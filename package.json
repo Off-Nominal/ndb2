@@ -1,0 +1,35 @@
+{
+  "name": "ndb2",
+  "version": "0.1.0",
+  "description": "Nostradambot 2.0 Betting Game for the Off-Nominal Discord",
+  "main": "index.js",
+  "scripts": {
+    "clear": "rm -rf ./dist",
+    "build": "tsc",
+    "dev": "NODE_ENV=dev nodemon ./dist/index.js -e ts --exec \"npm run compile\"",
+    "compile": "npm run clear && tsc && node ./dist/index.js",
+    "start": "node ./dist/index.js",
+    "log": "heroku logs -a ndb2 --tail",
+    "log:all": "heroku logs -a ndb2 -n 1500",
+    "deploy": "git push heroku main"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mendahu/ndb2.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mendahu/ndb2/issues"
+  },
+  "homepage": "https://github.com/mendahu/ndb2#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.14.6",
+    "nodemon": "^2.0.21",
+    "typescript": "^4.9.5"
+  }
+}
