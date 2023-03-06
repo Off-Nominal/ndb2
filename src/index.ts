@@ -1,15 +1,19 @@
-import express from "express";
 import dotenv from "dotenv";
+import express from "express";
+import morgan from "morgan";
 
-dotenv.config();
 const app = express();
 
+// Configuration
+dotenv.config();
 const PORT = process.env.PORT || 80;
+const morganOutput = process.env.NODE_ENV === "dev" ? "dev" : "combined";
+app.use(morgan(morganOutput));
 
-app.get("/", (req, res) => {
-  res.json({ message: "Success!!!1" });
-});
+// Routers
+import usersRouter from "./routers/users";
+app.use(usersRouter);
 
 app.listen(PORT, () => {
-  console.log(`App Listening on Port: `, PORT);
+  console.log(`NDB2 application listneing on port: `, PORT);
 });
