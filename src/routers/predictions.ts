@@ -4,8 +4,8 @@ import { isNumber, isString } from "../helpers/typeguards";
 import bets from "../queries/bets";
 import predictions from "../queries/predictions";
 import users from "../queries/users";
-import { APIPredictions } from "../types/predicitions";
 import responseUtils from "../utils/response";
+import { calculatePointRatios } from "../utils/mechanics";
 
 const router = express.Router();
 
@@ -67,8 +67,25 @@ router.post("/", async (req, res) => {
     .then((p) => bets.add(userId, p.id, true, created_date))
     .then((b) => predictions.getByPredictionId(b.prediction_id))
     .then((ep) => {
+      // Live calcualte current odds
+      const [endorse, undorse] = calculatePointRatios(
+        new Date(ep.due_date),
+        ep.bets
+      );
+
+      const enhancedPrediction = {
+        ...ep,
+        payouts: {
+          endorse,
+          undorse,
+        },
+      };
+
       res.json(
-        responseUtils.writeSuccess(ep, "Prediction created successfully.")
+        responseUtils.writeSuccess(
+          enhancedPrediction,
+          "Prediction created successfully."
+        )
       );
     })
     .catch((err) => {

@@ -22,6 +22,15 @@ export namespace APIPredictions {
     closed_date: string;
     judged_date: string;
     successful: boolean | null;
+    bets: {
+      id: string;
+      endorsed: boolean;
+      date: string;
+    }[];
+    payouts: {
+      endorse: number;
+      undorse: number;
+    };
   };
 
   export type AddPrediction = Prediction;

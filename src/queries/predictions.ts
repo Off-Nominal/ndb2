@@ -38,7 +38,7 @@ export default {
     text: string,
     due_date: Date,
     created_date: Date = new Date()
-  ) {
+  ): Promise<APIPredictions.AddPrediction> {
     return client
       .query<APIPredictions.AddPrediction>(ADD_PREDICTION, [
         user_id,
@@ -49,11 +49,14 @@ export default {
       .then((response) => response.rows[0]);
   },
 
-  getByPredictionId: function (prediction_id: number) {
+  getByPredictionId: function (
+    prediction_id: number
+  ): Promise<Omit<APIPredictions.GetPredictionById, "payouts">> {
     return client
-      .query<APIPredictions.GetPredictionById>(GET_ENHANCED_PREDICTION_BY_ID, [
-        prediction_id,
-      ])
+      .query<Omit<APIPredictions.GetPredictionById, "payouts">>(
+        GET_ENHANCED_PREDICTION_BY_ID,
+        [prediction_id]
+      )
       .then((response) => response.rows[0]);
   },
 };
