@@ -15,13 +15,13 @@ exports.setup = function (options, seedLink) {
 };
 
 exports.up = function (db) {
-  return db.createTable("predictions", {
+  return db.createTable("bets", {
     id: { type: "int", primaryKey: true, notNull: true, autoIncrement: true },
     user_id: {
       type: "uuid",
       notNull: true,
       foreignKey: {
-        name: "predictions_user_id_fk",
+        name: "bets_user_id_fk",
         table: "users",
         rules: {
           onDelete: "SET NULL",
@@ -29,17 +29,25 @@ exports.up = function (db) {
         mapping: "id",
       },
     },
-    text: { type: "text", notNull: true },
-    created_date: { type: "timestamp", notNull: true },
-    due_date: { type: "timestamp", notNull: true },
-    closed_date: { type: "timestamp" },
-    judged_date: { type: "date" },
-    successful: { type: "boolean" },
+    prediction_id: {
+      type: "int",
+      notNull: true,
+      foreignKey: {
+        name: "bets_prediction_id_fk",
+        table: "predictions",
+        rules: {
+          onDelete: "SET NULL",
+        },
+        mapping: "id",
+      },
+    },
+    date: { type: "timestamp", notNull: true },
+    endorsed: { type: "boolean", notNull: true },
   });
 };
 
 exports.down = function (db) {
-  return db.dropTable("predictions");
+  return db.dropTable("bets");
 };
 
 exports._meta = {

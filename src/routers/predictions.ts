@@ -1,8 +1,10 @@
-import { isDate } from "date-fns";
 import express from "express";
+import { isDate } from "date-fns";
 import { isNumber, isString } from "../helpers/typeguards";
+import bets from "../queries/bets";
 import predictions from "../queries/predictions";
 import users from "../queries/users";
+import { APIPredictions } from "../types/predicitions";
 import responseUtils from "../utils/response";
 
 const router = express.Router();
@@ -58,12 +60,19 @@ router.post("/", async (req, res) => {
   }
 
   // Add prediction
+  let prediction: APIPredictions.Prediction;
+  const created_date = new Date();
+
   predictions
-    .add(userId, text, new Date(due_date))
-    .then((prediction) => {
+    .add(userId, text, new Date(due_date), created_date)
+    .then((p) => {
+      prediction = p;
+      return bets.add(userId, p.id, true, created_date);
+    })
+    .then((bet) => {
       res.json(
         responseUtils.writeSuccess(
-          prediction,
+          { prediction, bet },
           "Prediction created successfully."
         )
       );
