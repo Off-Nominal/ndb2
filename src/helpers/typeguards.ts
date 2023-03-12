@@ -23,3 +23,11 @@ export const isUuid = (val: any): val is string => {
 
   return validator !== null;
 };
+
+export const isString = (val: any): val is string => {
+  if (typeof val === "string") {
+    return true;
+  }
+
+  return typeof val === "number";
+};

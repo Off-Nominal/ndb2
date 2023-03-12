@@ -13,7 +13,8 @@
     "log:all": "heroku logs -a ndb2 -n 1500",
     "deploy": "git push heroku main",
     "migrate:create": "db-migrate create -m ./db/migrations",
-    "migrate:up": "db-migrate up -m ./db/migrations"
+    "migrate:up": "db-migrate up -m ./db/migrations",
+    "seed": "node ./dist/db/seed.js"
   },
   "repository": {
     "type": "git",
