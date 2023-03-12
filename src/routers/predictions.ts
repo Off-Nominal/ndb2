@@ -60,21 +60,15 @@ router.post("/", async (req, res) => {
   }
 
   // Add prediction
-  let prediction: APIPredictions.Prediction;
   const created_date = new Date();
 
   predictions
     .add(userId, text, new Date(due_date), created_date)
-    .then((p) => {
-      prediction = p;
-      return bets.add(userId, p.id, true, created_date);
-    })
-    .then((bet) => {
+    .then((p) => bets.add(userId, p.id, true, created_date))
+    .then((b) => predictions.getByPredictionId(b.prediction_id))
+    .then((ep) => {
       res.json(
-        responseUtils.writeSuccess(
-          { prediction, bet },
-          "Prediction created successfully."
-        )
+        responseUtils.writeSuccess(ep, "Prediction created successfully.")
       );
     })
     .catch((err) => {
@@ -86,3 +80,5 @@ router.post("/", async (req, res) => {
 });
 
 export default router;
+
+// discord id
