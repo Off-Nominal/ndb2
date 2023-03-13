@@ -14,7 +14,7 @@
     "deploy": "git push heroku main",
     "migrate:create": "db-migrate create -m ./db/migrations",
     "migrate:up": "db-migrate up -m ./db/migrations",
-    "seed": "node ./dist/db/seed.js"
+    "db:reset": "NODE_ENV=dev node ./db/reset.js"
   },
   "repository": {
     "type": "git",

@@ -41,7 +41,7 @@ exports.up = function (db) {
         mapping: "id",
       },
     },
-    date: { type: "timestamp", notNull: true },
+    date: { type: "timestamptz", notNull: true },
     endorsed: { type: "boolean", notNull: true },
   });
 };

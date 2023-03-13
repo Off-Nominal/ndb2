@@ -10,7 +10,7 @@ dotenv.config();
 const PORT = process.env.PORT || 80;
 const morganOutput = process.env.NODE_ENV === "dev" ? "dev" : "combined";
 app.use(morgan(morganOutput));
-app.use(express.urlencoded());
+app.use(express.json());
 
 // Authentication
 app.use(authenticateApplication);

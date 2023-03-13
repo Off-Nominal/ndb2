@@ -30,10 +30,10 @@ exports.up = function (db) {
       },
     },
     text: { type: "text", notNull: true },
-    created_date: { type: "timestamp", notNull: true },
-    due_date: { type: "timestamp", notNull: true },
-    closed_date: { type: "timestamp" },
-    judged_date: { type: "date" },
+    created_date: { type: "timestamptz", notNull: true },
+    due_date: { type: "timestamptz", notNull: true },
+    closed_date: { type: "timestamptz" },
+    judged_date: { type: "timestamptz" },
     successful: { type: "boolean" },
   });
 };

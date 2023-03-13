@@ -1,12 +1,11 @@
 import express from "express";
-import { isDate } from "date-fns";
+import { isDate, isFuture } from "date-fns";
 import { isNumber, isString } from "../helpers/typeguards";
 import bets from "../queries/bets";
 import predictions from "../queries/predictions";
 import users from "../queries/users";
 import responseUtils from "../utils/response";
 import { calculatePointRatios } from "../utils/mechanics";
-
 const router = express.Router();
 
 router.post("/", async (req, res) => {
@@ -46,6 +45,17 @@ router.post("/", async (req, res) => {
       );
   }
 
+  if (!isFuture(new Date(due_date))) {
+    return res
+      .status(400)
+      .json(
+        responseUtils.writeError(
+          "MALFORMED_BODY_DATA",
+          "Prediction due_date must be in the future"
+        )
+      );
+  }
+
   // Fetch User
   let userId: string;
 
@@ -54,13 +64,14 @@ router.post("/", async (req, res) => {
     userId = user.id;
   } catch (err) {
     console.error(err);
-    return res.json(
-      responseUtils.writeError("SERVER_ERROR", "Error Adding user")
-    );
+    return res
+      .status(500)
+      .json(responseUtils.writeError("SERVER_ERROR", "Error Adding user"));
   }
 
   // Add prediction
   const created_date = new Date();
+  console.log(created_date);
 
   predictions
     .add(userId, text, new Date(due_date), created_date)
@@ -90,12 +101,12 @@ router.post("/", async (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      res.json(
-        responseUtils.writeError("SERVER_ERROR", "Error Adding prediction")
-      );
+      res
+        .status(500)
+        .json(
+          responseUtils.writeError("SERVER_ERROR", "Error Adding prediction")
+        );
     });
 });
 
 export default router;
-
-// discord id
