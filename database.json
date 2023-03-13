@@ -1,4 +1,10 @@
 {
   "dev": { "ENV": "DATABASE_URL" },
-  "prod": { "ENV": "DATABASE_URL" }
+  "prod": {
+    "url": { "ENV": "PROD_DATABASE_URL" },
+    "sslmode": "require",
+    "ssl": {
+      "rejectUnauthorized": false
+    }
+  }
 }
