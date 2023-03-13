@@ -5,7 +5,7 @@ import bets from "../queries/bets";
 import predictions from "../queries/predictions";
 import users from "../queries/users";
 import responseUtils from "../utils/response";
-import { calculatePointRatios } from "../utils/mechanics";
+import { addRatiosToPrediction } from "../utils/mechanics";
 const router = express.Router();
 
 router.post("/", async (req, res) => {
@@ -71,32 +71,14 @@ router.post("/", async (req, res) => {
 
   // Add prediction
   const created_date = new Date();
-  console.log(created_date);
 
   predictions
     .add(userId, text, new Date(due_date), created_date)
     .then((p) => bets.add(userId, p.id, true, created_date))
     .then((b) => predictions.getByPredictionId(b.prediction_id))
     .then((ep) => {
-      // Live calcualte current odds
-      const [endorse, undorse] = calculatePointRatios(
-        new Date(ep.due_date),
-        ep.bets
-      );
-
-      const enhancedPrediction = {
-        ...ep,
-        payouts: {
-          endorse,
-          undorse,
-        },
-      };
-
       res.json(
-        responseUtils.writeSuccess(
-          enhancedPrediction,
-          "Prediction created successfully."
-        )
+        responseUtils.writeSuccess(ep, "Prediction created successfully.")
       );
     })
     .catch((err) => {

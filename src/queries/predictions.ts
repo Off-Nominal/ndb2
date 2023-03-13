@@ -1,5 +1,6 @@
 import client from "../db";
 import { APIPredictions } from "../types/predicitions";
+import { addRatiosToPrediction } from "../utils/mechanics";
 
 const ADD_PREDICTION = `
   INSERT INTO predictions (
@@ -25,7 +26,7 @@ const GET_ENHANCED_PREDICTION_BY_ID = `
     p.closed_date,
     p.judged_date,
     p.successful,
-    (SELECT jsonb_agg(bets) FROM (SELECT id, date, endorsed FROM bets WHERE bets.prediction_id = p.id) bets) as bets
+    (SELECT jsonb_agg(bets) FROM (SELECT bets.id, (SELECT row_to_json(bett) FROM (SELECT bets.user_id as id, u.discord_id) bett) as better, date, endorsed FROM bets JOIN users on bets.user_id = users.id WHERE bets.prediction_id = p.id) bets) as bets
   FROM predictions p
   JOIN bets b ON b.prediction_id = p.id
   JOIN users u ON u.id = p.user_id
@@ -51,12 +52,14 @@ export default {
 
   getByPredictionId: function (
     prediction_id: number
-  ): Promise<Omit<APIPredictions.GetPredictionById, "payouts">> {
+  ): Promise<APIPredictions.GetPredictionById> {
     return client
       .query<Omit<APIPredictions.GetPredictionById, "payouts">>(
         GET_ENHANCED_PREDICTION_BY_ID,
         [prediction_id]
       )
-      .then((response) => response.rows[0]);
+      .then((response) => {
+        return addRatiosToPrediction(response.rows[0]);
+      });
   },
 };

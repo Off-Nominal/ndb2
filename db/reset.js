@@ -11,11 +11,7 @@ dotenv.config({
 const { Client } = pg;
 
 const client = new Client({
-  host: "localhost",
-  port: process.env.PGPORT,
-  user: process.env.PGUSER,
-  password: process.env.PGPASSWORD,
-  database: process.env.PGDATABASE,
+  connectionString: process.env.DATABASE_URL,
 });
 
 const reset = async (client) => {

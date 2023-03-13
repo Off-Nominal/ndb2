@@ -17,9 +17,13 @@ app.use(authenticateApplication);
 
 // Routers
 import usersRouter from "./routers/users";
-import predictionsRouter from "./routers/predictions";
 app.use("/api/users", usersRouter);
+
+import predictionsRouter from "./routers/predictions";
 app.use("/api/predictions", predictionsRouter);
+
+import betsRouter from "./routers/bets";
+app.use("/api/bets", betsRouter);
 
 app.listen(PORT, () => {
   console.log(`NDB2 application listneing on port: `, PORT);
