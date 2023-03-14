@@ -12,6 +12,16 @@ export const isNumber = (val: any): val is number => {
   return !isNaN(num);
 };
 
+export const isNumberParseableString = (val: any): val is string => {
+  if (typeof val !== "string") {
+    return false;
+  }
+
+  const numString = Number(val);
+
+  return !isNaN(numString);
+};
+
 export const isUuid = (val: any): val is string => {
   if (typeof val !== "string") {
     return false;

@@ -1,10 +1,9 @@
 import express from "express";
-import { isBoolean, isNumber } from "../helpers/typeguards";
+import { isBoolean, isNumberParseableString } from "../helpers/typeguards";
 import bets from "../queries/bets";
 import predictions from "../queries/predictions";
 import users from "../queries/users";
 import { APIPredictions } from "../types/predicitions";
-import { addRatiosToPrediction } from "../utils/mechanics";
 import responseUtils from "../utils/response";
 
 const router = express.Router();
@@ -12,10 +11,8 @@ const router = express.Router();
 router.post("/", async (req, res) => {
   const { discord_id, prediction_id, endorsed } = req.body;
 
-  console.log(req.body);
-
   // Body parameter validation
-  if (!isNumber(discord_id)) {
+  if (!isNumberParseableString(discord_id)) {
     return res
       .status(400)
       .json(
@@ -27,7 +24,7 @@ router.post("/", async (req, res) => {
   }
 
   // Body parameter validation
-  if (!isNumber(prediction_id)) {
+  if (!isNumberParseableString(prediction_id)) {
     return res
       .status(400)
       .json(
@@ -63,19 +60,11 @@ router.post("/", async (req, res) => {
       .json(responseUtils.writeError("SERVER_ERROR", "Error Adding user"));
   }
 
-  // Validate if bet has already been made
+  // Fetch Prediction
+  let prediction: APIPredictions.EnhancedPrediction;
+
   try {
-    const bet = await bets.getBetByUserIdAndPredictionId(userId, prediction_id);
-    if (bet) {
-      return res
-        .status(400)
-        .json(
-          responseUtils.writeError(
-            "BAD_REQUEST",
-            "User has already bet on this prediction."
-          )
-        );
-    }
+    prediction = await predictions.getByPredictionId(prediction_id);
   } catch (err) {
     console.error(err);
     return res
@@ -84,6 +73,28 @@ router.post("/", async (req, res) => {
         responseUtils.writeError(
           "SERVER_ERROR",
           "Error validating if bet has already been made."
+        )
+      );
+  }
+
+  // Validate that prediction is open
+  if (prediction.closed_date) {
+    return res
+      .status(400)
+      .json(responseUtils.writeError("BAD_REQUEST", "Prediction is closed."));
+  }
+
+  // Validate if bet has already been made
+  const bet = prediction.bets.find(
+    (b) => b.better.discord_id === discord_id.toString()
+  );
+  if (bet) {
+    return res
+      .status(400)
+      .json(
+        responseUtils.writeError(
+          "BAD_REQUEST",
+          "User has already bet on this prediction."
         )
       );
   }

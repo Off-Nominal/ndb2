@@ -1,18 +1,17 @@
 import express from "express";
 import { isDate, isFuture } from "date-fns";
-import { isNumber, isString } from "../helpers/typeguards";
+import { isNumberParseableString, isString } from "../helpers/typeguards";
 import bets from "../queries/bets";
 import predictions from "../queries/predictions";
 import users from "../queries/users";
 import responseUtils from "../utils/response";
-import { addRatiosToPrediction } from "../utils/mechanics";
 const router = express.Router();
 
 router.post("/", async (req, res) => {
   const { discord_id, text, due_date } = req.body;
 
   // Body parameter validation
-  if (!isNumber(discord_id)) {
+  if (!isNumberParseableString(discord_id)) {
     return res
       .status(400)
       .json(

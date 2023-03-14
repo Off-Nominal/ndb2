@@ -8,6 +8,4 @@ export namespace APIBets {
   };
 
   export type AddBet = Bet;
-
-  export type GetBetByUserIdAndPredictionId = Bet;
 }
