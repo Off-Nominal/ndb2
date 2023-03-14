@@ -72,7 +72,7 @@ export default {
 
   getByPredictionId: function (
     prediction_id: number | string
-  ): Promise<APIPredictions.GetPredictionById> {
+  ): Promise<APIPredictions.GetPredictionById | null> {
     return client
       .query<Omit<APIPredictions.GetPredictionById, "payouts">>(
         GET_ENHANCED_PREDICTION_BY_ID,

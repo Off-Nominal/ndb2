@@ -63,6 +63,16 @@ router.post("/", async (req, res) => {
 
   try {
     prediction = await predictions.getByPredictionId(prediction_id);
+    if (!prediction) {
+      return res
+        .status(404)
+        .json(
+          responseUtils.writeError(
+            "BAD_REQUEST",
+            `Prediction with id ${prediction_id} does not exist.`
+          )
+        );
+    }
   } catch (err) {
     console.error(err);
     return res
