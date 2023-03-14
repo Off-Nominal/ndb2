@@ -57,7 +57,7 @@ router.post("/", async (req, res) => {
     console.error(err);
     return res
       .status(500)
-      .json(responseUtils.writeError("SERVER_ERROR", "Error Adding user"));
+      .json(responseUtils.writeError("SERVER_ERROR", "Error fetching user"));
   }
 
   // Fetch Prediction
@@ -70,10 +70,7 @@ router.post("/", async (req, res) => {
     return res
       .status(500)
       .json(
-        responseUtils.writeError(
-          "SERVER_ERROR",
-          "Error validating if bet has already been made."
-        )
+        responseUtils.writeError("SERVER_ERROR", "Error fetching prediction.")
       );
   }
 

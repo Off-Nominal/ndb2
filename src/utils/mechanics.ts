@@ -36,9 +36,9 @@ export const calculatePointRatios = (
     );
 
     if (bets[i].endorsed) {
-      endorsementPoints += points;
+      endorsementPoints += points | 1;
     } else {
-      undorsementPoints += points;
+      undorsementPoints += points | 1;
     }
   }
 
