@@ -14,20 +14,22 @@ const ADD_USER = `
 
 export default {
   getOrAddByDiscordId: async function (
-    discordId: number
+    discordId: number | string
   ): Promise<APIUsers.User> {
     return this.getByDiscordId(discordId).then(
       (user) => user || this.add(discordId)
     );
   },
 
-  getByDiscordId: function (discordId: number): Promise<APIUsers.User> {
+  getByDiscordId: function (
+    discordId: number | string
+  ): Promise<APIUsers.User> {
     return client
       .query<APIUsers.GetUserByDiscordId>(GET_USER_BY_DISCORD_ID, [discordId])
       .then((response) => response.rows[0]);
   },
 
-  add: function (discordId: number | number): Promise<APIUsers.User> {
+  add: function (discordId: number | string): Promise<APIUsers.User> {
     const id = uuidv4();
     return client
       .query<APIUsers.AddUser>(ADD_USER, [id, discordId])

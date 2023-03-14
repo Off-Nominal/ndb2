@@ -1,5 +1,6 @@
 import GAME_MECHANICS from "../config/game_mechanics";
 import { MS_IN_A_DAY } from "../types/constants";
+import { APIPredictions } from "../types/predicitions";
 
 interface Bet {
   date: string;
@@ -35,9 +36,9 @@ export const calculatePointRatios = (
     );
 
     if (bets[i].endorsed) {
-      endorsementPoints += points;
+      endorsementPoints += points | 1;
     } else {
-      undorsementPoints += points;
+      undorsementPoints += points | 1;
     }
   }
 
@@ -53,4 +54,23 @@ export const calculatePointRatios = (
   );
 
   return [endorsementPayoutRatio, endorsementPenaltyRatio];
+};
+
+export const addRatiosToPrediction = (
+  ep: Omit<APIPredictions.EnhancedPrediction, "payouts">
+): APIPredictions.EnhancedPrediction => {
+  const [endorse, undorse] = calculatePointRatios(
+    new Date(ep.due_date),
+    ep.bets
+  );
+
+  const enhancedPrediction = {
+    ...ep,
+    payouts: {
+      endorse,
+      undorse,
+    },
+  };
+
+  return enhancedPrediction;
 };

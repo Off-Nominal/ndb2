@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "user_id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
+    "text": "A banana will fall from the sky",
+    "created": -7,
+    "due": 7
+  },
+  {
+    "id": 2,
+    "user_id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
+    "text": "A monkey will eat some porridge",
+    "created": -14,
+    "due": 14
+  },
+  {
+    "id": 3,
+    "user_id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
+    "text": "A caterpillar will crawl through my window",
+    "created": -21,
+    "due": 21
+  }
+]

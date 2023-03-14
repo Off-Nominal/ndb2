@@ -26,6 +26,10 @@ export namespace APIPredictions {
       id: string;
       endorsed: boolean;
       date: string;
+      better: {
+        id: string;
+        discord_id: string;
+      };
     }[];
     payouts: {
       endorse: number;

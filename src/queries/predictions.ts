@@ -1,5 +1,6 @@
 import client from "../db";
 import { APIPredictions } from "../types/predicitions";
+import { addRatiosToPrediction } from "../utils/mechanics";
 
 const ADD_PREDICTION = `
   INSERT INTO predictions (
@@ -18,17 +19,37 @@ const ADD_PREDICTION = `
 const GET_ENHANCED_PREDICTION_BY_ID = `
   SELECT
     p.id,
-    (SELECT row_to_json(pred) FROM (SELECT p.user_id as id, u.discord_id) pred) as predictor,
+    (SELECT row_to_json(pred) FROM 
+        (SELECT 
+            p.user_id as id, 
+            u.discord_id 
+          FROM users u 
+          WHERE u.id = p.user_id) 
+      pred)
+    as predictor,
     p.text,
     p.created_date,
     p.due_date,
     p.closed_date,
     p.judged_date,
     p.successful,
-    (SELECT jsonb_agg(bets) FROM (SELECT id, date, endorsed FROM bets WHERE bets.prediction_id = p.id) bets) as bets
+    (SELECT jsonb_agg(p_bets) FROM
+      (SELECT 
+          id, 
+          (SELECT row_to_json(bett) FROM 
+            (SELECT 
+                u.id, 
+                u.discord_id
+              FROM users u 
+              WHERE u.id = b.user_id) 
+            bett) 
+          as better, 
+          date,
+          endorsed 
+        FROM bets b
+        WHERE b.prediction_id = p.id
+      ) p_bets ) as bets
   FROM predictions p
-  JOIN bets b ON b.prediction_id = p.id
-  JOIN users u ON u.id = p.user_id
   WHERE p.id = $1
 `;
 
@@ -50,13 +71,15 @@ export default {
   },
 
   getByPredictionId: function (
-    prediction_id: number
-  ): Promise<Omit<APIPredictions.GetPredictionById, "payouts">> {
+    prediction_id: number | string
+  ): Promise<APIPredictions.GetPredictionById> {
     return client
       .query<Omit<APIPredictions.GetPredictionById, "payouts">>(
         GET_ENHANCED_PREDICTION_BY_ID,
         [prediction_id]
       )
-      .then((response) => response.rows[0]);
+      .then((response) => {
+        return addRatiosToPrediction(response.rows[0]);
+      });
   },
 };

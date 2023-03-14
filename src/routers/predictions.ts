@@ -1,18 +1,17 @@
 import express from "express";
 import { isDate, isFuture } from "date-fns";
-import { isNumber, isString } from "../helpers/typeguards";
+import { isNumberParseableString, isString } from "../helpers/typeguards";
 import bets from "../queries/bets";
 import predictions from "../queries/predictions";
 import users from "../queries/users";
 import responseUtils from "../utils/response";
-import { calculatePointRatios } from "../utils/mechanics";
 const router = express.Router();
 
 router.post("/", async (req, res) => {
   const { discord_id, text, due_date } = req.body;
 
   // Body parameter validation
-  if (!isNumber(discord_id)) {
+  if (!isNumberParseableString(discord_id)) {
     return res
       .status(400)
       .json(
@@ -71,32 +70,14 @@ router.post("/", async (req, res) => {
 
   // Add prediction
   const created_date = new Date();
-  console.log(created_date);
 
   predictions
     .add(userId, text, new Date(due_date), created_date)
     .then((p) => bets.add(userId, p.id, true, created_date))
     .then((b) => predictions.getByPredictionId(b.prediction_id))
     .then((ep) => {
-      // Live calcualte current odds
-      const [endorse, undorse] = calculatePointRatios(
-        new Date(ep.due_date),
-        ep.bets
-      );
-
-      const enhancedPrediction = {
-        ...ep,
-        payouts: {
-          endorse,
-          undorse,
-        },
-      };
-
       res.json(
-        responseUtils.writeSuccess(
-          enhancedPrediction,
-          "Prediction created successfully."
-        )
+        responseUtils.writeSuccess(ep, "Prediction created successfully.")
       );
     })
     .catch((err) => {

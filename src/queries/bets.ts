@@ -17,7 +17,7 @@ const ADD_BET = `
 export default {
   add: (
     user_id: string,
-    prediction_id: number,
+    prediction_id: number | string,
     endorsed: boolean,
     date: Date = new Date()
   ) => {
