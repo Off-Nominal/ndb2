@@ -23,7 +23,6 @@ router.post("/", async (req, res) => {
       );
   }
 
-  // Body parameter validation
   if (!isNumberParseableString(prediction_id)) {
     return res
       .status(400)
@@ -35,7 +34,6 @@ router.post("/", async (req, res) => {
       );
   }
 
-  // Body parameter validation
   if (!isBoolean(endorsed)) {
     return res
       .status(400)

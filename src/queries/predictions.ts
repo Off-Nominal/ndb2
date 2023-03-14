@@ -79,6 +79,9 @@ export default {
         [prediction_id]
       )
       .then((response) => {
+        if (response.rows.length === 0) {
+          return null;
+        }
         return addRatiosToPrediction(response.rows[0]);
       });
   },
