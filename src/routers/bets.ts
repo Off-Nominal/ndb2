@@ -84,10 +84,9 @@ router.post("/", async (req, res) => {
       .json(responseUtils.writeError("BAD_REQUEST", "Prediction is closed."));
   }
 
-  // Validate if bet has already been made
-  const bet = prediction.bets.find(
-    (b) => b.better.discord_id === discord_id.toString()
-  );
+  // Validate if bet has already been made by the user
+  const bet = prediction.bets.find((b) => b.better.discord_id === discord_id);
+
   if (bet) {
     return res
       .status(400)

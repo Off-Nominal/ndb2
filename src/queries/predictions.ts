@@ -19,17 +19,37 @@ const ADD_PREDICTION = `
 const GET_ENHANCED_PREDICTION_BY_ID = `
   SELECT
     p.id,
-    (SELECT row_to_json(pred) FROM (SELECT p.user_id as id, u.discord_id) pred) as predictor,
+    (SELECT row_to_json(pred) FROM 
+        (SELECT 
+            p.user_id as id, 
+            u.discord_id 
+          FROM users u 
+          WHERE u.id = p.user_id) 
+      pred)
+    as predictor,
     p.text,
     p.created_date,
     p.due_date,
     p.closed_date,
     p.judged_date,
     p.successful,
-    (SELECT jsonb_agg(bets) FROM (SELECT bets.id, (SELECT row_to_json(bett) FROM (SELECT bets.user_id as id, u.discord_id) bett) as better, date, endorsed FROM bets JOIN users on bets.user_id = users.id WHERE bets.prediction_id = p.id) bets) as bets
+    (SELECT jsonb_agg(p_bets) FROM
+      (SELECT 
+          id, 
+          (SELECT row_to_json(bett) FROM 
+            (SELECT 
+                u.id, 
+                u.discord_id
+              FROM users u 
+              WHERE u.id = b.user_id) 
+            bett) 
+          as better, 
+          date,
+          endorsed 
+        FROM bets b
+        WHERE b.prediction_id = p.id
+      ) p_bets ) as bets
   FROM predictions p
-  JOIN bets b ON b.prediction_id = p.id
-  JOIN users u ON u.id = p.user_id
   WHERE p.id = $1
 `;
 
