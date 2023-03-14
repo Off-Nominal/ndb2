@@ -1,7 +1,7 @@
-const uuid = require("uuid");
-const uuidv4 = uuid.v4;
+const { add, sub } = require("date-fns");
 
 const users = require("./seeds/users.json");
+const predictions = require("./seeds/predictions.json");
 
 const seed = (client) => {
   if (process.env.NODE_ENV === "production") {
@@ -19,16 +19,81 @@ const seed = (client) => {
   )`;
 
   for (const user of users) {
-    baseData.push(client.query(INSERT_USER, [uuidv4(), user.discord_id]));
+    baseData.push(client.query(INSERT_USER, [user.id, user.discord_id]));
   }
 
-  const PREDICTION_SEQUENCE_RESET = `SELECT SETVAL(pg_get_serial_sequence('predictions', 'id'), (SELECT MAX(id) FROM predictions))`;
-  baseData.push(client.query(PREDICTION_SEQUENCE_RESET));
+  return Promise.all(baseData)
+    .then(([users]) => {
+      const referencedData = [];
 
-  const BET_SEQUENCE_RESET = `SELECT SETVAL(pg_get_serial_sequence('bets', 'id'), (SELECT MAX(id) FROM bets))`;
-  baseData.push(client.query(BET_SEQUENCE_RESET));
+      const INSERT_PREDICTION = `INSERT INTO predictions (
+        id,
+        user_id,
+        text,
+        created_date,
+        due_date
+      ) VALUES (
+        $1,
+        $2,
+        $3,
+        $4,
+        $5
+      )`;
 
-  return Promise.all(baseData);
+      const INSERT_BET = `INSERT INTO bets (
+        id,
+        user_id,
+        prediction_id,
+        endorsed,
+        date
+      ) VALUES (
+        $1, 
+        $2, 
+        $3, 
+        $4, 
+        $5
+      )`;
+
+      const now = new Date();
+
+      for (let i = 0; i < predictions.length; i++) {
+        const p = predictions[i];
+        const created_date = add(now, { days: p.created });
+        referencedData.push(
+          client
+            .query(INSERT_PREDICTION, [
+              p.id,
+              p.user_id,
+              p.text,
+              created_date,
+              add(now, { days: p.due }),
+            ])
+            .then(() => {
+              return client.query(INSERT_BET, [
+                p.id,
+                p.user_id,
+                p.id,
+                true,
+                created_date,
+              ]);
+            })
+            .catch((err) => console.error(err))
+        );
+      }
+
+      return Promise.all(referencedData);
+    })
+    .then(() => {
+      const finalData = [];
+
+      const PREDICTION_SEQUENCE_RESET = `SELECT SETVAL(pg_get_serial_sequence('predictions', 'id'), (SELECT MAX(id) FROM predictions))`;
+      finalData.push(client.query(PREDICTION_SEQUENCE_RESET));
+
+      const BET_SEQUENCE_RESET = `SELECT SETVAL(pg_get_serial_sequence('bets', 'id'), (SELECT MAX(id) FROM bets))`;
+      finalData.push(client.query(BET_SEQUENCE_RESET));
+
+      return Promise.all(finalData);
+    });
 };
 
 module.exports = seed;

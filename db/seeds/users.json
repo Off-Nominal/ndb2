@@ -1,5 +1,12 @@
 [
   {
-    "discord_id": "274725911415226369"
+    "id": "ac5ad4e9-3b48-43b4-995c-48b0842b0e4c",
+    "discord_id": "274725911415226369",
+    "notes": "Jake's dev user id"
+  },
+  {
+    "id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
+    "discord_id": "781234657487749180",
+    "notes": "Helper Bot dev user id"
   }
 ]

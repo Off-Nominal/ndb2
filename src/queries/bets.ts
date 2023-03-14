@@ -37,9 +37,11 @@ export default {
       .then((response) => response.rows[0]);
   },
   getBetByUserIdAndPredictionId: (user_id: string, prediction_id: number) => {
-    return client.query<APIBets.GetBetByUserIdAndPredictionId>(
-      GET_BET_BY_USER_ID_AND_PREDICTION_ID,
-      [user_id, prediction_id]
-    );
+    return client
+      .query<APIBets.GetBetByUserIdAndPredictionId>(
+        GET_BET_BY_USER_ID_AND_PREDICTION_ID,
+        [user_id, prediction_id]
+      )
+      .then((response) => response.rows[0]);
   },
 };
