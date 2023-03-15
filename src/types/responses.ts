@@ -8,6 +8,6 @@ const ErrorCode = {
 export type APIResponse<T = null> = {
   success: boolean;
   errorCode?: keyof typeof ErrorCode;
-  message: string | string[] | null;
+  message: string | null;
   data: T;
 };

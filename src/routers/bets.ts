@@ -10,6 +10,7 @@ const router = express.Router();
 
 router.post("/", async (req, res) => {
   const { discord_id, prediction_id, endorsed } = req.body;
+  console.log(req.body);
 
   // Body parameter validation
   if (!isNumberParseableString(discord_id)) {
@@ -62,7 +63,9 @@ router.post("/", async (req, res) => {
   let prediction: APIPredictions.EnhancedPrediction;
 
   try {
+    console.log(prediction_id);
     prediction = await predictions.getByPredictionId(prediction_id);
+    console.log(prediction);
     if (!prediction) {
       return res
         .status(404)
@@ -98,7 +101,9 @@ router.post("/", async (req, res) => {
       .json(
         responseUtils.writeError(
           "BAD_REQUEST",
-          "User has already bet on this prediction."
+          `You have already ${
+            bet.endorsed ? "endorsed" : "undorsed"
+          } this prediction.`
         )
       );
   }

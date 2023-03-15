@@ -3,7 +3,7 @@ import { APIResponse } from "../types/responses";
 const responseUtils = {
   writeError: function (
     errorCode: APIResponse["errorCode"],
-    message?: string | string[]
+    message?: string
   ): APIResponse {
     return {
       success: false,
