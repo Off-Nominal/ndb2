@@ -1,4 +1,5 @@
 import express from "express";
+import webhookManager from "../../config/webhook_subscribers";
 import { isBoolean, isNumberParseableString } from "../../helpers/typeguards";
 import bets from "../../queries/bets";
 import predictions from "../../queries/predictions";
@@ -123,6 +124,9 @@ router.post("/", async (req, res) => {
     .add(userId, prediction_id, endorsed, date)
     .then((b) => predictions.getByPredictionId(b.prediction_id))
     .then((ep) => {
+      // Notify subscribers
+      webhookManager.emit("retired_prediction", ep);
+
       res.json(responseUtils.writeSuccess(ep, "Bet created successfully."));
     })
     .catch((err) => {
