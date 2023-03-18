@@ -125,7 +125,7 @@ router.post("/", async (req, res) => {
     .then((b) => predictions.getByPredictionId(b.prediction_id))
     .then((ep) => {
       // Notify subscribers
-      webhookManager.emit("retired_prediction", ep);
+      webhookManager.emit("new_bet", ep);
 
       res.json(responseUtils.writeSuccess(ep, "Bet created successfully."));
     })
