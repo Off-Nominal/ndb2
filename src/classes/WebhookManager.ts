@@ -75,10 +75,16 @@ export class WebhookManager extends EventEmitter {
     const requests = [];
 
     for (const sub of this.subscribers) {
-      const request = axios.post(sub, data).catch((err) => {
-        console.error("Subscriber webhook request failed: ", sub);
-        console.error(err);
-      });
+      const request = axios
+        .post(sub, data, {
+          headers: {
+            authorization: `Bearer ${process.env.DISCORD_CLIENT_API_KEY}`,
+          },
+        })
+        .catch((err) => {
+          console.error("Subscriber webhook request failed: ", sub);
+          console.error(err);
+        });
 
       requests.push(request);
     }
