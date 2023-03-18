@@ -16,9 +16,6 @@ app.use(express.json());
 app.use(authenticateApplication);
 
 // Routers
-import usersRouter from "./routers/users";
-app.use("/api/users", usersRouter);
-
 import predictionsRouter from "./routers/predictions";
 app.use("/api/predictions", predictionsRouter);
 

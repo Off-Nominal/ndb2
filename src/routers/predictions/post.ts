@@ -1,57 +1,11 @@
-import express from "express";
 import { isDate, isFuture } from "date-fns";
-import { isNumberParseableString, isString } from "../helpers/typeguards";
-import bets from "../queries/bets";
-import predictions from "../queries/predictions";
-import users from "../queries/users";
-import responseUtils from "../utils/response";
+import express from "express";
+import { isNumberParseableString, isString } from "../../helpers/typeguards";
+import bets from "../../queries/bets";
+import predictions from "../../queries/predictions";
+import users from "../../queries/users";
+import responseUtils from "../../utils/response";
 const router = express.Router();
-
-router.get("/:prediction_id", async (req, res) => {
-  const { prediction_id } = req.params;
-
-  // Body parameter validation
-  if (!isNumberParseableString(prediction_id)) {
-    return res
-      .status(400)
-      .json(
-        responseUtils.writeError(
-          "MALFORMED_BODY_DATA",
-          "Predictions Ids must be a parseable as number"
-        )
-      );
-  }
-
-  // Fetch prediction
-  predictions
-    .getByPredictionId(prediction_id)
-    .then((ep) => {
-      if (!ep) {
-        return res
-          .status(404)
-          .json(
-            responseUtils.writeError(
-              "BAD_REQUEST",
-              `Predicton with id ${prediction_id} does not exist.`
-            )
-          );
-      }
-      res.json(
-        responseUtils.writeSuccess(ep, "Prediction fetched successfully.")
-      );
-    })
-    .catch((err) => {
-      console.error(err);
-      res
-        .status(500)
-        .json(
-          responseUtils.writeError(
-            "SERVER_ERROR",
-            "Unable to fetch prediction."
-          )
-        );
-    });
-});
 
 router.post("/", async (req, res) => {
   const { discord_id, text, due_date } = req.body;

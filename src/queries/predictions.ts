@@ -32,6 +32,7 @@ const GET_ENHANCED_PREDICTION_BY_ID = `
     p.due_date,
     p.closed_date,
     p.judged_date,
+    p.retired_date,
     p.successful,
     (SELECT jsonb_agg(p_bets) FROM
       (SELECT 
@@ -51,6 +52,10 @@ const GET_ENHANCED_PREDICTION_BY_ID = `
       ) p_bets ) as bets
   FROM predictions p
   WHERE p.id = $1
+`;
+
+const RETIRE_PREDICTION_BY_ID = `
+  UPDATE predictions SET retired_date = NOW() WHERE predictions.id = $1;
 `;
 
 export default {
@@ -84,5 +89,13 @@ export default {
         }
         return addRatiosToPrediction(response.rows[0]);
       });
+  },
+
+  retirePredictionById: function (
+    prediction_id: number | string
+  ): Promise<APIPredictions.RetirePredictionById> {
+    return client
+      .query<null>(RETIRE_PREDICTION_BY_ID, [prediction_id])
+      .then(() => this.getByPredictionId(prediction_id));
   },
 };
