@@ -1,11 +1,10 @@
 import express from "express";
-import { isBoolean, isNumberParseableString } from "../helpers/typeguards";
-import bets from "../queries/bets";
-import predictions from "../queries/predictions";
-import users from "../queries/users";
-import { APIPredictions } from "../types/predicitions";
-import responseUtils from "../utils/response";
-
+import { isBoolean, isNumberParseableString } from "../../helpers/typeguards";
+import bets from "../../queries/bets";
+import predictions from "../../queries/predictions";
+import users from "../../queries/users";
+import { APIPredictions } from "../../types/predicitions";
+import responseUtils from "../../utils/response";
 const router = express.Router();
 
 router.post("/", async (req, res) => {
@@ -83,10 +82,22 @@ router.post("/", async (req, res) => {
   }
 
   // Validate that prediction is open
-  if (prediction.closed_date) {
+  if (prediction.closed_date && !prediction.retired_date) {
     return res
       .status(400)
       .json(responseUtils.writeError("BAD_REQUEST", "Prediction is closed."));
+  }
+
+  // Validate that prediction is not retured
+  if (prediction.retired_date) {
+    return res
+      .status(400)
+      .json(
+        responseUtils.writeError(
+          "BAD_REQUEST",
+          "Prediction was retired by predictor."
+        )
+      );
   }
 
   // Validate if bet has already been made by the user

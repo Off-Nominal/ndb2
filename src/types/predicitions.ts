@@ -8,6 +8,7 @@ export namespace APIPredictions {
     closed_date: string;
     judged_date: string;
     successful: boolean | null;
+    retired_date: string | null;
   };
 
   export type EnhancedPrediction = {
@@ -19,8 +20,9 @@ export namespace APIPredictions {
     text: string;
     created_date: string;
     due_date: string;
-    closed_date: string;
-    judged_date: string;
+    closed_date: string | null;
+    judged_date: string | null;
+    retired_date: string | null;
     successful: boolean | null;
     bets: {
       id: string;
@@ -40,4 +42,6 @@ export namespace APIPredictions {
   export type AddPrediction = Prediction;
 
   export type GetPredictionById = EnhancedPrediction;
+
+  export type RetirePredictionById = EnhancedPrediction;
 }
