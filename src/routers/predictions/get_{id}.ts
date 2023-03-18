@@ -49,3 +49,5 @@ router.get("/:prediction_id", async (req, res) => {
         );
     });
 });
+
+export default router;
