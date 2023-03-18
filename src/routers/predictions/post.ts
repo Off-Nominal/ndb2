@@ -1,5 +1,6 @@
 import { isDate, isFuture } from "date-fns";
 import express from "express";
+import webhookManager from "../../config/webhook_subscribers";
 import { isNumberParseableString, isString } from "../../helpers/typeguards";
 import bets from "../../queries/bets";
 import predictions from "../../queries/predictions";
@@ -76,6 +77,9 @@ router.post("/", async (req, res) => {
     .then((p) => bets.add(userId, p.id, true, created_date))
     .then((b) => predictions.getByPredictionId(b.prediction_id))
     .then((ep) => {
+      // Notify subscribers
+      webhookManager.emit("new_prediction", ep);
+
       res.json(
         responseUtils.writeSuccess(ep, "Prediction created successfully.")
       );

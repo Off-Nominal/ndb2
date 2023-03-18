@@ -1,6 +1,7 @@
 import { add, isAfter } from "date-fns";
 import express from "express";
 import GAME_MECHANICS from "../../config/game_mechanics";
+import webhookManager from "../../config/webhook_subscribers";
 import { isNumberParseableString } from "../../helpers/typeguards";
 import predictions from "../../queries/predictions";
 import { APIPredictions } from "../../types/predicitions";
@@ -108,6 +109,9 @@ router.patch("/:prediction_id", async (req, res) => {
   return predictions
     .retirePredictionById(prediction_id)
     .then((prediction) => {
+      // Notify subscribers
+      webhookManager.emit("retired_prediction", prediction);
+
       return res.json(
         responseUtils.writeSuccess(
           prediction,
