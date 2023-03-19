@@ -1,4 +1,4 @@
-import { isDate, isFuture } from "date-fns";
+import { isFuture, isValid } from "date-fns";
 import express from "express";
 import webhookManager from "../../config/webhook_subscribers";
 import { isNumberParseableString, isString } from "../../helpers/typeguards";
@@ -34,7 +34,7 @@ router.post("/", async (req, res) => {
       );
   }
 
-  if (!isDate(new Date(due_date))) {
+  if (!isValid(new Date(due_date))) {
     return res
       .status(400)
       .json(

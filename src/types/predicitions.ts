@@ -1,3 +1,11 @@
+export enum PredictionLifeCycle {
+  OPEN = "open",
+  RETIRED = "retired",
+  CLOSED = "closed",
+  SUCCESSFUL = "successful",
+  FAILED = "failed",
+}
+
 export namespace APIPredictions {
   export type Prediction = {
     id: number;
@@ -7,7 +15,6 @@ export namespace APIPredictions {
     due_date: string;
     closed_date: string;
     judged_date: string;
-    successful: boolean | null;
     retired_date: string | null;
   };
 
@@ -23,7 +30,7 @@ export namespace APIPredictions {
     closed_date: string | null;
     judged_date: string | null;
     retired_date: string | null;
-    successful: boolean | null;
+    status: PredictionLifeCycle;
     bets: {
       id: string;
       endorsed: boolean;

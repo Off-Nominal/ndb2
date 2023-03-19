@@ -34,24 +34,30 @@ export class WebhookManager extends EventEmitter {
     super();
     this.subscribers = subscribers;
 
-    this.on("new_prediction", (prediction) => {
-      this.notifySubscribers(
-        this.generateResponse<APIPredictions.EnhancedPrediction>(
-          "new_prediction",
-          prediction
-        )
-      );
-    });
+    this.on(
+      "new_prediction",
+      (prediction: APIPredictions.EnhancedPrediction) => {
+        this.notifySubscribers(
+          this.generateResponse<APIPredictions.EnhancedPrediction>(
+            "new_prediction",
+            prediction
+          )
+        );
+      }
+    );
 
-    this.on("retired_prediction", (prediction) => {
-      this.notifySubscribers(
-        this.generateResponse<APIPredictions.EnhancedPrediction>(
-          "retired_prediction",
-          prediction
-        )
-      );
-    });
-    this.on("new_bet", (prediction) => {
+    this.on(
+      "retired_prediction",
+      (prediction: APIPredictions.EnhancedPrediction) => {
+        this.notifySubscribers(
+          this.generateResponse<APIPredictions.EnhancedPrediction>(
+            "retired_prediction",
+            prediction
+          )
+        );
+      }
+    );
+    this.on("new_bet", (prediction: APIPredictions.EnhancedPrediction) => {
       this.notifySubscribers(
         this.generateResponse<APIPredictions.EnhancedPrediction>(
           "new_bet",

@@ -41,7 +41,6 @@ const seed = (client) => {
       )`;
 
       const INSERT_BET = `INSERT INTO bets (
-        id,
         user_id,
         prediction_id,
         endorsed,
@@ -50,15 +49,14 @@ const seed = (client) => {
         $1, 
         $2, 
         $3, 
-        $4, 
-        $5
+        $4
       )`;
 
       const now = new Date();
 
       for (let i = 0; i < predictions.length; i++) {
         const p = predictions[i];
-        const created_date = add(now, { days: p.created });
+        const created_date = add(now, { hours: p.created });
         referencedData.push(
           client
             .query(INSERT_PREDICTION, [
@@ -66,16 +64,31 @@ const seed = (client) => {
               p.user_id,
               p.text,
               created_date,
-              add(now, { days: p.due }),
+              add(now, { hours: p.due }),
             ])
             .then(() => {
-              return client.query(INSERT_BET, [
-                p.id,
-                p.user_id,
-                p.id,
-                true,
-                created_date,
-              ]);
+              const bets = [];
+
+              // Predictor's original bet
+              bets.push(
+                client.query(INSERT_BET, [p.user_id, p.id, true, created_date])
+              );
+
+              // Additional bets as needed
+              if (p.bets) {
+                for (const b of p.bets) {
+                  bets.push(
+                    client.query(INSERT_BET, [
+                      b.user_id,
+                      p.id,
+                      b.endorsed,
+                      add(now, { hours: b.created }),
+                    ])
+                  );
+                }
+              }
+
+              return Promise.all(bets);
             })
             .catch((err) => console.error(err))
         );

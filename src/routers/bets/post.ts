@@ -4,7 +4,7 @@ import { isBoolean, isNumberParseableString } from "../../helpers/typeguards";
 import bets from "../../queries/bets";
 import predictions from "../../queries/predictions";
 import users from "../../queries/users";
-import { APIPredictions } from "../../types/predicitions";
+import { APIPredictions, PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
 const router = express.Router();
 
@@ -83,14 +83,18 @@ router.post("/", async (req, res) => {
   }
 
   // Validate that prediction is open
-  if (prediction.closed_date && !prediction.retired_date) {
+  if (
+    prediction.status === PredictionLifeCycle.CLOSED ||
+    prediction.status === PredictionLifeCycle.FAILED ||
+    prediction.status === PredictionLifeCycle.SUCCESSFUL
+  ) {
     return res
       .status(400)
       .json(responseUtils.writeError("BAD_REQUEST", "Prediction is closed."));
   }
 
-  // Validate that prediction is not retured
-  if (prediction.retired_date) {
+  // Validate that prediction is not retired
+  if (prediction.status === PredictionLifeCycle.RETIRED) {
     return res
       .status(400)
       .json(

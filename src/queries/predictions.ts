@@ -13,7 +13,7 @@ const ADD_PREDICTION = `
     $2,
     $3,
     $4
-  ) RETURNING id, user_id, text, created_date, due_date, closed_date, judged_date, successful
+  ) RETURNING id, user_id, text, created_date, due_date, closed_date, judged_date
 `;
 
 const GET_ENHANCED_PREDICTION_BY_ID = `
@@ -33,7 +33,12 @@ const GET_ENHANCED_PREDICTION_BY_ID = `
     p.closed_date,
     p.judged_date,
     p.retired_date,
-    p.successful,
+    (CASE
+        WHEN p.retired_date IS NOT NULL THEN 'retired'
+        WHEN p.judged_date IS NOT NULL THEN 'judged'
+        WHEN p.closed_date IS NOT NULL THEN 'closed'
+        ELSE 'open'
+      END) as status,
     (SELECT jsonb_agg(p_bets) FROM
       (SELECT 
           id, 

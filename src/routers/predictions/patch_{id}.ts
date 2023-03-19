@@ -4,7 +4,7 @@ import GAME_MECHANICS from "../../config/game_mechanics";
 import webhookManager from "../../config/webhook_subscribers";
 import { isNumberParseableString } from "../../helpers/typeguards";
 import predictions from "../../queries/predictions";
-import { APIPredictions } from "../../types/predicitions";
+import { APIPredictions, PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
 const router = express.Router();
 
@@ -60,13 +60,13 @@ router.patch("/:prediction_id", async (req, res) => {
   }
 
   // Verify prediction is open
-  if (prediction.closed_date !== null) {
+  if (prediction.status !== PredictionLifeCycle.OPEN) {
     return res
       .status(400)
       .json(
         responseUtils.writeError(
           "BAD_REQUEST",
-          "This prediction has already closed and cannot be altered"
+          "This prediction is not in an open state and cannot be retired."
         )
       );
   }
