@@ -53,7 +53,7 @@ router.post(
       .closePredictionById(req.prediction.id, userId, closed_date || new Date())
       .then((prediction) => {
         // Notify Subscribers
-        // webhookManager.emit("triggered_prediction", prediction);
+        webhookManager.emit("triggered_prediction", prediction);
 
         return res.json(
           responseUtils.writeSuccess(
