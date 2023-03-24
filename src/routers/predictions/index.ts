@@ -13,4 +13,10 @@ router.use("/", post);
 router.use("/", post_id_trigger);
 router.use("/", patch_id_retire);
 
+// Temporary redirect for old route, can be removed when clients are updated
+router.patch("/:prediction_id", (req, res) => {
+  const { prediction_id } = req.params;
+  res.redirect(308, `/api/predictions/${prediction_id}/retire`);
+});
+
 export default router;

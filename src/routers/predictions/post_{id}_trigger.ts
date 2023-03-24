@@ -22,10 +22,10 @@ router.post(
   ],
   async (req: Request, res: Response) => {
     const { discord_id, closed_date } = req.body;
+    const closedDate = new Date(closed_date);
 
-    if (
-      isBefore(new Date(closed_date), new Date(req.prediction.created_date))
-    ) {
+    // Verify closed date is after prediction's creation date
+    if (isBefore(closedDate, new Date(req.prediction.created_date))) {
       return res
         .status(400)
         .json(
@@ -50,7 +50,7 @@ router.post(
     }
 
     return predictions
-      .closePredictionById(req.prediction.id, userId, closed_date || new Date())
+      .closePredictionById(req.prediction.id, userId, closedDate || new Date())
       .then((prediction) => {
         // Notify Subscribers
         webhookManager.emit("triggered_prediction", prediction);

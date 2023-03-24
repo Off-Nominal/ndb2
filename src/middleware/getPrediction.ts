@@ -10,7 +10,7 @@ export const getPrediction = async (
   next: NextFunction
 ) => {
   const { prediction_id } = req.params;
-  console.log(prediction_id);
+
   // Body parameter validation
   if (!isNumberParseableString(prediction_id)) {
     return res
