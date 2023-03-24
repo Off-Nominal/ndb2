@@ -15,11 +15,13 @@ exports.setup = function (options, seedLink) {
 };
 
 exports.up = function (db) {
-  return db.removeColumn("predictions", "successful");
+  return db.addColumn("predictions", "triggered_date", {
+    type: "timestamptz",
+  });
 };
 
 exports.down = function (db) {
-  return db.addColumn("predictions", "successful", { type: "boolean" });
+  return db.removeColumn("predictions", "triggered_date");
 };
 
 exports._meta = {

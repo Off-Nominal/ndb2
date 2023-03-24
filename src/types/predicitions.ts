@@ -13,9 +13,11 @@ export namespace APIPredictions {
     text: string;
     created_date: string;
     due_date: string;
-    closed_date: string;
-    judged_date: string;
+    closed_date: string | null;
+    triggered_date: string | null;
+    judged_date: string | null;
     retired_date: string | null;
+    triggerer_id: string | null;
   };
 
   export type EnhancedPrediction = {
@@ -28,6 +30,11 @@ export namespace APIPredictions {
     created_date: string;
     due_date: string;
     closed_date: string | null;
+    triggered_date: string | null;
+    triggerer: {
+      id: string;
+      discord_id: string;
+    };
     judged_date: string | null;
     retired_date: string | null;
     status: PredictionLifeCycle;
@@ -51,4 +58,6 @@ export namespace APIPredictions {
   export type GetPredictionById = EnhancedPrediction;
 
   export type RetirePredictionById = EnhancedPrediction;
+
+  export type ClosePredictionById = EnhancedPrediction;
 }

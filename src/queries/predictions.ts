@@ -31,6 +31,15 @@ const GET_ENHANCED_PREDICTION_BY_ID = `
     p.created_date,
     p.due_date,
     p.closed_date,
+    p.triggered_date,
+    (SELECT row_to_json(trig) FROM 
+        (SELECT 
+            p.triggerer_id as id, 
+            u.discord_id 
+          FROM users u 
+          WHERE u.id = p.triggerer_id) 
+      trig)
+    as triggerer,
     p.judged_date,
     p.retired_date,
     (CASE
@@ -61,6 +70,10 @@ const GET_ENHANCED_PREDICTION_BY_ID = `
 
 const RETIRE_PREDICTION_BY_ID = `
   UPDATE predictions SET retired_date = NOW() WHERE predictions.id = $1;
+`;
+
+const CLOSE_PREDICTION_BY_ID = `
+  UPDATE predictions SET triggerer_id = $2, closed_date = $3, triggered_date = NOW() WHERE predictions.id = $1;
 `;
 
 export default {
@@ -101,6 +114,20 @@ export default {
   ): Promise<APIPredictions.RetirePredictionById> {
     return client
       .query<null>(RETIRE_PREDICTION_BY_ID, [prediction_id])
+      .then(() => this.getByPredictionId(prediction_id));
+  },
+
+  closePredictionById: function (
+    prediction_id: number | string,
+    triggerer_id: number | string,
+    closed_date: Date
+  ): Promise<APIPredictions.ClosePredictionById> {
+    return client
+      .query<null>(CLOSE_PREDICTION_BY_ID, [
+        prediction_id,
+        triggerer_id,
+        closed_date,
+      ])
       .then(() => this.getByPredictionId(prediction_id));
   },
 };
