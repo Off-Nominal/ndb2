@@ -15,11 +15,22 @@ exports.setup = function (options, seedLink) {
 };
 
 exports.up = function (db) {
-  return db.removeColumn("predictions", "successful");
+  return db.addColumn("predictions", "triggerer_id", {
+    type: "uuid",
+    default: null,
+    foreignKey: {
+      name: "predictions_triggerer_id_fk",
+      table: "users",
+      rules: {
+        onDelete: "SET NULL",
+      },
+      mapping: "id",
+    },
+  });
 };
 
 exports.down = function (db) {
-  return db.addColumn("predictions", "successful", { type: "boolean" });
+  return db.removeColumn("predictions", "triggerer_id");
 };
 
 exports._meta = {

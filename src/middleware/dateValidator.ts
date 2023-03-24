@@ -1,4 +1,4 @@
-import { isFuture, isValid } from "date-fns";
+import { isFuture, isPast, isValid } from "date-fns";
 import { NextFunction, Request, Response } from "express";
 import responseUtils from "../utils/response";
 
@@ -6,12 +6,17 @@ const createChecker = (
   key: string,
   callback: (val: Date | number) => boolean,
   error: string,
-  statusCode: number
+  statusCode: number,
+  optional: boolean
 ) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const value = req.body[key];
 
-    if (!callback(new Date(value))) {
+    if (optional && value === undefined) {
+      return next();
+    }
+
+    if (!value || !callback(new Date(value))) {
       return res
         .status(statusCode)
         .json(
@@ -27,11 +32,32 @@ const createChecker = (
 };
 
 const dateValidator = {
-  isValid: (key: string) => {
-    return createChecker(key, isValid, "must be parseable as a Date.", 400);
+  isValid: (key: string, options?: { optional: boolean }) => {
+    return createChecker(
+      key,
+      isValid,
+      "must be parseable as a Date.",
+      400,
+      options?.optional || false
+    );
   },
-  isFuture: (key: string) => {
-    return createChecker(key, isFuture, "must be a Date in the future.", 400);
+  isFuture: (key: string, options?: { optional: boolean }) => {
+    return createChecker(
+      key,
+      isFuture,
+      "must be a Date in the future.",
+      400,
+      options?.optional || false
+    );
+  },
+  isPast: (key: string, options?: { optional: boolean }) => {
+    return createChecker(
+      key,
+      isPast,
+      "must be a Date in the past.",
+      400,
+      options?.optional || false
+    );
   },
 };
 

@@ -10,12 +10,17 @@ const createChecker = (
   key: string,
   callback: (val: string) => boolean,
   error: string,
-  statusCode: number
+  statusCode: number,
+  optional: boolean
 ) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const value = req.body[key];
 
-    if (!callback(value)) {
+    if (optional && value === undefined) {
+      return next();
+    }
+
+    if (!value || !callback(value)) {
       return res
         .status(statusCode)
         .json(
@@ -32,19 +37,32 @@ const createChecker = (
 };
 
 const bodyValidator = {
-  numberParseableString: (key: string) => {
+  numberParseableString: (key: string, options?: { optional: boolean }) => {
     return createChecker(
       key,
       isNumberParseableString,
       "must be parseable as a number",
-      400
+      400,
+      options?.optional || false
     );
   },
-  string: (key: string) => {
-    return createChecker(key, isString, "must be a string", 400);
+  string: (key: string, options?: { optional: boolean }) => {
+    return createChecker(
+      key,
+      isString,
+      "must be a string",
+      400,
+      options?.optional || false
+    );
   },
-  boolean: (key: string) => {
-    return createChecker(key, isBoolean, "must be parseable as a boolean", 400);
+  boolean: (key: string, options?: { optional: boolean }) => {
+    return createChecker(
+      key,
+      isBoolean,
+      "must be parseable as a boolean",
+      400,
+      options?.optional || false
+    );
   },
 };
 
