@@ -24,16 +24,18 @@ router.post(
     const { discord_id, closed_date } = req.body;
     const closedDate = new Date(closed_date);
 
-    // Verify closed date is after prediction's creation date
-    if (isBefore(closedDate, new Date(req.prediction.created_date))) {
-      return res
-        .status(400)
-        .json(
-          responseUtils.writeError(
-            "BAD_REQUEST",
-            "Closed date cannot be before prediction's created date"
-          )
-        );
+    if (closed_date) {
+      // Verify closed date is after prediction's creation date
+      if (isBefore(closedDate, new Date(req.prediction.created_date))) {
+        return res
+          .status(400)
+          .json(
+            responseUtils.writeError(
+              "BAD_REQUEST",
+              "Closed date cannot be before prediction's created date"
+            )
+          );
+      }
     }
 
     // Fetch User
@@ -50,7 +52,11 @@ router.post(
     }
 
     return predictions
-      .closePredictionById(req.prediction.id, userId, closedDate || new Date())
+      .closePredictionById(
+        req.prediction.id,
+        userId,
+        closed_date ? closedDate : new Date()
+      )
       .then((prediction) => {
         // Notify Subscribers
         webhookManager.emit("triggered_prediction", prediction);
@@ -69,7 +75,7 @@ router.post(
           .json(
             responseUtils.writeError(
               "SERVER_ERROR",
-              "There was an error retiring this prediction."
+              "There was an error triggering this prediction."
             )
           );
       });
