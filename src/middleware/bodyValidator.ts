@@ -25,6 +25,7 @@ const createChecker = (
           )
         );
     } else {
+      value;
       next();
     }
   };
