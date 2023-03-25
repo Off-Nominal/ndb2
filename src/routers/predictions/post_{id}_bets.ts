@@ -13,7 +13,6 @@ router.post(
   "/:prediction_id/bets",
   [
     bodyValidator.numberParseableString("discord_id"),
-    bodyValidator.numberParseableString("prediction_id"),
     bodyValidator.boolean("endorsed"),
     getPrediction,
   ],
