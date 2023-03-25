@@ -47,6 +47,15 @@ export namespace APIPredictions {
         discord_id: string;
       };
     }[];
+    votes: {
+      id: string;
+      vote: boolean;
+      voted_date: string;
+      voter: {
+        id: string;
+        discord_id: string;
+      };
+    }[];
     payouts: {
       endorse: number;
       undorse: number;

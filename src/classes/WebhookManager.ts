@@ -7,6 +7,7 @@ interface WebhookEvent {
   retired_prediction: (prediction: APIPredictions.EnhancedPrediction) => void;
   new_bet: (bet: APIPredictions.EnhancedPrediction) => void;
   triggered_prediction: (prediction: APIPredictions.EnhancedPrediction) => void;
+  new_vote: (prediction: APIPredictions.EnhancedPrediction) => void;
 }
 
 type WebhookNotification<T> = {
@@ -75,6 +76,15 @@ export class WebhookManager extends EventEmitter {
       this.notifySubscribers(
         this.generateResponse<APIPredictions.EnhancedPrediction>(
           "new_bet",
+          prediction
+        )
+      );
+    });
+
+    this.on("new_vote", (prediction: APIPredictions.EnhancedPrediction) => {
+      this.notifySubscribers(
+        this.generateResponse<APIPredictions.EnhancedPrediction>(
+          "new_vote",
           prediction
         )
       );

@@ -48,7 +48,7 @@ const GET_ENHANCED_PREDICTION_BY_ID = `
         WHEN p.closed_date IS NOT NULL THEN 'closed'
         ELSE 'open'
       END) as status,
-    (SELECT jsonb_agg(p_bets) FROM
+    (SELECT COALESCE(jsonb_agg(p_bets), '[]') FROM
       (SELECT 
           id, 
           (SELECT row_to_json(bett) FROM 
@@ -63,7 +63,26 @@ const GET_ENHANCED_PREDICTION_BY_ID = `
           endorsed 
         FROM bets b
         WHERE b.prediction_id = p.id
-      ) p_bets ) as bets
+      ) p_bets ) as bets,
+    (SELECT 
+      COALESCE(
+        jsonb_agg(p_votes), '[]') FROM
+          (SELECT 
+              id, 
+              (SELECT row_to_json(vott) FROM 
+                (SELECT 
+                    u.id, 
+                    u.discord_id
+                  FROM users u 
+                  WHERE u.id = v.user_id) 
+                vott) 
+              as voter, 
+              voted_date,
+              vote 
+            FROM votes v
+            WHERE v.prediction_id = p.id
+          ) p_votes
+        ) as votes
   FROM predictions p
   WHERE p.id = $1
 `;
