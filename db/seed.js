@@ -31,13 +31,19 @@ const seed = (client) => {
         user_id,
         text,
         created_date,
-        due_date
+        due_date,
+        closed_date,
+        retired_date,
+        triggered_date
       ) VALUES (
         $1,
         $2,
         $3,
         $4,
-        $5
+        $5,
+        $6,
+        $7,
+        $8
       )`;
 
       const INSERT_BET = `INSERT INTO bets (
@@ -52,11 +58,30 @@ const seed = (client) => {
         $4
       )`;
 
+      const INSERT_VOTE = `INSERT INTO votes (
+        user_id, 
+        prediction_id, 
+        vote, 
+        voted_date
+      ) VALUES (
+        $1, 
+        $2, 
+        $3, 
+        $4
+      )`;
+
       const now = new Date();
 
       for (let i = 0; i < predictions.length; i++) {
         const p = predictions[i];
+
         const created_date = add(now, { hours: p.created });
+        const closed_date = p.closed ? add(now, { hours: p.closed }) : null;
+        const retired_date = p.retired ? add(now, { hours: p.retired }) : null;
+        const triggered_date = p.closed
+          ? add(now, { hours: p.triggered })
+          : null;
+
         referencedData.push(
           client
             .query(INSERT_PREDICTION, [
@@ -65,6 +90,9 @@ const seed = (client) => {
               p.text,
               created_date,
               add(now, { hours: p.due }),
+              closed_date,
+              retired_date,
+              triggered_date,
             ])
             .then(() => {
               const bets = [];
@@ -88,7 +116,22 @@ const seed = (client) => {
                 }
               }
 
-              return Promise.all(bets);
+              const votes = [];
+
+              if (p.votes) {
+                for (const v of p.votes) {
+                  votes.push(
+                    client.query(INSERT_VOTE, [
+                      v.user_id,
+                      p.id,
+                      v.vote,
+                      add(now, { hours: v.voted }),
+                    ])
+                  );
+                }
+              }
+
+              return Promise.all([...bets, ...votes]);
             })
             .catch((err) => console.error(err))
         );

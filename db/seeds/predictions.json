@@ -2,21 +2,55 @@
   {
     "id": 1,
     "user_id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
-    "text": "A banana will fall from the sky",
+    "text": "A prediction that everyone endorses",
     "created": -168,
-    "due": 168
+    "due": 168,
+    "bets": [
+      {
+        "user_id": "d5c87550-0bcf-4213-9ed3-9a716682ef2b",
+        "created": -165,
+        "endorsed": true
+      },
+      {
+        "user_id": "28ac07b4-3238-4f60-958c-fce7284e931b",
+        "created": -130,
+        "endorsed": true
+      },
+      {
+        "user_id": "115bbe5b-44d8-4ed2-b442-a31305368e08",
+        "created": -120,
+        "endorsed": true
+      }
+    ]
   },
   {
     "id": 2,
     "user_id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
-    "text": "A monkey will eat some porridge",
+    "text": "A fift fifty prediction",
     "created": -300,
-    "due": 300
+    "due": 300,
+    "bets": [
+      {
+        "user_id": "d5c87550-0bcf-4213-9ed3-9a716682ef2b",
+        "created": -300,
+        "endorsed": false
+      },
+      {
+        "user_id": "28ac07b4-3238-4f60-958c-fce7284e931b",
+        "created": -300,
+        "endorsed": false
+      },
+      {
+        "user_id": "115bbe5b-44d8-4ed2-b442-a31305368e08",
+        "created": -299,
+        "endorsed": true
+      }
+    ]
   },
   {
     "id": 3,
     "user_id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
-    "text": "A caterpillar will crawl through my window",
+    "text": "A prediction with no other bets",
     "created": -450,
     "due": 450
   },
@@ -25,19 +59,88 @@
     "user_id": "ac5ad4e9-3b48-43b4-995c-48b0842b0e4c",
     "text": "A prediction older than time window cannot be deleted",
     "created": -450,
-    "due": 500
+    "due": 500,
+    "bets": [
+      {
+        "user_id": "d5c87550-0bcf-4213-9ed3-9a716682ef2b",
+        "created": -401,
+        "endorsed": false
+      }
+    ]
   },
   {
     "id": 5,
     "user_id": "ac5ad4e9-3b48-43b4-995c-48b0842b0e4c",
     "text": "A current prediction which can be cancelled",
-    "created": -1,
+    "created": -5,
     "due": 200,
     "bets": [
       {
         "user_id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
-        "created": -1,
+        "created": -4,
         "endorsed": true
+      },
+      {
+        "user_id": "28ac07b4-3238-4f60-958c-fce7284e931b",
+        "created": -4,
+        "endorsed": false
+      },
+      {
+        "user_id": "115bbe5b-44d8-4ed2-b442-a31305368e08",
+        "created": -4,
+        "endorsed": true
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "user_id": "28ac07b4-3238-4f60-958c-fce7284e931b",
+    "text": "A retired prediction",
+    "created": -400,
+    "retired": -396,
+    "due": 145
+  },
+  {
+    "id": 7,
+    "user_id": "28ac07b4-3238-4f60-958c-fce7284e931b",
+    "text": "A prediction that is being voted on, no triggerer",
+    "created": -677,
+    "closed": -4,
+    "triggered": -4,
+    "due": -4,
+    "retired": null,
+    "bets": [
+      {
+        "user_id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
+        "created": -675,
+        "endorsed": true
+      },
+      {
+        "user_id": "d5c87550-0bcf-4213-9ed3-9a716682ef2b",
+        "created": -644,
+        "endorsed": false
+      },
+      {
+        "user_id": "115bbe5b-44d8-4ed2-b442-a31305368e08",
+        "created": -621,
+        "endorsed": true
+      }
+    ],
+    "votes": [
+      {
+        "user_id": "28ac07b4-3238-4f60-958c-fce7284e931b",
+        "voted": -3,
+        "vote": true
+      },
+      {
+        "user_id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
+        "voted": -3,
+        "vote": true
+      },
+      {
+        "user_id": "d5c87550-0bcf-4213-9ed3-9a716682ef2b",
+        "voted": -2,
+        "vote": false
       }
     ]
   }

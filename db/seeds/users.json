@@ -8,5 +8,20 @@
     "id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
     "discord_id": "781234657487749180",
     "notes": "Helper Bot dev user id"
+  },
+  {
+    "id": "d5c87550-0bcf-4213-9ed3-9a716682ef2b",
+    "discord_id": "781234878992744488",
+    "notes": "Book Club Bot dev user id"
+  },
+  {
+    "id": "28ac07b4-3238-4f60-958c-fce7284e931b",
+    "discord_id": "930495203159199895",
+    "notes": "Content Bot dev user id"
+  },
+  {
+    "id": "115bbe5b-44d8-4ed2-b442-a31305368e08",
+    "discord_id": "930627458087141388",
+    "notes": "Events Bot dev user id"
   }
 ]
