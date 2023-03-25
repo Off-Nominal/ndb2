@@ -20,7 +20,7 @@ const createChecker = (
       return next();
     }
 
-    if (!value || !callback(value)) {
+    if (value === undefined || !callback(value)) {
       return res
         .status(statusCode)
         .json(
@@ -30,7 +30,6 @@ const createChecker = (
           )
         );
     } else {
-      value;
       next();
     }
   };

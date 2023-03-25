@@ -3,6 +3,7 @@ dotenv.config();
 
 const EMPTY_TABLES = `
   TRUNCATE
+    votes,
     bets,
     predictions, 
     users
