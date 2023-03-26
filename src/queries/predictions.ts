@@ -95,6 +95,10 @@ const CLOSE_PREDICTION_BY_ID = `
   UPDATE predictions SET triggerer_id = $2, closed_date = $3, triggered_date = NOW() WHERE predictions.id = $1;
 `;
 
+const GET_NEXT_PREDICTION_TO_TRIGGER = `
+  SELECT id FROM predictions WHERE due_date < NOW() AND triggered_date IS NULL ORDER BY due_date ASC LIMIT 1
+`;
+
 export default {
   add: function (
     user_id: string,
@@ -138,7 +142,7 @@ export default {
 
   closePredictionById: function (
     prediction_id: number | string,
-    triggerer_id: number | string,
+    triggerer_id: number | string | null,
     closed_date: Date
   ): Promise<APIPredictions.ClosePredictionById> {
     return client
@@ -148,5 +152,18 @@ export default {
         closed_date,
       ])
       .then(() => this.getByPredictionId(prediction_id));
+  },
+
+  getNextPredictionToTrigger: function (): Promise<
+    APIPredictions.GetNextPredictionToTrigger | undefined
+  > {
+    return client
+      .query<APIPredictions.GetNextPredictionToTrigger>(
+        GET_NEXT_PREDICTION_TO_TRIGGER
+      )
+      .then((res) => {
+        console.log("query response.rows", res.rows);
+        return res.rows[0];
+      });
   },
 };

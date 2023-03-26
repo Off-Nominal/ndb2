@@ -143,5 +143,29 @@
         "vote": false
       }
     ]
+  },
+  {
+    "id": 8,
+    "user_id": "28ac07b4-3238-4f60-958c-fce7284e931b",
+    "text": "A prediction that is due to be triggered",
+    "created": -311,
+    "due": -1,
+    "bets": [
+      {
+        "user_id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
+        "created": -309,
+        "endorsed": true
+      },
+      {
+        "user_id": "d5c87550-0bcf-4213-9ed3-9a716682ef2b",
+        "created": -307,
+        "endorsed": false
+      },
+      {
+        "user_id": "115bbe5b-44d8-4ed2-b442-a31305368e08",
+        "created": -300,
+        "endorsed": true
+      }
+    ]
   }
 ]

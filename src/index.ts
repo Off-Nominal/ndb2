@@ -1,12 +1,15 @@
 import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import morgan from "morgan";
 import { authenticateApplication } from "./middleware/authenticateApplication";
+import PredictionMonitor from "./classes/PredictionMonitor";
 
 const app = express();
 
 // Configuration
-dotenv.config();
+
 const PORT = process.env.PORT || 80;
 if (process.env.NODE_ENV === "dev") {
   app.use(morgan("dev"));
@@ -21,8 +24,11 @@ import predictionsRouter from "./routers/predictions";
 app.use("/api/predictions", predictionsRouter);
 
 import betsRouter from "./routers/bets";
+
 app.use("/api/bets", betsRouter);
 
 app.listen(PORT, () => {
-  console.log(`NDB2 application listneing on port: `, PORT);
+  console.log(`[NDB2]: Application listeneing on port: `, PORT);
 });
+
+const monitor = new PredictionMonitor();

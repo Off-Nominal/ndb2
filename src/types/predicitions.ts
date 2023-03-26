@@ -69,4 +69,6 @@ export namespace APIPredictions {
   export type RetirePredictionById = EnhancedPrediction;
 
   export type ClosePredictionById = EnhancedPrediction;
+
+  export type GetNextPredictionToTrigger = { id: number };
 }
