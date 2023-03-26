@@ -147,9 +147,54 @@
   {
     "id": 8,
     "user_id": "28ac07b4-3238-4f60-958c-fce7284e931b",
+    "text": "A prediction that is being voted on, with triggerer",
+    "created": -677,
+    "closed": -28,
+    "triggered": -4,
+    "triggerer": "28ac07b4-3238-4f60-958c-fce7284e931b",
+    "due": 133,
+    "retired": null,
+    "bets": [
+      {
+        "user_id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
+        "created": -675,
+        "endorsed": true
+      },
+      {
+        "user_id": "d5c87550-0bcf-4213-9ed3-9a716682ef2b",
+        "created": -644,
+        "endorsed": false
+      },
+      {
+        "user_id": "115bbe5b-44d8-4ed2-b442-a31305368e08",
+        "created": -621,
+        "endorsed": true
+      }
+    ],
+    "votes": [
+      {
+        "user_id": "28ac07b4-3238-4f60-958c-fce7284e931b",
+        "voted": -3,
+        "vote": true
+      },
+      {
+        "user_id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
+        "voted": -3,
+        "vote": true
+      },
+      {
+        "user_id": "d5c87550-0bcf-4213-9ed3-9a716682ef2b",
+        "voted": -2,
+        "vote": false
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "user_id": "28ac07b4-3238-4f60-958c-fce7284e931b",
     "text": "A prediction that is due to be triggered",
     "created": -311,
-    "due": -1,
+    "due": -2,
     "bets": [
       {
         "user_id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
@@ -165,6 +210,161 @@
         "user_id": "115bbe5b-44d8-4ed2-b442-a31305368e08",
         "created": -300,
         "endorsed": true
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "user_id": "28ac07b4-3238-4f60-958c-fce7284e931b",
+    "text": "A second prediction that is due to be triggered",
+    "created": -788,
+    "due": -1,
+    "bets": [
+      {
+        "user_id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
+        "created": -785,
+        "endorsed": true
+      },
+      {
+        "user_id": "d5c87550-0bcf-4213-9ed3-9a716682ef2b",
+        "created": -766,
+        "endorsed": false
+      },
+      {
+        "user_id": "115bbe5b-44d8-4ed2-b442-a31305368e08",
+        "created": -677,
+        "endorsed": false
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "user_id": "28ac07b4-3238-4f60-958c-fce7284e931b",
+    "text": "A prediction which has been voted on for 24 hours and is ready to be judged",
+    "created": -333,
+    "due": -26,
+    "triggered": -25,
+    "closed": -26,
+    "bets": [
+      {
+        "user_id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
+        "created": -331,
+        "endorsed": false
+      },
+      {
+        "user_id": "d5c87550-0bcf-4213-9ed3-9a716682ef2b",
+        "created": -311,
+        "endorsed": false
+      },
+      {
+        "user_id": "115bbe5b-44d8-4ed2-b442-a31305368e08",
+        "created": -310,
+        "endorsed": false
+      }
+    ],
+    "votes": [
+      {
+        "user_id": "28ac07b4-3238-4f60-958c-fce7284e931b",
+        "voted": -3,
+        "vote": true
+      },
+      {
+        "user_id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
+        "voted": -3,
+        "vote": true
+      },
+      {
+        "user_id": "d5c87550-0bcf-4213-9ed3-9a716682ef2b",
+        "voted": -2,
+        "vote": false
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "user_id": "28ac07b4-3238-4f60-958c-fce7284e931b",
+    "text": "A successful prediction",
+    "created": -887,
+    "due": -299,
+    "triggered": -299,
+    "closed": -299,
+    "judged": -275,
+    "bets": [
+      {
+        "user_id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
+        "created": -886,
+        "endorsed": false
+      },
+      {
+        "user_id": "d5c87550-0bcf-4213-9ed3-9a716682ef2b",
+        "created": -884,
+        "endorsed": false
+      },
+      {
+        "user_id": "115bbe5b-44d8-4ed2-b442-a31305368e08",
+        "created": -881,
+        "endorsed": true
+      }
+    ],
+    "votes": [
+      {
+        "user_id": "28ac07b4-3238-4f60-958c-fce7284e931b",
+        "voted": -299,
+        "vote": true
+      },
+      {
+        "user_id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
+        "voted": -298,
+        "vote": true
+      },
+      {
+        "user_id": "d5c87550-0bcf-4213-9ed3-9a716682ef2b",
+        "voted": -297,
+        "vote": false
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "user_id": "28ac07b4-3238-4f60-958c-fce7284e931b",
+    "text": "A failed prediction",
+    "created": -887,
+    "due": -299,
+    "triggered": -299,
+    "closed": -299,
+    "judged": -275,
+    "bets": [
+      {
+        "user_id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
+        "created": -886,
+        "endorsed": false
+      },
+      {
+        "user_id": "d5c87550-0bcf-4213-9ed3-9a716682ef2b",
+        "created": -884,
+        "endorsed": false
+      },
+      {
+        "user_id": "115bbe5b-44d8-4ed2-b442-a31305368e08",
+        "created": -881,
+        "endorsed": true
+      }
+    ],
+    "votes": [
+      {
+        "user_id": "28ac07b4-3238-4f60-958c-fce7284e931b",
+        "voted": -299,
+        "vote": true
+      },
+      {
+        "user_id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
+        "voted": -298,
+        "vote": false
+      },
+      {
+        "user_id": "d5c87550-0bcf-4213-9ed3-9a716682ef2b",
+        "voted": -297,
+        "vote": false
       }
     ]
   }

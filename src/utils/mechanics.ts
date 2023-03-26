@@ -59,8 +59,10 @@ export const calculatePointRatios = (
 export const addRatiosToPrediction = (
   ep: Omit<APIPredictions.EnhancedPrediction, "payouts">
 ): APIPredictions.EnhancedPrediction => {
+  const effectiveCloseDate = ep.closed_date || ep.due_date;
+
   const [endorse, undorse] = calculatePointRatios(
-    new Date(ep.due_date),
+    new Date(effectiveCloseDate),
     ep.bets
   );
 

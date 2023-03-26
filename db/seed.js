@@ -34,7 +34,9 @@ const seed = (client) => {
         due_date,
         closed_date,
         retired_date,
-        triggered_date
+        triggered_date,
+        judged_date,
+        triggerer_id
       ) VALUES (
         $1,
         $2,
@@ -43,7 +45,9 @@ const seed = (client) => {
         $5,
         $6,
         $7,
-        $8
+        $8,
+        $9,
+        $10
       )`;
 
       const INSERT_BET = `INSERT INTO bets (
@@ -81,6 +85,7 @@ const seed = (client) => {
         const triggered_date = p.closed
           ? add(now, { hours: p.triggered })
           : null;
+        const judged_date = p.judged ? add(now, { hours: p.judged }) : null;
 
         referencedData.push(
           client
@@ -93,6 +98,8 @@ const seed = (client) => {
               closed_date,
               retired_date,
               triggered_date,
+              judged_date,
+              p.triggerer,
             ])
             .then(() => {
               const bets = [];

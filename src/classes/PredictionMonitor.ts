@@ -14,7 +14,13 @@ export default class PredictionMonitor {
     }
     console.log("[PM]: Prediction Monitor now running");
 
+    // Queue up the next trigger
     this.scheduleNextTrigger();
+
+    // Set judgement loop
+    setInterval(() => {
+      this.judgeNextPrediction();
+    }, 600000);
   }
 
   private getSchedule(tomorrow: boolean = false): Date[] {
@@ -59,27 +65,46 @@ export default class PredictionMonitor {
         if (!pred) {
           console.log("[PM]: No predictions due, skipping.");
           return;
-        } else {
-          console.log(
-            "[PM]: Prediction with id",
-            pred.id,
-            "due, triggering now."
-          );
-          return predictions
-            .closePredictionById(pred.id, null, new Date())
-            .then((prediction) => {
-              console.log(
-                "[PM]: Prediction successfully triggered, sending webhook"
-              );
-              console.log(prediction);
-              webhookManager.emit("triggered_prediction", prediction);
-            });
         }
+        console.log(
+          "[PM]: Prediction with id",
+          pred.id,
+          "due, triggering now."
+        );
+        return predictions
+          .closePredictionById(pred.id, null, new Date(pred.due_date))
+          .then((prediction) => {
+            console.log(
+              "[PM]: Prediction successfully triggered, sending webhook"
+            );
+            console.log(prediction);
+            webhookManager.emit("triggered_prediction", prediction);
+          });
       })
       .finally(() => {
         this.removeFirstScheduleTrigger();
         this.scheduleNextTrigger();
       });
+  }
+
+  private judgeNextPrediction() {
+    console.log("[PM]: Looking for judgements.");
+    predictions.getNextPredictionToJudge().then((pred) => {
+      if (!pred) {
+        console.log("[PM]: No judgements due, skipping.");
+        return;
+      }
+      console.log(
+        "[PM]: Prediction with id,",
+        pred.id,
+        "due for judgement. Judging now."
+      );
+      return predictions.judgePredictionById(pred.id).then((prediction) => {
+        console.log("[PM]: Prediction successfully judged, sending webhook");
+        console.log(prediction);
+        webhookManager.emit("judged_prediction", prediction);
+      });
+    });
   }
 
   private scheduleNextTrigger() {
