@@ -44,26 +44,46 @@ const GET_ENHANCED_PREDICTION_BY_ID = `
     p.retired_date,
     (CASE
         WHEN p.retired_date IS NOT NULL THEN 'retired'
-        WHEN p.judged_date IS NOT NULL THEN 'judged'
+        WHEN p.judged_date IS NOT NULL THEN
+          CASE 
+            WHEN 
+                (SELECT COUNT(id) FROM votes where votes.prediction_id = p.id AND votes.vote IS TRUE) > 
+                (SELECT COUNT(id) FROM votes where votes.prediction_id = p.id AND votes.vote IS FALSE)
+              THEN 'successful'
+            ELSE 'failed'
+          END
         WHEN p.closed_date IS NOT NULL THEN 'closed'
         ELSE 'open'
       END) as status,
-    (SELECT COALESCE(jsonb_agg(p_bets), '[]') FROM
-      (SELECT 
-          id, 
-          (SELECT row_to_json(bett) FROM 
-            (SELECT 
-                u.id, 
-                u.discord_id
-              FROM users u 
-              WHERE u.id = b.user_id) 
-            bett) 
-          as better, 
-          date,
-          endorsed 
-        FROM bets b
-        WHERE b.prediction_id = p.id
-      ) p_bets ) as bets,
+    (SELECT 
+      COALESCE(
+        jsonb_agg(p_bets), '[]') FROM
+          (SELECT 
+              id, 
+              (SELECT row_to_json(bett) FROM 
+                (SELECT 
+                    u.id, 
+                    u.discord_id
+                  FROM users u 
+                  WHERE u.id = b.user_id) 
+                bett) 
+              as better, 
+              date,
+              endorsed,
+              (SELECT 
+                EXTRACT(
+                  DAY FROM
+                    CASE
+                      WHEN p.closed_date IS NOT NULL THEN p.closed_date - b.date
+                      ELSE p.due_date - b.date
+                    END
+                )
+              ) as wager 
+            FROM bets b
+            WHERE b.prediction_id = p.id
+            ORDER BY date ASC
+          ) p_bets 
+        ) as bets,
     (SELECT 
       COALESCE(
         jsonb_agg(p_votes), '[]') FROM
@@ -78,9 +98,10 @@ const GET_ENHANCED_PREDICTION_BY_ID = `
                 vott) 
               as voter, 
               voted_date,
-              vote 
+              vote
             FROM votes v
             WHERE v.prediction_id = p.id
+            ORDER BY voted_date DESC
           ) p_votes
         ) as votes
   FROM predictions p
@@ -93,6 +114,17 @@ const RETIRE_PREDICTION_BY_ID = `
 
 const CLOSE_PREDICTION_BY_ID = `
   UPDATE predictions SET triggerer_id = $2, closed_date = $3, triggered_date = NOW() WHERE predictions.id = $1;
+`;
+const JUDGE_PREDICTION_BY_ID = `
+  UPDATE predictions SET judged_date = NOW() WHERE predictions.id = $1;
+`;
+
+const GET_NEXT_PREDICTION_TO_TRIGGER = `
+  SELECT id, due_date FROM predictions WHERE due_date < NOW() AND triggered_date IS NULL ORDER BY due_date ASC LIMIT 1
+`;
+
+const GET_NEXT_PREDICTION_TO_JUDGE = `
+  SELECT id FROM predictions WHERE judged_date IS NULL AND triggered_date + '1 day' < NOW() ORDER BY due_date ASC LIMIT 1
 `;
 
 export default {
@@ -138,7 +170,7 @@ export default {
 
   closePredictionById: function (
     prediction_id: number | string,
-    triggerer_id: number | string,
+    triggerer_id: number | string | null,
     closed_date: Date
   ): Promise<APIPredictions.ClosePredictionById> {
     return client
@@ -148,5 +180,39 @@ export default {
         closed_date,
       ])
       .then(() => this.getByPredictionId(prediction_id));
+  },
+
+  judgePredictionById: function (
+    prediction_id: number | string
+  ): Promise<APIPredictions.JudgePredictionById> {
+    return client
+      .query<null>(JUDGE_PREDICTION_BY_ID, [prediction_id])
+      .then(() => this.getByPredictionId(prediction_id));
+  },
+
+  getNextPredictionToTrigger: function (): Promise<
+    APIPredictions.GetNextPredictionToTrigger | undefined
+  > {
+    return client
+      .query<APIPredictions.GetNextPredictionToTrigger>(
+        GET_NEXT_PREDICTION_TO_TRIGGER
+      )
+      .then((res) => {
+        console.log("query response.rows", res.rows);
+        return res.rows[0];
+      });
+  },
+
+  getNextPredictionToJudge: function (): Promise<
+    APIPredictions.GetNextPredictionToJudge | undefined
+  > {
+    return client
+      .query<APIPredictions.GetNextPredictionToJudge>(
+        GET_NEXT_PREDICTION_TO_JUDGE
+      )
+      .then((res) => {
+        console.log("query response.rows", res.rows);
+        return res.rows[0];
+      });
   },
 };

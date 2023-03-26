@@ -42,6 +42,7 @@ export namespace APIPredictions {
       id: string;
       endorsed: boolean;
       date: string;
+      wager: number;
       better: {
         id: string;
         discord_id: string;
@@ -69,4 +70,10 @@ export namespace APIPredictions {
   export type RetirePredictionById = EnhancedPrediction;
 
   export type ClosePredictionById = EnhancedPrediction;
+
+  export type JudgePredictionById = EnhancedPrediction;
+
+  export type GetNextPredictionToTrigger = { id: number; due_date: string };
+
+  export type GetNextPredictionToJudge = { id: number };
 }
