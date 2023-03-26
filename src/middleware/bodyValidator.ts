@@ -40,7 +40,7 @@ const bodyValidator = {
     return createChecker(
       key,
       isNumberParseableString,
-      "must be parseable as a number",
+      "must be parseable as a safe integer",
       400,
       options?.optional || false
     );
