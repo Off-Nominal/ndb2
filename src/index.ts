@@ -23,6 +23,9 @@ app.use(authenticateApplication);
 import predictionsRouter from "./routers/predictions";
 app.use("/api/predictions", predictionsRouter);
 
+import usersRouter from "./routers/users";
+app.use("/api/users", usersRouter);
+
 app.listen(PORT, () => {
   console.log(`[NDB2]: Application listeneing on port: `, PORT);
 });

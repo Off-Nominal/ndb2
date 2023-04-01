@@ -11,7 +11,7 @@ export const getPrediction = async (
 ) => {
   const { prediction_id } = req.params;
 
-  // Body parameter validation
+  // Query parameter validation
   if (!isNumberParseableString(prediction_id)) {
     return res
       .status(400)

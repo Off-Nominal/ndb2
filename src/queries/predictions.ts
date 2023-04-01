@@ -1,4 +1,4 @@
-import client from "../db";
+import pool from "../db";
 import { APIPredictions } from "../types/predicitions";
 import { addRatiosToPrediction } from "../utils/mechanics";
 
@@ -71,14 +71,20 @@ const GET_ENHANCED_PREDICTION_BY_ID = `
               date,
               endorsed,
               (SELECT 
-                EXTRACT(
-                  DAY FROM
-                    CASE
-                      WHEN p.closed_date IS NOT NULL THEN p.closed_date - b.date
-                      ELSE p.due_date - b.date
-                    END
+                COALESCE(
+                  NULLIF(
+                    EXTRACT(
+                      DAY FROM
+                        CASE
+                          WHEN p.closed_date IS NOT NULL THEN p.closed_date - b.date
+                          ELSE p.due_date - b.date
+                        END
+                    ),
+                    0
+                  ),
+                  1
                 )
-              ) as wager 
+              ) as wager
             FROM bets b
             WHERE b.prediction_id = p.id
             ORDER BY date ASC
@@ -134,38 +140,51 @@ export default {
     due_date: Date,
     created_date: Date = new Date()
   ): Promise<APIPredictions.AddPrediction> {
-    return client
-      .query<APIPredictions.AddPrediction>(ADD_PREDICTION, [
-        user_id,
-        text,
-        due_date,
-        created_date,
-      ])
-      .then((response) => response.rows[0]);
+    return pool.connect().then((client) => {
+      return client
+        .query<APIPredictions.AddPrediction>(ADD_PREDICTION, [
+          user_id,
+          text,
+          due_date,
+          created_date,
+        ])
+        .then((response) => {
+          client.release();
+          return response.rows[0];
+        });
+    });
   },
 
   getByPredictionId: function (
     prediction_id: number | string
   ): Promise<APIPredictions.GetPredictionById | null> {
-    return client
-      .query<Omit<APIPredictions.GetPredictionById, "payouts">>(
-        GET_ENHANCED_PREDICTION_BY_ID,
-        [prediction_id]
-      )
-      .then((response) => {
-        if (response.rows.length === 0) {
-          return null;
-        }
-        return addRatiosToPrediction(response.rows[0]);
-      });
+    return pool.connect().then((client) => {
+      return client
+        .query<Omit<APIPredictions.GetPredictionById, "payouts">>(
+          GET_ENHANCED_PREDICTION_BY_ID,
+          [prediction_id]
+        )
+        .then((response) => {
+          client.release();
+          if (response.rows.length === 0) {
+            return null;
+          }
+          return addRatiosToPrediction(response.rows[0]);
+        });
+    });
   },
 
   retirePredictionById: function (
     prediction_id: number | string
   ): Promise<APIPredictions.RetirePredictionById> {
-    return client
-      .query<null>(RETIRE_PREDICTION_BY_ID, [prediction_id])
-      .then(() => this.getByPredictionId(prediction_id));
+    return pool.connect().then((client) => {
+      return client
+        .query<null>(RETIRE_PREDICTION_BY_ID, [prediction_id])
+        .then(() => {
+          client.release();
+          return this.getByPredictionId(prediction_id);
+        });
+    });
   },
 
   closePredictionById: function (
@@ -173,46 +192,60 @@ export default {
     triggerer_id: number | string | null,
     closed_date: Date
   ): Promise<APIPredictions.ClosePredictionById> {
-    return client
-      .query<null>(CLOSE_PREDICTION_BY_ID, [
-        prediction_id,
-        triggerer_id,
-        closed_date,
-      ])
-      .then(() => this.getByPredictionId(prediction_id));
+    return pool.connect().then((client) => {
+      return client
+        .query<null>(CLOSE_PREDICTION_BY_ID, [
+          prediction_id,
+          triggerer_id,
+          closed_date,
+        ])
+        .then(() => {
+          client.release();
+          return this.getByPredictionId(prediction_id);
+        });
+    });
   },
 
   judgePredictionById: function (
     prediction_id: number | string
   ): Promise<APIPredictions.JudgePredictionById> {
-    return client
-      .query<null>(JUDGE_PREDICTION_BY_ID, [prediction_id])
-      .then(() => this.getByPredictionId(prediction_id));
+    return pool.connect().then((client) => {
+      return client
+        .query<null>(JUDGE_PREDICTION_BY_ID, [prediction_id])
+        .then(() => {
+          client.release();
+          return this.getByPredictionId(prediction_id);
+        });
+    });
   },
 
   getNextPredictionToTrigger: function (): Promise<
     APIPredictions.GetNextPredictionToTrigger | undefined
   > {
-    return client
-      .query<APIPredictions.GetNextPredictionToTrigger>(
-        GET_NEXT_PREDICTION_TO_TRIGGER
-      )
-      .then((res) => {
-        console.log("query response.rows", res.rows);
-        return res.rows[0];
-      });
+    return pool.connect().then((client) => {
+      return client
+        .query<APIPredictions.GetNextPredictionToTrigger>(
+          GET_NEXT_PREDICTION_TO_TRIGGER
+        )
+        .then((res) => {
+          client.release();
+          return res.rows[0];
+        });
+    });
   },
 
   getNextPredictionToJudge: function (): Promise<
     APIPredictions.GetNextPredictionToJudge | undefined
   > {
-    return client
-      .query<APIPredictions.GetNextPredictionToJudge>(
-        GET_NEXT_PREDICTION_TO_JUDGE
-      )
-      .then((res) => {
-        console.log("query response.rows", res.rows);
-        return res.rows[0];
-      });
+    return pool.connect().then((client) => {
+      return client
+        .query<APIPredictions.GetNextPredictionToJudge>(
+          GET_NEXT_PREDICTION_TO_JUDGE
+        )
+        .then((res) => {
+          client.release();
+          return res.rows[0];
+        });
+    });
   },
 };

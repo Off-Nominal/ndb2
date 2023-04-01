@@ -8,7 +8,6 @@ export default class PredictionMonitor {
 
   constructor() {
     this.schedule = this.getSchedule();
-    console.log(this.schedule);
     if (this.schedule.length === 0) {
       this.schedule = this.getSchedule(true);
     }
@@ -88,10 +87,8 @@ export default class PredictionMonitor {
   }
 
   private judgeNextPrediction() {
-    console.log("[PM]: Looking for judgements.");
     predictions.getNextPredictionToJudge().then((pred) => {
       if (!pred) {
-        console.log("[PM]: No judgements due, skipping.");
         return;
       }
       console.log(

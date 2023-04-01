@@ -1,4 +1,4 @@
-import client from "../db";
+import pool from "../db";
 import { APIBets } from "../types/bets";
 
 const ADD_BET = `
@@ -21,8 +21,18 @@ export default {
     endorsed: boolean,
     date: Date = new Date()
   ) => {
-    return client
-      .query<APIBets.AddBet>(ADD_BET, [user_id, prediction_id, endorsed, date])
-      .then((response) => response.rows[0]);
+    return pool.connect().then((client) => {
+      return client
+        .query<APIBets.AddBet>(ADD_BET, [
+          user_id,
+          prediction_id,
+          endorsed,
+          date,
+        ])
+        .then((response) => {
+          client.release();
+          return response.rows[0];
+        });
+    });
   },
 };

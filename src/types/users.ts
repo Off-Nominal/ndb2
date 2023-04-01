@@ -7,4 +7,9 @@ export namespace APIUsers {
   export type GetUserByDiscordId = User;
 
   export type AddUser = User;
+
+  export type GetUserAllTimeScoreByDiscordId = {
+    predictions: {};
+    bets: {};
+  };
 }
