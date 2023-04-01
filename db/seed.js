@@ -2,6 +2,7 @@ const { add, sub } = require("date-fns");
 
 const users = require("./seeds/users.json");
 const predictions = require("./seeds/predictions.json");
+const seasons = require("./seeds/seasons.json");
 
 const seed = (client) => {
   if (process.env.NODE_ENV === "production") {
@@ -25,6 +26,18 @@ const seed = (client) => {
   return Promise.all(baseData)
     .then(([users]) => {
       const referencedData = [];
+
+      const INSERT_SEASON = `INSERT INTO seasons (
+        name, 
+        start, 
+        "end", 
+        payout_formula
+      ) VALUES (
+        $1,
+        $2,
+        $3,
+        $4
+      )`;
 
       const INSERT_PREDICTION = `INSERT INTO predictions (
         id,
@@ -73,6 +86,17 @@ const seed = (client) => {
         $3, 
         $4
       )`;
+
+      for (const season of seasons) {
+        const promise = client.query(INSERT_SEASON, [
+          season.name,
+          season.start,
+          season.end,
+          season.payout_formula,
+        ]);
+
+        referencedData.push(promise);
+      }
 
       const now = new Date();
 
@@ -154,6 +178,9 @@ const seed = (client) => {
 
       const BET_SEQUENCE_RESET = `SELECT SETVAL(pg_get_serial_sequence('bets', 'id'), (SELECT MAX(id) FROM bets))`;
       finalData.push(client.query(BET_SEQUENCE_RESET));
+
+      const SEASON_SEQUENCE_RESET = `SELECT SETVAL(pg_get_serial_sequence('seasons', 'id'), (SELECT MAX(id) FROM seasons))`;
+      finalData.push(client.query(SEASON_SEQUENCE_RESET));
 
       return Promise.all(finalData);
     });

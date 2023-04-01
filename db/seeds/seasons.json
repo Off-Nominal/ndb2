@@ -1,0 +1,14 @@
+[
+  {
+    "name": "NDB Legacy",
+    "start": "2019-01-01T00:00:00Z",
+    "end": "2023-06-01T00:00:00Z",
+    "payout_formula": "1"
+  },
+  {
+    "name": "Hermes",
+    "start": "2023-06-01T00:00:00Z",
+    "end": "2023-07-01T00:00:00Z",
+    "payout_formula": "(ln($1/$2/2)/1.5)+1"
+  }
+]
