@@ -175,4 +175,8 @@ CREATE VIEW payouts AS
   JOIN enhanced_predictions ep ON ep.prediction_id = eb.prediction_id
   WHERE eb.status = 'successful' OR eb.status = 'failed';
 
+CREATE INDEX predictions_predictor_id_idx ON predictions (user_id);
+
+CREATE INDEX bets_prediction_id_idx ON bets (prediction_id);
+
 COMMIT;

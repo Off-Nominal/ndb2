@@ -12,80 +12,102 @@ const ADD_USER = `
   VALUES ($1, $2) 
   RETURNING id, discord_id`;
 
-//x
+const generate_GET_USER_BET_SUMMARY_with_SEASON = (seasonId?: number) => {
+  const whereClause = seasonId ? ` AND eb.season_id = ${seasonId}` : "";
 
-const CREATE_USERS_BETS_SUMMARY = `
-  CREATE VIEW users_bets_summary AS
+  const query = `
     SELECT
-      u.id,
-      RANK () OVER (
-        ORDER BY 
-          COUNT(eb.bet_id) FILTER 
-            (WHERE 
-              (eb.status = 'successful' AND eb.endorsed IS TRUE) OR
-              (eb.status = 'failed' AND eb.endorsed IS FALSE)
-            )::INT DESC,
-          COUNT(eb.bet_id) FILTER 
-            (WHERE 
-              (eb.status = 'successful' AND eb.endorsed IS FALSE) OR
-              (eb.status = 'failed' AND eb.endorsed IS TRUE)
-            )::INT ASC
-      ) as rank,
-      COUNT(eb.bet_id) FILTER 
-        (WHERE 
-          (eb.status = 'successful' AND eb.endorsed IS TRUE) OR
-          (eb.status = 'failed' AND eb.endorsed IS FALSE)
-        )::INT as successful,
-      COUNT(eb.bet_id) FILTER 
-        (WHERE 
-          (eb.status = 'successful' AND eb.endorsed IS FALSE) OR
-          (eb.status = 'failed' AND eb.endorsed IS TRUE)
-        )::INT as failed,
-      COUNT(eb.bet_id) FILTER 
-        (WHERE eb.status = 'open' OR eb.status = 'closed')::INT as pending,
-      COUNT(eb.bet_id) FILTER (WHERE eb.status = 'retired')::INT as retired
-    FROM users u
-    LEFT JOIN enhanced_bets eb ON eb.better_id = u.id
-    GROUP BY u.id
-`;
+        u.id,
+        RANK () OVER (
+          ORDER BY 
+            COUNT(eb.bet_id) FILTER 
+              (WHERE 
+                ((eb.status = 'successful' AND eb.endorsed IS TRUE) OR
+                (eb.status = 'failed' AND eb.endorsed IS FALSE))${whereClause}
+              )::INT DESC,
+            COUNT(eb.bet_id) FILTER 
+              (WHERE 
+                ((eb.status = 'successful' AND eb.endorsed IS FALSE) OR
+                (eb.status = 'failed' AND eb.endorsed IS TRUE))${whereClause}
+              )::INT ASC
+        ) as rank,
+        COUNT(eb.bet_id) FILTER 
+          (WHERE 
+            ((eb.status = 'successful' AND eb.endorsed IS TRUE) OR
+            (eb.status = 'failed' AND eb.endorsed IS FALSE))${whereClause}
+          )::INT as successful,
+        COUNT(eb.bet_id) FILTER 
+          (WHERE 
+            ((eb.status = 'successful' AND eb.endorsed IS FALSE) OR
+            (eb.status = 'failed' AND eb.endorsed IS TRUE))${whereClause}
+          )::INT as failed,
+        COUNT(eb.bet_id) FILTER 
+          (WHERE (eb.status = 'open' OR eb.status = 'closed')${whereClause})::INT as pending,
+        COUNT(eb.bet_id) FILTER (WHERE eb.status = 'retired')::INT as retired
+      FROM users u
+      LEFT JOIN enhanced_bets eb ON eb.better_id = u.id
+      GROUP BY u.id`;
 
-const CREATE_USERS_PREDICTIONS_SUMMARY = `
-  CREATE VIEW users_predictions_summary AS
+  return query;
+};
+
+const generate_GET_USER_PREDICTION_SUMMARY_with_SEASON = (
+  seasonId?: number
+) => {
+  const whereClause = seasonId ? ` AND ep.season_id = ${seasonId}` : "";
+
+  const query = `
     SELECT
-      u.id,
-      RANK () OVER (
-        ORDER BY 
-          COUNT(DISTINCT ep.prediction_id) FILTER (WHERE ep.status = 'successful')::INT DESC,
-          COUNT(DISTINCT ep.prediction_id) FILTER (WHERE ep.status = 'failed')::INT ASC
-      ) as rank,
-      COUNT(DISTINCT ep.prediction_id) FILTER (WHERE ep.status = 'successful')::INT
-        as successful,
-      COUNT(DISTINCT ep.prediction_id) FILTER (WHERE ep.status = 'failed')::INT
-        as failed,
-      COUNT(DISTINCT ep.prediction_id) FILTER (WHERE ep.status = 'open' OR ep.status = 'closed')::INT
-        as pending,
-      COUNT(DISTINCT ep.prediction_id) FILTER (WHERE ep.status = 'retired')::INT
-        as retired
-    FROM users u
-    LEFT JOIN enhanced_predictions ep ON ep.predictor_id = u.id
-    GROUP BY u.id
-`;
+        u.id,
+        RANK () OVER (
+          ORDER BY 
+            COUNT(DISTINCT ep.prediction_id) FILTER (WHERE (ep.status = 'successful')${whereClause})::INT DESC,
+            COUNT(DISTINCT ep.prediction_id) FILTER (WHERE (ep.status = 'failed')${whereClause})::INT ASC
+        ) as rank,
+        COUNT(DISTINCT ep.prediction_id) FILTER (WHERE (ep.status = 'successful')${whereClause})::INT
+          as successful,
+        COUNT(DISTINCT ep.prediction_id) FILTER (WHERE (ep.status = 'failed')${whereClause})::INT
+          as failed,
+        COUNT(DISTINCT ep.prediction_id) FILTER (WHERE (ep.status = 'open' OR ep.status = 'closed')${whereClause})::INT
+          as pending,
+        COUNT(DISTINCT ep.prediction_id) FILTER (WHERE (ep.status = 'retired')${whereClause})::INT
+          as retired
+      FROM users u
+      LEFT JOIN enhanced_predictions ep ON ep.predictor_id = u.id
+      GROUP BY u.id`;
 
-const CREATE_USERS_SCORE_SUMMARY = `
-  CREATE VIEW users_scores_summary AS
+  return query;
+};
+
+const generate_GET_USER_SCORE_SUMMARY_with_SEASON = (seasonId?: number) => {
+  const whereClause = seasonId
+    ? ` FILTER (WHERE payouts.season_id = ${seasonId})`
+    : "";
+
+  const query = `
     SELECT
-      users.id as better_id,
-      COALESCE(SUM(payout), 0) as points,
-      RANK () OVER (
-        ORDER BY 
-          COALESCE(SUM(payout), 0) DESC
-      )
-    FROM users
-    LEFT JOIN payouts ON payouts.better_id = users.id
-    GROUP BY users.id
-`;
+        u.id as better_id,
+        COALESCE(SUM(payout)${whereClause}, 0) as points,
+        RANK () OVER (
+          ORDER BY 
+            COALESCE(SUM(payout)${whereClause}, 0) DESC
+        )
+      FROM users u
+      LEFT JOIN payouts ON payouts.better_id = u.id
+      GROUP BY u.id`;
 
-const GET_USER_SCORE_BY_ID = `
+  return query;
+};
+
+const generate_GET_USER_SCORE_BY_ID_with_SEASON = (seasonId?: number) => {
+  return `
+    WITH 
+      users_scores_summary 
+        AS (${generate_GET_USER_SCORE_SUMMARY_with_SEASON(seasonId)}),
+      users_predictions_summary 
+        AS (${generate_GET_USER_PREDICTION_SUMMARY_with_SEASON(seasonId)}),
+      users_bets_summary 
+        AS (${generate_GET_USER_BET_SUMMARY_with_SEASON(seasonId)})
     SELECT
       (SELECT row_to_json(score_sum) FROM (
         SELECT points, rank FROM users_scores_summary us WHERE us.better_id  = $1
@@ -96,8 +118,8 @@ const GET_USER_SCORE_BY_ID = `
       (SELECT row_to_json(bet_sum) FROM (
         SELECT successful, failed, pending, retired, rank FROM users_bets_summary WHERE id = $1
       ) bet_sum) as bets,
-      (SELECT COUNT(votes.id) FILTER (WHERE votes.user_id = $1)::INT FROM votes) as votes
-`;
+      (SELECT COUNT(votes.id) FILTER (WHERE votes.user_id = $1)::INT FROM votes) as votes`;
+};
 
 export default {
   getOrAddByDiscordId: async function (
@@ -137,6 +159,7 @@ export default {
     discordId: number | string
   ): Promise<APIUsers.GetUserAllTimeScoreByDiscordId> {
     const client = await pool.connect();
+
     try {
       await client.query("BEGIN");
       const { rows } = await client.query<APIUsers.GetUserByDiscordId>(
@@ -144,8 +167,10 @@ export default {
         [discordId]
       );
       const userId = rows[0].id;
-
-      const response = await client.query(GET_USER_SCORE_BY_ID, [userId]);
+      const response = await client.query(
+        generate_GET_USER_SCORE_BY_ID_with_SEASON(2),
+        [userId]
+      );
 
       await client.query("COMMIT");
       return response.rows[0];
