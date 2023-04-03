@@ -9,35 +9,60 @@ const seed = (client) => {
     return console.error("Cannot run seeding in production.");
   }
 
-  const baseData = [];
+  const resetIdData = [];
 
-  const INSERT_USER = `INSERT INTO users (
-    id,
-    discord_id
-  ) VALUES (
-    $1,
-    $2
-  )`;
+  const PREDICTION_SEQUENCE_RESET = `SELECT SETVAL(pg_get_serial_sequence('predictions', 'id'), COALESCE((SELECT MAX(id)+1 FROM predictions), 1), false)`;
+  resetIdData.push(client.query(PREDICTION_SEQUENCE_RESET));
 
-  for (const user of users) {
-    baseData.push(client.query(INSERT_USER, [user.id, user.discord_id]));
-  }
+  const BET_SEQUENCE_RESET = `SELECT SETVAL(pg_get_serial_sequence('bets', 'id'), COALESCE((SELECT MAX(id)+1 FROM bets), 1), false)`;
+  resetIdData.push(client.query(BET_SEQUENCE_RESET));
 
-  return Promise.all(baseData)
-    .then(([users]) => {
-      const referencedData = [];
+  const SEASON_SEQUENCE_RESET = `SELECT SETVAL(pg_get_serial_sequence('seasons', 'id'), COALESCE((SELECT MAX(id)+1 FROM seasons), 1), false)`;
+  resetIdData.push(client.query(SEASON_SEQUENCE_RESET));
+
+  return Promise.all(resetIdData)
+    .then(() => {
+      const baseData = [];
+
+      const INSERT_USER = `INSERT INTO users (
+      id,
+      discord_id
+    ) VALUES (
+      $1,
+      $2
+    )`;
+
+      for (const user of users) {
+        baseData.push(client.query(INSERT_USER, [user.id, user.discord_id]));
+      }
 
       const INSERT_SEASON = `INSERT INTO seasons (
-        name, 
-        start, 
-        "end", 
-        payout_formula
-      ) VALUES (
-        $1,
-        $2,
-        $3,
-        $4
-      )`;
+      name, 
+      start, 
+      "end", 
+      payout_formula
+    ) VALUES (
+      $1,
+      $2,
+      $3,
+      $4
+    )`;
+
+      for (const season of seasons) {
+        const promise = client.query(INSERT_SEASON, [
+          season.name,
+          season.start,
+          season.end,
+          season.payout_formula,
+        ]);
+
+        baseData.push(promise);
+      }
+
+      return Promise.all(baseData);
+    })
+    .then(() => {
+      const referencedData = [];
 
       const INSERT_PREDICTION = `INSERT INTO predictions (
         id,
@@ -86,17 +111,6 @@ const seed = (client) => {
         $3, 
         $4
       )`;
-
-      for (const season of seasons) {
-        const promise = client.query(INSERT_SEASON, [
-          season.name,
-          season.start,
-          season.end,
-          season.payout_formula,
-        ]);
-
-        referencedData.push(promise);
-      }
 
       const now = new Date();
 
@@ -169,20 +183,6 @@ const seed = (client) => {
       }
 
       return Promise.all(referencedData);
-    })
-    .then(() => {
-      const finalData = [];
-
-      const PREDICTION_SEQUENCE_RESET = `SELECT SETVAL(pg_get_serial_sequence('predictions', 'id'), (SELECT MAX(id) FROM predictions))`;
-      finalData.push(client.query(PREDICTION_SEQUENCE_RESET));
-
-      const BET_SEQUENCE_RESET = `SELECT SETVAL(pg_get_serial_sequence('bets', 'id'), (SELECT MAX(id) FROM bets))`;
-      finalData.push(client.query(BET_SEQUENCE_RESET));
-
-      const SEASON_SEQUENCE_RESET = `SELECT SETVAL(pg_get_serial_sequence('seasons', 'id'), (SELECT MAX(id) FROM seasons))`;
-      finalData.push(client.query(SEASON_SEQUENCE_RESET));
-
-      return Promise.all(finalData);
     });
 };
 
