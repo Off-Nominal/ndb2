@@ -9,7 +9,7 @@ export enum ScoreView {
   BETS = "bets",
 }
 
-const isScoreView = (val: any): val is ScoreView => {
+export const isScoreView = (val: any): val is ScoreView => {
   if (typeof val !== "string") {
     return false;
   }

@@ -6,13 +6,23 @@ import responseUtils from "../../utils/response";
 const router = express.Router();
 
 router.get(
-  "/:discord_id/scores",
+  "/:discord_id/scores/seasons/:season_id",
   [
     paramValidator.numberParseableString("discord_id", { type: "params" }),
     getUserByDiscordId,
+    paramValidator.integerParseableString("season_id", {
+      optional: true,
+      type: "params",
+    }),
+    paramValidator.isPostgresInt("season_id", {
+      optional: true,
+      type: "params",
+    }),
   ],
   async (req: Request, res: Response) => {
-    users.getUserScoreById(req.user_id).then((response) => {
+    const { season_id } = req.params;
+
+    users.getUserScoreById(req.user_id, season_id).then((response) => {
       res.json(
         responseUtils.writeSuccess(response, "Score fetched successfully.")
       );
