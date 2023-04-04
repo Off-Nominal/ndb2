@@ -7,8 +7,17 @@ export const getDbClient = (
   res: Response,
   next: NextFunction
 ) => {
-  pool.connect().then((client) => {
-    if (!client) {
+  pool
+    .connect()
+    .then((client) => {
+      if (!client) {
+        throw new Error();
+      }
+
+      req.dbClient = client;
+      next();
+    })
+    .catch((err) => {
       return res
         .status(500)
         .json(
@@ -17,9 +26,5 @@ export const getDbClient = (
             `Unable to make database connection, request aborted.`
           )
         );
-    }
-
-    req.dbClient = client;
-    next();
-  });
+    });
 };
