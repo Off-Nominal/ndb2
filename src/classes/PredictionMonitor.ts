@@ -1,6 +1,7 @@
 import { isAfter, sub } from "date-fns";
 import GAME_MECHANICS from "../config/game_mechanics";
 import webhookManager from "../config/webhook_subscribers";
+import pool from "../db";
 import predictions from "../queries/predictions";
 
 export default class PredictionMonitor {
@@ -56,13 +57,14 @@ export default class PredictionMonitor {
     }
   }
 
-  private triggerNextPrediction() {
+  private async triggerNextPrediction() {
     console.log("[PM]: Scheduled Trigger");
+    const client = await pool.connect();
+
     predictions
-      .getNextPredictionToTrigger()
+      .getNextPredictionToTrigger(client)()
       .then((pred) => {
         if (!pred) {
-          console.log("[PM]: No predictions due, skipping.");
           return;
         }
         console.log(
@@ -71,37 +73,65 @@ export default class PredictionMonitor {
           "due, triggering now."
         );
         return predictions
-          .closePredictionById(pred.id, null, new Date(pred.due_date))
+          .closePredictionById(client)(pred.id, null, new Date(pred.due_date))
+          .then(() => predictions.getByPredictionId(client)(pred.id))
           .then((prediction) => {
             console.log(
               "[PM]: Prediction successfully triggered, sending webhook"
             );
-            console.log(prediction);
             webhookManager.emit("triggered_prediction", prediction);
+          })
+          .catch((err) => {
+            console.error("[PM]: Failed to trigger prediction.");
+            console.error(err);
           });
+      })
+      .catch((err) => {
+        console.error("[PM]: Failed to fetch next prediction trigger.");
+        console.error(err);
       })
       .finally(() => {
         this.removeFirstScheduleTrigger();
         this.scheduleNextTrigger();
+        client.release();
       });
   }
 
-  private judgeNextPrediction() {
-    predictions.getNextPredictionToJudge().then((pred) => {
-      if (!pred) {
-        return;
-      }
-      console.log(
-        "[PM]: Prediction with id,",
-        pred.id,
-        "due for judgement. Judging now."
-      );
-      return predictions.judgePredictionById(pred.id).then((prediction) => {
-        console.log("[PM]: Prediction successfully judged, sending webhook");
-        console.log(prediction);
-        webhookManager.emit("judged_prediction", prediction);
+  private async judgeNextPrediction() {
+    const client = await pool.connect();
+    predictions
+      .getNextPredictionToJudge(client)()
+      .then((pred) => {
+        if (!pred) {
+          return;
+        }
+        console.log(
+          "[PM]: Prediction with id,",
+          pred.id,
+          "due for judgement. Judging now."
+        );
+        return predictions
+          .judgePredictionById(client)(pred.id)
+          .then(() => predictions.getByPredictionId(client)(pred.id))
+          .then((prediction) => {
+            console.log(
+              "[PM]: Prediction successfully judged, sending webhook"
+            );
+
+            webhookManager.emit("judged_prediction", prediction);
+          })
+          .catch((err) => {
+            console.error("[PM]: Failed to judge next prediction.");
+            console.error(err);
+          });
+      })
+      .catch((err) => {
+        console.error("[PM]: Failed to get next prediction to judge.");
+        console.error(err);
+      })
+      .finally(() => {
+        client.release();
       });
-    });
   }
 
   private scheduleNextTrigger() {

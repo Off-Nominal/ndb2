@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import pool from "../db";
 import { isNoMoreThan, isNumberParseableString } from "../helpers/typeguards";
 import predictions from "../queries/predictions";
 import { APIPredictions } from "../types/predicitions";
@@ -15,9 +16,12 @@ export const getPrediction = async (
   let prediction: APIPredictions.EnhancedPrediction;
 
   try {
-    prediction = await predictions.getByPredictionId(prediction_id);
+    prediction = await predictions.getByPredictionId(req.dbClient)(
+      prediction_id
+    );
+
     if (!prediction) {
-      return res
+      res
         .status(404)
         .json(
           responseUtils.writeError(
@@ -26,6 +30,8 @@ export const getPrediction = async (
           )
         );
     }
+    req.prediction = prediction;
+    return next();
   } catch (err) {
     console.error(err);
     return res
@@ -34,7 +40,4 @@ export const getPrediction = async (
         responseUtils.writeError("SERVER_ERROR", "Unable to fetch prediction.")
       );
   }
-
-  req.prediction = prediction;
-  next();
 };

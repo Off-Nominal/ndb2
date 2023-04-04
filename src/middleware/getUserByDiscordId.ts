@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import { isNumberParseableString } from "../helpers/typeguards";
 import users from "../queries/users";
 import responseUtils from "../utils/response";
 
@@ -10,12 +9,14 @@ export const getUserByDiscordId = async (
 ) => {
   const discord_id = req.params.discord_id || req.body.discord_id;
 
-  // Fetch User
-  let userId: string;
-
   try {
-    const user = await users.getOrAddByDiscordId(discord_id);
-    userId = user.id;
+    const fetchedUser = await users.getByDiscordId(req.dbClient)(discord_id);
+    if (!fetchedUser) {
+      const user = await users.add(req.dbClient)(discord_id);
+      req.user_id = user.id;
+    } else {
+      req.user_id = fetchedUser.id;
+    }
   } catch (err) {
     console.error(err);
     return res
@@ -28,6 +29,5 @@ export const getUserByDiscordId = async (
       );
   }
 
-  req.user_id = userId;
   next();
 };

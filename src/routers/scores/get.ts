@@ -1,4 +1,5 @@
 import express, { Request, Response } from "express";
+import { getDbClient } from "../../middleware/getDbClient";
 import scores from "../../queries/scores";
 import responseUtils from "../../utils/response";
 const router = express.Router();
@@ -17,7 +18,7 @@ export const isScoreView = (val: any): val is ScoreView => {
   return Object.values(ScoreView).includes(val as ScoreView);
 };
 
-router.get("/", async (req: Request, res: Response) => {
+router.get("/", getDbClient, async (req: Request, res: Response) => {
   const view = req.query.view || ScoreView.POINTS;
 
   if (!isScoreView(view)) {
@@ -33,11 +34,17 @@ router.get("/", async (req: Request, res: Response) => {
       );
   }
 
-  scores.getLeaderboard(view).then((response) => {
-    res.json(
-      responseUtils.writeSuccess(response, "Leaderboard fetched successfully.")
-    );
-  });
+  scores
+    .getLeaderboard(req.dbClient)(view)
+    .then((response) => {
+      res.json(
+        responseUtils.writeSuccess(
+          response,
+          "Leaderboard fetched successfully."
+        )
+      );
+    })
+    .finally(() => req.dbClient.release());
 });
 
 export default router;

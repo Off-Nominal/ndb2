@@ -1,3 +1,4 @@
+import { PoolClient } from "pg";
 import pool from "../db";
 import { APIScores } from "../types/scores";
 
@@ -197,20 +198,16 @@ const generate_GET_LEADERBOARD_with_SEASON = (
   `;
 };
 
+const getLeaderboard =
+  (client: PoolClient) =>
+  (type: "points" | "predictions" | "bets", seasonId?: string | number) => {
+    return client
+      .query<APIScores.GetLeaderboard>(
+        generate_GET_LEADERBOARD_with_SEASON(type, seasonId)
+      )
+      .then((response) => response.rows[0]);
+  };
+
 export default {
-  getLeaderboard: (
-    type: "points" | "predictions" | "bets",
-    seasonId?: string | number
-  ) => {
-    return pool.connect().then((client) => {
-      return client
-        .query<APIScores.GetLeaderboard>(
-          generate_GET_LEADERBOARD_with_SEASON(type, seasonId)
-        )
-        .then((response) => {
-          client.release();
-          return response.rows[0];
-        });
-    });
-  },
+  getLeaderboard,
 };

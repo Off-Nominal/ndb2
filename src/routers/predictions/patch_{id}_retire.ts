@@ -8,6 +8,7 @@ import predictionStatusValidator from "../../middleware/predictionStatusValidato
 import predictions from "../../queries/predictions";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
+import { getDbClient } from "../../middleware/getDbClient";
 const router = express.Router();
 
 router.patch(
@@ -16,6 +17,7 @@ router.patch(
     paramValidator.numberParseableString("discord_id", { type: "body" }),
     paramValidator.integerParseableString("prediction_id", { type: "params" }),
     paramValidator.isPostgresInt("prediction_id", { type: "params" }),
+    getDbClient,
     getPrediction,
     predictionStatusValidator(PredictionLifeCycle.OPEN),
   ],
@@ -58,7 +60,10 @@ router.patch(
     }
 
     return predictions
-      .retirePredictionById(req.prediction.id)
+      .retirePredictionById(req.dbClient)(req.prediction.id)
+      .then(() =>
+        predictions.getByPredictionId(req.dbClient)(req.prediction.id)
+      )
       .then((prediction) => {
         // Notify subscribers
         webhookManager.emit("retired_prediction", prediction);
@@ -80,7 +85,8 @@ router.patch(
               "There was an error retiring this prediction."
             )
           );
-      });
+      })
+      .finally(() => req.dbClient.release());
   }
 );
 

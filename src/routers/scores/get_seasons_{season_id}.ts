@@ -1,4 +1,5 @@
 import express, { Request, Response } from "express";
+import { getDbClient } from "../../middleware/getDbClient";
 import paramValidator from "../../middleware/paramValidator";
 import scores from "../../queries/scores";
 import responseUtils from "../../utils/response";
@@ -10,6 +11,7 @@ router.get(
   [
     paramValidator.integerParseableString("season_id", { type: "params" }),
     paramValidator.isPostgresInt("season_id", { type: "params" }),
+    getDbClient,
   ],
   async (req: Request, res: Response) => {
     const view = req.query.view || ScoreView.POINTS;
@@ -28,14 +30,17 @@ router.get(
         );
     }
 
-    scores.getLeaderboard(view, season_id).then((response) => {
-      res.json(
-        responseUtils.writeSuccess(
-          response,
-          "Leaderboard fetched successfully."
-        )
-      );
-    });
+    scores
+      .getLeaderboard(req.dbClient)(view, season_id)
+      .then((response) => {
+        res.json(
+          responseUtils.writeSuccess(
+            response,
+            "Leaderboard fetched successfully."
+          )
+        );
+      })
+      .finally(() => req.dbClient.release());
   }
 );
 

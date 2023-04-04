@@ -8,16 +8,18 @@ import predictions from "../../queries/predictions";
 import votes from "../../queries/votes";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
+import { getDbClient } from "../../middleware/getDbClient";
 const router = express.Router();
 
 router.post(
   "/:prediction_id/votes",
   [
-    getUserByDiscordId,
     paramValidator.boolean("vote", { type: "body" }),
     paramValidator.numberParseableString("discord_id", { type: "body" }),
     paramValidator.integerParseableString("prediction_id", { type: "params" }),
     paramValidator.isPostgresInt("prediction_id", { type: "params" }),
+    getDbClient,
+    getUserByDiscordId,
     getPrediction,
     predictionStatusValidator(PredictionLifeCycle.CLOSED),
   ],
@@ -39,8 +41,8 @@ router.post(
     }
 
     return votes
-      .add(req.user_id, req.prediction.id, vote)
-      .then((v) => predictions.getByPredictionId(v.prediction_id))
+      .add(req.dbClient)(req.user_id, req.prediction.id, vote)
+      .then((v) => predictions.getByPredictionId(req.dbClient)(v.prediction_id))
       .then((prediction) => {
         // Notify Subscribers
         webhookManager.emit("new_vote", prediction);
@@ -59,7 +61,8 @@ router.post(
               "There was an error adding this vote."
             )
           );
-      });
+      })
+      .finally(() => req.dbClient.release());
   }
 );
 

@@ -1,4 +1,4 @@
-import pool from "../db";
+import { PoolClient } from "pg";
 import { APIPredictions } from "../types/predicitions";
 
 const ADD_PREDICTION = `
@@ -111,119 +111,93 @@ const GET_NEXT_PREDICTION_TO_JUDGE = `
   SELECT id FROM predictions WHERE judged_date IS NULL AND triggered_date + '1 day' < NOW() ORDER BY due_date ASC LIMIT 1
 `;
 
-export default {
-  add: function (
+const add = (client: PoolClient) =>
+  function (
     user_id: string,
     text: string,
     due_date: Date,
     created_date: Date = new Date()
   ): Promise<APIPredictions.AddPrediction> {
-    return pool.connect().then((client) => {
-      return client
-        .query<APIPredictions.AddPrediction>(ADD_PREDICTION, [
-          user_id,
-          text,
-          due_date,
-          created_date,
-        ])
-        .then((response) => {
-          client.release();
-          return response.rows[0];
-        });
-    });
-  },
+    return client
+      .query<APIPredictions.AddPrediction>(ADD_PREDICTION, [
+        user_id,
+        text,
+        due_date,
+        created_date,
+      ])
+      .then((response) => {
+        return response.rows[0];
+      });
+  };
 
-  getByPredictionId: function (
+const getByPredictionId = (client: PoolClient) =>
+  function (
     prediction_id: number | string
   ): Promise<APIPredictions.GetPredictionById | null> {
-    return pool.connect().then((client) => {
-      return client
-        .query<APIPredictions.GetPredictionById>(
-          GET_ENHANCED_PREDICTION_BY_ID,
-          [prediction_id]
-        )
-        .then((response) => {
-          client.release();
-          if (response.rows.length === 0) {
-            return null;
-          }
-          return response.rows[0];
-        });
-    });
-  },
+    return client
+      .query<APIPredictions.GetPredictionById>(GET_ENHANCED_PREDICTION_BY_ID, [
+        prediction_id,
+      ])
+      .then((response) => response.rows[0] ?? null);
+  };
 
-  retirePredictionById: function (
+const retirePredictionById = (client: PoolClient) =>
+  function (
     prediction_id: number | string
   ): Promise<APIPredictions.RetirePredictionById> {
-    return pool.connect().then((client) => {
-      return client
-        .query<null>(RETIRE_PREDICTION_BY_ID, [prediction_id])
-        .then(() => {
-          client.release();
-          return this.getByPredictionId(prediction_id);
-        });
-    });
-  },
+    return client
+      .query<null>(RETIRE_PREDICTION_BY_ID, [prediction_id])
+      .then((response) => response.rows[0]);
+  };
 
-  closePredictionById: function (
+const closePredictionById = (client: PoolClient) =>
+  function (
     prediction_id: number | string,
     triggerer_id: number | string | null,
     closed_date: Date
   ): Promise<APIPredictions.ClosePredictionById> {
-    return pool.connect().then((client) => {
-      return client
-        .query<null>(CLOSE_PREDICTION_BY_ID, [
-          prediction_id,
-          triggerer_id,
-          closed_date,
-        ])
-        .then(() => {
-          client.release();
-          return this.getByPredictionId(prediction_id);
-        });
-    });
-  },
+    return client
+      .query<null>(CLOSE_PREDICTION_BY_ID, [
+        prediction_id,
+        triggerer_id,
+        closed_date,
+      ])
+      .then((response) => response.rows[0]);
+  };
 
-  judgePredictionById: function (
+const judgePredictionById = (client: PoolClient) =>
+  function (
     prediction_id: number | string
   ): Promise<APIPredictions.JudgePredictionById> {
-    return pool.connect().then((client) => {
-      return client
-        .query<null>(JUDGE_PREDICTION_BY_ID, [prediction_id])
-        .then(() => {
-          client.release();
-          return this.getByPredictionId(prediction_id);
-        });
-    });
-  },
+    return client
+      .query<null>(JUDGE_PREDICTION_BY_ID, [prediction_id])
+      .then((response) => response.rows[0]);
+  };
 
-  getNextPredictionToTrigger: function (): Promise<
-    APIPredictions.GetNextPredictionToTrigger | undefined
-  > {
-    return pool.connect().then((client) => {
-      return client
-        .query<APIPredictions.GetNextPredictionToTrigger>(
-          GET_NEXT_PREDICTION_TO_TRIGGER
-        )
-        .then((res) => {
-          client.release();
-          return res.rows[0];
-        });
-    });
-  },
+const getNextPredictionToTrigger = (client: PoolClient) =>
+  function (): Promise<APIPredictions.GetNextPredictionToTrigger | undefined> {
+    return client
+      .query<APIPredictions.GetNextPredictionToTrigger>(
+        GET_NEXT_PREDICTION_TO_TRIGGER
+      )
+      .then((res) => res.rows[0]);
+  };
 
-  getNextPredictionToJudge: function (): Promise<
-    APIPredictions.GetNextPredictionToJudge | undefined
-  > {
-    return pool.connect().then((client) => {
-      return client
-        .query<APIPredictions.GetNextPredictionToJudge>(
-          GET_NEXT_PREDICTION_TO_JUDGE
-        )
-        .then((res) => {
-          client.release();
-          return res.rows[0];
-        });
-    });
-  },
+const getNextPredictionToJudge = (client: PoolClient) =>
+  function (): Promise<APIPredictions.GetNextPredictionToJudge | undefined> {
+    return client
+      .query<APIPredictions.GetNextPredictionToJudge>(
+        GET_NEXT_PREDICTION_TO_JUDGE
+      )
+      .then((res) => res.rows[0]);
+  };
+
+export default {
+  add,
+  getByPredictionId,
+  retirePredictionById,
+  closePredictionById,
+  judgePredictionById,
+  getNextPredictionToTrigger,
+  getNextPredictionToJudge,
 };

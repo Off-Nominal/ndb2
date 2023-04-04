@@ -8,6 +8,7 @@ import bets from "../../queries/bets";
 import predictions from "../../queries/predictions";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
+import { getDbClient } from "../../middleware/getDbClient";
 const router = express.Router();
 
 router.post(
@@ -17,6 +18,7 @@ router.post(
     paramValidator.numberParseableString("discord_id", { type: "body" }),
     paramValidator.integerParseableString("prediction_id", { type: "params" }),
     paramValidator.isPostgresInt("prediction_id", { type: "params" }),
+    getDbClient,
     getUserByDiscordId,
     getPrediction,
     predictionStatusValidator(PredictionLifeCycle.OPEN),
@@ -46,8 +48,8 @@ router.post(
     const date = new Date();
 
     bets
-      .add(req.user_id, req.prediction.id, endorsed, date)
-      .then((b) => predictions.getByPredictionId(b.prediction_id))
+      .add(req.dbClient)(req.user_id, req.prediction.id, endorsed, date)
+      .then((b) => predictions.getByPredictionId(req.dbClient)(b.prediction_id))
       .then((ep) => {
         // Notify subscribers
         webhookManager.emit("new_bet", ep);
@@ -59,7 +61,8 @@ router.post(
         res
           .status(500)
           .json(responseUtils.writeError("SERVER_ERROR", "Error Adding bet"));
-      });
+      })
+      .finally(() => req.dbClient.release());
   }
 );
 

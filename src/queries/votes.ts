@@ -1,3 +1,4 @@
+import { PoolClient } from "pg";
 import pool from "../db";
 import { APIVotes } from "../types/votes";
 
@@ -14,15 +15,14 @@ const ADD_VOTE = `
     NOW()
   ) RETURNING id, user_id, prediction_id, vote, voted_date`;
 
+const add =
+  (client: PoolClient) =>
+  (user_id: string, prediction_id: number | string, vote: boolean) => {
+    return client
+      .query<APIVotes.AddVote>(ADD_VOTE, [user_id, prediction_id, vote])
+      .then((response) => response.rows[0]);
+  };
+
 export default {
-  add: (user_id: string, prediction_id: number | string, vote: boolean) => {
-    return pool.connect().then((client) => {
-      return client
-        .query<APIVotes.AddVote>(ADD_VOTE, [user_id, prediction_id, vote])
-        .then((response) => {
-          client.release();
-          return response.rows[0];
-        });
-    });
-  },
+  add,
 };

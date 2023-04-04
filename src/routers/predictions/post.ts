@@ -6,6 +6,7 @@ import responseUtils from "../../utils/response";
 import paramValidator from "../../middleware/paramValidator";
 import dateValidator from "../../middleware/dateValidator";
 import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
+import { getDbClient } from "../../middleware/getDbClient";
 const router = express.Router();
 
 router.post(
@@ -15,6 +16,7 @@ router.post(
     paramValidator.numberParseableString("discord_id", { type: "body" }),
     dateValidator.isValid("due_date"),
     dateValidator.isFuture("due_date"),
+    getDbClient,
     getUserByDiscordId,
   ],
   async (req: Request, res: Response) => {
@@ -24,16 +26,17 @@ router.post(
     const created_date = new Date();
 
     predictions
-      .add(req.user_id, text, new Date(due_date), created_date)
-      .then((p) => bets.add(req.user_id, p.id, true, created_date))
-      .then((b) => predictions.getByPredictionId(b.prediction_id))
+      .add(req.dbClient)(req.user_id, text, new Date(due_date), created_date)
+      .then((p) =>
+        bets.add(req.dbClient)(req.user_id, p.id, true, created_date)
+      )
+      .then((b) => predictions.getByPredictionId(req.dbClient)(b.prediction_id))
       .then((ep) => {
-        // Notify subscribers
-        webhookManager.emit("new_prediction", ep);
-
         res.json(
           responseUtils.writeSuccess(ep, "Prediction created successfully.")
         );
+        // Notify subscribers
+        webhookManager.emit("new_prediction", ep);
       })
       .catch((err) => {
         console.error(err);
@@ -42,7 +45,8 @@ router.post(
           .json(
             responseUtils.writeError("SERVER_ERROR", "Error Adding prediction")
           );
-      });
+      })
+      .finally(() => req.dbClient.release());
   }
 );
 

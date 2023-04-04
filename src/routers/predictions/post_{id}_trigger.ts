@@ -2,6 +2,7 @@ import { isBefore } from "date-fns";
 import express, { Request, Response } from "express";
 import webhookManager from "../../config/webhook_subscribers";
 import dateValidator from "../../middleware/dateValidator";
+import { getDbClient } from "../../middleware/getDbClient";
 import { getPrediction } from "../../middleware/getPrediction";
 import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
 import paramValidator from "../../middleware/paramValidator";
@@ -19,6 +20,7 @@ router.post(
     paramValidator.numberParseableString("discord_id", { type: "body" }),
     paramValidator.integerParseableString("prediction_id", { type: "params" }),
     paramValidator.isPostgresInt("prediction_id", { type: "params" }),
+    getDbClient,
     getUserByDiscordId,
     getPrediction,
     predictionStatusValidator(PredictionLifeCycle.OPEN),
@@ -42,10 +44,13 @@ router.post(
     }
 
     return predictions
-      .closePredictionById(
+      .closePredictionById(req.dbClient)(
         req.prediction.id,
         req.user_id,
         closed_date ? closedDate : new Date()
+      )
+      .then(() =>
+        predictions.getByPredictionId(req.dbClient)(req.prediction.id)
       )
       .then((prediction) => {
         // Notify Subscribers
@@ -68,7 +73,8 @@ router.post(
               "There was an error triggering this prediction."
             )
           );
-      });
+      })
+      .finally(() => req.dbClient.release());
   }
 );
 

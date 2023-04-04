@@ -7,6 +7,7 @@ import {
   generate_GET_USER_SCORE_SUMMARY_with_SEASON,
   generate_GET_USER_VOTE_SUMMARY_with_SEASON,
 } from "./scores";
+import { PoolClient } from "pg";
 
 const GET_USER_BY_DISCORD_ID = `
   SELECT id, discord_id 
@@ -55,55 +56,36 @@ const generate_GET_USER_SCORE_BY_ID_with_SEASON = (
       ) vote_sum) as votes`;
 };
 
-export default {
-  getOrAddByDiscordId: async function (
-    discordId: number | string
-  ): Promise<APIUsers.User> {
-    return this.getByDiscordId(discordId).then(
-      (user) => user || this.add(discordId)
-    );
-  },
+const add = (client: PoolClient) =>
+  function (discordId: number | string): Promise<APIUsers.User> {
+    const id = uuidv4();
+    return client
+      .query<APIUsers.AddUser>(ADD_USER, [id, discordId])
+      .then((response) => response.rows[0]);
+  };
 
-  getByDiscordId: function (
-    discordId: number | string
-  ): Promise<APIUsers.User> {
-    return pool.connect().then((client) => {
-      return client
-        .query<APIUsers.GetUserByDiscordId>(GET_USER_BY_DISCORD_ID, [discordId])
-        .then((response) => {
-          client.release();
-          return response.rows[0];
-        });
-    });
-  },
+const getByDiscordId = (client: PoolClient) =>
+  function (discordId: number | string): Promise<APIUsers.User> {
+    return client
+      .query<APIUsers.GetUserByDiscordId>(GET_USER_BY_DISCORD_ID, [discordId])
+      .then((response) => response.rows[0]);
+  };
 
-  add: function (discordId: number | string): Promise<APIUsers.User> {
-    return pool.connect().then((client) => {
-      const id = uuidv4();
-      return client
-        .query<APIUsers.AddUser>(ADD_USER, [id, discordId])
-        .then((response) => {
-          client.release();
-          return response.rows[0];
-        });
-    });
-  },
-
-  getUserScoreById: function (
+const getUserScoreById = (client: PoolClient) =>
+  function (
     userId: number | string,
     seasonId?: number | string
   ): Promise<APIUsers.GetUserScoreByDiscordId> {
-    return pool.connect().then((client) => {
-      console.log(generate_GET_USER_SCORE_BY_ID_with_SEASON(seasonId));
-      return client
-        .query<APIUsers.GetUserScoreByDiscordId>(
-          generate_GET_USER_SCORE_BY_ID_with_SEASON(seasonId),
-          [userId]
-        )
-        .then((response) => {
-          client.release();
-          return response.rows[0];
-        });
-    });
-  },
+    return client
+      .query<APIUsers.GetUserScoreByDiscordId>(
+        generate_GET_USER_SCORE_BY_ID_with_SEASON(seasonId),
+        [userId]
+      )
+      .then((response) => response.rows[0]);
+  };
+
+export default {
+  add,
+  getByDiscordId,
+  getUserScoreById,
 };

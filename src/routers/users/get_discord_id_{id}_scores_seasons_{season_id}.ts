@@ -1,4 +1,5 @@
 import express, { Request, Response } from "express";
+import { getDbClient } from "../../middleware/getDbClient";
 import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
 import paramValidator from "../../middleware/paramValidator";
 import users from "../../queries/users";
@@ -9,7 +10,6 @@ router.get(
   "/:discord_id/scores/seasons/:season_id",
   [
     paramValidator.numberParseableString("discord_id", { type: "params" }),
-    getUserByDiscordId,
     paramValidator.integerParseableString("season_id", {
       optional: true,
       type: "params",
@@ -18,15 +18,20 @@ router.get(
       optional: true,
       type: "params",
     }),
+    getDbClient,
+    getUserByDiscordId,
   ],
   async (req: Request, res: Response) => {
     const { season_id } = req.params;
 
-    users.getUserScoreById(req.user_id, season_id).then((response) => {
-      res.json(
-        responseUtils.writeSuccess(response, "Score fetched successfully.")
-      );
-    });
+    users
+      .getUserScoreById(req.dbClient)(req.user_id, season_id)
+      .then((response) => {
+        res.json(
+          responseUtils.writeSuccess(response, "Score fetched successfully.")
+        );
+      })
+      .finally(() => req.dbClient.release());
   }
 );
 
