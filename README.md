@@ -57,8 +57,8 @@ module.exports = {
     // omitted for all time scores
     "id": 1,
     "name": "Falcon",
-    "start_date": "2023-07-01T00:00:00Z",
-    "start_date": "2023-10-01T00:00:00Z"
+    "start": "2023-07-01T00:00:00Z",
+    "end": "2023-10-01T00:00:00Z"
   },
   "points": {
     "total": 3413,
@@ -76,7 +76,11 @@ module.exports = {
     "incorrect": 13,
     "ranking": 2 // ranking based on total correct
   },
-  "votes": 40
+  "votes": {
+    "sycophantic": 6,
+    "contrarian": 3,
+    "pending": 4
+  }
 }
 ```
 
@@ -86,6 +90,7 @@ Short leaderboard formats are for quick views of rankings. Three views would exi
 
 ```json
 {
+  "type": "points", // or predictions or bets
   "season": {
     // omitted for all time scores
     "id": 1,
@@ -98,12 +103,7 @@ Short leaderboard formats are for quick views of rankings. Three views would exi
       "id": "ac5ad4e9-3b48-43b4-995c-48b0842b0e4c",
       "discord_id": "123456789",
       "ranking": 1,
-      "points": {
-        // for points view
-        "earned": 4390,
-        "lost": 1309,
-        "total": 3081
-      },
+      "points": 3081, // for points view
       "predictions": {
         // for predictions view
         "successful": 8,

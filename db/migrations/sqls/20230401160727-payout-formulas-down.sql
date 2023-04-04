@@ -2,6 +2,8 @@
 
 DROP VIEW IF EXISTS enhanced_votes;
 
+DROP INDEX IF EXISTS bets_user_id_idx;
+
 DROP INDEX IF EXISTS bets_prediction_id_idx;
 
 DROP INDEX IF EXISTS predictions_predictor_id_idx;

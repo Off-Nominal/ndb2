@@ -1,13 +1,12 @@
 import { isBefore } from "date-fns";
 import express, { Request, Response } from "express";
 import webhookManager from "../../config/webhook_subscribers";
-import bodyValidator from "../../middleware/bodyValidator";
 import dateValidator from "../../middleware/dateValidator";
 import { getPrediction } from "../../middleware/getPrediction";
 import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
+import paramValidator from "../../middleware/paramValidator";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
 import predictions from "../../queries/predictions";
-import users from "../../queries/users";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
 const router = express.Router();
@@ -17,6 +16,9 @@ router.post(
   [
     dateValidator.isValid("closed_date", { optional: true }),
     dateValidator.isPast("closed_date", { optional: true }),
+    paramValidator.numberParseableString("discord_id", { type: "body" }),
+    paramValidator.integerParseableString("prediction_id", { type: "params" }),
+    paramValidator.isPostgresInt("prediction_id", { type: "params" }),
     getUserByDiscordId,
     getPrediction,
     predictionStatusValidator(PredictionLifeCycle.OPEN),

@@ -11,30 +11,6 @@ export const getPrediction = async (
 ) => {
   const { prediction_id } = req.params;
 
-  // Query parameter validation
-  if (!isNumberParseableString(prediction_id)) {
-    return res
-      .status(400)
-      .json(
-        responseUtils.writeError(
-          "MALFORMED_BODY_DATA",
-          "Predictions Ids must be a parseable as a safe integer."
-        )
-      );
-  }
-
-  // Postgres INTEGER type maxes at 2147483647, which is used as primary keys for predictions
-  if (!isNoMoreThan(Number(prediction_id), 2147483647)) {
-    return res
-      .status(400)
-      .json(
-        responseUtils.writeError(
-          "MALFORMED_BODY_DATA",
-          "Predictions Ids can be no higher than at 2147483647."
-        )
-      );
-  }
-
   // Fetch prediction
   let prediction: APIPredictions.EnhancedPrediction;
 

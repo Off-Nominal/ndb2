@@ -1,6 +1,6 @@
 import express from "express";
 import webhookManager from "../../config/webhook_subscribers";
-import bodyValidator from "../../middleware/bodyValidator";
+import paramValidator from "../../middleware/paramValidator";
 import { getPrediction } from "../../middleware/getPrediction";
 import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
@@ -13,7 +13,10 @@ const router = express.Router();
 router.post(
   "/:prediction_id/bets",
   [
-    bodyValidator.boolean("endorsed"),
+    paramValidator.boolean("endorsed", { type: "body" }),
+    paramValidator.numberParseableString("discord_id", { type: "body" }),
+    paramValidator.integerParseableString("prediction_id", { type: "params" }),
+    paramValidator.isPostgresInt("prediction_id", { type: "params" }),
     getUserByDiscordId,
     getPrediction,
     predictionStatusValidator(PredictionLifeCycle.OPEN),

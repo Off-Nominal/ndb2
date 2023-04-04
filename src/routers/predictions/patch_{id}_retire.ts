@@ -2,7 +2,7 @@ import { add, isAfter } from "date-fns";
 import express, { Request, Response } from "express";
 import GAME_MECHANICS from "../../config/game_mechanics";
 import webhookManager from "../../config/webhook_subscribers";
-import bodyValidator from "../../middleware/bodyValidator";
+import paramValidator from "../../middleware/paramValidator";
 import { getPrediction } from "../../middleware/getPrediction";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
 import predictions from "../../queries/predictions";
@@ -13,7 +13,9 @@ const router = express.Router();
 router.patch(
   "/:prediction_id/retire",
   [
-    bodyValidator.numberParseableString("discord_id"),
+    paramValidator.numberParseableString("discord_id", { type: "body" }),
+    paramValidator.integerParseableString("prediction_id", { type: "params" }),
+    paramValidator.isPostgresInt("prediction_id", { type: "params" }),
     getPrediction,
     predictionStatusValidator(PredictionLifeCycle.OPEN),
   ],

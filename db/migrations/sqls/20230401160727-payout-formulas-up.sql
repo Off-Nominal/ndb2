@@ -188,6 +188,8 @@ CREATE INDEX predictions_predictor_id_idx ON predictions (user_id);
 
 CREATE INDEX bets_prediction_id_idx ON bets (prediction_id);
 
+CREATE INDEX bets_user_id_idx ON bets (user_id);
+
 CREATE VIEW enhanced_votes AS
   SELECT 
     v.id,

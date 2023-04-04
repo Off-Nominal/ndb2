@@ -3,7 +3,7 @@ import webhookManager from "../../config/webhook_subscribers";
 import bets from "../../queries/bets";
 import predictions from "../../queries/predictions";
 import responseUtils from "../../utils/response";
-import bodyValidator from "../../middleware/bodyValidator";
+import paramValidator from "../../middleware/paramValidator";
 import dateValidator from "../../middleware/dateValidator";
 import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
 const router = express.Router();
@@ -11,7 +11,8 @@ const router = express.Router();
 router.post(
   "/",
   [
-    bodyValidator.string("text"),
+    paramValidator.string("text", { type: "body" }),
+    paramValidator.numberParseableString("discord_id", { type: "body" }),
     dateValidator.isValid("due_date"),
     dateValidator.isFuture("due_date"),
     getUserByDiscordId,

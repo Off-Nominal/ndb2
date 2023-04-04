@@ -10,18 +10,6 @@ export const getUserByDiscordId = async (
 ) => {
   const discord_id = req.params.discord_id || req.body.discord_id;
 
-  // Query parameter validation
-  if (!isNumberParseableString(discord_id)) {
-    return res
-      .status(400)
-      .json(
-        responseUtils.writeError(
-          "MALFORMED_BODY_DATA",
-          "Discord Ids must be a parseable as a number."
-        )
-      );
-  }
-
   // Fetch User
   let userId: string;
 
