@@ -33,6 +33,10 @@ export namespace APIUsers {
       retired: number;
       rank: number;
     };
-    votes: number;
+    votes: {
+      sycophantic: number;
+      contrarian: number;
+      pending: number;
+    };
   };
 }

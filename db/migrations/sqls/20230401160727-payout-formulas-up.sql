@@ -21,6 +21,7 @@ CREATE OR REPLACE VIEW enhanced_bets AS
   SELECT
     b.id as bet_id,
     b.user_id as better_id,
+    b.date as bet_date,
     b.endorsed,
     (SELECT 
       COALESCE(
@@ -60,6 +61,13 @@ CREATE VIEW enhanced_predictions AS
   SELECT
     p.id as prediction_id,
     p.user_id as predictor_id,
+    p.text,
+    p.created_date,
+    p.due_date,
+    p.closed_date,
+    p.judged_date,
+    p.triggered_date,
+    p.triggerer_id,
     seasons.id as season_id,
     (CASE
       WHEN p.retired_date IS NOT NULL THEN 'retired'
@@ -200,6 +208,6 @@ CREATE VIEW enhanced_votes AS
       END
     ) as popular_vote
   FROM votes v
-  JOIN enhanced_predictions ep ON ep.prediction_id = v.prediction_id
+  JOIN enhanced_predictions ep ON ep.prediction_id = v.prediction_id;
 
 COMMIT;

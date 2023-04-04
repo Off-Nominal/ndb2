@@ -1,6 +1,5 @@
 import pool from "../db";
 import { APIPredictions } from "../types/predicitions";
-import { addRatiosToPrediction } from "../utils/mechanics";
 
 const ADD_PREDICTION = `
   INSERT INTO predictions (
@@ -18,99 +17,75 @@ const ADD_PREDICTION = `
 
 const GET_ENHANCED_PREDICTION_BY_ID = `
   SELECT
-    p.id,
+    ep.id,
     (SELECT row_to_json(pred) FROM 
         (SELECT 
-            p.user_id as id, 
+            ep.predictor_id as id, 
             u.discord_id 
           FROM users u 
-          WHERE u.id = p.user_id) 
+          WHERE u.id = ep.predictor_id) 
       pred)
     as predictor,
-    p.text,
-    p.created_date,
-    p.due_date,
-    p.closed_date,
-    p.triggered_date,
+    ep.text,
+    ep.created_date,
+    ep.due_date,
+    ep.closed_date,
+    ep.triggered_date,
     (SELECT row_to_json(trig) FROM 
         (SELECT 
-            p.triggerer_id as id, 
+            ep.triggerer_id as id, 
             u.discord_id 
           FROM users u 
-          WHERE u.id = p.triggerer_id) 
+          WHERE u.id = ep.triggerer_id) 
       trig)
     as triggerer,
-    p.judged_date,
-    p.retired_date,
-    (CASE
-        WHEN p.retired_date IS NOT NULL THEN 'retired'
-        WHEN p.judged_date IS NOT NULL THEN
-          CASE 
-            WHEN 
-                (SELECT COUNT(id) FROM votes where votes.prediction_id = p.id AND votes.vote IS TRUE) > 
-                (SELECT COUNT(id) FROM votes where votes.prediction_id = p.id AND votes.vote IS FALSE)
-              THEN 'successful'
-            ELSE 'failed'
-          END
-        WHEN p.closed_date IS NOT NULL THEN 'closed'
-        ELSE 'open'
-      END) as status,
+    ep.judged_date,
+    ep.retired_date,
+    ep.status,
     (SELECT 
-      COALESCE(
-        jsonb_agg(p_bets), '[]') FROM
-          (SELECT 
-              id, 
-              (SELECT row_to_json(bett) FROM 
-                (SELECT 
-                    u.id, 
-                    u.discord_id
-                  FROM users u 
-                  WHERE u.id = b.user_id) 
-                bett) 
-              as better, 
-              date,
-              endorsed,
-              (SELECT 
-                COALESCE(
-                  NULLIF(
-                    EXTRACT(
-                      DAY FROM
-                        CASE
-                          WHEN p.closed_date IS NOT NULL THEN p.closed_date - b.date
-                          ELSE p.due_date - b.date
-                        END
-                    ),
-                    0
-                  ),
-                  1
-                )
-              ) as wager
-            FROM bets b
-            WHERE b.prediction_id = p.id
-            ORDER BY date ASC
-          ) p_bets 
-        ) as bets,
-    (SELECT 
-      COALESCE(
-        jsonb_agg(p_votes), '[]') FROM
-          (SELECT 
-              id, 
-              (SELECT row_to_json(vott) FROM 
-                (SELECT 
-                    u.id, 
-                    u.discord_id
-                  FROM users u 
-                  WHERE u.id = v.user_id) 
-                vott) 
-              as voter, 
-              voted_date,
-              vote
-            FROM votes v
-            WHERE v.prediction_id = p.id
-            ORDER BY voted_date DESC
-          ) p_votes
-        ) as votes
-  FROM predictions p
+      COALESCE(jsonb_agg(p_bets), '[]') 
+      FROM
+        (SELECT 
+          eb.bet_id as id, 
+          (SELECT row_to_json(bett) FROM 
+            (SELECT 
+                u.id, 
+                u.discord_id
+              FROM users u 
+              WHERE u.id = eb.better_id) 
+            bett) 
+          as better, 
+          eb.bet_date as date,
+          eb.endorsed,
+          eb.wager
+          FROM enhanced_bets eb
+          WHERE eb.prediction_id = ep.prediction_id
+          ORDER BY date ASC
+        ) p_bets 
+  ) as bets,
+  (SELECT 
+    COALESCE(jsonb_agg(p_votes), '[]') 
+    FROM
+      (SELECT 
+          id, 
+          (SELECT row_to_json(vott) FROM 
+            (SELECT 
+                u.id, 
+                u.discord_id
+              FROM users u 
+              WHERE u.id = v.user_id) 
+            vott) 
+          as voter, 
+          voted_date,
+          vote
+        FROM votes v
+        WHERE v.prediction_id = ep.prediction_id
+        ORDER BY voted_date DESC
+      ) p_votes
+  ) as votes,
+  ep.endorsement_ratio,
+  ep.undorsement_ratio  
+  FROM enhanced_predictions ep
   WHERE p.id = $1
 `;
 
@@ -160,7 +135,7 @@ export default {
   ): Promise<APIPredictions.GetPredictionById | null> {
     return pool.connect().then((client) => {
       return client
-        .query<Omit<APIPredictions.GetPredictionById, "payouts">>(
+        .query<APIPredictions.GetPredictionById>(
           GET_ENHANCED_PREDICTION_BY_ID,
           [prediction_id]
         )
@@ -169,7 +144,7 @@ export default {
           if (response.rows.length === 0) {
             return null;
           }
-          return addRatiosToPrediction(response.rows[0]);
+          return response.rows[0];
         });
     });
   },
