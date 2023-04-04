@@ -1,4 +1,4 @@
-import { Pool, PoolClient } from "pg";
+import { PoolClient } from "pg";
 import { APIBets } from "../types/bets";
 
 const ADD_BET = `

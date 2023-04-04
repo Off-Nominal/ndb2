@@ -111,6 +111,83 @@ const GET_NEXT_PREDICTION_TO_JUDGE = `
   SELECT id FROM predictions WHERE judged_date IS NULL AND triggered_date + '1 day' < NOW() ORDER BY due_date ASC LIMIT 1
 `;
 
+const GET_UPCOMING_PREDICTIONS = `
+  SELECT
+    ep.prediction_id as id,
+    (SELECT row_to_json(pred) FROM 
+        (SELECT 
+            ep.predictor_id as id, 
+            u.discord_id 
+          FROM users u 
+          WHERE u.id = ep.predictor_id) 
+      pred)
+    as predictor,
+    ep.text,
+    ep.created_date,
+    ep.due_date,
+    ep.closed_date,
+    ep.triggered_date,
+    (SELECT row_to_json(trig) FROM 
+        (SELECT 
+            ep.triggerer_id as id, 
+            u.discord_id 
+          FROM users u 
+          WHERE u.id = ep.triggerer_id) 
+      trig)
+    as triggerer,
+    ep.judged_date,
+    ep.retired_date,
+    ep.status,
+    (SELECT row_to_json(payout_sum)
+    FROM(
+      SELECT ep.endorsement_ratio as endorse, ep.undorsement_ratio as undorse
+    ) payout_sum
+  ) as payouts
+  FROM enhanced_predictions ep
+  WHERE ep.status = 'open'
+  ORDER BY ep.due_date ASC
+  LIMIT 10
+  OFFSET ($1 - 1) * 10
+`;
+
+const GET_RECENT_PREDICTIONS = `
+  SELECT
+    ep.prediction_id as id,
+    (SELECT row_to_json(pred) FROM 
+        (SELECT 
+            ep.predictor_id as id, 
+            u.discord_id 
+          FROM users u 
+          WHERE u.id = ep.predictor_id) 
+      pred)
+    as predictor,
+    ep.text,
+    ep.created_date,
+    ep.due_date,
+    ep.closed_date,
+    ep.triggered_date,
+    (SELECT row_to_json(trig) FROM 
+        (SELECT 
+            ep.triggerer_id as id, 
+            u.discord_id 
+          FROM users u 
+          WHERE u.id = ep.triggerer_id) 
+      trig)
+    as triggerer,
+    ep.judged_date,
+    ep.retired_date,
+    ep.status,
+    (SELECT row_to_json(payout_sum)
+    FROM(
+      SELECT ep.endorsement_ratio as endorse, ep.undorsement_ratio as undorse
+    ) payout_sum
+  ) as payouts
+  FROM enhanced_predictions ep
+  ORDER BY ep.created_date DESC
+  LIMIT 10
+  OFFSET ($1 - 1) * 10
+`;
+
 const add = (client: PoolClient) =>
   function (
     user_id: string,
@@ -192,6 +269,28 @@ const getNextPredictionToJudge = (client: PoolClient) =>
       .then((res) => res.rows[0]);
   };
 
+const getUpcomingPredictions = (client: PoolClient) =>
+  function (
+    page: number | string = 1
+  ): Promise<APIPredictions.GetUpcomingPredictions[]> {
+    return client
+      .query<APIPredictions.GetUpcomingPredictions>(GET_UPCOMING_PREDICTIONS, [
+        page,
+      ])
+      .then((res) => res.rows);
+  };
+
+const getRecentPredictions = (client: PoolClient) =>
+  function (
+    page: number | string = 1
+  ): Promise<APIPredictions.GetRecentPredictions[]> {
+    return client
+      .query<APIPredictions.GetRecentPredictions>(GET_RECENT_PREDICTIONS, [
+        page,
+      ])
+      .then((res) => res.rows);
+  };
+
 export default {
   add,
   getByPredictionId,
@@ -200,4 +299,6 @@ export default {
   judgePredictionById,
   getNextPredictionToTrigger,
   getNextPredictionToJudge,
+  getUpcomingPredictions,
+  getRecentPredictions,
 };

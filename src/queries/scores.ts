@@ -1,5 +1,4 @@
 import { PoolClient } from "pg";
-import pool from "../db";
 import { APIScores } from "../types/scores";
 
 export const generate_GET_USER_SCORE_SUMMARY_with_SEASON = (

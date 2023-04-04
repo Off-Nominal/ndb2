@@ -1,5 +1,4 @@
 import { PoolClient } from "pg";
-import pool from "../db";
 import { APIVotes } from "../types/votes";
 
 const ADD_VOTE = `
