@@ -179,4 +179,27 @@ CREATE INDEX predictions_predictor_id_idx ON predictions (user_id);
 
 CREATE INDEX bets_prediction_id_idx ON bets (prediction_id);
 
+CREATE VIEW enhanced_votes AS
+  SELECT 
+    v.id,
+    v.vote,
+    v.voted_date,
+    v.prediction_id,
+    v.user_id as voter_id,
+    ep.status,
+    ep.season_id,
+    (SELECT 
+      CASE
+        WHEN 
+          ep.status = 'successful'
+          THEN v.vote IS TRUE
+        WHEN           
+          ep.status = 'failed'
+          THEN v.vote IS FALSE
+        ELSE NULL
+      END
+    ) as popular_vote
+  FROM votes v
+  JOIN enhanced_predictions ep ON ep.prediction_id = v.prediction_id
+
 COMMIT;

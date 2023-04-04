@@ -1,5 +1,7 @@
 /* Replace with your SQL commands */
 
+DROP VIEW IF EXISTS enhanved_votes;
+
 DROP VIEW IF EXISTS payouts;
 
 DROP VIEW IF EXISTS enhanced_predictions;

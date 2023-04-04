@@ -12,7 +12,9 @@ const ADD_USER = `
   VALUES ($1, $2) 
   RETURNING id, discord_id`;
 
-const generate_GET_USER_BET_SUMMARY_with_SEASON = (seasonId?: number) => {
+const generate_GET_USER_BET_SUMMARY_with_SEASON = (
+  seasonId?: number | string
+) => {
   const whereClause = seasonId ? ` AND eb.season_id = ${seasonId}` : "";
 
   const query = `
@@ -52,7 +54,7 @@ const generate_GET_USER_BET_SUMMARY_with_SEASON = (seasonId?: number) => {
 };
 
 const generate_GET_USER_PREDICTION_SUMMARY_with_SEASON = (
-  seasonId?: number
+  seasonId?: number | string
 ) => {
   const whereClause = seasonId ? ` AND ep.season_id = ${seasonId}` : "";
 
@@ -79,7 +81,9 @@ const generate_GET_USER_PREDICTION_SUMMARY_with_SEASON = (
   return query;
 };
 
-const generate_GET_USER_SCORE_SUMMARY_with_SEASON = (seasonId?: number) => {
+const generate_GET_USER_SCORE_SUMMARY_with_SEASON = (
+  seasonId?: number | string
+) => {
   const whereClause = seasonId
     ? ` FILTER (WHERE payouts.season_id = ${seasonId})`
     : "";
@@ -99,7 +103,38 @@ const generate_GET_USER_SCORE_SUMMARY_with_SEASON = (seasonId?: number) => {
   return query;
 };
 
-const generate_GET_USER_SCORE_BY_ID_with_SEASON = (seasonId?: number) => {
+const generate_GET_USER_VOTE_SUMMARY_with_SEASON = (
+  seasonId?: number | string
+) => {
+  const whereClause = seasonId ? ` AND ev.season_id = ${seasonId}` : "";
+
+  const query = `
+    SELECT
+        u.id,
+        COUNT(ev.id) FILTER (WHERE (ev.popular_vote IS TRUE${whereClause}))::INT
+          as sycophantic,
+        COUNT(ev.id) FILTER (WHERE (ev.popular_vote IS FALSE${whereClause}))::INT
+          as contrarian,
+        COUNT(ev.id) FILTER (WHERE (ev.status = 'closed'${whereClause}))::INT
+          as pending
+      FROM users u
+      LEFT JOIN enhanced_votes ev ON ev.voter_id = u.id
+      GROUP BY u.id`;
+
+  return query;
+};
+
+const generate_GET_USER_SCORE_BY_ID_with_SEASON = (
+  seasonId?: number | string
+) => {
+  const season = seasonId
+    ? `
+    (SELECT row_to_json(season_sum) FROM (
+      SELECT id, name, start, "end" FROM seasons WHERE seasons.id = ${seasonId}
+    ) season_sum) as season,
+  `
+    : "";
+
   return `
     WITH 
       users_scores_summary 
@@ -107,8 +142,11 @@ const generate_GET_USER_SCORE_BY_ID_with_SEASON = (seasonId?: number) => {
       users_predictions_summary 
         AS (${generate_GET_USER_PREDICTION_SUMMARY_with_SEASON(seasonId)}),
       users_bets_summary 
-        AS (${generate_GET_USER_BET_SUMMARY_with_SEASON(seasonId)})
+        AS (${generate_GET_USER_BET_SUMMARY_with_SEASON(seasonId)}),
+      users_votes_summary 
+        AS (${generate_GET_USER_VOTE_SUMMARY_with_SEASON(seasonId)})
     SELECT
+      ${season}
       (SELECT row_to_json(score_sum) FROM (
         SELECT points, rank FROM users_scores_summary us WHERE us.better_id  = $1
       ) score_sum) as score,
@@ -118,7 +156,9 @@ const generate_GET_USER_SCORE_BY_ID_with_SEASON = (seasonId?: number) => {
       (SELECT row_to_json(bet_sum) FROM (
         SELECT successful, failed, pending, retired, rank FROM users_bets_summary WHERE id = $1
       ) bet_sum) as bets,
-      (SELECT COUNT(votes.id) FILTER (WHERE votes.user_id = $1)::INT FROM votes) as votes`;
+      (SELECT row_to_json(vote_sum) FROM (
+        SELECT sycophantic, contrarian, pending FROM users_votes_summary WHERE id = $1
+      ) vote_sum) as votes`;
 };
 
 export default {
@@ -155,28 +195,23 @@ export default {
     });
   },
 
-  getUserAllTimeScoreByDiscordId: async function (
-    discordId: number | string
-  ): Promise<APIUsers.GetUserAllTimeScoreByDiscordId> {
+  getUserScoreByDiscordId: async function (
+    discordId: number | string,
+    seasonId?: number | string
+  ): Promise<APIUsers.GetUserScoreByDiscordId> {
     const client = await pool.connect();
 
     try {
-      await client.query("BEGIN");
       const { rows } = await client.query<APIUsers.GetUserByDiscordId>(
         GET_USER_BY_DISCORD_ID,
         [discordId]
       );
       const userId = rows[0].id;
-      const response = await client.query(
-        generate_GET_USER_SCORE_BY_ID_with_SEASON(2),
+      const response = await client.query<APIUsers.GetUserScoreByDiscordId>(
+        generate_GET_USER_SCORE_BY_ID_with_SEASON(seasonId),
         [userId]
       );
-
-      await client.query("COMMIT");
       return response.rows[0];
-    } catch (err) {
-      await client.query("ROLLBACK");
-      throw err;
     } finally {
       client.release();
     }
