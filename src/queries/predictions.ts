@@ -17,7 +17,7 @@ const ADD_PREDICTION = `
 
 const GET_ENHANCED_PREDICTION_BY_ID = `
   SELECT
-    ep.id,
+    ep.prediction_id as id,
     (SELECT row_to_json(pred) FROM 
         (SELECT 
             ep.predictor_id as id, 
@@ -83,10 +83,13 @@ const GET_ENHANCED_PREDICTION_BY_ID = `
         ORDER BY voted_date DESC
       ) p_votes
   ) as votes,
-  ep.endorsement_ratio,
-  ep.undorsement_ratio  
+  (SELECT row_to_json(payout_sum)
+    FROM(
+      SELECT ep.endorsement_ratio as endorse, ep.undorsement_ratio as undorse
+    ) payout_sum
+  ) as payouts
   FROM enhanced_predictions ep
-  WHERE p.id = $1
+  WHERE ep.prediction_id = $1
 `;
 
 const RETIRE_PREDICTION_BY_ID = `

@@ -195,25 +195,20 @@ export default {
     });
   },
 
-  getUserScoreByDiscordId: async function (
-    discordId: number | string,
+  getUserScoreById: function (
+    userId: number | string,
     seasonId?: number | string
   ): Promise<APIUsers.GetUserScoreByDiscordId> {
-    const client = await pool.connect();
-
-    try {
-      const { rows } = await client.query<APIUsers.GetUserByDiscordId>(
-        GET_USER_BY_DISCORD_ID,
-        [discordId]
-      );
-      const userId = rows[0].id;
-      const response = await client.query<APIUsers.GetUserScoreByDiscordId>(
-        generate_GET_USER_SCORE_BY_ID_with_SEASON(seasonId),
-        [userId]
-      );
-      return response.rows[0];
-    } finally {
-      client.release();
-    }
+    return pool.connect().then((client) => {
+      return client
+        .query<APIUsers.GetUserScoreByDiscordId>(
+          generate_GET_USER_SCORE_BY_ID_with_SEASON(seasonId),
+          [userId]
+        )
+        .then((response) => {
+          client.release();
+          return response.rows[0];
+        });
+    });
   },
 };

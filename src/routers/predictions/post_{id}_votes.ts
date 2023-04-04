@@ -1,12 +1,10 @@
-import { isBefore } from "date-fns";
 import express, { Request, Response } from "express";
 import webhookManager from "../../config/webhook_subscribers";
 import bodyValidator from "../../middleware/bodyValidator";
-import dateValidator from "../../middleware/dateValidator";
 import { getPrediction } from "../../middleware/getPrediction";
+import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
 import predictions from "../../queries/predictions";
-import users from "../../queries/users";
 import votes from "../../queries/votes";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
@@ -15,7 +13,7 @@ const router = express.Router();
 router.post(
   "/:prediction_id/votes",
   [
-    bodyValidator.numberParseableString("discord_id"),
+    getUserByDiscordId,
     bodyValidator.boolean("vote"),
     getPrediction,
     predictionStatusValidator(PredictionLifeCycle.CLOSED),
@@ -37,21 +35,8 @@ router.post(
         );
     }
 
-    // Fetch User
-    let userId: string;
-
-    try {
-      const user = await users.getOrAddByDiscordId(discord_id);
-      userId = user.id;
-    } catch (err) {
-      console.error(err);
-      return res
-        .status(500)
-        .json(responseUtils.writeError("SERVER_ERROR", "Error Adding user"));
-    }
-
     return votes
-      .add(userId, req.prediction.id, vote)
+      .add(req.user_id, req.prediction.id, vote)
       .then((v) => predictions.getByPredictionId(v.prediction_id))
       .then((prediction) => {
         // Notify Subscribers

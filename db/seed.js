@@ -1,4 +1,4 @@
-const { add, sub } = require("date-fns");
+const { add } = require("date-fns");
 
 const users = require("./seeds/users.json");
 const predictions = require("./seeds/predictions.json");
@@ -17,6 +17,9 @@ const seed = (client) => {
   const BET_SEQUENCE_RESET = `SELECT SETVAL(pg_get_serial_sequence('bets', 'id'), COALESCE((SELECT MAX(id)+1 FROM bets), 1), false)`;
   resetIdData.push(client.query(BET_SEQUENCE_RESET));
 
+  const VOTE_SEQUENCE_RESET = `SELECT SETVAL(pg_get_serial_sequence('votes', 'id'), COALESCE((SELECT MAX(id)+1 FROM votes), 1), false)`;
+  resetIdData.push(client.query(VOTE_SEQUENCE_RESET));
+
   const SEASON_SEQUENCE_RESET = `SELECT SETVAL(pg_get_serial_sequence('seasons', 'id'), COALESCE((SELECT MAX(id)+1 FROM seasons), 1), false)`;
   resetIdData.push(client.query(SEASON_SEQUENCE_RESET));
 
@@ -25,28 +28,28 @@ const seed = (client) => {
       const baseData = [];
 
       const INSERT_USER = `INSERT INTO users (
-      id,
-      discord_id
-    ) VALUES (
-      $1,
-      $2
-    )`;
+        id,
+        discord_id
+      ) VALUES (
+        $1,
+        $2
+      )`;
 
       for (const user of users) {
         baseData.push(client.query(INSERT_USER, [user.id, user.discord_id]));
       }
 
       const INSERT_SEASON = `INSERT INTO seasons (
-      name, 
-      start, 
-      "end", 
-      payout_formula
-    ) VALUES (
-      $1,
-      $2,
-      $3,
-      $4
-    )`;
+        name, 
+        start, 
+        "end", 
+        payout_formula
+      ) VALUES (
+        $1,
+        $2,
+        $3,
+        $4
+      )`;
 
       for (const season of seasons) {
         const promise = client.query(INSERT_SEASON, [
@@ -65,7 +68,6 @@ const seed = (client) => {
       const referencedData = [];
 
       const INSERT_PREDICTION = `INSERT INTO predictions (
-        id,
         user_id,
         text,
         created_date,
@@ -84,9 +86,8 @@ const seed = (client) => {
         $6,
         $7,
         $8,
-        $9,
-        $10
-      )`;
+        $9
+      ) RETURNING id`;
 
       const INSERT_BET = `INSERT INTO bets (
         user_id,
@@ -128,7 +129,6 @@ const seed = (client) => {
         referencedData.push(
           client
             .query(INSERT_PREDICTION, [
-              p.id,
               p.user_id,
               p.text,
               created_date,
@@ -139,12 +139,13 @@ const seed = (client) => {
               judged_date,
               p.triggerer,
             ])
-            .then(() => {
+            .then((response) => {
+              const { id } = response.rows[0];
               const bets = [];
 
               // Predictor's original bet
               bets.push(
-                client.query(INSERT_BET, [p.user_id, p.id, true, created_date])
+                client.query(INSERT_BET, [p.user_id, id, true, created_date])
               );
 
               // Additional bets as needed
@@ -153,7 +154,7 @@ const seed = (client) => {
                   bets.push(
                     client.query(INSERT_BET, [
                       b.user_id,
-                      p.id,
+                      id,
                       b.endorsed,
                       add(now, { hours: b.created }),
                     ])
@@ -168,7 +169,7 @@ const seed = (client) => {
                   votes.push(
                     client.query(INSERT_VOTE, [
                       v.user_id,
-                      p.id,
+                      id,
                       v.vote,
                       add(now, { hours: v.voted }),
                     ])

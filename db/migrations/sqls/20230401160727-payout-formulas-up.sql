@@ -66,6 +66,7 @@ CREATE VIEW enhanced_predictions AS
     p.due_date,
     p.closed_date,
     p.judged_date,
+    p.retired_date,
     p.triggered_date,
     p.triggerer_id,
     seasons.id as season_id,

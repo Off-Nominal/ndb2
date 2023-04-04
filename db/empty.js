@@ -10,7 +10,7 @@ const EMPTY_TABLES = `
     users
 `;
 
-const empty = async (client) => {
+const empty = (client) => {
   if (process.env.NODE_ENV === "production") {
     return console.error("Cannot run seeding in production.");
   }
