@@ -82,7 +82,5 @@ export namespace APIPredictions {
 
   export type GetNextPredictionToJudge = { id: number };
 
-  export type GetUpcomingPredictions = ShortEnhancedPrediction;
-
-  export type GetRecentPredictions = ShortEnhancedPrediction;
+  export type SearchPredictions = ShortEnhancedPrediction;
 }
