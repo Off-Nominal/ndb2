@@ -1,7 +1,8 @@
 import express, { Request, Response } from "express";
 import { getDbClient } from "../../middleware/getDbClient";
 import paramValidator from "../../middleware/paramValidator";
-import predictions, { SortByOption } from "../../queries/predictions";
+import predictions from "../../queries/predictions";
+import { SortByOption } from "../../queries/predictions_search";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
 const router = express.Router();
@@ -27,7 +28,11 @@ const isSortByOption = (val: any): val is SortByOption => {
 router.get(
   "/search",
   [
-    paramValidator.string("status", { type: "query", optional: true }),
+    paramValidator.string("status", {
+      type: "query",
+      optional: true,
+      allowArray: true,
+    }),
     paramValidator.string("sort_by", { type: "query", optional: true }),
     paramValidator.string("keyword", { type: "query", optional: true }),
     paramValidator.integerParseableString("page", {
@@ -39,7 +44,7 @@ router.get(
   async (req: Request, res: Response) => {
     const { status, sort_by, page, keyword } = req.query;
 
-    if (Object.values(req.query).length === 0) {
+    if (!status && !sort_by && !keyword) {
       return res
         .status(400)
         .json(
@@ -50,17 +55,27 @@ router.get(
         );
     }
 
-    if (status !== undefined && !isPredictionLifeCycle(status)) {
-      return res
-        .status(400)
-        .json(
-          responseUtils.writeError(
-            "MALFORMED_QUERY_PARAMS",
-            `Status must be any of the following: ${Object.values(
-              PredictionLifeCycle
-            ).join(", ")}`
-          )
-        );
+    let statuses = [];
+
+    if (Array.isArray(status)) {
+      statuses = status;
+    } else if (typeof status === "string") {
+      statuses.push(status);
+    }
+
+    for (const status of statuses) {
+      if (status !== undefined && !isPredictionLifeCycle(status)) {
+        return res
+          .status(400)
+          .json(
+            responseUtils.writeError(
+              "MALFORMED_QUERY_PARAMS",
+              `Status must be any of the following: ${Object.values(
+                PredictionLifeCycle
+              ).join(", ")}`
+            )
+          );
+      }
     }
 
     if (sort_by !== undefined && !isSortByOption(sort_by)) {
@@ -80,8 +95,8 @@ router.get(
       .searchPredictions(req.dbClient)({
         keyword: keyword as string,
         sort_by: sort_by as SortByOption,
-        status: status as PredictionLifeCycle,
-        page: page as string,
+        statuses: statuses as PredictionLifeCycle[],
+        page: Number(page),
       })
       .then((predictions) => {
         res.json(

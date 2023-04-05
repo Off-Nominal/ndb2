@@ -14,94 +14,106 @@ const createChecker = (
   error: string,
   statusCode: number,
   optional: boolean,
-  type: "body" | "params" | "query"
+  type: "body" | "params" | "query",
+  allowArray: boolean
 ) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const value = req[type][key];
+
+    if (!allowArray && Array.isArray(value)) {
+      return res
+        .status(statusCode)
+        .json(
+          responseUtils.writeError(
+            "MALFORMED_QUERY_PARAMS",
+            `Query param property '${key}' cannot be an array.`
+          )
+        );
+    }
 
     if (optional && value === undefined) {
       return next();
     }
 
-    if (value === undefined || !callback(value)) {
-      return res
-        .status(statusCode)
-        .json(
-          responseUtils.writeError(
-            "MALFORMED_BODY_DATA",
-            `Body data property '${key}' ${error}`
-          )
-        );
-    } else {
-      next();
+    const values = Array.isArray(value) ? value : [value];
+
+    for (const value of values) {
+      if (value === undefined || !callback(value)) {
+        return res
+          .status(statusCode)
+          .json(
+            responseUtils.writeError(
+              "MALFORMED_BODY_DATA",
+              `Body data property '${key}' ${error}`
+            )
+          );
+      }
     }
+
+    next();
   };
 };
 
+type ParamValidatorOptions = {
+  optional?: boolean;
+  type?: "body" | "params" | "query";
+  allowArray?: boolean;
+};
+
 const paramValidator = {
-  numberParseableString: (
-    key: string,
-    options?: { optional?: boolean; type?: "body" | "params" | "query" }
-  ) => {
+  numberParseableString: (key: string, options?: ParamValidatorOptions) => {
     return createChecker(
       key,
       isNumberParseableString,
       "must be string parseable as a number",
       400,
       options?.optional || false,
-      options?.type || "body"
+      options?.type || "body",
+      options?.allowArray || false
     );
   },
-  string: (
-    key: string,
-    options?: { optional?: boolean; type?: "body" | "params" | "query" }
-  ) => {
+  string: (key: string, options?: ParamValidatorOptions) => {
     return createChecker(
       key,
       isString,
       "must be a string",
       400,
       options?.optional || false,
-      options?.type || "body"
+      options?.type || "body",
+      options?.allowArray || false
     );
   },
-  boolean: (
-    key: string,
-    options?: { optional?: boolean; type?: "body" | "params" | "query" }
-  ) => {
+  boolean: (key: string, options?: ParamValidatorOptions) => {
     return createChecker(
       key,
       isBoolean,
       "must be parseable as a boolean",
       400,
       options?.optional || false,
-      options?.type || "body"
+      options?.type || "body",
+      options?.allowArray || false
     );
   },
-  integerParseableString: (
-    key: string,
-    options?: { optional?: boolean; type?: "body" | "params" | "query" }
-  ) => {
+  integerParseableString: (key: string, options?: ParamValidatorOptions) => {
     return createChecker(
       key,
       isIntegerParseableString,
       "must be parseable as a safe integer",
       400,
       options?.optional || false,
-      options?.type || "body"
+      options?.type || "body",
+      options?.allowArray || false
     );
   },
-  isPostgresInt: (
-    key: string,
-    options?: { optional?: boolean; type?: "body" | "params" | "query" }
-  ) => {
+  isPostgresInt: (key: string, options?: ParamValidatorOptions) => {
     return createChecker(
       key,
       (val: string) => isNoMoreThan(Number(val), 2147483647),
       "can be no higher than at 2147483647.",
       400,
       options?.optional || false,
-      options?.type || "body"
+      options?.type || "body",
+      options?.allowArray || false
     );
   },
 };
