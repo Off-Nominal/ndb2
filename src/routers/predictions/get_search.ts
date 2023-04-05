@@ -29,6 +29,7 @@ router.get(
   [
     paramValidator.string("status", { type: "query", optional: true }),
     paramValidator.string("sort_by", { type: "query", optional: true }),
+    paramValidator.string("keyword", { type: "query", optional: true }),
     paramValidator.integerParseableString("page", {
       type: "query",
       optional: true,
@@ -36,9 +37,7 @@ router.get(
     getDbClient,
   ],
   async (req: Request, res: Response) => {
-    const { status, sort_by, page } = req.query;
-
-    console.log(sort_by);
+    const { status, sort_by, page, keyword } = req.query;
 
     if (Object.values(req.query).length === 0) {
       return res
@@ -79,6 +78,7 @@ router.get(
 
     predictions
       .searchPredictions(req.dbClient)({
+        keyword: keyword as string,
         sort_by: sort_by as SortByOption,
         status: status as PredictionLifeCycle,
         page: page as string,

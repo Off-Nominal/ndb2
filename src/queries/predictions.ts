@@ -181,20 +181,42 @@ const generate_SEARCH_PREDICTIONS = (options: SearchOptions) => {
 
   whereClause += whereClauses.join(" AND ");
 
-  const sortByOptions = {
-    [SortByOption.CREATED_ASC]: `ORDER BY ep.created_date ASC`,
-    [SortByOption.CREATED_DESC]: `ORDER BY ep.created_date DESC`,
-    [SortByOption.DUE_ASC]: `ORDER BY ep.due_date ASC`,
-    [SortByOption.DUE_DESC]: `ORDER BY ep.due_date DESC`,
-    [SortByOption.RETIRED_ASC]: `ORDER BY ep.retired_date ASC`,
-    [SortByOption.RETIRED_DESC]: `ORDER BY ep.retired_date DESC`,
-    [SortByOption.TRIGGERED_ASC]: `ORDER BY ep.triggered_date ASC`,
-    [SortByOption.TRIGGERED_DESC]: `ORDER BY ep.triggered_date DESC`,
-    [SortByOption.CLOSED_ASC]: `ORDER BY ep.closed_date ASC`,
-    [SortByOption.CLOSED_DESC]: `ORDER BY ep.closed_date DESC`,
-    [SortByOption.JUDGED_ASC]: `ORDER BY ep.judged_date ASC`,
-    [SortByOption.JUDGED_DESC]: `ORDER BY ep.judged_date DESC`,
-  };
+  let orderByClause = options.sort_by || options.keyword ? `ORDER BY ` : "";
+
+  const orderByClauses = [];
+
+  if (options.keyword) {
+    orderByClauses.push(`ep.text <-> '${options.keyword}'`);
+  }
+
+  if (options.sort_by) {
+    const sortByOptions = {
+      [SortByOption.CREATED_ASC]: `ep.created_date ASC`,
+      [SortByOption.CREATED_DESC]: `ep.created_date DESC`,
+      [SortByOption.DUE_ASC]: `ep.due_date ASC`,
+      [SortByOption.DUE_DESC]: `ep.due_date DESC`,
+      [SortByOption.RETIRED_ASC]: `ep.retired_date ASC`,
+      [SortByOption.RETIRED_DESC]: `ep.retired_date DESC`,
+      [SortByOption.TRIGGERED_ASC]: `ep.triggered_date ASC`,
+      [SortByOption.TRIGGERED_DESC]: `ep.triggered_date DESC`,
+      [SortByOption.CLOSED_ASC]: `ep.closed_date ASC`,
+      [SortByOption.CLOSED_DESC]: `ep.closed_date DESC`,
+      [SortByOption.JUDGED_ASC]: `ep.judged_date ASC`,
+      [SortByOption.JUDGED_DESC]: `ep.judged_date DESC`,
+    };
+
+    if (typeof options.sort_by === "string") {
+      orderByClauses.push(sortByOptions[options.sort_by]);
+    }
+
+    if (Array.isArray(options.sort_by)) {
+      options.sort_by.forEach((opt) => {
+        orderByClauses.push(sortByOptions[opt]);
+      });
+    }
+  }
+
+  orderByClause += orderByClauses.join(", ");
 
   return `
     SELECT
@@ -230,7 +252,7 @@ const generate_SEARCH_PREDICTIONS = (options: SearchOptions) => {
     ) as payouts
     FROM enhanced_predictions ep
     ${whereClause}
-    ${options.sort_by ? sortByOptions[options.sort_by] : ""}
+    ${orderByClause}
     LIMIT 10
     ${offset}`;
 };
