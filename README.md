@@ -120,3 +120,15 @@ Short leaderboard formats are for quick views of rankings. Three views would exi
   ]
 }
 ```
+
+## Web Dashboard Planning
+
+### MVP
+
+- Discord Authentication `/login`
+  - Discord Logout `/logout`
+- Leaderboards `/leaderboards`
+- Prediction Search/List `/predictions`
+- Prediction View :id `/predictions/:id`
+- Admin Page `/admin`
+  - Untrigger a manually triggered prediction (remove triggered_date, triggerer, close_date, delete all votes)

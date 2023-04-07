@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import webhookManager from "../../config/webhook_subscribers";
 import paramValidator from "../../middleware/paramValidator";
 import { getPrediction } from "../../middleware/getPrediction";
@@ -9,6 +9,8 @@ import predictions from "../../queries/predictions";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
 import { getDbClient } from "../../middleware/getDbClient";
+import { add, isAfter } from "date-fns";
+import GAME_MECHANICS from "../../config/game_mechanics";
 const router = express.Router();
 
 router.post(
@@ -23,7 +25,7 @@ router.post(
     getPrediction,
     predictionStatusValidator(PredictionLifeCycle.OPEN),
   ],
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const { discord_id, endorsed } = req.body;
 
     // Validate if bet has already been made by the user
@@ -32,16 +34,38 @@ router.post(
     );
 
     if (bet) {
-      return res
-        .status(400)
-        .json(
-          responseUtils.writeError(
-            "BAD_REQUEST",
-            `You have already ${
-              bet.endorsed ? "endorsed" : "undorsed"
-            } this prediction.`
-          )
-        );
+      const convertedRequestBet = endorsed === "true";
+
+      // Reject if existing bet matches change request
+      if (bet.endorsed === convertedRequestBet) {
+        return res
+          .status(400)
+          .json(
+            responseUtils.writeError(
+              "BAD_REQUEST",
+              `You have already ${
+                bet.endorsed ? "endorsed" : "undorsed"
+              } this prediction. No change necessary.`
+            )
+          );
+      }
+
+      // Reject if change is outside the allowable time window
+      const now = new Date();
+      const expiryWindow = add(new Date(bet.date), {
+        hours: GAME_MECHANICS.predictionUpdateWindow,
+      });
+
+      if (isAfter(now, expiryWindow)) {
+        return res
+          .status(403)
+          .json(
+            responseUtils.writeError(
+              "BAD_REQUEST",
+              `Bets cannot be changed past the allowable time window of ${GAME_MECHANICS.predictionUpdateWindow} hours since the bet was made.`
+            )
+          );
+      }
     }
 
     // Add bet
@@ -54,7 +78,11 @@ router.post(
         // Notify subscribers
         webhookManager.emit("new_bet", ep);
 
-        res.json(responseUtils.writeSuccess(ep, "Bet created successfully."));
+        const message = !!bet
+          ? "Bet successfully changed"
+          : "Bet created successfully";
+
+        res.json(responseUtils.writeSuccess(ep, message));
       })
       .catch((err) => {
         console.error(err);

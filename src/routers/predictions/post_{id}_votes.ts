@@ -26,16 +26,19 @@ router.post(
   async (req: Request, res: Response) => {
     const { discord_id, vote } = req.body;
 
-    // Verify user has not already voted
-    if (
-      req.prediction.votes.find((vote) => vote.voter.discord_id === discord_id)
-    ) {
+    const existingVote = req.prediction.votes.find(
+      (vote) => vote.voter.discord_id === discord_id
+    );
+
+    const convertedRequestVote = vote === "true";
+
+    if (existingVote.vote === convertedRequestVote) {
       return res
         .status(400)
         .json(
           responseUtils.writeError(
             "BAD_REQUEST",
-            "User has already voted on this prediction."
+            "You already have that vote logged on this prediction, no change necessary."
           )
         );
     }
@@ -47,9 +50,11 @@ router.post(
         // Notify Subscribers
         webhookManager.emit("new_vote", prediction);
 
-        return res.json(
-          responseUtils.writeSuccess(prediction, "Voted logged successfully.")
-        );
+        const message = !!existingVote
+          ? "Voted successfully changed."
+          : "Vote added successfully.";
+
+        return res.json(responseUtils.writeSuccess(prediction, message));
       })
       .catch((err) => {
         console.error(err);

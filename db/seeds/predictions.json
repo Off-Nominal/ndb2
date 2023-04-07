@@ -322,11 +322,6 @@
     "judged": -275,
     "bets": [
       {
-        "user_id": "28ac07b4-3238-4f60-958c-fce7284e931b",
-        "created": -886,
-        "endorsed": true
-      },
-      {
         "user_id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
         "created": -886,
         "endorsed": false
@@ -370,11 +365,6 @@
         "user_id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
         "created": -100,
         "endorsed": false
-      },
-      {
-        "user_id": "d5c87550-0bcf-4213-9ed3-9a716682ef2b",
-        "created": -100,
-        "endorsed": true
       },
       {
         "user_id": "115bbe5b-44d8-4ed2-b442-a31305368e08",

@@ -54,7 +54,7 @@ router.patch(
         .json(
           responseUtils.writeError(
             "BAD_REQUEST",
-            "This prediction is past the retirement window and is not locked and cannot be retired."
+            "This prediction is past the retirement window. It is locked and cannot be retired."
           )
         );
     }
