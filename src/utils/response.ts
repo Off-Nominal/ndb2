@@ -3,13 +3,14 @@ import { APIResponse } from "../types/responses";
 const responseUtils = {
   writeError: function (
     errorCode: APIResponse["errorCode"],
-    message?: string
+    message: string = "NA",
+    data: any = null
   ): APIResponse {
     return {
       success: false,
       errorCode,
       message,
-      data: null,
+      data,
     };
   },
 

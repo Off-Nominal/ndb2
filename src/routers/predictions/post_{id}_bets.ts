@@ -45,7 +45,8 @@ router.post(
               "BAD_REQUEST",
               `You have already ${
                 bet.endorsed ? "endorsed" : "undorsed"
-              } this prediction. No change necessary.`
+              } this prediction. No change necessary.`,
+              req.prediction
             )
           );
       }
@@ -68,11 +69,8 @@ router.post(
       }
     }
 
-    // Add bet
-    const date = new Date();
-
     bets
-      .add(req.dbClient)(req.user_id, req.prediction.id, endorsed, date)
+      .add(req.dbClient)(req.user_id, req.prediction.id, endorsed)
       .then((b) => predictions.getByPredictionId(req.dbClient)(b.prediction_id))
       .then((ep) => {
         // Notify subscribers
