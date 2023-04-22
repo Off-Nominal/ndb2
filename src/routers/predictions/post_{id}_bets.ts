@@ -34,10 +34,8 @@ router.post(
     );
 
     if (bet) {
-      const convertedRequestBet = endorsed === "true";
-
       // Reject if existing bet matches change request
-      if (bet.endorsed === convertedRequestBet) {
+      if (bet.endorsed === endorsed) {
         return res
           .status(400)
           .json(
