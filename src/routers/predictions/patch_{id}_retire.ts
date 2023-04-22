@@ -2,18 +2,22 @@ import { add, isAfter } from "date-fns";
 import express, { Request, Response } from "express";
 import GAME_MECHANICS from "../../config/game_mechanics";
 import webhookManager from "../../config/webhook_subscribers";
-import bodyValidator from "../../middleware/bodyValidator";
+import paramValidator from "../../middleware/paramValidator";
 import { getPrediction } from "../../middleware/getPrediction";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
 import predictions from "../../queries/predictions";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
+import { getDbClient } from "../../middleware/getDbClient";
 const router = express.Router();
 
 router.patch(
   "/:prediction_id/retire",
   [
-    bodyValidator.numberParseableString("discord_id"),
+    paramValidator.numberParseableString("discord_id", { type: "body" }),
+    paramValidator.integerParseableString("prediction_id", { type: "params" }),
+    paramValidator.isPostgresInt("prediction_id", { type: "params" }),
+    getDbClient,
     getPrediction,
     predictionStatusValidator(PredictionLifeCycle.OPEN),
   ],
@@ -50,13 +54,16 @@ router.patch(
         .json(
           responseUtils.writeError(
             "BAD_REQUEST",
-            "This prediction is past the retirement window and is not locked and cannot be retired."
+            "This prediction is past the retirement window. It is locked and cannot be retired."
           )
         );
     }
 
     return predictions
-      .retirePredictionById(req.prediction.id)
+      .retirePredictionById(req.dbClient)(req.prediction.id)
+      .then(() =>
+        predictions.getByPredictionId(req.dbClient)(req.prediction.id)
+      )
       .then((prediction) => {
         // Notify subscribers
         webhookManager.emit("retired_prediction", prediction);
@@ -78,7 +85,8 @@ router.patch(
               "There was an error retiring this prediction."
             )
           );
-      });
+      })
+      .finally(() => req.dbClient.release());
   }
 );
 

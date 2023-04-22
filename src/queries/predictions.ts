@@ -1,6 +1,9 @@
-import client from "../db";
+import { PoolClient } from "pg";
 import { APIPredictions } from "../types/predicitions";
-import { addRatiosToPrediction } from "../utils/mechanics";
+import {
+  generate_SEARCH_PREDICTIONS,
+  SearchOptions,
+} from "./predictions_search";
 
 const ADD_PREDICTION = `
   INSERT INTO predictions (
@@ -18,94 +21,79 @@ const ADD_PREDICTION = `
 
 const GET_ENHANCED_PREDICTION_BY_ID = `
   SELECT
-    p.id,
+    ep.prediction_id as id,
     (SELECT row_to_json(pred) FROM 
         (SELECT 
-            p.user_id as id, 
+            ep.predictor_id as id, 
             u.discord_id 
           FROM users u 
-          WHERE u.id = p.user_id) 
+          WHERE u.id = ep.predictor_id) 
       pred)
     as predictor,
-    p.text,
-    p.created_date,
-    p.due_date,
-    p.closed_date,
-    p.triggered_date,
+    ep.text,
+    ep.created_date,
+    ep.due_date,
+    ep.closed_date,
+    ep.triggered_date,
     (SELECT row_to_json(trig) FROM 
         (SELECT 
-            p.triggerer_id as id, 
+            ep.triggerer_id as id, 
             u.discord_id 
           FROM users u 
-          WHERE u.id = p.triggerer_id) 
+          WHERE u.id = ep.triggerer_id) 
       trig)
     as triggerer,
-    p.judged_date,
-    p.retired_date,
-    (CASE
-        WHEN p.retired_date IS NOT NULL THEN 'retired'
-        WHEN p.judged_date IS NOT NULL THEN
-          CASE 
-            WHEN 
-                (SELECT COUNT(id) FROM votes where votes.prediction_id = p.id AND votes.vote IS TRUE) > 
-                (SELECT COUNT(id) FROM votes where votes.prediction_id = p.id AND votes.vote IS FALSE)
-              THEN 'successful'
-            ELSE 'failed'
-          END
-        WHEN p.closed_date IS NOT NULL THEN 'closed'
-        ELSE 'open'
-      END) as status,
+    ep.judged_date,
+    ep.retired_date,
+    ep.status,
     (SELECT 
-      COALESCE(
-        jsonb_agg(p_bets), '[]') FROM
-          (SELECT 
-              id, 
-              (SELECT row_to_json(bett) FROM 
-                (SELECT 
-                    u.id, 
-                    u.discord_id
-                  FROM users u 
-                  WHERE u.id = b.user_id) 
-                bett) 
-              as better, 
-              date,
-              endorsed,
-              (SELECT 
-                EXTRACT(
-                  DAY FROM
-                    CASE
-                      WHEN p.closed_date IS NOT NULL THEN p.closed_date - b.date
-                      ELSE p.due_date - b.date
-                    END
-                )
-              ) as wager 
-            FROM bets b
-            WHERE b.prediction_id = p.id
-            ORDER BY date ASC
-          ) p_bets 
-        ) as bets,
-    (SELECT 
-      COALESCE(
-        jsonb_agg(p_votes), '[]') FROM
-          (SELECT 
-              id, 
-              (SELECT row_to_json(vott) FROM 
-                (SELECT 
-                    u.id, 
-                    u.discord_id
-                  FROM users u 
-                  WHERE u.id = v.user_id) 
-                vott) 
-              as voter, 
-              voted_date,
-              vote
-            FROM votes v
-            WHERE v.prediction_id = p.id
-            ORDER BY voted_date DESC
-          ) p_votes
-        ) as votes
-  FROM predictions p
-  WHERE p.id = $1
+      COALESCE(jsonb_agg(p_bets), '[]') 
+      FROM
+        (SELECT 
+          eb.bet_id as id, 
+          (SELECT row_to_json(bett) FROM 
+            (SELECT 
+                u.id, 
+                u.discord_id
+              FROM users u 
+              WHERE u.id = eb.better_id) 
+            bett) 
+          as better, 
+          eb.bet_date as date,
+          eb.endorsed,
+          eb.wager
+          FROM enhanced_bets eb
+          WHERE eb.prediction_id = ep.prediction_id
+          ORDER BY date ASC
+        ) p_bets 
+  ) as bets,
+  (SELECT 
+    COALESCE(jsonb_agg(p_votes), '[]') 
+    FROM
+      (SELECT 
+          id, 
+          (SELECT row_to_json(vott) FROM 
+            (SELECT 
+                u.id, 
+                u.discord_id
+              FROM users u 
+              WHERE u.id = v.user_id) 
+            vott) 
+          as voter, 
+          voted_date,
+          vote
+        FROM votes v
+        WHERE v.prediction_id = ep.prediction_id
+        ORDER BY voted_date DESC
+      ) p_votes
+  ) as votes,
+  (SELECT row_to_json(payout_sum)
+    FROM(
+      SELECT ep.endorsement_ratio as endorse, ep.undorsement_ratio as undorse
+    ) payout_sum
+  ) as payouts
+  FROM enhanced_predictions ep
+  WHERE ep.prediction_id = $1
 `;
 
 const RETIRE_PREDICTION_BY_ID = `
@@ -127,8 +115,8 @@ const GET_NEXT_PREDICTION_TO_JUDGE = `
   SELECT id FROM predictions WHERE judged_date IS NULL AND triggered_date + '1 day' < NOW() ORDER BY due_date ASC LIMIT 1
 `;
 
-export default {
-  add: function (
+const add = (client: PoolClient) =>
+  function (
     user_id: string,
     text: string,
     due_date: Date,
@@ -141,34 +129,33 @@ export default {
         due_date,
         created_date,
       ])
-      .then((response) => response.rows[0]);
-  },
+      .then((response) => {
+        return response.rows[0];
+      });
+  };
 
-  getByPredictionId: function (
+const getByPredictionId = (client: PoolClient) =>
+  function (
     prediction_id: number | string
   ): Promise<APIPredictions.GetPredictionById | null> {
     return client
-      .query<Omit<APIPredictions.GetPredictionById, "payouts">>(
-        GET_ENHANCED_PREDICTION_BY_ID,
-        [prediction_id]
-      )
-      .then((response) => {
-        if (response.rows.length === 0) {
-          return null;
-        }
-        return addRatiosToPrediction(response.rows[0]);
-      });
-  },
+      .query<APIPredictions.GetPredictionById>(GET_ENHANCED_PREDICTION_BY_ID, [
+        prediction_id,
+      ])
+      .then((response) => response.rows[0] ?? null);
+  };
 
-  retirePredictionById: function (
+const retirePredictionById = (client: PoolClient) =>
+  function (
     prediction_id: number | string
   ): Promise<APIPredictions.RetirePredictionById> {
     return client
       .query<null>(RETIRE_PREDICTION_BY_ID, [prediction_id])
-      .then(() => this.getByPredictionId(prediction_id));
-  },
+      .then((response) => response.rows[0]);
+  };
 
-  closePredictionById: function (
+const closePredictionById = (client: PoolClient) =>
+  function (
     prediction_id: number | string,
     triggerer_id: number | string | null,
     closed_date: Date
@@ -179,40 +166,54 @@ export default {
         triggerer_id,
         closed_date,
       ])
-      .then(() => this.getByPredictionId(prediction_id));
-  },
+      .then((response) => response.rows[0]);
+  };
 
-  judgePredictionById: function (
+const judgePredictionById = (client: PoolClient) =>
+  function (
     prediction_id: number | string
   ): Promise<APIPredictions.JudgePredictionById> {
     return client
       .query<null>(JUDGE_PREDICTION_BY_ID, [prediction_id])
-      .then(() => this.getByPredictionId(prediction_id));
-  },
+      .then((response) => response.rows[0]);
+  };
 
-  getNextPredictionToTrigger: function (): Promise<
-    APIPredictions.GetNextPredictionToTrigger | undefined
-  > {
+const getNextPredictionToTrigger = (client: PoolClient) =>
+  function (): Promise<APIPredictions.GetNextPredictionToTrigger | undefined> {
     return client
       .query<APIPredictions.GetNextPredictionToTrigger>(
         GET_NEXT_PREDICTION_TO_TRIGGER
       )
-      .then((res) => {
-        console.log("query response.rows", res.rows);
-        return res.rows[0];
-      });
-  },
+      .then((res) => res.rows[0]);
+  };
 
-  getNextPredictionToJudge: function (): Promise<
-    APIPredictions.GetNextPredictionToJudge | undefined
-  > {
+const getNextPredictionToJudge = (client: PoolClient) =>
+  function (): Promise<APIPredictions.GetNextPredictionToJudge | undefined> {
     return client
       .query<APIPredictions.GetNextPredictionToJudge>(
         GET_NEXT_PREDICTION_TO_JUDGE
       )
-      .then((res) => {
-        console.log("query response.rows", res.rows);
-        return res.rows[0];
-      });
-  },
+      .then((res) => res.rows[0]);
+  };
+
+const searchPredictions = (client: PoolClient) =>
+  function (
+    options: SearchOptions
+  ): Promise<APIPredictions.SearchPredictions[]> {
+    return client
+      .query<APIPredictions.SearchPredictions>(
+        generate_SEARCH_PREDICTIONS(options)
+      )
+      .then((res) => res.rows);
+  };
+
+export default {
+  add,
+  getByPredictionId,
+  retirePredictionById,
+  closePredictionById,
+  judgePredictionById,
+  getNextPredictionToTrigger,
+  getNextPredictionToJudge,
+  searchPredictions,
 };

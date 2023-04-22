@@ -1,12 +1,13 @@
 import { isBefore } from "date-fns";
 import express, { Request, Response } from "express";
 import webhookManager from "../../config/webhook_subscribers";
-import bodyValidator from "../../middleware/bodyValidator";
 import dateValidator from "../../middleware/dateValidator";
+import { getDbClient } from "../../middleware/getDbClient";
 import { getPrediction } from "../../middleware/getPrediction";
+import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
+import paramValidator from "../../middleware/paramValidator";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
 import predictions from "../../queries/predictions";
-import users from "../../queries/users";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
 const router = express.Router();
@@ -14,14 +15,18 @@ const router = express.Router();
 router.post(
   "/:prediction_id/trigger",
   [
-    bodyValidator.numberParseableString("discord_id"),
     dateValidator.isValid("closed_date", { optional: true }),
     dateValidator.isPast("closed_date", { optional: true }),
+    paramValidator.numberParseableString("discord_id", { type: "body" }),
+    paramValidator.integerParseableString("prediction_id", { type: "params" }),
+    paramValidator.isPostgresInt("prediction_id", { type: "params" }),
+    getDbClient,
+    getUserByDiscordId,
     getPrediction,
     predictionStatusValidator(PredictionLifeCycle.OPEN),
   ],
   async (req: Request, res: Response) => {
-    const { discord_id, closed_date } = req.body;
+    const { closed_date } = req.body;
     const closedDate = new Date(closed_date);
 
     if (closed_date) {
@@ -38,24 +43,14 @@ router.post(
       }
     }
 
-    // Fetch User
-    let userId: string;
-
-    try {
-      const user = await users.getOrAddByDiscordId(discord_id);
-      userId = user.id;
-    } catch (err) {
-      console.error(err);
-      return res
-        .status(500)
-        .json(responseUtils.writeError("SERVER_ERROR", "Error Adding user"));
-    }
-
     return predictions
-      .closePredictionById(
+      .closePredictionById(req.dbClient)(
         req.prediction.id,
-        userId,
+        req.user_id,
         closed_date ? closedDate : new Date()
+      )
+      .then(() =>
+        predictions.getByPredictionId(req.dbClient)(req.prediction.id)
       )
       .then((prediction) => {
         // Notify Subscribers
@@ -78,7 +73,8 @@ router.post(
               "There was an error triggering this prediction."
             )
           );
-      });
+      })
+      .finally(() => req.dbClient.release());
   }
 );
 

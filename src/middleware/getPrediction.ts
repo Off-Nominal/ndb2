@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import pool from "../db";
 import { isNoMoreThan, isNumberParseableString } from "../helpers/typeguards";
 import predictions from "../queries/predictions";
 import { APIPredictions } from "../types/predicitions";
@@ -11,37 +12,16 @@ export const getPrediction = async (
 ) => {
   const { prediction_id } = req.params;
 
-  // Body parameter validation
-  if (!isNumberParseableString(prediction_id)) {
-    return res
-      .status(400)
-      .json(
-        responseUtils.writeError(
-          "MALFORMED_BODY_DATA",
-          "Predictions Ids must be a parseable as a safe integer."
-        )
-      );
-  }
-
-  // Postgres INTEGER type maxes at 2147483647, which is used as primary keys for predictions
-  if (!isNoMoreThan(Number(prediction_id), 2147483647)) {
-    return res
-      .status(400)
-      .json(
-        responseUtils.writeError(
-          "MALFORMED_BODY_DATA",
-          "Predictions Ids can be no higher than at 2147483647."
-        )
-      );
-  }
-
   // Fetch prediction
   let prediction: APIPredictions.EnhancedPrediction;
 
   try {
-    prediction = await predictions.getByPredictionId(prediction_id);
+    prediction = await predictions.getByPredictionId(req.dbClient)(
+      prediction_id
+    );
+
     if (!prediction) {
-      return res
+      res
         .status(404)
         .json(
           responseUtils.writeError(
@@ -50,6 +30,8 @@ export const getPrediction = async (
           )
         );
     }
+    req.prediction = prediction;
+    return next();
   } catch (err) {
     console.error(err);
     return res
@@ -58,7 +40,4 @@ export const getPrediction = async (
         responseUtils.writeError("SERVER_ERROR", "Unable to fetch prediction.")
       );
   }
-
-  req.prediction = prediction;
-  next();
 };

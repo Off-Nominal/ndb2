@@ -63,6 +63,11 @@ export namespace APIPredictions {
     };
   };
 
+  export type ShortEnhancedPrediction = Omit<
+    EnhancedPrediction,
+    "bets" | "votes"
+  >;
+
   export type AddPrediction = Prediction;
 
   export type GetPredictionById = EnhancedPrediction;
@@ -76,4 +81,6 @@ export namespace APIPredictions {
   export type GetNextPredictionToTrigger = { id: number; due_date: string };
 
   export type GetNextPredictionToJudge = { id: number };
+
+  export type SearchPredictions = ShortEnhancedPrediction;
 }
