@@ -6,8 +6,8 @@ declare global {
   namespace Express {
     interface Request {
       prediction?: APIPredictions.EnhancedPrediction;
-      user_id: string;
-      dbClient: PoolClient;
+      user_id?: string;
+      dbClient?: PoolClient;
     }
   }
 }
