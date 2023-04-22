@@ -30,9 +30,7 @@ router.post(
       (vote) => vote.voter.discord_id === discord_id
     );
 
-    const convertedRequestVote = vote === "true";
-
-    if (existingVote.vote === convertedRequestVote) {
+    if (existingVote?.vote === vote) {
       return res
         .status(400)
         .json(
