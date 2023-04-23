@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import axios from "axios";
 import { Client } from "pg";
-import { add } from "date-fns";
+import { add, isBefore } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 
 dotenv.config();
@@ -23,6 +23,15 @@ const db_url =
 
 const client = new Client({
   connectionString: db_url,
+});
+
+const discord_db_url =
+  env === "production"
+    ? process.env.DISCORD_DB_URL_PROD
+    : process.env.DISCORD_DB_URL;
+
+const discordDbClient = new Client({
+  connectionString: discord_db_url,
 });
 
 const manualUserMap = {
@@ -504,10 +513,22 @@ const migrateLegacyData = async () => {
     const user_id = guildMembers[p.user] || defaultUserId;
     const due_date = p.due === "0000-00-00 00:00:00" ? "2030-01-01" : p.due;
 
-    // For review after import - manually close these
-    if (p.due === "0000-00-00 00:00:00" && p.type !== "retired") {
+    // These have no due date and were never triggered
+    if (p.due === "0000-00-00 00:00:00" && p.type === "standing") {
       untriggeredLegacyPredictions.push({
         id: p.id,
+        due: p.due,
+        text: p.text,
+        created: p.date,
+        user: p.user,
+      });
+    }
+
+    // These have a due date in the past and were never triggered
+    if (isBefore(new Date(p.due), new Date()) && p.type === "standing") {
+      untriggeredLegacyPredictions.push({
+        id: p.id,
+        due: p.due,
         text: p.text,
         created: p.date,
         user: p.user,
@@ -527,6 +548,9 @@ const migrateLegacyData = async () => {
         p.type === "judged" ? add(new Date(p.due), { days: 1 }) : undefined,
       bets: pBets,
       votes: pVotes,
+      context_channelId: p.channelID,
+      context_messageId: p.initial_messageID,
+      judgement_notice_messageId: p.messageID,
     };
   });
 
@@ -601,7 +625,32 @@ const migrateLegacyData = async () => {
 
   const predictionPromises = [];
 
+  const contextEntries: {
+    prediction_id: number;
+    type: "context" | "judgement_notice";
+    channel_id: string;
+    message_id: string;
+  }[] = [];
+
   for (const prediction of predictionSeeds) {
+    if (prediction.context_messageId !== "0") {
+      contextEntries.push({
+        prediction_id: prediction.id,
+        type: "context",
+        channel_id: prediction.context_channelId,
+        message_id: prediction.context_messageId,
+      });
+    }
+
+    if (prediction.judgement_notice_messageId !== "0") {
+      contextEntries.push({
+        prediction_id: prediction.id,
+        type: "judgement_notice",
+        channel_id: prediction.context_channelId,
+        message_id: prediction.judgement_notice_messageId,
+      });
+    }
+
     predictionPromises.push(
       client
         .query(INSERT_PREDICTION, [
@@ -721,9 +770,71 @@ const migrateLegacyData = async () => {
   }
 
   console.log("Committing.");
-  return await client.query("COMMIT");
+  await client.query("COMMIT");
+
+  return contextEntries;
 };
 
-migrateLegacyData().finally(() => {
-  client.end();
-});
+migrateLegacyData()
+  .then(async (contexts) => {
+    discordDbClient.connect();
+
+    discordDbClient.query("BEGIN");
+
+    try {
+      console.log("Truncating ndb2_msg_sub table...");
+      await discordDbClient.query("TRUNCATE ndb2_msg_subscriptions");
+    } catch (err) {
+      console.error(
+        "Failed to truncate ndb2_msg_subscriptions table, aborting"
+      );
+      console.error(err);
+      discordDbClient.query("ROLLBACK");
+      return;
+    }
+
+    try {
+      const SUB_SEQUENCE_RESET = `SELECT SETVAL(pg_get_serial_sequence('ndb2_msg_subscriptions', 'id'), COALESCE((SELECT MAX(id)+1 FROM ndb2_msg_subscriptions), 1), false)`;
+      await discordDbClient.query(SUB_SEQUENCE_RESET);
+    } catch (err) {
+      console.error("failed to reset id sequence for subs");
+      console.error(err);
+      discordDbClient.query("ROLLBACK");
+      return;
+    }
+
+    const ADD_SUB = `INSERT INTO ndb2_msg_subscriptions (type, prediction_id, channel_id, message_id, expiry) VALUES ($1, $2, $3, $4, $5) RETURNING id`;
+
+    const subPromises = [];
+
+    for (const sub of contexts) {
+      subPromises.push(
+        discordDbClient
+          .query(ADD_SUB, [
+            sub.type,
+            sub.prediction_id,
+            sub.channel_id,
+            sub.message_id,
+            null,
+          ])
+          .catch((err) => {
+            console.error(err);
+            throw err;
+          })
+      );
+    }
+
+    return Promise.all(subPromises)
+      .then(() => {
+        console.log("Successfully added all subscriptions");
+        return discordDbClient.query("COMMIT");
+      })
+      .catch((err) => {
+        console.error("failed to submit all subscriptions.");
+        return discordDbClient.query("ROLLBACK");
+      });
+  })
+  .finally(() => {
+    client.end();
+    discordDbClient.end();
+  });
