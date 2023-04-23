@@ -7,7 +7,7 @@
 
 ## Predictions
 
--
+- Some older predictions which had no due date or somehow missed being checked will be retroactively triggered, so we will have some old votes to figure out
 
 ## Bets
 
