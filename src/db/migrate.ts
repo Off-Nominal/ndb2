@@ -327,7 +327,7 @@ const migrateLegacyData = async () => {
   const seasons = [
     {
       id: 1,
-      name: "NDB Legacy",
+      name: "Legacy",
       start: "2019-01-01T00:00:00Z",
       end: "2023-06-01T00:00:00Z",
       payout_formula: "1",
@@ -474,6 +474,8 @@ const migrateLegacyData = async () => {
 
   const untriggeredLegacyPredictions = [];
 
+  const incorrectDueDatePredictions = [];
+
   const predictionSeeds = predictions.map((p) => {
     const pBets = bets
       .filter(
@@ -511,7 +513,17 @@ const migrateLegacyData = async () => {
 
     // Fallbacks
     const user_id = guildMembers[p.user] || defaultUserId;
-    const due_date = p.due === "0000-00-00 00:00:00" ? "2030-01-01" : p.due;
+    let due_date = p.due;
+
+    // Predictions with no due date are set way in the future, will be cleaned up after deploy
+    if (p.due === "0000-00-00 00:00:00") {
+      due_date = "2030-01-01";
+    }
+
+    // Some predictions have due dates before created date because of a bug. Set these to match so the points calculations are correct
+    if (isBefore(new Date(p.due), new Date(p.date))) {
+      due_date = p.date;
+    }
 
     // These have no due date and were never triggered
     if (p.due === "0000-00-00 00:00:00" && p.type === "standing") {
@@ -527,6 +539,17 @@ const migrateLegacyData = async () => {
     // These have a due date in the past and were never triggered
     if (isBefore(new Date(p.due), new Date()) && p.type === "standing") {
       untriggeredLegacyPredictions.push({
+        id: p.id,
+        due: p.due,
+        text: p.text,
+        created: p.date,
+        user: p.user,
+      });
+    }
+
+    // These have a due date that is before the created date
+    if (isBefore(new Date(p.due), new Date(p.date))) {
+      incorrectDueDatePredictions.push({
         id: p.id,
         due: p.due,
         text: p.text,
@@ -558,6 +581,11 @@ const migrateLegacyData = async () => {
     `Found ${untriggeredLegacyPredictions.length} untriggered legacy predictions to be reviewed.`
   );
   console.table(untriggeredLegacyPredictions);
+
+  console.log(
+    `Found ${incorrectDueDatePredictions.length} predictions with negative due dates to be reviewed.`
+  );
+  console.table(incorrectDueDatePredictions);
 
   // Reset sequences for votes and bets
   try {
