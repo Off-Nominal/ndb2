@@ -21,7 +21,7 @@ export const getPrediction = async (
     );
 
     if (!prediction) {
-      res
+      return res
         .status(404)
         .json(
           responseUtils.writeError(

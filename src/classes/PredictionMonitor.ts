@@ -7,7 +7,7 @@ const cronOptions = {
   timezone: "America/New_York",
 };
 
-const triggerSchedule = "0/30 8-18 * * *";
+const triggerSchedule = "0/30 8-17 * * *";
 const judgementSchedule = "*/10 * * * *";
 
 if (!cron.validate(triggerSchedule)) {
