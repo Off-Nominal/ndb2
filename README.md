@@ -132,3 +132,14 @@ Short leaderboard formats are for quick views of rankings. Three views would exi
 - Prediction View :id `/predictions/:id`
 - Admin Page `/admin`
   - Untrigger a manually triggered prediction (remove triggered_date, triggerer, close_date, delete all votes)
+
+## MVP Testing
+
+- Can create a new prediction
+- Can retire a recently made prediction
+- Can not retire a not-recently made prediction or a closed prediction
+- Can trigger a prediction that isn't closed
+- Can not trigger a prediction that is closed
+- Due predictions are automatically triggered
+- Can add effective close dates to triggered predictions
+-
