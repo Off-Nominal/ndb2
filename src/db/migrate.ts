@@ -327,7 +327,7 @@ const migrateLegacyData = async () => {
   const seasons = [
     {
       id: 1,
-      name: "NDB Legacy",
+      name: "Legacy",
       start: "2019-01-01T00:00:00Z",
       end: "2023-06-01T00:00:00Z",
       payout_formula: "1",
