@@ -1,60 +1,44 @@
-import { isAfter, sub } from "date-fns";
-import GAME_MECHANICS from "../config/game_mechanics";
 import webhookManager from "../config/webhook_subscribers";
 import pool from "../db";
 import predictions from "../queries/predictions";
+import cron from "node-cron";
+
+const cronOptions = {
+  timezone: "America/New_York",
+};
+
+const triggerSchedule = "0/30 8-18 * * *";
+const judgementSchedule = "*/10 * * * *";
+
+if (!cron.validate(triggerSchedule)) {
+  throw new SyntaxError("Cron Trigger Schedule Syntax invalud");
+}
+
+if (!cron.validate(judgementSchedule)) {
+  throw new SyntaxError("Cron Judgement Schedule Syntax invalud");
+}
 
 export default class PredictionMonitor {
-  private schedule: Date[];
-
   constructor() {
-    this.schedule = this.getSchedule();
-    if (this.schedule.length === 0) {
-      this.schedule = this.getSchedule(true);
-    }
-    console.log("[PM]: Prediction Monitor now running");
+    // Trigger Schedule
+    cron.schedule(
+      triggerSchedule,
+      () => {
+        this.triggerNextPrediction();
+      },
+      cronOptions
+    );
 
-    // Queue up the next trigger
-    this.scheduleNextTrigger();
+    // Judgement Schedule
+    cron.schedule(
+      judgementSchedule,
+      () => {
+        this.judgeNextPrediction();
+      },
+      cronOptions
+    );
 
-    // Set judgement loop
-    setInterval(() => {
-      this.judgeNextPrediction();
-    }, 600000);
-  }
-
-  private getSchedule(tomorrow: boolean = false): Date[] {
-    const now = new Date();
-    return GAME_MECHANICS.notificationSchedule.times
-      .map((t) => {
-        const offset = GAME_MECHANICS.notificationSchedule.offset;
-        const [hour, minute] = t.split(":");
-        const date = new Date();
-
-        const offsetDate = sub(date, { days: 1 });
-
-        offsetDate.setUTCHours(Number(hour) - offset);
-        offsetDate.setUTCMinutes(Number(minute));
-        offsetDate.setUTCSeconds(0);
-        offsetDate.setUTCMilliseconds(0);
-
-        return sub(offsetDate, {
-          days: tomorrow ? -1 : 0,
-        });
-      })
-      .filter((date) => isAfter(date, now));
-  }
-
-  private getTimeToNextTrigger(): number {
-    const nextTrigger = this.schedule[0];
-    return nextTrigger.getTime() - new Date().getTime();
-  }
-
-  private removeFirstScheduleTrigger(): void {
-    const noItemsLeft = !this.schedule.shift();
-    if (noItemsLeft) {
-      this.schedule = this.getSchedule(true);
-    }
+    console.log("[PM]: Prediction Monitor running.");
   }
 
   private async triggerNextPrediction() {
@@ -67,18 +51,11 @@ export default class PredictionMonitor {
         if (!pred) {
           return;
         }
-        console.log(
-          "[PM]: Prediction with id",
-          pred.id,
-          "due, triggering now."
-        );
+        console.log("[PM]: Triggering prediction with id ", pred.id);
         return predictions
           .closePredictionById(client)(pred.id, null, new Date(pred.due_date))
           .then(() => predictions.getByPredictionId(client)(pred.id))
           .then((prediction) => {
-            console.log(
-              "[PM]: Prediction successfully triggered, sending webhook"
-            );
             webhookManager.emit("triggered_prediction", prediction);
           })
           .catch((err) => {
@@ -91,8 +68,6 @@ export default class PredictionMonitor {
         console.error(err);
       })
       .finally(() => {
-        this.removeFirstScheduleTrigger();
-        this.scheduleNextTrigger();
         client.release();
       });
   }
@@ -105,19 +80,11 @@ export default class PredictionMonitor {
         if (!pred) {
           return;
         }
-        console.log(
-          "[PM]: Prediction with id,",
-          pred.id,
-          "due for judgement. Judging now."
-        );
+        console.log("[PM]: Judging prediction with id,", pred.id);
         return predictions
           .judgePredictionById(client)(pred.id)
           .then(() => predictions.getByPredictionId(client)(pred.id))
           .then((prediction) => {
-            console.log(
-              "[PM]: Prediction successfully judged, sending webhook"
-            );
-
             webhookManager.emit("judged_prediction", prediction);
           })
           .catch((err) => {
@@ -132,17 +99,5 @@ export default class PredictionMonitor {
       .finally(() => {
         client.release();
       });
-  }
-
-  private scheduleNextTrigger() {
-    const nextTime = this.getTimeToNextTrigger();
-    console.log(
-      "[PM]: Next prediction trigger scheduled in",
-      Math.floor(nextTime / 1000 / 60),
-      "minutes."
-    );
-    setTimeout(() => {
-      this.triggerNextPrediction();
-    }, nextTime);
   }
 }
