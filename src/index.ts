@@ -2,16 +2,15 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
-import morgan from "morgan";
 import { authenticateApplication } from "./middleware/authenticateApplication";
 import PredictionMonitor from "./classes/PredictionMonitor";
 
 const app = express();
 
 // Configuration
-
 const PORT = process.env.PORT || 80;
 if (process.env.NODE_ENV === "dev") {
+  const morgan = require("morgan");
   app.use(morgan("dev"));
 }
 app.use(express.json());
