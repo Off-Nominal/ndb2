@@ -33,6 +33,7 @@
 
 - Power down and confirm NDB1 is offline
 - Execute Migration Script
+  - Copy review table to notes
   - Confirm data is live
   - Check seasons information for correctness
   - Spot check three predictions
@@ -47,8 +48,4 @@
 ### Later
 
 - Begin cleaning up predictions
-- Turn schedule back on
-
-## Final Checks
-
-- Shut down NDB2 during migration, disable trigger schedule (but not judgement schedule) on API, disable trigger command on NDB2 bot for anyone but mods (for manual fixing)
+- Turn schedule back on with API
