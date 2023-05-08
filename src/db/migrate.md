@@ -16,3 +16,39 @@
 ## Votes
 
 - Legacy NDB did not capture who voted, only totals, but the new DB structure does. During the migration, a batch of fake users was created to fill this structure out. You will see "Unknown Users" or <@0000000000000001> in voting lists for legacy prediction details. In addition, your vote count in the `/predict score` command will not reflect any votes from the legacy system.
+
+## Migration Checklist
+
+### Pre Deploy
+
+- Complete PR for cut over on Discord bot
+- Change name of bot to remove beta label
+- Communicate downtime
+- Communicate Prediction cleanup process
+  - Fixing negative due dates
+  - Fixing unresolved predictions
+- Create Thread for Deployment in #general
+
+### Cut Over
+
+- Power down and confirm NDB1 is offline
+- Execute Migration Script
+  - Confirm data is live
+  - Check seasons information for correctness
+  - Spot check three predictions
+- Merge PR for NDB2, deploy
+- Communicate
+
+### Test
+
+- Does Acronym bot still work?
+- Do !predict, !ndb, !nostradambot, !endorse and !undorse return redirect messages and not add data?- Test all nine commands
+
+### Later
+
+- Begin cleaning up predictions
+- Turn schedule back on
+
+## Final Checks
+
+- Shut down NDB2 during migration, disable trigger schedule (but not judgement schedule) on API, disable trigger command on NDB2 bot for anyone but mods (for manual fixing)
