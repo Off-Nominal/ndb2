@@ -108,7 +108,7 @@ const JUDGE_PREDICTION_BY_ID = `
 `;
 
 const GET_NEXT_PREDICTION_TO_TRIGGER = `
-  SELECT id, due_date FROM predictions WHERE due_date < NOW() AND triggered_date IS NULL ORDER BY due_date ASC LIMIT 1
+  SELECT id, due_date FROM predictions WHERE due_date < NOW() AND triggered_date IS NULL AND retired_date IS NULL ORDER BY due_date ASC LIMIT 1
 `;
 
 const GET_NEXT_PREDICTION_TO_JUDGE = `
