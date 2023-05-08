@@ -35,7 +35,7 @@
     "date-fns": "^2.29.3",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "morgan": "^1.10.0",
+    "node-cron": "^3.0.2",
     "pg": "^8.9.0",
     "uuid": "^9.0.0"
   },
@@ -47,6 +47,7 @@
     "@types/pg": "^8.6.4",
     "db-migrate": "^0.11.13",
     "db-migrate-pg": "^1.2.2",
+    "morgan": "^1.10.0",
     "nodemon": "^2.0.21",
     "typescript": "^4.9.5"
   }
