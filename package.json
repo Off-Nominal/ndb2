@@ -17,7 +17,8 @@
     "migrate:down": "db-migrate down -m ./db/migrations",
     "migrate:up-prod": "db-migrate up -m ./db/migrations -e prod",
     "db:reset": "NODE_ENV=dev node ./db/reset.js",
-    "db:connect-prod": "heroku pg:psql postgresql-contoured-75136 --app ndb2"
+    "db:connect-prod": "heroku pg:psql postgresql-contoured-75136 --app ndb2",
+    "legacy-migrate": "npm run clear && tsc && node ./dist/db/migrate.js"
   },
   "repository": {
     "type": "git",
