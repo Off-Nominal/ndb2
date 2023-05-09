@@ -3,7 +3,6 @@ import axios from "axios";
 import { Client } from "pg";
 import { add, isBefore } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
-
 dotenv.config();
 
 export const isRejected = <T>(
@@ -23,6 +22,7 @@ const db_url =
 
 const client = new Client({
   connectionString: db_url,
+  // ssl: { rejectUnauthorized: false },
 });
 
 const discord_db_url =
