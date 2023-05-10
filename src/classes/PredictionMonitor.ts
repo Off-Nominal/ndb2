@@ -3,11 +3,7 @@ import pool from "../db";
 import predictions from "../queries/predictions";
 import cron from "node-cron";
 
-const cronOptions = {
-  timezone: "America/New_York",
-};
-
-const triggerSchedule = "0/30 8-17 * * *";
+const triggerSchedule = "0/30 12-21 * * *";
 const judgementSchedule = "*/10 * * * *";
 
 if (!cron.validate(triggerSchedule)) {
@@ -30,13 +26,9 @@ export default class PredictionMonitor {
     // );
 
     // Judgement Schedule
-    cron.schedule(
-      judgementSchedule,
-      () => {
-        this.judgeNextPrediction();
-      },
-      cronOptions
-    );
+    cron.schedule(judgementSchedule, () => {
+      this.judgeNextPrediction();
+    });
 
     console.log("[PM]: Prediction Monitor running.");
   }
