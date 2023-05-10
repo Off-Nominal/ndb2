@@ -16,14 +16,10 @@ if (!cron.validate(judgementSchedule)) {
 
 export default class PredictionMonitor {
   constructor() {
-    // // Trigger Schedule
-    // cron.schedule(
-    //   triggerSchedule,
-    //   () => {
-    //     this.triggerNextPrediction();
-    //   },
-    //   cronOptions
-    // );
+    // Trigger Schedule
+    cron.schedule(triggerSchedule, () => {
+      this.triggerNextPrediction();
+    });
 
     // Judgement Schedule
     cron.schedule(judgementSchedule, () => {
