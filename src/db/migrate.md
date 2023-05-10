@@ -42,26 +42,28 @@
 
 ```sql
 -- quick view
-SELECT id, created_date, due_date, text, user_id from predictions WHERE predictions.id = '';
+SELECT prediction_id, created_date, due_date, closed_date, judged_date, status, text, predictor_id from enhanced_predictions ep WHERE ep.prediction_id =
 
 -- Set to vote
 UPDATE predictions SET triggerer_id = '', closed_date = '', triggered_date = NOW() WHERE predictions.id = '';
 
 -- Auto close
 BEGIN;
-UPDATE predictions SET triggerer_id = '', closed_date = '', triggered_date = NOW() WHERE predictions.id = '';
+UPDATE predictions SET triggerer_id = 'fd004038-e1e9-4c20-b3ca-0fe6b99cebe9', closed_date = '2020-07-30', triggered_date = NOW() WHERE predictions.id = 172;
 INSERT INTO votes (
     user_id,
     prediction_id,
     vote,
     voted_date
   ) VALUES (
-    '',
-    '',
-    true, -- false for fail
+    '8397e07c-b6b7-4672-81fe-4d9e087e69f1',
+    172,
+    true,
     NOW()
   );
-UPDATE predictions SET judged_date = NOW() WHERE predictions.id = '';
+UPDATE predictions SET judged_date = NOW() WHERE predictions.id = 172;
 COMMIT;
-``
+
+-- Update due date
+UPDATE predictions SET due_date = '' WHERE prediction_id = ''
 ```

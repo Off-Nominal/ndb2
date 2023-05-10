@@ -285,189 +285,189 @@ const migrateLegacyData = async () => {
     return;
   }
 
-  await client.connect();
-  await client.query("BEGIN");
+  // await client.connect();
+  // await client.query("BEGIN");
 
-  // Clear existing data
-  const EMPTY_TABLES = `
-    TRUNCATE
-      seasons,
-      votes,
-      bets,
-      predictions, 
-      users
-  `;
+  // // Clear existing data
+  // const EMPTY_TABLES = `
+  //   TRUNCATE
+  //     seasons,
+  //     votes,
+  //     bets,
+  //     predictions,
+  //     users
+  // `;
 
-  try {
-    await client.query(EMPTY_TABLES);
-    console.log("Tables succesfully truncated");
-  } catch (err) {
-    console.error("Failed to truncate tables");
-    console.error(err);
-    await client.query("ROLLBACK");
-    return;
-  }
+  // try {
+  //   await client.query(EMPTY_TABLES);
+  //   console.log("Tables succesfully truncated");
+  // } catch (err) {
+  //   console.error("Failed to truncate tables");
+  //   console.error(err);
+  //   await client.query("ROLLBACK");
+  //   return;
+  // }
 
-  // Add seasons
+  // // Add seasons
 
-  const INSERT_SEASON = `INSERT INTO seasons (
-    id,
-    name, 
-    start, 
-    "end", 
-    payout_formula
-  ) VALUES (
-    $1,
-    $2,
-    $3,
-    $4,
-    $5
-  )`;
+  // const INSERT_SEASON = `INSERT INTO seasons (
+  //   id,
+  //   name,
+  //   start,
+  //   "end",
+  //   payout_formula
+  // ) VALUES (
+  //   $1,
+  //   $2,
+  //   $3,
+  //   $4,
+  //   $5
+  // )`;
 
-  const seasons = [
-    {
-      id: 1,
-      name: "Legacy",
-      start: "2019-01-01T00:00:00Z",
-      end: "2023-06-01T00:00:00Z",
-      payout_formula: "1",
-    },
-    {
-      id: 2,
-      name: "Hermes",
-      start: "2023-06-01T00:00:00Z",
-      end: "2023-07-01T00:00:00Z",
-      payout_formula: "(ln($1/$2/2.0)/1.5)+1",
-    },
-    {
-      id: 3,
-      name: "Nova",
-      start: "2023-07-01T00:00:00Z",
-      end: "2023-10-01T00:00:00Z",
-      payout_formula: "(ln($1/$2/2.0)/1.5)+1",
-    },
-  ];
+  // const seasons = [
+  //   {
+  //     id: 1,
+  //     name: "Legacy",
+  //     start: "2019-01-01T00:00:00Z",
+  //     end: "2023-06-01T00:00:00Z",
+  //     payout_formula: "1",
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "Hermes",
+  //     start: "2023-06-01T00:00:00Z",
+  //     end: "2023-07-01T00:00:00Z",
+  //     payout_formula: "(ln($1/$2/2.0)/1.5)+1",
+  //   },
+  //   {
+  //     id: 3,
+  //     name: "Nova",
+  //     start: "2023-07-01T00:00:00Z",
+  //     end: "2023-10-01T00:00:00Z",
+  //     payout_formula: "(ln($1/$2/2.0)/1.5)+1",
+  //   },
+  // ];
 
-  const seasonsPromises = [];
+  // const seasonsPromises = [];
 
-  for (const season of seasons) {
-    const promise = client.query(INSERT_SEASON, [
-      season.id,
-      season.name,
-      season.start,
-      season.end,
-      season.payout_formula,
-    ]);
+  // for (const season of seasons) {
+  //   const promise = client.query(INSERT_SEASON, [
+  //     season.id,
+  //     season.name,
+  //     season.start,
+  //     season.end,
+  //     season.payout_formula,
+  //   ]);
 
-    seasonsPromises.push(promise);
-  }
+  //   seasonsPromises.push(promise);
+  // }
 
-  try {
-    await Promise.all(seasonsPromises);
-  } catch (err) {
-    console.error("Failed to add seasons");
-    console.error(err);
-    await client.query("ROLLBACK");
-    return;
-  }
+  // try {
+  //   await Promise.all(seasonsPromises);
+  // } catch (err) {
+  //   console.error("Failed to add seasons");
+  //   console.error(err);
+  //   await client.query("ROLLBACK");
+  //   return;
+  // }
 
-  try {
-    const SEASON_SEQUENCE_RESET = `SELECT SETVAL(pg_get_serial_sequence('seasons', 'id'), COALESCE((SELECT MAX(id)+1 FROM seasons), 1), false)`;
-    await client.query(SEASON_SEQUENCE_RESET);
-  } catch (err) {
-    console.error("Failed to reset seasons id sequence");
-    console.error(err);
-    await client.query("ROLLBACK");
-    return;
-  }
+  // try {
+  //   const SEASON_SEQUENCE_RESET = `SELECT SETVAL(pg_get_serial_sequence('seasons', 'id'), COALESCE((SELECT MAX(id)+1 FROM seasons), 1), false)`;
+  //   await client.query(SEASON_SEQUENCE_RESET);
+  // } catch (err) {
+  //   console.error("Failed to reset seasons id sequence");
+  //   console.error(err);
+  //   await client.query("ROLLBACK");
+  //   return;
+  // }
 
-  // Insert users to DB
-  const ADD_USER = `
-    WITH add_user AS (
-      INSERT 
-        INTO users (id, discord_id) 
-        VALUES ($1, $2) 
-      ON CONFLICT (discord_id) DO NOTHING
-      RETURNING id, discord_id
-    )
-    SELECT id, discord_id FROM add_user
-    UNION
-    SELECT id, discord_id FROM users WHERE discord_id = $2
-  `;
+  // // Insert users to DB
+  // const ADD_USER = `
+  //   WITH add_user AS (
+  //     INSERT
+  //       INTO users (id, discord_id)
+  //       VALUES ($1, $2)
+  //     ON CONFLICT (discord_id) DO NOTHING
+  //     RETURNING id, discord_id
+  //   )
+  //   SELECT id, discord_id FROM add_user
+  //   UNION
+  //   SELECT id, discord_id FROM users WHERE discord_id = $2
+  // `;
 
-  const usersPromises: Promise<{ id: string; discord_id: string }>[] = [];
+  // const usersPromises: Promise<{ id: string; discord_id: string }>[] = [];
 
-  for (const username in guildMembers) {
-    // For missing users
-    if (guildMembers[username] === null) {
-      continue;
-    }
+  // for (const username in guildMembers) {
+  //   // For missing users
+  //   if (guildMembers[username] === null) {
+  //     continue;
+  //   }
 
-    usersPromises.push(
-      client
-        .query<{ id: string; discord_id: string }>(ADD_USER, [
-          uuidv4(),
-          guildMembers[username],
-        ])
-        .then((res) => res.rows[0])
-        .catch((err) => {
-          console.error(err);
-          throw err;
-        })
-    );
-  }
+  //   usersPromises.push(
+  //     client
+  //       .query<{ id: string; discord_id: string }>(ADD_USER, [
+  //         uuidv4(),
+  //         guildMembers[username],
+  //       ])
+  //       .then((res) => res.rows[0])
+  //       .catch((err) => {
+  //         console.error(err);
+  //         throw err;
+  //       })
+  //   );
+  // }
 
-  // Insert default user for missing people
-  usersPromises.push(
-    client
-      .query<{ id: string; discord_id: string }>(ADD_USER, [
-        uuidv4(),
-        default_discord_id,
-      ])
-      .then((res) => res.rows[0])
-      .catch((err) => {
-        console.error(err);
-        throw err;
-      })
-  );
+  // // Insert default user for missing people
+  // usersPromises.push(
+  //   client
+  //     .query<{ id: string; discord_id: string }>(ADD_USER, [
+  //       uuidv4(),
+  //       default_discord_id,
+  //     ])
+  //     .then((res) => res.rows[0])
+  //     .catch((err) => {
+  //       console.error(err);
+  //       throw err;
+  //     })
+  // );
 
-  // Insert fake users for votes
-  for (const fakeUser of fakeUsersForVotes) {
-    usersPromises.push(
-      client
-        .query<{ id: string; discord_id: string }>(ADD_USER, [
-          fakeUser.id,
-          fakeUser.discord_id,
-        ])
-        .then((res) => res.rows[0])
-        .catch((err) => {
-          console.error(err);
-          throw err;
-        })
-    );
-  }
+  // // Insert fake users for votes
+  // for (const fakeUser of fakeUsersForVotes) {
+  //   usersPromises.push(
+  //     client
+  //       .query<{ id: string; discord_id: string }>(ADD_USER, [
+  //         fakeUser.id,
+  //         fakeUser.discord_id,
+  //       ])
+  //       .then((res) => res.rows[0])
+  //       .catch((err) => {
+  //         console.error(err);
+  //         throw err;
+  //       })
+  //   );
+  // }
 
   let defaultUserId: string;
 
-  try {
-    const users = await Promise.all(usersPromises);
-    console.log(`Successfully upserted ${usersPromises.length} users.`);
+  // try {
+  //   const users = await Promise.all(usersPromises);
+  //   console.log(`Successfully upserted ${usersPromises.length} users.`);
 
-    const defaultUser = users.find((u) => u.discord_id === default_discord_id);
-    defaultUserId = defaultUser.id;
+  //   const defaultUser = users.find((u) => u.discord_id === default_discord_id);
+  //   defaultUserId = defaultUser.id;
 
-    for (const username in guildMembers) {
-      const foundUser = users.find(
-        (u) => u.discord_id === guildMembers[username]
-      );
-      guildMembers[username] = foundUser?.id || defaultUserId;
-    }
-  } catch (err) {
-    console.error("Failed to insert all users to DB");
-    console.error(err);
-    await client.query("ROLLBACK");
-    return;
-  }
+  //   for (const username in guildMembers) {
+  //     const foundUser = users.find(
+  //       (u) => u.discord_id === guildMembers[username]
+  //     );
+  //     guildMembers[username] = foundUser?.id || defaultUserId;
+  //   }
+  // } catch (err) {
+  //   console.error("Failed to insert all users to DB");
+  //   console.error(err);
+  //   await client.query("ROLLBACK");
+  //   return;
+  // }
 
   // Create Prediction Seeds
   console.log("building Prediction seeds from legacy data...");
@@ -478,12 +478,7 @@ const migrateLegacyData = async () => {
 
   const predictionSeeds = predictions.map((p) => {
     const pBets = bets
-      .filter(
-        (bet) =>
-          bet.prediction_id === p.id &&
-          bet.better_name !== p.user &&
-          guildMembers[bet.better_name] !== defaultUserId
-      )
+      .filter((bet) => bet.prediction_id === p.id && bet.better_name !== p.user)
       .map((bet) => {
         return {
           user_id: guildMembers[bet.better_name],
@@ -512,7 +507,7 @@ const migrateLegacyData = async () => {
     }
 
     // Fallbacks
-    const user_id = guildMembers[p.user] || defaultUserId;
+    const user_id = guildMembers[p.user];
     let due_date = p.due;
 
     // Predictions with no due date are set way in the future, will be cleaned up after deploy
@@ -577,79 +572,79 @@ const migrateLegacyData = async () => {
     };
   });
 
-  console.log(
-    `Found ${untriggeredLegacyPredictions.length} untriggered legacy predictions to be reviewed.`
-  );
-  console.table(untriggeredLegacyPredictions);
+  // console.log(
+  //   `Found ${untriggeredLegacyPredictions.length} untriggered legacy predictions to be reviewed.`
+  // );
+  // console.table(untriggeredLegacyPredictions);
 
-  console.log(
-    `Found ${incorrectDueDatePredictions.length} predictions with negative due dates to be reviewed.`
-  );
-  console.table(incorrectDueDatePredictions);
+  // console.log(
+  //   `Found ${incorrectDueDatePredictions.length} predictions with negative due dates to be reviewed.`
+  // );
+  // console.table(incorrectDueDatePredictions);
 
-  // Reset sequences for votes and bets
-  try {
-    const BET_SEQUENCE_RESET = `SELECT SETVAL(pg_get_serial_sequence('bets', 'id'), COALESCE((SELECT MAX(id)+1 FROM bets), 1), false)`;
-    await client.query(BET_SEQUENCE_RESET);
-    const VOTE_SEQUENCE_RESET = `SELECT SETVAL(pg_get_serial_sequence('votes', 'id'), COALESCE((SELECT MAX(id)+1 FROM votes), 1), false)`;
-    await client.query(VOTE_SEQUENCE_RESET);
-    console.log("Successfully reset Bet and Vote ID sequence");
-  } catch (err) {
-    console.error("Failed to reset sequences for Bets and Votes");
-    console.error(err);
-    await client.query("ROLLBACK");
-    return;
-  }
+  // // Reset sequences for votes and bets
+  // try {
+  //   const BET_SEQUENCE_RESET = `SELECT SETVAL(pg_get_serial_sequence('bets', 'id'), COALESCE((SELECT MAX(id)+1 FROM bets), 1), false)`;
+  //   await client.query(BET_SEQUENCE_RESET);
+  //   const VOTE_SEQUENCE_RESET = `SELECT SETVAL(pg_get_serial_sequence('votes', 'id'), COALESCE((SELECT MAX(id)+1 FROM votes), 1), false)`;
+  //   await client.query(VOTE_SEQUENCE_RESET);
+  //   console.log("Successfully reset Bet and Vote ID sequence");
+  // } catch (err) {
+  //   console.error("Failed to reset sequences for Bets and Votes");
+  //   console.error(err);
+  //   await client.query("ROLLBACK");
+  //   return;
+  // }
 
   // Seed db
 
-  const INSERT_PREDICTION = `INSERT INTO predictions (
-    id,
-    user_id,
-    text,
-    created_date,
-    due_date,
-    closed_date,
-    retired_date,
-    triggered_date,
-    judged_date
-  ) VALUES (
-    $1,
-    $2,
-    $3,
-    $4,
-    $5,
-    $6,
-    $7,
-    $8,
-    $9
-  )`;
+  // const INSERT_PREDICTION = `INSERT INTO predictions (
+  //   id,
+  //   user_id,
+  //   text,
+  //   created_date,
+  //   due_date,
+  //   closed_date,
+  //   retired_date,
+  //   triggered_date,
+  //   judged_date
+  // ) VALUES (
+  //   $1,
+  //   $2,
+  //   $3,
+  //   $4,
+  //   $5,
+  //   $6,
+  //   $7,
+  //   $8,
+  //   $9
+  // )`;
 
-  const INSERT_BET = `INSERT INTO bets (
-    user_id,
-    prediction_id,
-    endorsed,
-    date
-  ) VALUES (
-    $1, 
-    $2, 
-    $3, 
-    $4
-  )`;
+  // const INSERT_BET = `INSERT INTO bets (
+  //   user_id,
+  //   prediction_id,
+  //   endorsed,
+  //   date
+  // ) VALUES (
+  //   $1,
+  //   $2,
+  //   $3,
+  //   $4
+  // )`;
 
-  const INSERT_VOTE = `INSERT INTO votes (
-    user_id, 
-    prediction_id, 
-    vote, 
-    voted_date
-  ) VALUES (
-    $1, 
-    $2, 
-    $3, 
-    $4
-  )`;
+  // const INSERT_VOTE = `INSERT INTO votes (
+  //   user_id,
+  //   prediction_id,
+  //   vote,
+  //   voted_date
+  // ) VALUES (
+  //   $1,
+  //   $2,
+  //   $3,
+  //   $4
+  // )`;
 
-  console.log("Inserting predictions into datbase...");
+  // console.log("Inserting predictions into datbase...");
 
   const predictionPromises = [];
 
@@ -679,126 +674,126 @@ const migrateLegacyData = async () => {
       });
     }
 
-    predictionPromises.push(
-      client
-        .query(INSERT_PREDICTION, [
-          prediction.id,
-          prediction.user_id,
-          prediction.text,
-          prediction.created_date,
-          prediction.due_date,
-          prediction.closed_date,
-          prediction.retired_date,
-          prediction.triggered_date,
-          prediction.judged_date,
-        ])
-        .then(() => {
-          const betsPromises = [];
+    // predictionPromises.push(
+    //   client
+    //     .query(INSERT_PREDICTION, [
+    //       prediction.id,
+    //       prediction.user_id,
+    //       prediction.text,
+    //       prediction.created_date,
+    //       prediction.due_date,
+    //       prediction.closed_date,
+    //       prediction.retired_date,
+    //       prediction.triggered_date,
+    //       prediction.judged_date,
+    //     ])
+    //     .then(() => {
+    //       const betsPromises = [];
 
-          const usersWhoHaveBet = {};
+    //       const usersWhoHaveBet = {};
 
-          // Insert predictor's initial bet
-          betsPromises.push(
-            client
-              .query(INSERT_BET, [
-                prediction.user_id,
-                prediction.id,
-                true,
-                prediction.created_date,
-              ])
-              .catch((err) => {
-                throw [
-                  "Initial Predictor Bet Error\n",
-                  [
-                    prediction.user_id,
-                    prediction.id,
-                    true,
-                    prediction.created_date,
-                  ],
-                  err,
-                ];
-              })
-          );
+    //       // Insert predictor's initial bet
+    //       betsPromises.push(
+    //         client
+    //           .query(INSERT_BET, [
+    //             prediction.user_id,
+    //             prediction.id,
+    //             true,
+    //             prediction.created_date,
+    //           ])
+    //           .catch((err) => {
+    //             throw [
+    //               "Initial Predictor Bet Error\n",
+    //               [
+    //                 prediction.user_id,
+    //                 prediction.id,
+    //                 true,
+    //                 prediction.created_date,
+    //               ],
+    //               err,
+    //             ];
+    //           })
+    //       );
 
-          usersWhoHaveBet[prediction.user_id] = true;
+    //       usersWhoHaveBet[prediction.user_id] = true;
 
-          // Insert other bets
-          for (const bet of prediction.bets) {
-            if (usersWhoHaveBet[bet.user_id]) {
-              continue;
-            }
+    //       // Insert other bets
+    //       for (const bet of prediction.bets) {
+    //         if (usersWhoHaveBet[bet.user_id]) {
+    //           continue;
+    //         }
 
-            betsPromises.push(
-              client
-                .query(INSERT_BET, [
-                  bet.user_id,
-                  prediction.id,
-                  bet.endorsed,
-                  bet.date,
-                ])
-                .catch((err) => {
-                  throw [
-                    "Subsequent Bet Error\n",
-                    [bet.user_id, prediction.id, bet.endorsed, bet.date],
-                    err,
-                  ];
-                })
-            );
+    //         betsPromises.push(
+    //           client
+    //             .query(INSERT_BET, [
+    //               bet.user_id,
+    //               prediction.id,
+    //               bet.endorsed,
+    //               bet.date,
+    //             ])
+    //             .catch((err) => {
+    //               throw [
+    //                 "Subsequent Bet Error\n",
+    //                 [bet.user_id, prediction.id, bet.endorsed, bet.date],
+    //                 err,
+    //               ];
+    //             })
+    //         );
 
-            usersWhoHaveBet[bet.user_id] = true;
-          }
+    //         usersWhoHaveBet[bet.user_id] = true;
+    //       }
 
-          const votePromises = [];
+    //       const votePromises = [];
 
-          // Insert votes if it is a judged prediction
-          if (prediction.judged_date) {
-            for (const vote of prediction.votes) {
-              votePromises.push(
-                client.query(INSERT_VOTE, [
-                  vote.user_id,
-                  prediction.id,
-                  vote.vote,
-                  vote.voted,
-                ])
-              );
-            }
-          }
+    //       // Insert votes if it is a judged prediction
+    //       if (prediction.judged_date) {
+    //         for (const vote of prediction.votes) {
+    //           votePromises.push(
+    //             client.query(INSERT_VOTE, [
+    //               vote.user_id,
+    //               prediction.id,
+    //               vote.vote,
+    //               vote.voted,
+    //             ])
+    //           );
+    //         }
+    //       }
 
-          return Promise.allSettled([...betsPromises, ...votePromises]).then(
-            (responses) => {
-              const rejectedPromises = responses.filter(isRejected);
+    //       return Promise.allSettled([...betsPromises, ...votePromises]).then(
+    //         (responses) => {
+    //           const rejectedPromises = responses.filter(isRejected);
 
-              // throw first error to help troubleshoot
-              if (rejectedPromises.length > 0) {
-                throw new Error(rejectedPromises[0].reason);
-              }
-            }
-          );
-        })
-    );
+    //           // throw first error to help troubleshoot
+    //           if (rejectedPromises.length > 0) {
+    //             throw new Error(rejectedPromises[0].reason);
+    //           }
+    //         }
+    //       );
+    //     })
+    // );
   }
 
-  try {
-    const responses = await Promise.allSettled(predictionPromises);
-    const rejectedPromises = responses.filter(isRejected);
-    if (rejectedPromises.length > 0) {
-      console.error(rejectedPromises[0]);
-      throw new Error();
-    }
-    console.log(
-      `Successfuly inserted ${predictionPromises.length} predictions.`
-    );
-    const PREDICTION_SEQUENCE_RESET = `SELECT SETVAL(pg_get_serial_sequence('predictions', 'id'), COALESCE((SELECT MAX(id)+1 FROM predictions), 1), false)`;
-    await client.query(PREDICTION_SEQUENCE_RESET);
-    console.log("Successfully reset Prediction ID sequence to latest number");
-  } catch (err) {
-    console.error("Failed to insert all predictions");
-    await client.query("ROLLBACK");
-    return;
-  }
+  // try {
+  //   const responses = await Promise.allSettled(predictionPromises);
+  //   const rejectedPromises = responses.filter(isRejected);
+  //   if (rejectedPromises.length > 0) {
+  //     console.error(rejectedPromises[0]);
+  //     throw new Error();
+  //   }
+  //   console.log(
+  //     `Successfuly inserted ${predictionPromises.length} predictions.`
+  //   );
+  //   const PREDICTION_SEQUENCE_RESET = `SELECT SETVAL(pg_get_serial_sequence('predictions', 'id'), COALESCE((SELECT MAX(id)+1 FROM predictions), 1), false)`;
+  //   await client.query(PREDICTION_SEQUENCE_RESET);
+  //   console.log("Successfully reset Prediction ID sequence to latest number");
+  // } catch (err) {
+  //   console.error("Failed to insert all predictions");
+  //   await client.query("ROLLBACK");
+  //   return;
+  // }
 
-  console.log("Committing.");
-  await client.query("COMMIT");
+  // console.log("Committing.");
+  // await client.query("COMMIT");
 
   return contextEntries;
 };
