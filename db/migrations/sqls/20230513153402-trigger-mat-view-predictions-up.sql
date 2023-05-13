@@ -2,6 +2,11 @@
 
 BEGIN;
 
+-- Drop Existing Indexes
+DROP INDEX IF EXISTS predictions_id_due_date_closed_date_idx;
+DROP INDEX IF EXISTS predictions_predictor_id_idx;
+DROP INDEX IF EXISTS bets_user_id_idx;
+
 -- Update predictions to have status and season_id column
 ALTER TABLE predictions 
   ADD COLUMN status TEXT,
@@ -128,6 +133,7 @@ CREATE VIEW enhanced_bets AS
     p.season_id
   FROM bets b
   JOIN predictions p on b.prediction_id = p.id;
+
 CREATE OR REPLACE VIEW enhanced_predictions AS
   WITH current_season_payout_formula AS (
     SELECT payout_formula

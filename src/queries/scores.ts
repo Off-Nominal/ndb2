@@ -200,6 +200,7 @@ const generate_GET_LEADERBOARD_with_SEASON = (
 const getLeaderboard =
   (client: PoolClient) =>
   (type: "points" | "predictions" | "bets", seasonId?: string | number) => {
+    console.log(generate_GET_LEADERBOARD_with_SEASON(type, seasonId));
     return client
       .query<APIScores.GetLeaderboard>(
         generate_GET_LEADERBOARD_with_SEASON(type, seasonId)

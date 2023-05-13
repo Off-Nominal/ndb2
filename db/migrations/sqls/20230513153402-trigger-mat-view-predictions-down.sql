@@ -218,4 +218,10 @@ ALTER TABLE predictions
   DROP COLUMN status,
   DROP COLUMN season_id;
 
+-- Replace indexes
+CREATE INDEX predictions_predictor_id_idx ON predictions (user_id);
+CREATE INDEX bets_user_id_idx ON bets (user_id);
+CREATE INDEX predictions_id_due_date_closed_date_idx ON predictions (id, due_date, closed_date);
+
+
 COMMIT;
