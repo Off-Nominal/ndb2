@@ -94,11 +94,14 @@ CREATE TRIGGER prediction_update_season AFTER UPDATE of closed_date, due_date ON
   FOR EACH ROW EXECUTE PROCEDURE refresh_season();
 
 -- Trigger for Updates to Status
-CREATE TRIGGER prediction_update_status AFTER UPDATE of retired_date, closed_date, triggered_date, judged_date ON predictions
+CREATE TRIGGER prediction_update_status AFTER UPDATE of retired_date, closed_date, judged_date ON predictions
   FOR EACH ROW EXECUTE PROCEDURE refresh_status();
 
 -- Trigger for Updates to Seasons
-CREATE TRIGGER season_insert_or_update AFTER INSERT OR UPDATE OR DELETE ON seasons
+CREATE TRIGGER season_insert_or_delete AFTER INSERT OR DELETE ON seasons
+  FOR EACH ROW EXECUTE PROCEDURE refresh_seasons();
+
+CREATE TRIGGER season_update AFTER UPDATE of "start", "end" ON seasons
   FOR EACH ROW EXECUTE PROCEDURE refresh_seasons();
 
 DROP VIEW IF EXISTS enhanced_votes;
