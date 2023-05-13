@@ -75,7 +75,6 @@ const getUserScoreById = (client: PoolClient) =>
     userId: number | string,
     seasonId?: number | string
   ): Promise<APIUsers.GetUserScoreByDiscordId> {
-    console.log(generate_GET_USER_SCORE_BY_ID_with_SEASON(seasonId));
     return client
       .query<APIUsers.GetUserScoreByDiscordId>(
         generate_GET_USER_SCORE_BY_ID_with_SEASON(seasonId),
