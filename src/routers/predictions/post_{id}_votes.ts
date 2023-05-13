@@ -32,11 +32,13 @@ router.post(
 
     if (existingVote?.vote === vote) {
       return res
-        .status(400)
+        .status(200)
         .json(
-          responseUtils.writeError(
-            "BAD_REQUEST",
-            "You already have that vote logged on this prediction, no change necessary."
+          responseUtils.writeSuccess(
+            req.prediction,
+            `You already voted ${
+              existingVote.vote === true ? "'yes'" : "'no'"
+            } on this prediction, no change necessary.`
           )
         );
     }
@@ -49,8 +51,10 @@ router.post(
         webhookManager.emit("new_vote", prediction);
 
         const message = !!existingVote
-          ? "Voted successfully changed."
-          : "Vote added successfully.";
+          ? `Vote successfully changed from ${
+              existingVote.vote === true ? "'yes' to 'no'" : "'no' to 'yes'"
+            }.`
+          : `${vote === true ? "'Yes'" : "'No'"} vote added successfully.`;
 
         return res.json(responseUtils.writeSuccess(prediction, message));
       })
@@ -61,7 +65,7 @@ router.post(
           .json(
             responseUtils.writeError(
               "SERVER_ERROR",
-              "There was an error adding this vote."
+              "There was an error updating this vote."
             )
           );
       })
