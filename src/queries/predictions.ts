@@ -115,6 +115,10 @@ const GET_NEXT_PREDICTION_TO_JUDGE = `
   SELECT id FROM predictions WHERE judged_date IS NULL AND triggered_date + '1 day' < NOW() ORDER BY due_date ASC LIMIT 1
 `;
 
+const REFRESH_PREDICTIONS_VIEW = `
+  REFRESH MATERIALIZED VIEW predictions_with_context
+`;
+
 const add = (client: PoolClient) =>
   function (
     user_id: string,
@@ -130,7 +134,9 @@ const add = (client: PoolClient) =>
         created_date,
       ])
       .then((response) => {
-        return response.rows[0];
+        return client
+          .query(REFRESH_PREDICTIONS_VIEW)
+          .then(() => response.rows[0]);
       });
   };
 
@@ -207,6 +213,11 @@ const searchPredictions = (client: PoolClient) =>
       .then((res) => res.rows);
   };
 
+const refreshPredictionsView = (client: PoolClient) =>
+  function (): Promise<boolean> {
+    return client.query(REFRESH_PREDICTIONS_VIEW).then(() => true);
+  };
+
 export default {
   add,
   getByPredictionId,
@@ -216,4 +227,5 @@ export default {
   getNextPredictionToTrigger,
   getNextPredictionToJudge,
   searchPredictions,
+  refreshPredictionsView,
 };

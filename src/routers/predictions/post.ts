@@ -25,11 +25,22 @@ router.post(
     // Add prediction
     const created_date = new Date();
 
-    predictions
-      .add(req.dbClient)(req.user_id, text, new Date(due_date), created_date)
+    req.dbClient
+      .query("BEGIN")
+      .then(() => {
+        return predictions.add(req.dbClient)(
+          req.user_id,
+          text,
+          new Date(due_date),
+          created_date
+        );
+      })
       .then((p) =>
         bets.add(req.dbClient)(req.user_id, p.id, true, created_date)
       )
+      .then((b) => {
+        return req.dbClient.query("COMMIT").then(() => b);
+      })
       .then((b) => predictions.getByPredictionId(req.dbClient)(b.prediction_id))
       .then((ep) => {
         res.json(

@@ -58,9 +58,14 @@ router.patch(
           )
         );
     }
+    req.dbClient
+      .query("BEGIN")
+      .then(() => {
+        return predictions.retirePredictionById(req.dbClient)(
+          req.prediction.id
+        );
+      })
 
-    return predictions
-      .retirePredictionById(req.dbClient)(req.prediction.id)
       .then(() =>
         predictions.getByPredictionId(req.dbClient)(req.prediction.id)
       )
