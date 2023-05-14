@@ -126,13 +126,13 @@ UPDATE bets b
   FROM predictions p
   WHERE p.id = b.prediction_id;
 
--- Create trigger function for refreshing wager on a single bet
-CREATE FUNCTION refresh_wager() RETURNS trigger
+-- Create trigger function for refreshing wager on a prediction update
+CREATE FUNCTION refresh_wager_from_predictions() RETURNS trigger
   SECURITY definer
   LANGUAGE plpgsql
 AS $$
   BEGIN
-    UPDATE bets
+    UPDATE bets b
       SET wager = 
         (SELECT 
         COALESCE(
@@ -150,10 +150,39 @@ AS $$
     RETURN new;
   END;
 $$;
+-- Create trigger function for refreshing wager on bet insert
+CREATE FUNCTION refresh_wager_from_bets() RETURNS trigger
+  SECURITY definer
+  LANGUAGE plpgsql
+AS $$
+  BEGIN
+    UPDATE bets
+      SET wager = 
+        (SELECT 
+          COALESCE(
+            NULLIF(
+              EXTRACT(
+                DAY FROM
+                  COALESCE(p.closed_date, p.due_date) - new.date
+              ),
+              0
+            ),
+            1
+          )
+        )::INT
+      FROM predictions p
+      WHERE p.id = new.prediction_id;
+    RETURN new;
+  END;
+$$;
 
 -- Triggers for Updates
-CREATE TRIGGER predictions_bets_wager AFTER UPDATE of due_date, closed_date ON predictions
-  FOR EACH ROW EXECUTE PROCEDURE refresh_wager();
+CREATE TRIGGER predictions_bets_wager_update AFTER UPDATE of due_date, closed_date ON predictions
+  FOR EACH ROW EXECUTE PROCEDURE refresh_wager_from_predictions();
+
+-- Triggers for Inserts
+CREATE TRIGGER predictions_bets_wager_insert AFTER INSERT ON bets
+  FOR EACH ROW EXECUTE PROCEDURE refresh_wager_from_bets();
 
 DROP VIEW IF EXISTS enhanced_votes;
 
