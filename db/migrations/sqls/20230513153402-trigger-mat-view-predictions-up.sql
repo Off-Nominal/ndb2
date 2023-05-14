@@ -104,6 +104,57 @@ CREATE TRIGGER season_insert_or_delete AFTER INSERT OR DELETE ON seasons
 CREATE TRIGGER season_update AFTER UPDATE of "start", "end" ON seasons
   FOR EACH ROW EXECUTE PROCEDURE refresh_seasons();
 
+-- Update bets to have wager column
+ALTER TABLE bets
+  ADD COLUMN wager INTEGER;
+
+-- Update to reflect current data
+UPDATE bets b
+  SET wager = 
+    (SELECT 
+      COALESCE(
+        NULLIF(
+          EXTRACT(
+            DAY FROM
+              COALESCE(p.closed_date, p.due_date) - b.date
+          ),
+          0
+        ),
+        1
+      )
+    )::INT
+  FROM predictions p
+  WHERE p.id = b.prediction_id;
+
+-- Create trigger function for refreshing wager on a single bet
+CREATE FUNCTION refresh_wager() RETURNS trigger
+  SECURITY definer
+  LANGUAGE plpgsql
+AS $$
+  BEGIN
+    UPDATE bets
+      SET wager = 
+        (SELECT 
+        COALESCE(
+          NULLIF(
+            EXTRACT(
+              DAY FROM
+                COALESCE(new.closed_date, new.due_date) - b.date
+            ),
+            0
+          ),
+          1
+        )
+      )::INT
+    WHERE new.id = b.prediction_id;
+    RETURN new;
+  END;
+$$;
+
+-- Triggers for Updates
+CREATE TRIGGER predictions_bets_wager AFTER UPDATE of due_date, closed_date ON predictions
+  FOR EACH ROW EXECUTE PROCEDURE refresh_wager();
+
 DROP VIEW IF EXISTS enhanced_votes;
 
 DROP VIEW IF EXISTS payouts;
@@ -161,7 +212,7 @@ CREATE OR REPLACE VIEW enhanced_predictions AS
     (SELECT 
       COALESCE(
         NULLIF(
-          (SELECT SUM(eb.wager) FROM enhanced_bets eb WHERE eb.prediction_id = p.id AND eb.endorsed IS TRUE), 0
+          (SELECT SUM(b.wager) FROM bets b WHERE b.prediction_id = p.id AND b.endorsed IS TRUE), 0
           ), 0
       )
     ) as total_endorsement_wagers,
@@ -169,23 +220,23 @@ CREATE OR REPLACE VIEW enhanced_predictions AS
     (SELECT 
       COALESCE(
         NULLIF(
-          (SELECT SUM(eb.wager) FROM enhanced_bets eb WHERE eb.prediction_id = p.id AND eb.endorsed IS FALSE), 0
+          (SELECT SUM(b.wager) FROM bets b WHERE b.prediction_id = p.id AND b.endorsed IS FALSE), 0
           ), 0
       )
     ) as total_undorsement_wagers,
-    (SELECT SUM(eb.wager) FROM enhanced_bets eb WHERE eb.prediction_id = p.id) as total_wager,
+    (SELECT SUM(b.wager) FROM bets b WHERE b.prediction_id = p.id) as total_wager,
     (SELECT 
       ROUND(
         calc_payout_ratio(
-          (SELECT SUM(eb.wager) 
-            FROM enhanced_bets eb WHERE eb.prediction_id = p.id)::INT,
+          (SELECT SUM(b.wager) 
+            FROM bets b WHERE b.prediction_id = p.id)::INT,
           (COALESCE(
             NULLIF(
               (SELECT 
-                  SUM(eb.wager) 
-                FROM enhanced_bets eb 
-                WHERE eb.prediction_id = p.id 
-                AND eb.endorsed IS TRUE
+                  SUM(b.wager) 
+                FROM bets b 
+                WHERE b.prediction_id = p.id 
+                AND b.endorsed IS TRUE
               ),
               0
             ),
@@ -198,15 +249,15 @@ CREATE OR REPLACE VIEW enhanced_predictions AS
     (SELECT 
       ROUND(
         calc_payout_ratio(
-          (SELECT SUM(eb.wager)
-            FROM enhanced_bets eb WHERE eb.prediction_id = p.id)::INT,
+          (SELECT SUM(b.wager)
+            FROM bets b WHERE b.prediction_id = p.id)::INT,
           (COALESCE(
             NULLIF(
               (SELECT 
-                  SUM(eb.wager)
-                FROM enhanced_bets eb 
-                WHERE eb.prediction_id = p.id 
-                AND eb.endorsed IS FALSE
+                  SUM(b.wager)
+                FROM bets b 
+                WHERE b.prediction_id = p.id 
+                AND b.endorsed IS FALSE
               ),
               0
             ),
@@ -221,13 +272,13 @@ CREATE OR REPLACE VIEW enhanced_predictions AS
 
 CREATE VIEW payouts AS
   SELECT
-    eb.bet_id,
-    eb.better_id,
-    eb.endorsed,
-    eb.wager,
-    eb.prediction_id,
-    eb.predictor_id,
-    eb.status,
+    b.id as bet_id,
+    b.user_id as better_id,
+    b.endorsed,
+    b.wager,
+    b.prediction_id,
+    ep.predictor_id,
+    ep.status,
     ep.endorsement_ratio,
     ep.undorsement_ratio,
     ep.season_id,
@@ -235,9 +286,9 @@ CREATE VIEW payouts AS
       COALESCE(
         NULLIF(
           FLOOR(
-            eb.wager *
+            b.wager *
             (CASE
-              WHEN eb.status = 'successful'
+              WHEN ep.status = 'successful'
               THEN ep.endorsement_ratio
               ELSE ep.undorsement_ratio
             END)
@@ -246,15 +297,15 @@ CREATE VIEW payouts AS
       )  *
       (CASE
         WHEN 
-          (eb.status = 'successful' AND eb.endorsed IS TRUE) OR 
-          (eb.status = 'failed' AND eb.endorsed IS FALSE)
+          (ep.status = 'successful' AND b.endorsed IS TRUE) OR 
+          (ep.status = 'failed' AND b.endorsed IS FALSE)
         THEN 1
         ELSE -1
       END)
     ) as payout
-  FROM enhanced_bets eb
-  JOIN enhanced_predictions ep ON ep.prediction_id = eb.prediction_id
-  WHERE eb.status = 'successful' OR eb.status = 'failed';
+  FROM bets b
+  JOIN enhanced_predictions ep ON ep.prediction_id = b.prediction_id
+  WHERE ep.status = 'successful' OR ep.status = 'failed';
 
 CREATE VIEW enhanced_votes AS
   SELECT 

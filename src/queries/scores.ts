@@ -56,7 +56,7 @@ export const generate_GET_USER_PREDICTION_SUMMARY_with_SEASON = (
 export const generate_GET_USER_BET_SUMMARY_with_SEASON = (
   seasonId?: number | string
 ) => {
-  const whereClause = seasonId ? ` AND eb.season_id = ${seasonId}` : "";
+  const whereClause = seasonId ? ` AND ep.season_id = ${seasonId}` : "";
 
   const query = `
     SELECT
@@ -64,32 +64,33 @@ export const generate_GET_USER_BET_SUMMARY_with_SEASON = (
         u.discord_id,
         RANK () OVER (
           ORDER BY 
-            COUNT(eb.bet_id) FILTER 
+            COUNT(b.id) FILTER 
               (WHERE 
-                ((eb.status = 'successful' AND eb.endorsed IS TRUE) OR
-                (eb.status = 'failed' AND eb.endorsed IS FALSE))${whereClause}
+                ((ep.status = 'successful' AND b.endorsed IS TRUE) OR
+                (ep.status = 'failed' AND b.endorsed IS FALSE))${whereClause}
               )::INT DESC,
-            COUNT(eb.bet_id) FILTER 
+            COUNT(b.id) FILTER 
               (WHERE 
-                ((eb.status = 'successful' AND eb.endorsed IS FALSE) OR
-                (eb.status = 'failed' AND eb.endorsed IS TRUE))${whereClause}
+                ((ep.status = 'successful' AND b.endorsed IS FALSE) OR
+                (ep.status = 'failed' AND b.endorsed IS TRUE))${whereClause}
               )::INT ASC
         ) as rank,
-        COUNT(eb.bet_id) FILTER 
+        COUNT(b.id) FILTER 
           (WHERE 
-            ((eb.status = 'successful' AND eb.endorsed IS TRUE) OR
-            (eb.status = 'failed' AND eb.endorsed IS FALSE))${whereClause}
+            ((ep.status = 'successful' AND b.endorsed IS TRUE) OR
+            (ep.status = 'failed' AND b.endorsed IS FALSE))${whereClause}
           )::INT as successful,
-        COUNT(eb.bet_id) FILTER 
+        COUNT(b.id) FILTER 
           (WHERE 
-            ((eb.status = 'successful' AND eb.endorsed IS FALSE) OR
-            (eb.status = 'failed' AND eb.endorsed IS TRUE))${whereClause}
+            ((ep.status = 'successful' AND b.endorsed IS FALSE) OR
+            (ep.status = 'failed' AND b.endorsed IS TRUE))${whereClause}
           )::INT as failed,
-        COUNT(eb.bet_id) FILTER 
-          (WHERE (eb.status = 'open' OR eb.status = 'closed')${whereClause})::INT as pending,
-        COUNT(eb.bet_id) FILTER (WHERE eb.status = 'retired')::INT as retired
+        COUNT(b.id) FILTER 
+          (WHERE (ep.status = 'open' OR ep.status = 'closed')${whereClause})::INT as pending,
+        COUNT(b.id) FILTER (WHERE ep.status = 'retired')::INT as retired
       FROM users u
-      LEFT JOIN enhanced_bets eb ON eb.better_id = u.id
+      LEFT JOIN bets b ON b.user_id = u.id
+      JOIN enhanced_predictions ep ON b.prediction_id = ep.prediction_id
       GROUP BY u.id`;
 
   return query;

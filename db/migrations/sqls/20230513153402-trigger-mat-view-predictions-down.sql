@@ -6,7 +6,6 @@ BEGIN;
 DROP VIEW IF EXISTS enhanced_votes;
 DROP VIEW IF EXISTS payouts;
 DROP VIEW IF EXISTS enhanced_predictions;
-DROP VIEW IF EXISTS enhanced_bets;
 
 -- Reset them to previous state
 CREATE VIEW enhanced_bets AS
