@@ -50,20 +50,20 @@ const GET_ENHANCED_PREDICTION_BY_ID = `
       COALESCE(jsonb_agg(p_bets), '[]') 
       FROM
         (SELECT 
-          eb.bet_id as id, 
+          b.id, 
           (SELECT row_to_json(bett) FROM 
             (SELECT 
                 u.id, 
                 u.discord_id
               FROM users u 
-              WHERE u.id = eb.better_id) 
+              WHERE u.id = b.user_id) 
             bett) 
           as better, 
-          eb.bet_date as date,
-          eb.endorsed,
-          eb.wager
-          FROM enhanced_bets eb
-          WHERE eb.prediction_id = ep.prediction_id
+          b.date,
+          b.endorsed,
+          b.wager
+          FROM bets b
+          WHERE b.prediction_id = ep.prediction_id
           ORDER BY date ASC
         ) p_bets 
   ) as bets,
