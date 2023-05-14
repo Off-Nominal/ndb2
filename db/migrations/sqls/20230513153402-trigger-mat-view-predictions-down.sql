@@ -210,14 +210,14 @@ DROP TRIGGER prediction_update_season ON predictions;
 DROP TRIGGER prediction_update_status ON predictions;
 DROP TRIGGER season_insert_or_delete ON seasons;
 DROP TRIGGER season_update ON seasons;
--- DROP TRIGGER predictions_bets_wager_update ON predictions;
--- DROP TRIGGER predictions_bets_wager_insert ON bets;
+DROP TRIGGER predictions_bets_wager_update ON predictions;
+DROP TRIGGER predictions_bets_wager_insert ON bets;
 
 DROP FUNCTION refresh_status;
 DROP FUNCTION refresh_season;
 DROP FUNCTION refresh_seasons;
 DROP FUNCTION refresh_wager_from_predictions;
--- DROP FUNCTION refresh_wager_from_bets;
+DROP FUNCTION refresh_wager_from_bets;
 
 ALTER TABLE predictions
   DROP COLUMN status,

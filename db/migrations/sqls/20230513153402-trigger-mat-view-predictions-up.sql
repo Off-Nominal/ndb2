@@ -171,7 +171,7 @@ AS $$
           )
         )::INT
       FROM predictions p
-      WHERE p.id = new.prediction_id;
+      WHERE p.id = new.prediction_id AND bets.id = new.id;
     RETURN new;
   END;
 $$;
