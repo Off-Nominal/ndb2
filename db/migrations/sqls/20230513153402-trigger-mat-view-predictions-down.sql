@@ -6,6 +6,7 @@ BEGIN;
 DROP VIEW IF EXISTS enhanced_votes;
 DROP VIEW IF EXISTS payouts;
 DROP VIEW IF EXISTS enhanced_predictions;
+DROP VIEW IF EXISTS enhanced_bets;
 
 -- Reset them to previous state
 CREATE VIEW enhanced_bets AS
@@ -209,14 +210,19 @@ DROP TRIGGER prediction_update_season ON predictions;
 DROP TRIGGER prediction_update_status ON predictions;
 DROP TRIGGER season_insert_or_delete ON seasons;
 DROP TRIGGER season_update ON seasons;
+DROP TRIGGER predictions_bets_wager ON predictions;
 
 DROP FUNCTION refresh_status;
 DROP FUNCTION refresh_season;
 DROP FUNCTION refresh_seasons;
+DROP FUNCTION refresh_wager;
 
 ALTER TABLE predictions
   DROP COLUMN status,
   DROP COLUMN season_id;
+
+ALTER TABLE bets
+  DROP COLUMN wager;
 
 -- Replace indexes
 CREATE INDEX predictions_predictor_id_idx ON predictions (user_id);
