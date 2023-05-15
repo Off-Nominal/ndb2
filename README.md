@@ -1,145 +1,27 @@
 # Nostradambot 2 API
 
-## Environments
+## Project Setup
 
-### Dev
+1. Clone this repository
+2. `npm install`
+3. Create a development `postgres` database in your development environment using the names and credentials of your choice
+4. Setup your environment variables according to the `.env.example` file (see below)
+5. Run `npm run migrate:up` to bring your dev database up to speed
+6. Run `npm run db:reset` to seed your database with some sample data
+7. Run `npm run dev` to start the development environment
+
+### Environment Variables
 
 Create a database in your local postgres installation and set variables from `.env.example` to a local copy of `.env`.
 
-To set up the database, run the database migration script `npm run migrate:up`
+Many variables are preloaded with default configurations, but you'll need to add some:
 
-## Migrations
+1. `DATABASE_URL` should be your fully qualified postgres database url, such as `postgresql://username:password@domain:port/databasename`
+2. `DISCORD_CLIENT_API_KEY` should be a high entroy randomly generated key to allow clients to connect to your development environment. Whether you are building the Discord bot or the Web Portal, this key should match across those platforms.
+3. `WEBHOOK_DISCORD_BOT` is a receiving URL for webhooks, should you need to work with those. This API sends data to it when events happen to the data. It is designed for use with the Discord Bot and not the web portal.
+
+## Developing for NDB2 API
+
+### Migrations
 
 To create a new migration, run `npm run migrate:create my-migration-description`.
-
-### Data Types
-
-The following data type keyes can be used.
-
-```js
-module.exports = {
-  CHAR: "char",
-  STRING: "string",
-  TEXT: "text",
-  SMALLINT: "smallint",
-  BIGINT: "bigint",
-  INTEGER: "int",
-  SMALL_INTEGER: "smallint",
-  BIG_INTEGER: "bigint",
-  REAL: "real",
-  DATE: "date",
-  DATE_TIME: "datetime",
-  TIME: "time",
-  BLOB: "blob",
-  TIMESTAMP: "timestamp",
-  BINARY: "binary",
-  BOOLEAN: "boolean",
-  DECIMAL: "decimal",
-};
-```
-
-## Score Views Worksheet
-
-- `/predict score ["all time", "last season", "this season"]` - get my short score
-- `/predict leaderboard ["all time", "last season", "this season"] ["points", "predictions", "bets"]` - get short leaderboard
-
-- `/api/users/discord_id/:discord_id/scores` - all time short score
-- `/api/users/discord_id/:discord_id/scores/seasons/:season_id` - season short score
-- `/api/scores?view=points` - all time short leaderboard, points/predictions/bets
-- `/api/scores/seasons/:season_id?view=points` - season short leaderboard points/predictions/bets
-
-### Short Score
-
-```json
-{
-  "discord_id": "123456789",
-  "season": {
-    // omitted for all time scores
-    "id": 1,
-    "name": "Falcon",
-    "start": "2023-07-01T00:00:00Z",
-    "end": "2023-10-01T00:00:00Z"
-  },
-  "points": {
-    "total": 3413,
-    "ranking": 3
-  },
-  "predictions": {
-    "total": 18,
-    "correct": 12,
-    "incorrect": 6,
-    "ranking": 5 // ranking based on total correct
-  },
-  "bets": {
-    "total": 31,
-    "correct": 18,
-    "incorrect": 13,
-    "ranking": 2 // ranking based on total correct
-  },
-  "votes": {
-    "sycophantic": 6,
-    "contrarian": 3,
-    "pending": 4
-  }
-}
-```
-
-### Short Leaderboard
-
-Short leaderboard formats are for quick views of rankings. Three views would exist - points, predictions, and bets.
-
-```json
-{
-  "type": "points", // or predictions or bets
-  "season": {
-    // omitted for all time scores
-    "id": 1,
-    "name": "Falcon",
-    "start_date": "2023-07-01T00:00:00Z",
-    "start_date": "2023-10-01T00:00:00Z"
-  },
-  "leaders": [
-    {
-      "id": "ac5ad4e9-3b48-43b4-995c-48b0842b0e4c",
-      "discord_id": "123456789",
-      "ranking": 1,
-      "points": 3081, // for points view
-      "predictions": {
-        // for predictions view
-        "successful": 8,
-        "unsuccessful": 4,
-        "total": 12
-      },
-      "bets": {
-        // for bets view
-        "successful": 14,
-        "unsuccessful": 12,
-        "total": 26
-      }
-    } // up to ten leaders in a query
-  ]
-}
-```
-
-## Web Dashboard Planning
-
-### MVP
-
-- Discord Authentication `/login`
-  - Discord Logout `/logout`
-- Leaderboards `/leaderboards`
-- Prediction Search/List `/predictions`
-- Prediction View :id `/predictions/:id`
-- Admin Page `/admin`
-  - Untrigger a manually triggered prediction (remove triggered_date, triggerer, close_date, delete all votes)
-
-## MVP Testing
-
-- Can create a new prediction
-- Can retire a recently made prediction
-- Can not retire a not-recently made prediction or a closed prediction
-- Can trigger a prediction that isn't closed
-- Can not trigger a prediction that is closed
-- Due predictions are automatically triggered
-- Can add effective close dates to triggered predictions
--
