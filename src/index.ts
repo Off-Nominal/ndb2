@@ -28,6 +28,10 @@ app.use("/api/users", usersRouter);
 import scoresRouter from "./routers/scores";
 app.use("/api/scores", scoresRouter);
 
+app.get("*", (req, res) => {
+  return res.status(404).json({ error: "Not found" });
+});
+
 app.listen(PORT, () => {
   console.log(`[NDB2]: Application listeneing on port: `, PORT);
 });
