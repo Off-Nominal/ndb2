@@ -22,7 +22,7 @@ router.get("/", getDbClient, async (req: Request, res: Response) => {
   const view = req.query.view || ScoreView.POINTS;
 
   if (!isScoreView(view)) {
-    return res
+    res
       .status(400)
       .json(
         responseUtils.writeError(
@@ -32,6 +32,7 @@ router.get("/", getDbClient, async (req: Request, res: Response) => {
           )}`
         )
       );
+    return req.dbClient.release();
   }
 
   scores

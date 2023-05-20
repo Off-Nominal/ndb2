@@ -36,7 +36,7 @@ router.post(
     if (bet) {
       // Reject if existing bet matches change request
       if (bet.endorsed === endorsed) {
-        return res
+        res
           .status(400)
           .json(
             responseUtils.writeError(
@@ -47,6 +47,7 @@ router.post(
               req.prediction
             )
           );
+        return req.dbClient.release();
       }
 
       // Reject if change is outside the allowable time window
@@ -56,7 +57,7 @@ router.post(
       });
 
       if (isAfter(now, expiryWindow)) {
-        return res
+        res
           .status(403)
           .json(
             responseUtils.writeError(
@@ -64,6 +65,7 @@ router.post(
               `Bets cannot be changed past the allowable time window of ${GAME_MECHANICS.predictionUpdateWindow} hours since the bet was made.`
             )
           );
+        return req.dbClient.release();
       }
     }
 

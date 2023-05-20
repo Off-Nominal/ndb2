@@ -34,6 +34,7 @@ export const getPrediction = async (
     return next();
   } catch (err) {
     console.error(err);
+    req.dbClient.release();
     return res
       .status(500)
       .json(

@@ -31,7 +31,7 @@ router.post(
     );
 
     if (existingVote?.vote === vote) {
-      return res
+      res
         .status(200)
         .json(
           responseUtils.writeSuccess(
@@ -41,6 +41,7 @@ router.post(
             } on this prediction, no change necessary.`
           )
         );
+      return req.dbClient.release();
     }
 
     return votes
