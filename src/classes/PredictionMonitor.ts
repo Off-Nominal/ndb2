@@ -1,28 +1,20 @@
 import webhookManager from "../config/webhook_subscribers";
 import pool from "../db";
 import predictions from "../queries/predictions";
-import cron from "node-cron";
+import schedule from "node-schedule";
 
 const triggerSchedule = "0/30 12-21 * * *";
 const judgementSchedule = "*/10 * * * *";
 
-if (!cron.validate(triggerSchedule)) {
-  throw new SyntaxError("Cron Trigger Schedule Syntax invalud");
-}
-
-if (!cron.validate(judgementSchedule)) {
-  throw new SyntaxError("Cron Judgement Schedule Syntax invalud");
-}
-
 export default class PredictionMonitor {
   constructor() {
     // Trigger Schedule
-    cron.schedule(triggerSchedule, () => {
+    schedule.scheduleJob(triggerSchedule, () => {
       this.triggerNextPrediction();
     });
 
     // Judgement Schedule
-    cron.schedule(judgementSchedule, () => {
+    schedule.scheduleJob(judgementSchedule, () => {
       this.judgeNextPrediction();
     });
 
