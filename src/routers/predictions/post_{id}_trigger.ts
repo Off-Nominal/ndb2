@@ -32,7 +32,7 @@ router.post(
     if (closed_date) {
       // Verify closed date is after prediction's creation date
       if (isBefore(closedDate, new Date(req.prediction.created_date))) {
-        return res
+        res
           .status(400)
           .json(
             responseUtils.writeError(
@@ -40,6 +40,7 @@ router.post(
               "Closed date cannot be before prediction's created date"
             )
           );
+        return req.dbClient.release();
       }
     }
 

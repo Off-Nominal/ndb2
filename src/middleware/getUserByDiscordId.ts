@@ -19,6 +19,7 @@ export const getUserByDiscordId = async (
     }
   } catch (err) {
     console.error(err);
+    req.dbClient.release();
     return res
       .status(500)
       .json(

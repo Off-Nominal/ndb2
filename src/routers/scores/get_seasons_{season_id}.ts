@@ -18,7 +18,7 @@ router.get(
     const { season_id } = req.params;
 
     if (!isScoreView(view)) {
-      return res
+      res
         .status(400)
         .json(
           responseUtils.writeError(
@@ -28,6 +28,7 @@ router.get(
             )}`
           )
         );
+      return req.dbClient.release();
     }
 
     scores

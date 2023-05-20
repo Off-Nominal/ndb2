@@ -50,7 +50,7 @@ const createChecker = (
       }
     }
 
-    next();
+    return next();
   };
 };
 
