@@ -31,7 +31,7 @@ router.post(
     );
 
     if (existingVote?.vote === vote) {
-      res
+      return res
         .status(200)
         .json(
           responseUtils.writeSuccess(
@@ -41,7 +41,6 @@ router.post(
             } on this prediction, no change necessary.`
           )
         );
-      return req.dbClient.release();
     }
 
     return votes
@@ -69,8 +68,7 @@ router.post(
               "There was an error updating this vote."
             )
           );
-      })
-      .finally(() => req.dbClient.release());
+      });
   }
 );
 

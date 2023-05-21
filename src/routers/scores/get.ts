@@ -22,7 +22,7 @@ router.get("/", getDbClient, async (req: Request, res: Response) => {
   const view = req.query.view || ScoreView.POINTS;
 
   if (!isScoreView(view)) {
-    res
+    return res
       .status(400)
       .json(
         responseUtils.writeError(
@@ -32,7 +32,6 @@ router.get("/", getDbClient, async (req: Request, res: Response) => {
           )}`
         )
       );
-    return req.dbClient.release();
   }
 
   scores
@@ -44,8 +43,7 @@ router.get("/", getDbClient, async (req: Request, res: Response) => {
           "Leaderboard fetched successfully."
         )
       );
-    })
-    .finally(() => req.dbClient.release());
+    });
 });
 
 export default router;

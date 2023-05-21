@@ -14,13 +14,12 @@ router.get(
     getPrediction,
   ],
   async (req: Request, res: Response) => {
-    res.json(
+    return res.json(
       responseUtils.writeSuccess(
         req.prediction,
         "Prediction fetched successfully."
       )
     );
-    req.dbClient.release();
   }
 );
 

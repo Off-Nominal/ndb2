@@ -45,8 +45,7 @@ router.post(
           .json(
             responseUtils.writeError("SERVER_ERROR", "Error Adding prediction")
           );
-      })
-      .finally(() => req.dbClient.release());
+      });
   }
 );
 

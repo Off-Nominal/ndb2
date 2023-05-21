@@ -11,7 +11,6 @@ const predictionStatusValidator = (
     const allowedStatuses = Array.isArray(statuses) ? statuses : [statuses];
 
     if (!allowedStatuses.includes(status)) {
-      req.dbClient.release();
       return res
         .status(400)
         .json(

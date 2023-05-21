@@ -32,6 +32,10 @@ app.get("*", (req, res) => {
   return res.status(404).json({ error: "Not found" });
 });
 
+app.use("*", (req, res, next) => {
+  console.log("last middleware");
+});
+
 app.listen(PORT, () => {
   console.log(`[NDB2]: Application listeneing on port: `, PORT);
 });
