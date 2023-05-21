@@ -26,7 +26,7 @@ router.patch(
 
     // Verify prediction is owned by updater
     if (req.prediction.predictor.discord_id !== discord_id) {
-      res
+      return res
         .status(403)
         .json(
           responseUtils.writeError(
@@ -34,7 +34,6 @@ router.patch(
             "This prediction does not belong to you."
           )
         );
-      return req.dbClient.release();
     }
 
     // Verify that prediction retirement is within allowable time window
@@ -50,7 +49,7 @@ router.patch(
       : expiryWindow;
 
     if (isAfter(now, effectiveExpiryWindow)) {
-      res
+      return res
         .status(403)
         .json(
           responseUtils.writeError(
@@ -58,7 +57,6 @@ router.patch(
             "This prediction is past the retirement window. It is locked and cannot be retired."
           )
         );
-      return req.dbClient.release();
     }
 
     return predictions
@@ -87,8 +85,7 @@ router.patch(
               "There was an error retiring this prediction."
             )
           );
-      })
-      .finally(() => req.dbClient.release());
+      });
   }
 );
 

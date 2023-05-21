@@ -45,7 +45,7 @@ router.get(
     const { status, sort_by, page, keyword } = req.query;
 
     if (!status && !sort_by && !keyword) {
-      res
+      return res
         .status(400)
         .json(
           responseUtils.writeError(
@@ -53,7 +53,6 @@ router.get(
             `Please provide at least one query parameter in your search.`
           )
         );
-      return req.dbClient.release();
     }
 
     let statuses = [];
@@ -66,7 +65,7 @@ router.get(
 
     for (const status of statuses) {
       if (status !== undefined && !isPredictionLifeCycle(status)) {
-        res
+        return res
           .status(400)
           .json(
             responseUtils.writeError(
@@ -76,13 +75,11 @@ router.get(
               ).join(", ")}`
             )
           );
-
-        return req.dbClient.release();
       }
     }
 
     if (sort_by !== undefined && !isSortByOption(sort_by)) {
-      res
+      return res
         .status(400)
         .json(
           responseUtils.writeError(
@@ -92,8 +89,6 @@ router.get(
             ).join(", ")}`
           )
         );
-
-      return req.dbClient.release();
     }
 
     predictions
@@ -110,8 +105,7 @@ router.get(
             "Predictions fetched successfully."
           )
         );
-      })
-      .then(() => req.dbClient.release());
+      });
   }
 );
 

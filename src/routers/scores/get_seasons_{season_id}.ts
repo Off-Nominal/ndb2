@@ -18,7 +18,7 @@ router.get(
     const { season_id } = req.params;
 
     if (!isScoreView(view)) {
-      res
+      return res
         .status(400)
         .json(
           responseUtils.writeError(
@@ -28,7 +28,6 @@ router.get(
             )}`
           )
         );
-      return req.dbClient.release();
     }
 
     scores
@@ -40,8 +39,7 @@ router.get(
             "Leaderboard fetched successfully."
           )
         );
-      })
-      .finally(() => req.dbClient.release());
+      });
   }
 );
 

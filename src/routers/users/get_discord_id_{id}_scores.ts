@@ -20,8 +20,7 @@ router.get(
         res.json(
           responseUtils.writeSuccess(response, "Score fetched successfully.")
         );
-      })
-      .finally(() => req.dbClient.release());
+      });
   }
 );
 

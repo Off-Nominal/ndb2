@@ -15,6 +15,12 @@ export const getDbClient = (
       }
 
       req.dbClient = client;
+
+      // release client when finished
+      res.on("finish", () => {
+        req.dbClient.release();
+      });
+
       next();
     })
     .catch((err) => {
