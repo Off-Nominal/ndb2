@@ -5,7 +5,7 @@ import predictions from "../../queries/predictions";
 import { SortByOption } from "../../queries/predictions_search";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
-import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
+import users from "../../queries/users";
 const router = express.Router();
 
 const isPredictionLifeCycle = (val: any): val is PredictionLifeCycle => {
@@ -36,19 +36,18 @@ router.get(
     }),
     paramValidator.string("sort_by", { type: "query", optional: true }),
     paramValidator.string("keyword", { type: "query", optional: true }),
-    paramValidator.boolean("mine", { type: "query", optional: true }),
-    paramValidator.boolean("opportunities", { type: "query", optional: true }),
+    paramValidator.string("creator", { type: "query", optional: true }),
+    paramValidator.string("unbetter", { type: "query", optional: true }),
     paramValidator.integerParseableString("page", {
       type: "query",
       optional: true,
     }),
     getDbClient,
-    getUserByDiscordId,
   ],
   async (req: Request, res: Response) => {
-    const { status, sort_by, page, keyword, mine, opportunities } = req.query;
+    const { status, sort_by, page, keyword, creator, unbetter } = req.query;
 
-    if (!status && !sort_by && !keyword && !mine && !opportunities) {
+    if (!status && !sort_by && !keyword && !creator && !unbetter) {
       return res
         .status(400)
         .json(
@@ -59,13 +58,13 @@ router.get(
         );
     }
 
-    if (mine === "true" && opportunities === "true") {
+    if (creator && unbetter) {
       return res
         .status(400)
         .json(
           responseUtils.writeError(
             "MALFORMED_QUERY_PARAMS",
-            `Filtering by both "mine" and "opportunities" is not allowed. You can only filter by one or the other.`
+            `Filtering by both "creator" and "unbetter" is not allowed. You can only filter by one or the other.`
           )
         );
     }
@@ -106,14 +105,32 @@ router.get(
         );
     }
 
+    // check for user
+    const userParam = creator || unbetter;
+    let user_id: string;
+
+    if (userParam) {
+      try {
+        const user = await users.getByDiscordId(req.dbClient)(
+          userParam as string
+        );
+        user_id = user.id;
+      } catch (err) {
+        console.error(err);
+        return res
+          .status(500)
+          .json(responseUtils.writeError("BAD_REQUEST", "User does not exist"));
+      }
+    }
+
     predictions
       .searchPredictions(req.dbClient)({
         keyword: keyword as string,
         sort_by: sort_by as SortByOption,
         statuses: statuses as PredictionLifeCycle[],
         page: Number(page),
-        predictor_id: mine === "true" ? req.user_id : undefined,
-        non_better_id: opportunities === "true" ? req.user_id : undefined,
+        predictor_id: creator && user_id,
+        non_better_id: unbetter && user_id,
       })
       .then((predictions) => {
         res.json(

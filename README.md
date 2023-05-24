@@ -24,4 +24,4 @@ Many variables are preloaded with default configurations, but you'll need to add
 
 ### Migrations
 
-To create a new migration, run `npm run migrate:create my-migration-description`.
+To create a new migration, run `npm run migrate:create my-migration-description -- --sql-file`.
