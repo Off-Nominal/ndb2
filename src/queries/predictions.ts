@@ -61,7 +61,9 @@ const GET_ENHANCED_PREDICTION_BY_ID = `
           as better, 
           b.date,
           b.endorsed,
-          b.wager
+          b.wager,
+          b.valid,
+          b.payout
           FROM bets b
           WHERE b.prediction_id = ep.prediction_id
           ORDER BY date ASC
@@ -103,6 +105,7 @@ const RETIRE_PREDICTION_BY_ID = `
 const CLOSE_PREDICTION_BY_ID = `
   UPDATE predictions SET triggerer_id = $2, closed_date = $3, triggered_date = NOW() WHERE predictions.id = $1;
 `;
+
 const JUDGE_PREDICTION_BY_ID = `
   UPDATE predictions SET judged_date = NOW() WHERE predictions.id = $1;
 `;
@@ -129,9 +132,7 @@ const add = (client: PoolClient) =>
         due_date,
         created_date,
       ])
-      .then((response) => {
-        return response.rows[0];
-      });
+      .then((response) => response.rows[0]);
   };
 
 const getByPredictionId = (client: PoolClient) =>

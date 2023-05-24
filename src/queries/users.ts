@@ -29,6 +29,8 @@ const generate_GET_USER_SCORE_BY_ID_with_SEASON = (
   `
     : "";
 
+  console.log(generate_GET_USER_SCORE_SUMMARY_with_SEASON(seasonId));
+
   return `
     WITH 
       users_scores_summary 
@@ -48,7 +50,7 @@ const generate_GET_USER_SCORE_BY_ID_with_SEASON = (
         SELECT successful, failed, pending, retired, rank FROM users_predictions_summary WHERE id = $1
       ) pred_sum) as predictions,
       (SELECT row_to_json(bet_sum) FROM (
-        SELECT successful, failed, pending, retired, rank FROM users_bets_summary WHERE id = $1
+        SELECT successful, failed, pending, retired, invalid, rank FROM users_bets_summary WHERE id = $1
       ) bet_sum) as bets,
       (SELECT row_to_json(vote_sum) FROM (
         SELECT sycophantic, contrarian, pending FROM users_votes_summary WHERE id = $1
