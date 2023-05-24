@@ -90,17 +90,3 @@ export default {
   getByDiscordId,
   getUserScoreById,
 };
-
-// SELECT
-//         u.id as better_id,
-//         u.discord_id,
-//         COALESCE(SUM(bets.payout) FILTER (WHERE p.season_id = 1), 0) as points,
-//         RANK () OVER (
-//           ORDER BY
-//             COALESCE(SUM(bets.payout) FILTER (WHERE p.season_id = 1), 0) DESC
-//         )
-//       FROM users u
-//       LEFT JOIN bets ON bets.user_id = u.id
-//       JOIN predictions p ON p.id = bets.prediction_id
-//       WHERE u.id = '59d77de0-78ee-4800-87ab-1a378a23c432'
-//       GROUP BY u.id
