@@ -59,7 +59,7 @@ router.get(
         );
     }
 
-    if (mine && opportunities) {
+    if (mine === "true" && opportunities === "true") {
       return res
         .status(400)
         .json(
@@ -112,8 +112,8 @@ router.get(
         sort_by: sort_by as SortByOption,
         statuses: statuses as PredictionLifeCycle[],
         page: Number(page),
-        predictor_id: mine ? req.user_id : undefined,
-        non_better_id: opportunities ? req.user_id : undefined,
+        predictor_id: mine === "true" ? req.user_id : undefined,
+        non_better_id: opportunities === "true" ? req.user_id : undefined,
       })
       .then((predictions) => {
         res.json(
