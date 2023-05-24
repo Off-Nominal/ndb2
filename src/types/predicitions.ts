@@ -43,6 +43,8 @@ export namespace APIPredictions {
       endorsed: boolean;
       date: string;
       wager: number;
+      valid: boolean;
+      payout: number;
       better: {
         id: string;
         discord_id: string;

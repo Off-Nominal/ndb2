@@ -29,6 +29,8 @@ const generate_GET_USER_SCORE_BY_ID_with_SEASON = (
   `
     : "";
 
+  console.log(generate_GET_USER_SCORE_SUMMARY_with_SEASON(seasonId));
+
   return `
     WITH 
       users_scores_summary 
@@ -48,7 +50,7 @@ const generate_GET_USER_SCORE_BY_ID_with_SEASON = (
         SELECT successful, failed, pending, retired, rank FROM users_predictions_summary WHERE id = $1
       ) pred_sum) as predictions,
       (SELECT row_to_json(bet_sum) FROM (
-        SELECT successful, failed, pending, retired, rank FROM users_bets_summary WHERE id = $1
+        SELECT successful, failed, pending, retired, invalid, rank FROM users_bets_summary WHERE id = $1
       ) bet_sum) as bets,
       (SELECT row_to_json(vote_sum) FROM (
         SELECT sycophantic, contrarian, pending FROM users_votes_summary WHERE id = $1
@@ -88,3 +90,17 @@ export default {
   getByDiscordId,
   getUserScoreById,
 };
+
+// SELECT
+//         u.id as better_id,
+//         u.discord_id,
+//         COALESCE(SUM(bets.payout) FILTER (WHERE p.season_id = 1), 0) as points,
+//         RANK () OVER (
+//           ORDER BY
+//             COALESCE(SUM(bets.payout) FILTER (WHERE p.season_id = 1), 0) DESC
+//         )
+//       FROM users u
+//       LEFT JOIN bets ON bets.user_id = u.id
+//       JOIN predictions p ON p.id = bets.prediction_id
+//       WHERE u.id = '59d77de0-78ee-4800-87ab-1a378a23c432'
+//       GROUP BY u.id

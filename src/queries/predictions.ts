@@ -61,7 +61,9 @@ const GET_ENHANCED_PREDICTION_BY_ID = `
           as better, 
           b.date,
           b.endorsed,
-          b.wager
+          b.wager,
+          b.valid,
+          b.payout
           FROM bets b
           WHERE b.prediction_id = ep.prediction_id
           ORDER BY date ASC
@@ -129,9 +131,7 @@ const add = (client: PoolClient) =>
         due_date,
         created_date,
       ])
-      .then((response) => {
-        return response.rows[0];
-      });
+      .then((response) => response.rows[0]);
   };
 
 const getByPredictionId = (client: PoolClient) =>

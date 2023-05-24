@@ -5,6 +5,8 @@ export namespace APIBets {
     prediction_id: number;
     endorsed: boolean;
     date: string;
+    valid: boolean;
+    payout: number;
   };
 
   export type AddBet = Bet;

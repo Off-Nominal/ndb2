@@ -20,6 +20,8 @@ export type SearchOptions = {
   page?: number;
   statuses?: PredictionLifeCycle[];
   sort_by?: SortByOption;
+  predictor_id?: string;
+  non_better_id?: string;
 };
 
 const sortByOptions = {
@@ -40,6 +42,8 @@ const sortByOptions = {
 export const generate_SEARCH_PREDICTIONS = (options: SearchOptions) => {
   const hasWhereClause =
     options.statuses.length > 0 ||
+    options.predictor_id ||
+    options.non_better_id ||
     options.sort_by === SortByOption.RETIRED_ASC ||
     options.sort_by === SortByOption.RETIRED_DESC ||
     options.sort_by === SortByOption.TRIGGERED_ASC ||
@@ -84,6 +88,18 @@ export const generate_SEARCH_PREDICTIONS = (options: SearchOptions) => {
       whereClauses.push(`ep.judged_date IS NOT NULL`);
       break;
     }
+  }
+
+  // Add predictor filter
+  if (options.predictor_id) {
+    whereClauses.push(`ep.predictor_id = '${options.predictor_id}'`);
+  }
+
+  // Add non better filter
+  if (options.non_better_id) {
+    whereClauses.push(
+      `NOT EXISTS (SELECT 1 FROM bets WHERE bets.prediction_id = ep.prediction_id AND bets.user_id = '${options.non_better_id}')`
+    );
   }
 
   // merge all the where clauses together
@@ -150,10 +166,10 @@ export const generate_SEARCH_PREDICTIONS = (options: SearchOptions) => {
       ep.retired_date,
       ep.status,
       (SELECT row_to_json(payout_sum)
-      FROM(
-        SELECT ep.endorsement_ratio as endorse, ep.undorsement_ratio as undorse
-      ) payout_sum
-    ) as payouts
+        FROM(
+          SELECT ep.endorsement_ratio as endorse, ep.undorsement_ratio as undorse
+        ) payout_sum
+      ) as payouts
     FROM enhanced_predictions ep
     ${whereClause}
     ${orderByClause}

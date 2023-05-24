@@ -15,7 +15,7 @@ const ADD_BET = `
   ) 
   ON CONFLICT (user_id, prediction_id) 
   DO UPDATE SET endorsed = $3
-  RETURNING id, user_id, prediction_id, date, endorsed`;
+  RETURNING id, user_id, prediction_id, date, endorsed, valid, payout`;
 
 const add = (client: PoolClient) => {
   return (
