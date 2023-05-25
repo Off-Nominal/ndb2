@@ -18,7 +18,10 @@
     "migrate:up-prod": "db-migrate up -m ./db/migrations -e prod",
     "db:reset": "NODE_ENV=dev node ./db/reset.js",
     "db:connect-prod": "heroku pg:psql postgresql-contoured-75136 --app ndb2",
-    "legacy-migrate": "npm run clear && tsc && node ./dist/db/migrate.js"
+    "legacy-migrate": "npm run clear && tsc && node ./dist/db/delta-migrate.js",
+    "legacy-migrate-prod": "npm run clear && tsc && NODE_ENV=production node ./dist/db/delta-migrate.js",
+    "db:backup:prod": "heroku pg:backups:capture --app ndb2 && heroku pg:backups:download --app ndb2",
+    "db:copy": "pg_restore --verbose --clean --no-acl --no-owner -h localhost -U ndb2_owner -d ndb2"
   },
   "repository": {
     "type": "git",
