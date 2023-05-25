@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import { Client, QueryResult } from "pg";
-// import delta_bets from "./delta_bets.json";
+import delta_bets from "../../db/dumps/delta_bets.json";
 import { isBefore } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 dotenv.config();
