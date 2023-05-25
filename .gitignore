@@ -3,4 +3,3 @@ node_modules
 dist
 
 db/dumps
-src/db/delta-bets.json
