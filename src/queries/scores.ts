@@ -12,10 +12,14 @@ export const generate_GET_USER_SCORE_SUMMARY_with_SEASON = (
     SELECT
         u.id as better_id,
         u.discord_id,
-        COALESCE(SUM(bets.payout)${seasonFilter}, 0) as points,
+        COALESCE(SUM(bets.${
+          seasonId ? "season_" : ""
+        }payout)${seasonFilter}, 0) as points,
         RANK () OVER (
           ORDER BY 
-            COALESCE(SUM(bets.payout)${seasonFilter}, 0) DESC
+            COALESCE(SUM(bets.${
+              seasonId ? "season_" : ""
+            }payout)${seasonFilter}, 0) DESC
         )
       FROM users u
       LEFT JOIN bets ON bets.user_id = u.id

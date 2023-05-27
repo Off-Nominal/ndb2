@@ -21,31 +21,32 @@ const ADD_PREDICTION = `
 
 const GET_ENHANCED_PREDICTION_BY_ID = `
   SELECT
-    ep.prediction_id as id,
+    p.id,
     (SELECT row_to_json(pred) FROM 
         (SELECT 
-            ep.predictor_id as id, 
+            p.user_id as id, 
             u.discord_id 
           FROM users u 
-          WHERE u.id = ep.predictor_id) 
+          WHERE u.id = p.user_id) 
       pred)
     as predictor,
-    ep.text,
-    ep.created_date,
-    ep.due_date,
-    ep.closed_date,
-    ep.triggered_date,
+    p.text,
+    p.season_id,
+    p.created_date,
+    p.due_date,
+    p.closed_date,
+    p.triggered_date,
     (SELECT row_to_json(trig) FROM 
         (SELECT 
-            ep.triggerer_id as id, 
+            p.triggerer_id as id, 
             u.discord_id 
           FROM users u 
-          WHERE u.id = ep.triggerer_id) 
+          WHERE u.id = p.triggerer_id) 
       trig)
     as triggerer,
-    ep.judged_date,
-    ep.retired_date,
-    ep.status,
+    p.judged_date,
+    p.retired_date,
+    p.status,
     (SELECT 
       COALESCE(jsonb_agg(p_bets), '[]') 
       FROM
@@ -63,9 +64,10 @@ const GET_ENHANCED_PREDICTION_BY_ID = `
           b.endorsed,
           b.wager,
           b.valid,
-          b.payout
+          b.payout,
+          b.season_payout
           FROM bets b
-          WHERE b.prediction_id = ep.prediction_id
+          WHERE b.prediction_id = p.id
           ORDER BY date ASC
         ) p_bets 
   ) as bets,
@@ -85,17 +87,17 @@ const GET_ENHANCED_PREDICTION_BY_ID = `
           voted_date,
           vote
         FROM votes v
-        WHERE v.prediction_id = ep.prediction_id
+        WHERE v.prediction_id = p.id
         ORDER BY voted_date DESC
       ) p_votes
   ) as votes,
   (SELECT row_to_json(payout_sum)
     FROM(
-      SELECT ep.endorsement_ratio as endorse, ep.undorsement_ratio as undorse
+      SELECT p.endorse_ratio as endorse, p.undorse_ratio as undorse
     ) payout_sum
   ) as payouts
-  FROM enhanced_predictions ep
-  WHERE ep.prediction_id = $1
+  FROM predictions p
+  WHERE p.id = $1
 `;
 
 const RETIRE_PREDICTION_BY_ID = `

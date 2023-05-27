@@ -27,6 +27,7 @@ export namespace APIPredictions {
       discord_id: string;
     };
     text: string;
+    season_id: number;
     created_date: string;
     due_date: string;
     closed_date: string | null;
@@ -45,6 +46,7 @@ export namespace APIPredictions {
       wager: number;
       valid: boolean;
       payout: number;
+      season_payout: number;
       better: {
         id: string;
         discord_id: string;
