@@ -352,6 +352,32 @@ ALTER TABLE bets
 
 UPDATE bets b
   SET 
+    payout = 
+          (CASE
+            WHEN b.valid IS FALSE THEN NULL
+            WHEN p.status = 'open' THEN NULL
+            WHEN p.status = 'retired' THEN NULL
+            WHEN p.status = 'closed' THEN NULL
+            ELSE COALESCE(
+                NULLIF(
+                  FLOOR(
+                    b.wager *
+                    (CASE
+                      WHEN b.endorsed IS TRUE
+                        THEN p.endorse_ratio
+                        ELSE p.undorse_ratio
+                    END)
+                  ), 0
+                ), 1
+              ) *
+              (CASE
+                WHEN 
+                  (p.status = 'successful' AND b.endorsed IS TRUE) OR 
+                  (p.status = 'failed' AND b.endorsed IS FALSE)
+                THEN 1
+                ELSE -1
+              END)
+            END),
     season_payout = 
       (CASE
         WHEN b.valid IS FALSE THEN NULL
@@ -363,7 +389,7 @@ UPDATE bets b
               FLOOR(
                 LEAST(b.wager, s.wager_cap) *
                 (CASE
-                  WHEN p.status = 'successful'
+                  WHEN b.endorsed IS TRUE
                     THEN p.endorse_ratio
                     ELSE p.undorse_ratio
                 END)
@@ -400,7 +426,7 @@ AS $$
                   FLOOR(
                     b.wager *
                     (CASE
-                      WHEN p.status = 'successful'
+                      WHEN b.endorsed IS TRUE
                         THEN p.endorse_ratio
                         ELSE p.undorse_ratio
                     END)
@@ -426,7 +452,7 @@ AS $$
                   FLOOR(
                     LEAST(b.wager, s.wager_cap) *
                     (CASE
-                      WHEN p.status = 'successful'
+                      WHEN b.endorsed IS TRUE
                         THEN p.endorse_ratio
                         ELSE p.undorse_ratio
                     END)
@@ -469,7 +495,7 @@ AS $$
                   FLOOR(
                     b.wager *
                     (CASE
-                      WHEN p.status = 'successful'
+                      WHEN b.endorsed IS TRUE
                         THEN p.endorse_ratio
                         ELSE p.undorse_ratio
                     END)
@@ -495,7 +521,7 @@ AS $$
                   FLOOR(
                     LEAST(b.wager, s.wager_cap) *
                     (CASE
-                      WHEN p.status = 'successful'
+                      WHEN b.endorsed IS TRUE
                         THEN p.endorse_ratio
                         ELSE p.undorse_ratio
                     END)
