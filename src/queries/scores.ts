@@ -97,8 +97,8 @@ export const generate_GET_USER_BET_SUMMARY_with_SEASON = (
             )${whereClause}
           )::INT as failed,
         COUNT(b.id) FILTER 
-          (WHERE (p.status = 'open' OR p.status = 'closed')${whereClause})::INT as pending,
-        COUNT(b.id) FILTER (WHERE p.status = 'retired')::INT as retired,
+          (WHERE (p.status = 'open' OR p.status = 'closed') AND b.valid IS TRUE${whereClause})::INT as pending,
+        COUNT(b.id) FILTER (WHERE p.status = 'retired'${whereClause})::INT as retired,
         COUNT(b.id) FILTER (WHERE b.valid IS FALSE${whereClause})::INT as invalid
       FROM users u
       LEFT JOIN bets b ON b.user_id = u.id

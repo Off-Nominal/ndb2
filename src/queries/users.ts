@@ -28,7 +28,7 @@ const generate_GET_USER_SCORE_BY_ID_with_SEASON = (
     ) season_sum) as season,
   `
     : "";
-  console.log(generate_GET_USER_SCORE_SUMMARY_with_SEASON(seasonId));
+
   return `
     WITH 
       users_scores_summary 
