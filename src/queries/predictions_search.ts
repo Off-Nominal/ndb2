@@ -92,13 +92,13 @@ export const generate_SEARCH_PREDICTIONS = (options: SearchOptions) => {
 
   // Add predictor filter
   if (options.predictor_id) {
-    whereClauses.push(`p.predictor_id = '${options.predictor_id}'`);
+    whereClauses.push(`p.user_id = '${options.predictor_id}'`);
   }
 
   // Add non better filter
   if (options.non_better_id) {
     whereClauses.push(
-      `NOT EXISTS (SELECT 1 FROM bets WHERE bets.prediction_id = p.prediction_id AND bets.user_id = '${options.non_better_id}')`
+      `NOT EXISTS (SELECT 1 FROM bets WHERE bets.prediction_id = p.id AND bets.user_id = '${options.non_better_id}')`
     );
   }
 

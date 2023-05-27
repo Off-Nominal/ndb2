@@ -443,7 +443,7 @@ AS $$
             END)
       FROM predictions p
       JOIN seasons s ON p.season_id = s.id
-      WHERE p.id = b.prediction_id AND b.id = NEW.id;
+      WHERE p.id = b.prediction_id AND p.id = NEW.id;
     RETURN NEW;
   END;
 $$;
