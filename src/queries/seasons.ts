@@ -1,8 +1,20 @@
 import { PoolClient } from "pg";
 import { APISeasons } from "../types/seasons";
 
-const GET_CURRENT_SEASON = `SELECT * FROM seasons WHERE start <= NOW() AND "end" > NOW()`;
-const GET_LAST_SEASON = `SELECT * FROM seasons WHERE "end" < NOW() ORDER BY "end" DESC LIMIT 1`;
+const GET_CURRENT_SEASON = `SELECT 
+    id,
+    name,
+    start,
+    "end",
+    wager_cap
+  FROM seasons WHERE start <= NOW() AND "end" > NOW()`;
+const GET_LAST_SEASON = `SELECT 
+    id,
+    name,
+    start,
+    "end",
+    wager_cap
+  FROM seasons WHERE "end" < NOW() ORDER BY "end" DESC LIMIT 1`;
 
 const getSeasonByIdentifier = (client: PoolClient) =>
   function (

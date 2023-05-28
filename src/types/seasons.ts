@@ -4,7 +4,6 @@ export namespace APISeasons {
     name: string;
     start: string;
     end: string;
-    payout_formula: string;
     wager_cap: number;
   };
 
