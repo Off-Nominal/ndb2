@@ -8,6 +8,7 @@ import {
 } from "./scores";
 import { PoolClient } from "pg";
 import seasons from "./seasons";
+import { seasonManager } from "../classes/SeasonManager";
 
 const GET_USER_BY_DISCORD_ID = `
   SELECT id, discord_id 
@@ -72,7 +73,7 @@ const getByDiscordId = (client: PoolClient) =>
   };
 
 const getUserScoreById = (client: PoolClient) =>
-  async function (
+  function (
     userId: number | string,
     seasonIdentifier?: "current" | "last" | number
   ): Promise<APIUsers.GetUserScoreByDiscordId> {
@@ -82,14 +83,7 @@ const getUserScoreById = (client: PoolClient) =>
       if (typeof seasonIdentifier === "number") {
         seasonId = seasonIdentifier;
       } else {
-        try {
-          const season = await seasons.getSeasonByIdentifier(client)(
-            seasonIdentifier
-          );
-          seasonId = season.id;
-        } catch (err) {
-          throw err;
-        }
+        seasonId = seasonManager.getSeasonByIdentifier(seasonIdentifier).id;
       }
     }
 
