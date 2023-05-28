@@ -3,6 +3,7 @@ import seasons from "../queries/seasons";
 import pool from "../db";
 import { APISeasons } from "../types/seasons";
 import schedule from "node-schedule";
+import webhookManager from "../config/webhook_subscribers";
 
 export class SeasonManager {
   private currentSeason: APISeasons.Season;
@@ -40,6 +41,10 @@ export class SeasonManager {
         return Promise.all(promises).finally(() => client.release());
       })
       .then(([currentSeason, lastSeason]) => {
+        if ((this.currentSeason.id = lastSeason.id)) {
+          // Season has changed
+          webhookManager.emit("season_start", currentSeason);
+        }
         this.currentSeason = currentSeason;
         this.lastSeason = lastSeason;
       })
