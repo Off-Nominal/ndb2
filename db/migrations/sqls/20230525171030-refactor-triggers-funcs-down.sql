@@ -10,6 +10,10 @@ DROP FUNCTION refresh_payouts_from_prediction;
 ALTER TABLE bets
   DROP COLUMN season_payout;
 
+DROP TRIGGER season_wager_cap_update_from_season ON seasons;
+
+DROP FUNCTION refresh_wager_cap;
+
 ALTER TABLE seasons
   DROP COLUMN wager_cap;
 

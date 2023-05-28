@@ -347,6 +347,25 @@ UPDATE seasons
         "end" - start
     );
 
+CREATE FUNCTION refresh_wager_cap() RETURNS trigger
+  SECURITY definer
+  LANGUAGE plpgsql
+AS $$
+  BEGIN
+    UPDATE seasons s
+      SET wager_cap = 
+        EXTRACT(
+          DAY FROM
+            "end" - start
+        )
+      WHERE s.id = NEW.id;
+    RETURN NEW;
+  END;
+$$;
+
+CREATE TRIGGER season_wager_cap_update_from_season AFTER INSERT OR UPDATE of "start", "end" ON seasons
+  FOR EACH ROW EXECUTE PROCEDURE refresh_wager_cap();
+
 ALTER TABLE bets
   ADD COLUMN season_payout INTEGER DEFAULT NULL;
 

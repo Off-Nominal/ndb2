@@ -49,6 +49,8 @@ These data are triggered to change directly as a result of normalized data. Core
 - `bets.valid`
   - `refresh_valid('prediction')` is called to update all bets for single prediction on UPDATE (closed_date) to `predictions` table
   - `refresh_valid('bet')` is called to update single bet on UPDATE (date) to `bets` table
+- `seasons.wager_cap`
+  - `refresh_wager_cap` is called to update the wager cap on a single season on INSERT or UPDATE (start, 'end') on seasons;
 
 ### LEVEL 2 Denormalized Data
 
