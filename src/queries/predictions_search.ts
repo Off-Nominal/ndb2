@@ -22,6 +22,7 @@ export type SearchOptions = {
   sort_by?: SortByOption;
   predictor_id?: string;
   non_better_id?: string;
+  season_id?: string;
 };
 
 const sortByOptions = {
@@ -39,11 +40,16 @@ const sortByOptions = {
   [SortByOption.JUDGED_DESC]: `p.judged_date DESC`,
 };
 
-export const generate_SEARCH_PREDICTIONS = (options: SearchOptions) => {
+export const generate_SEARCH_PREDICTIONS = (
+  options: SearchOptions
+): [string, string[]] => {
+  const params = [];
+
   const hasWhereClause =
     options.statuses.length > 0 ||
     options.predictor_id ||
     options.non_better_id ||
+    options.season_id ||
     options.sort_by === SortByOption.RETIRED_ASC ||
     options.sort_by === SortByOption.RETIRED_DESC ||
     options.sort_by === SortByOption.TRIGGERED_ASC ||
@@ -61,7 +67,10 @@ export const generate_SEARCH_PREDICTIONS = (options: SearchOptions) => {
   // Multiple statuses are joined via OR
   if (options.statuses.length > 0) {
     const statusClauses = options.statuses
-      .map((status) => `p.status = '${status}'`)
+      .map((status) => {
+        params.push(status);
+        return `p.status = $${params.length}`;
+      })
       .join(" OR ");
     whereClauses.push(`(${statusClauses})`);
   }
@@ -92,14 +101,22 @@ export const generate_SEARCH_PREDICTIONS = (options: SearchOptions) => {
 
   // Add predictor filter
   if (options.predictor_id) {
-    whereClauses.push(`p.user_id = '${options.predictor_id}'`);
+    params.push(options.predictor_id);
+    whereClauses.push(`p.user_id = $${params.length}`);
   }
 
   // Add non better filter
   if (options.non_better_id) {
+    params.push(options.non_better_id);
     whereClauses.push(
-      `NOT EXISTS (SELECT 1 FROM bets WHERE bets.prediction_id = p.id AND bets.user_id = '${options.non_better_id}')`
+      `NOT EXISTS (SELECT 1 FROM bets WHERE bets.prediction_id = p.id AND bets.user_id = $${params.length})`
     );
+  }
+
+  // Add season filter
+  if (options.season_id) {
+    params.push(options.season_id);
+    whereClauses.push(`p.season_id = $${params.length}`);
   }
 
   // merge all the where clauses together
@@ -115,7 +132,8 @@ export const generate_SEARCH_PREDICTIONS = (options: SearchOptions) => {
   // If the keyword is present, any other sorts will not accomplish
   // much, but they are left on anyway
   if (options.keyword) {
-    orderByClauses.push(`p.text <-> '${options.keyword}'`);
+    params.push(options.keyword);
+    orderByClauses.push(`p.text <-> $${params.length}`);
   }
 
   // multiple sort by is supported, ranked in order of the query string
@@ -136,9 +154,11 @@ export const generate_SEARCH_PREDICTIONS = (options: SearchOptions) => {
 
   // OFFSET/PAGE
   const page = options.page || 1;
-  const offset = `OFFSET (${page - 1}) * 10`;
+  params.push(page - 1);
+  const offset = `OFFSET ($${params.length}) * 10`;
 
-  return `
+  return [
+    `
     SELECT
       p.id,
       (SELECT row_to_json(pred) FROM 
@@ -154,6 +174,7 @@ export const generate_SEARCH_PREDICTIONS = (options: SearchOptions) => {
       p.due_date,
       p.closed_date,
       p.triggered_date,
+      p.season_id,
       (SELECT row_to_json(trig) FROM 
           (SELECT 
               p.triggerer_id as id, 
@@ -174,5 +195,7 @@ export const generate_SEARCH_PREDICTIONS = (options: SearchOptions) => {
     ${whereClause}
     ${orderByClause}
     LIMIT 10
-    ${offset}`;
+    ${offset}`,
+    params,
+  ];
 };

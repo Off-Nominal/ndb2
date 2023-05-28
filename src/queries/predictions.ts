@@ -203,10 +203,10 @@ const searchPredictions = (client: PoolClient) =>
   function (
     options: SearchOptions
   ): Promise<APIPredictions.SearchPredictions[]> {
+    const [query, params] = generate_SEARCH_PREDICTIONS(options);
+    console.log(query, params);
     return client
-      .query<APIPredictions.SearchPredictions>(
-        generate_SEARCH_PREDICTIONS(options)
-      )
+      .query<APIPredictions.SearchPredictions>(query, params)
       .then((res) => res.rows);
   };
 
