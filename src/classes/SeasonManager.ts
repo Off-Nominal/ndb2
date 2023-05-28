@@ -41,7 +41,7 @@ export class SeasonManager {
         return Promise.all(promises).finally(() => client.release());
       })
       .then(([currentSeason, lastSeason]) => {
-        if ((this.currentSeason.id = lastSeason.id)) {
+        if (this.currentSeason?.id === lastSeason.id) {
           // Season has changed
           webhookManager.emit("season_start", currentSeason);
         }
