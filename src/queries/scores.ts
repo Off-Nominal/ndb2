@@ -1,4 +1,4 @@
-import { PoolClient } from "pg";
+import { PoolClient, QueryResult } from "pg";
 import { APIScores } from "../types/scores";
 
 export const generate_GET_USER_SCORE_SUMMARY_with_SEASON = (
@@ -213,11 +213,31 @@ const generate_GET_LEADERBOARD_with_SEASON = (
 const getLeaderboard =
   (client: PoolClient) =>
   (type: "points" | "predictions" | "bets", seasonId?: string | number) => {
-    return client
-      .query<APIScores.GetLeaderboard>(
+    let query: Promise<
+      QueryResult<
+        | APIScores.GetPointsLeaderboard
+        | APIScores.GetPredictionsLeaderboard
+        | APIScores.GetBetsLeaderboard
+      >
+    >;
+
+    if (type === "points") {
+      query = client.query<APIScores.GetPointsLeaderboard>(
         generate_GET_LEADERBOARD_with_SEASON(type, seasonId)
-      )
-      .then((response) => response.rows[0]);
+      );
+    }
+    if (type === "predictions") {
+      query = client.query<APIScores.GetPredictionsLeaderboard>(
+        generate_GET_LEADERBOARD_with_SEASON(type, seasonId)
+      );
+    }
+    if (type === "bets") {
+      query = client.query<APIScores.GetBetsLeaderboard>(
+        generate_GET_LEADERBOARD_with_SEASON(type, seasonId)
+      );
+    }
+
+    return query.then((response) => response.rows[0]);
   };
 
 export default {
