@@ -7,6 +7,7 @@ import {
   generate_GET_USER_VOTE_SUMMARY_with_SEASON,
 } from "./scores";
 import { PoolClient } from "pg";
+import seasons from "./seasons";
 
 const GET_USER_BY_DISCORD_ID = `
   SELECT id, discord_id 
@@ -71,10 +72,27 @@ const getByDiscordId = (client: PoolClient) =>
   };
 
 const getUserScoreById = (client: PoolClient) =>
-  function (
+  async function (
     userId: number | string,
-    seasonId?: number | string
+    seasonIdentifier?: "current" | "last" | number
   ): Promise<APIUsers.GetUserScoreByDiscordId> {
+    let seasonId: number;
+
+    if (seasonIdentifier) {
+      if (typeof seasonIdentifier === "number") {
+        seasonId = seasonIdentifier;
+      } else {
+        try {
+          const season = await seasons.getSeasonByIdentifier(client)(
+            seasonIdentifier
+          );
+          seasonId = season.id;
+        } catch (err) {
+          throw err;
+        }
+      }
+    }
+
     return client
       .query<APIUsers.GetUserScoreByDiscordId>(
         generate_GET_USER_SCORE_BY_ID_with_SEASON(seasonId),

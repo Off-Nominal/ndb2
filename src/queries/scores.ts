@@ -1,5 +1,6 @@
 import { PoolClient, QueryResult } from "pg";
 import { APIScores } from "../types/scores";
+import seasons from "./seasons";
 
 export const generate_GET_USER_SCORE_SUMMARY_with_SEASON = (
   seasonId?: number | string
@@ -212,7 +213,27 @@ const generate_GET_LEADERBOARD_with_SEASON = (
 
 const getLeaderboard =
   (client: PoolClient) =>
-  (type: "points" | "predictions" | "bets", seasonId?: string | number) => {
+  async (
+    type: "points" | "predictions" | "bets",
+    seasonIdentifier?: "current" | "last" | number
+  ) => {
+    let seasonId: number;
+
+    if (seasonIdentifier) {
+      if (typeof seasonIdentifier === "number") {
+        seasonId = seasonIdentifier;
+      } else {
+        try {
+          const season = await seasons.getSeasonByIdentifier(client)(
+            seasonIdentifier
+          );
+          seasonId = season.id;
+        } catch (err) {
+          throw err;
+        }
+      }
+    }
+
     let query: Promise<
       QueryResult<
         | APIScores.GetPointsLeaderboard
