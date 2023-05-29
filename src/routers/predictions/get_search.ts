@@ -38,6 +38,7 @@ router.get(
     paramValidator.string("keyword", { type: "query", optional: true }),
     paramValidator.string("creator", { type: "query", optional: true }),
     paramValidator.string("unbetter", { type: "query", optional: true }),
+    paramValidator.string("season_id", { type: "query", optional: true }),
     paramValidator.integerParseableString("page", {
       type: "query",
       optional: true,
@@ -45,9 +46,17 @@ router.get(
     getDbClient,
   ],
   async (req: Request, res: Response) => {
-    const { status, sort_by, page, keyword, creator, unbetter } = req.query;
+    const { status, sort_by, page, keyword, creator, unbetter, season_id } =
+      req.query;
 
-    if (!status && !sort_by && !keyword && !creator && !unbetter) {
+    if (
+      !status &&
+      !sort_by &&
+      !keyword &&
+      !creator &&
+      !unbetter &&
+      !season_id
+    ) {
       return res
         .status(400)
         .json(
@@ -131,6 +140,7 @@ router.get(
         page: Number(page),
         predictor_id: creator && user_id,
         non_better_id: unbetter && user_id,
+        season_id: season_id as string,
       })
       .then((predictions) => {
         res.json(

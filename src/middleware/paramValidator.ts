@@ -116,6 +116,21 @@ const paramValidator = {
       options?.allowArray || false
     );
   },
+  isSeasonIdentifier: (key: string, options?: ParamValidatorOptions) => {
+    return createChecker(
+      key,
+      (val: string) =>
+        val === "current" ||
+        val === "last" ||
+        (isIntegerParseableString(val) &&
+          isNoMoreThan(Number(val), 2147483647)),
+      "must be one of the following: current, last, or a string parseable as a number",
+      400,
+      options?.optional || false,
+      options?.type || "body",
+      options?.allowArray || false
+    );
+  },
 };
 
 export default paramValidator;

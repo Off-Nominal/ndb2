@@ -22,28 +22,34 @@ export type SearchOptions = {
   sort_by?: SortByOption;
   predictor_id?: string;
   non_better_id?: string;
+  season_id?: string;
 };
 
 const sortByOptions = {
-  [SortByOption.CREATED_ASC]: `ep.created_date ASC`,
-  [SortByOption.CREATED_DESC]: `ep.created_date DESC`,
-  [SortByOption.DUE_ASC]: `ep.due_date ASC`,
-  [SortByOption.DUE_DESC]: `ep.due_date DESC`,
-  [SortByOption.RETIRED_ASC]: `ep.retired_date ASC`,
-  [SortByOption.RETIRED_DESC]: `ep.retired_date DESC`,
-  [SortByOption.TRIGGERED_ASC]: `ep.triggered_date ASC`,
-  [SortByOption.TRIGGERED_DESC]: `ep.triggered_date DESC`,
-  [SortByOption.CLOSED_ASC]: `ep.closed_date ASC`,
-  [SortByOption.CLOSED_DESC]: `ep.closed_date DESC`,
-  [SortByOption.JUDGED_ASC]: `ep.judged_date ASC`,
-  [SortByOption.JUDGED_DESC]: `ep.judged_date DESC`,
+  [SortByOption.CREATED_ASC]: `p.created_date ASC`,
+  [SortByOption.CREATED_DESC]: `p.created_date DESC`,
+  [SortByOption.DUE_ASC]: `p.due_date ASC`,
+  [SortByOption.DUE_DESC]: `p.due_date DESC`,
+  [SortByOption.RETIRED_ASC]: `p.retired_date ASC`,
+  [SortByOption.RETIRED_DESC]: `p.retired_date DESC`,
+  [SortByOption.TRIGGERED_ASC]: `p.triggered_date ASC`,
+  [SortByOption.TRIGGERED_DESC]: `p.triggered_date DESC`,
+  [SortByOption.CLOSED_ASC]: `p.closed_date ASC`,
+  [SortByOption.CLOSED_DESC]: `p.closed_date DESC`,
+  [SortByOption.JUDGED_ASC]: `p.judged_date ASC`,
+  [SortByOption.JUDGED_DESC]: `p.judged_date DESC`,
 };
 
-export const generate_SEARCH_PREDICTIONS = (options: SearchOptions) => {
+export const generate_SEARCH_PREDICTIONS = (
+  options: SearchOptions
+): [string, string[]] => {
+  const params = [];
+
   const hasWhereClause =
     options.statuses.length > 0 ||
     options.predictor_id ||
     options.non_better_id ||
+    options.season_id ||
     options.sort_by === SortByOption.RETIRED_ASC ||
     options.sort_by === SortByOption.RETIRED_DESC ||
     options.sort_by === SortByOption.TRIGGERED_ASC ||
@@ -61,7 +67,10 @@ export const generate_SEARCH_PREDICTIONS = (options: SearchOptions) => {
   // Multiple statuses are joined via OR
   if (options.statuses.length > 0) {
     const statusClauses = options.statuses
-      .map((status) => `ep.status = '${status}'`)
+      .map((status) => {
+        params.push(status);
+        return `p.status = $${params.length}`;
+      })
       .join(" OR ");
     whereClauses.push(`(${statusClauses})`);
   }
@@ -70,36 +79,44 @@ export const generate_SEARCH_PREDICTIONS = (options: SearchOptions) => {
   switch (options.sort_by) {
     case SortByOption.RETIRED_ASC:
     case SortByOption.RETIRED_DESC: {
-      whereClauses.push(`ep.retired_date IS NOT NULL`);
+      whereClauses.push(`p.retired_date IS NOT NULL`);
       break;
     }
     case SortByOption.TRIGGERED_ASC:
     case SortByOption.TRIGGERED_DESC: {
-      whereClauses.push(`ep.triggered_date IS NOT NULL`);
+      whereClauses.push(`p.triggered_date IS NOT NULL`);
       break;
     }
     case SortByOption.CLOSED_ASC:
     case SortByOption.CLOSED_DESC: {
-      whereClauses.push(`ep.closed_date IS NOT NULL`);
+      whereClauses.push(`p.closed_date IS NOT NULL`);
       break;
     }
     case SortByOption.JUDGED_ASC:
     case SortByOption.JUDGED_DESC: {
-      whereClauses.push(`ep.judged_date IS NOT NULL`);
+      whereClauses.push(`p.judged_date IS NOT NULL`);
       break;
     }
   }
 
   // Add predictor filter
   if (options.predictor_id) {
-    whereClauses.push(`ep.predictor_id = '${options.predictor_id}'`);
+    params.push(options.predictor_id);
+    whereClauses.push(`p.user_id = $${params.length}`);
   }
 
   // Add non better filter
   if (options.non_better_id) {
+    params.push(options.non_better_id);
     whereClauses.push(
-      `NOT EXISTS (SELECT 1 FROM bets WHERE bets.prediction_id = ep.prediction_id AND bets.user_id = '${options.non_better_id}')`
+      `NOT EXISTS (SELECT 1 FROM bets WHERE bets.prediction_id = p.id AND bets.user_id = $${params.length})`
     );
+  }
+
+  // Add season filter
+  if (options.season_id) {
+    params.push(options.season_id);
+    whereClauses.push(`p.season_id = $${params.length}`);
   }
 
   // merge all the where clauses together
@@ -115,7 +132,8 @@ export const generate_SEARCH_PREDICTIONS = (options: SearchOptions) => {
   // If the keyword is present, any other sorts will not accomplish
   // much, but they are left on anyway
   if (options.keyword) {
-    orderByClauses.push(`ep.text <-> '${options.keyword}'`);
+    params.push(options.keyword);
+    orderByClauses.push(`p.text <-> $${params.length}`);
   }
 
   // multiple sort by is supported, ranked in order of the query string
@@ -136,43 +154,48 @@ export const generate_SEARCH_PREDICTIONS = (options: SearchOptions) => {
 
   // OFFSET/PAGE
   const page = options.page || 1;
-  const offset = `OFFSET (${page - 1}) * 10`;
+  params.push(page - 1);
+  const offset = `OFFSET ($${params.length}) * 10`;
 
-  return `
+  return [
+    `
     SELECT
-      ep.prediction_id as id,
+      p.id,
       (SELECT row_to_json(pred) FROM 
           (SELECT 
-              ep.predictor_id as id, 
+              p.user_id as id, 
               u.discord_id 
             FROM users u 
-            WHERE u.id = ep.predictor_id) 
+            WHERE u.id = p.user_id) 
         pred)
       as predictor,
-      ep.text,
-      ep.created_date,
-      ep.due_date,
-      ep.closed_date,
-      ep.triggered_date,
+      p.text,
+      p.created_date,
+      p.due_date,
+      p.closed_date,
+      p.triggered_date,
+      p.season_id,
       (SELECT row_to_json(trig) FROM 
           (SELECT 
-              ep.triggerer_id as id, 
+              p.triggerer_id as id, 
               u.discord_id 
             FROM users u 
-            WHERE u.id = ep.triggerer_id) 
+            WHERE u.id = p.triggerer_id) 
         trig)
       as triggerer,
-      ep.judged_date,
-      ep.retired_date,
-      ep.status,
+      p.judged_date,
+      p.retired_date,
+      p.status,
       (SELECT row_to_json(payout_sum)
         FROM(
-          SELECT ep.endorsement_ratio as endorse, ep.undorsement_ratio as undorse
+          SELECT p.endorse_ratio as endorse, p.undorse_ratio as undorse
         ) payout_sum
       ) as payouts
-    FROM enhanced_predictions ep
+    FROM predictions p
     ${whereClause}
     ${orderByClause}
     LIMIT 10
-    ${offset}`;
+    ${offset}`,
+    params,
+  ];
 };

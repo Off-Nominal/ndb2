@@ -15,9 +15,13 @@ export namespace APIPredictions {
     due_date: string;
     closed_date: string | null;
     triggered_date: string | null;
+    triggerer_id: string | null;
     judged_date: string | null;
     retired_date: string | null;
-    triggerer_id: string | null;
+    status: PredictionLifeCycle;
+    season_id: number;
+    endorse_ratio: number;
+    undorse_ratio: number;
   };
 
   export type EnhancedPrediction = {
@@ -27,6 +31,7 @@ export namespace APIPredictions {
       discord_id: string;
     };
     text: string;
+    season_id: number;
     created_date: string;
     due_date: string;
     closed_date: string | null;
@@ -45,6 +50,7 @@ export namespace APIPredictions {
       wager: number;
       valid: boolean;
       payout: number;
+      season_payout: number;
       better: {
         id: string;
         discord_id: string;
@@ -70,7 +76,7 @@ export namespace APIPredictions {
     "bets" | "votes"
   >;
 
-  export type AddPrediction = Prediction;
+  export type AddPrediction = EnhancedPrediction;
 
   export type GetPredictionById = EnhancedPrediction;
 

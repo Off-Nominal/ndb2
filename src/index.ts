@@ -33,7 +33,7 @@ app.get("*", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`[NDB2]: Application listeneing on port: `, PORT);
+  console.log(`[NDB2]: Application listening on port:`, PORT);
 });
 
 const monitor = new PredictionMonitor();

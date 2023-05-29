@@ -1,6 +1,7 @@
 import axios from "axios";
 import EventEmitter from "events";
 import { APIPredictions } from "../types/predicitions";
+import { APISeasons } from "../types/seasons";
 
 interface WebhookEvent {
   new_prediction: (prediction: APIPredictions.EnhancedPrediction) => void;
@@ -9,6 +10,7 @@ interface WebhookEvent {
   triggered_prediction: (prediction: APIPredictions.EnhancedPrediction) => void;
   new_vote: (prediction: APIPredictions.EnhancedPrediction) => void;
   judged_prediction: (prediction: APIPredictions.EnhancedPrediction) => void;
+  season_start: (season: APISeasons.Season) => void;
 }
 
 type WebhookNotification<T> = {
@@ -102,6 +104,12 @@ export class WebhookManager extends EventEmitter {
         );
       }
     );
+
+    this.on("season_start", (season: APISeasons.Season) => {
+      this.notifySubscribers(
+        this.generateResponse<APISeasons.Season>("season_start", season)
+      );
+    });
   }
 
   private generateResponse = <T>(event_name: keyof WebhookEvent, data: T) => {

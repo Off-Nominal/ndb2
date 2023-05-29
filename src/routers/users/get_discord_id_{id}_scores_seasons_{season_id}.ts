@@ -10,12 +10,7 @@ router.get(
   "/:discord_id/scores/seasons/:season_id",
   [
     paramValidator.numberParseableString("discord_id", { type: "params" }),
-    paramValidator.integerParseableString("season_id", {
-      optional: true,
-      type: "params",
-    }),
-    paramValidator.isPostgresInt("season_id", {
-      optional: true,
+    paramValidator.isSeasonIdentifier("season_id", {
       type: "params",
     }),
     getDbClient,
@@ -24,8 +19,16 @@ router.get(
   async (req: Request, res: Response) => {
     const { season_id } = req.params;
 
+    let seasonIdentifier: "current" | "last" | number;
+
+    if (season_id !== "current" && season_id !== "last") {
+      seasonIdentifier = parseInt(season_id);
+    } else {
+      seasonIdentifier = season_id;
+    }
+
     users
-      .getUserScoreById(req.dbClient)(req.user_id, season_id)
+      .getUserScoreById(req.dbClient)(req.user_id, seasonIdentifier)
       .then((response) => {
         res.json(
           responseUtils.writeSuccess(response, "Score fetched successfully.")
