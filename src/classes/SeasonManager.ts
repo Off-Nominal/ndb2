@@ -16,7 +16,7 @@ export class SeasonManager {
 
     schedule.scheduleJob("1 0 * * *", () => {
       this.refreshSeasons().then(() => {
-        console.log("[SM] Seasons refreshed.");
+        console.log("[SM]: Seasons refreshed.");
       });
     });
   }

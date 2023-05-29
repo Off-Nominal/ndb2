@@ -7,7 +7,6 @@ import {
   generate_GET_USER_VOTE_SUMMARY_with_SEASON,
 } from "./scores";
 import { PoolClient } from "pg";
-import seasons from "./seasons";
 import { seasonManager } from "../classes/SeasonManager";
 
 const GET_USER_BY_DISCORD_ID = `
@@ -21,26 +20,44 @@ const ADD_USER = `
   RETURNING id, discord_id`;
 
 const generate_GET_USER_SCORE_BY_ID_with_SEASON = (
+  userId: number | string,
   seasonId?: number | string
-) => {
+): [string, string[]] => {
+  const params = [userId.toString()];
+
+  if (seasonId) {
+    params.push(seasonId.toString());
+  }
+
+  const parameterizedSeasonId = "$".concat(params.length.toString());
+
   const season = seasonId
     ? `
     (SELECT row_to_json(season_sum) FROM (
-      SELECT id, name, start, "end" FROM seasons WHERE seasons.id = ${seasonId}
+      SELECT id, name, start, "end" FROM seasons WHERE seasons.id = ${parameterizedSeasonId}
     ) season_sum) as season,
   `
     : "";
 
-  return `
+  return [
+    `
     WITH 
       users_scores_summary 
-        AS (${generate_GET_USER_SCORE_SUMMARY_with_SEASON(seasonId)}),
+        AS (${generate_GET_USER_SCORE_SUMMARY_with_SEASON(
+          seasonId && parameterizedSeasonId
+        )}),
       users_predictions_summary 
-        AS (${generate_GET_USER_PREDICTION_SUMMARY_with_SEASON(seasonId)}),
+        AS (${generate_GET_USER_PREDICTION_SUMMARY_with_SEASON(
+          seasonId && parameterizedSeasonId
+        )}),
       users_bets_summary 
-        AS (${generate_GET_USER_BET_SUMMARY_with_SEASON(seasonId)}),
+        AS (${generate_GET_USER_BET_SUMMARY_with_SEASON(
+          seasonId && parameterizedSeasonId
+        )}),
       users_votes_summary 
-        AS (${generate_GET_USER_VOTE_SUMMARY_with_SEASON(seasonId)})
+        AS (${generate_GET_USER_VOTE_SUMMARY_with_SEASON(
+          seasonId && parameterizedSeasonId
+        )})
     SELECT
       ${season}
       (SELECT row_to_json(score_sum) FROM (
@@ -54,7 +71,9 @@ const generate_GET_USER_SCORE_BY_ID_with_SEASON = (
       ) bet_sum) as bets,
       (SELECT row_to_json(vote_sum) FROM (
         SELECT sycophantic, contrarian, pending FROM users_votes_summary WHERE id = $1
-      ) vote_sum) as votes`;
+      ) vote_sum) as votes`,
+    params,
+  ];
 };
 
 const add = (client: PoolClient) =>
@@ -87,11 +106,13 @@ const getUserScoreById = (client: PoolClient) =>
       }
     }
 
+    const [query, params] = generate_GET_USER_SCORE_BY_ID_with_SEASON(
+      userId,
+      seasonId
+    );
+
     return client
-      .query<APIUsers.GetUserScoreByDiscordId>(
-        generate_GET_USER_SCORE_BY_ID_with_SEASON(seasonId),
-        [userId]
-      )
+      .query<APIUsers.GetUserScoreByDiscordId>(query, params)
       .then((response) => response.rows[0]);
   };
 
