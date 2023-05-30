@@ -7,6 +7,7 @@ import {
   isString,
 } from "../helpers/typeguards";
 import responseUtils from "../utils/response";
+import { ErrorCode } from "../types/responses";
 
 const createChecker = (
   key: string,
@@ -25,7 +26,7 @@ const createChecker = (
         .status(statusCode)
         .json(
           responseUtils.writeError(
-            "MALFORMED_QUERY_PARAMS",
+            ErrorCode.MALFORMED_QUERY_PARAMS,
             `Query param property '${key}' cannot be an array.`
           )
         );
@@ -43,7 +44,7 @@ const createChecker = (
           .status(statusCode)
           .json(
             responseUtils.writeError(
-              "MALFORMED_BODY_DATA",
+              ErrorCode.MALFORMED_BODY_DATA,
               `Body data property '${key}' ${error}`
             )
           );

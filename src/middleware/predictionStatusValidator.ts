@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { PredictionLifeCycle } from "../types/predicitions";
 import responseUtils from "../utils/response";
+import { ErrorCode } from "../types/responses";
 
 const predictionStatusValidator = (
   statuses: PredictionLifeCycle[] | PredictionLifeCycle
@@ -15,7 +16,7 @@ const predictionStatusValidator = (
         .status(400)
         .json(
           responseUtils.writeError(
-            "BAD_REQUEST",
+            ErrorCode.BAD_REQUEST,
             `The requested change to this prediction is invalid because its status is '${status}'. Allowable statuses are ${allowedStatuses
               .map((s) => `'${s}'`)
               .join(", ")}.`

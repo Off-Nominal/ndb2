@@ -10,6 +10,7 @@ import predictionStatusValidator from "../../middleware/predictionStatusValidato
 import predictions from "../../queries/predictions";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
+import { ErrorCode } from "../../types/responses";
 const router = express.Router();
 
 router.post(
@@ -36,7 +37,7 @@ router.post(
           .status(400)
           .json(
             responseUtils.writeError(
-              "BAD_REQUEST",
+              ErrorCode.BAD_REQUEST,
               "Closed date cannot be before prediction's created date"
             )
           );
@@ -69,7 +70,7 @@ router.post(
           .status(500)
           .json(
             responseUtils.writeError(
-              "SERVER_ERROR",
+              ErrorCode.SERVER_ERROR,
               "There was an error triggering this prediction."
             )
           );

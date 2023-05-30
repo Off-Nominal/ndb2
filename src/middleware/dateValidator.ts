@@ -1,6 +1,7 @@
 import { isFuture, isPast, isValid } from "date-fns";
 import { NextFunction, Request, Response } from "express";
 import responseUtils from "../utils/response";
+import { ErrorCode } from "../types/responses";
 
 const createChecker = (
   key: string,
@@ -21,7 +22,7 @@ const createChecker = (
         .status(statusCode)
         .json(
           responseUtils.writeError(
-            "MALFORMED_BODY_DATA",
+            ErrorCode.MALFORMED_BODY_DATA,
             `Body data property '${key}' ${error}`
           )
         );

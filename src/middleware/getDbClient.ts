@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import pool from "../db";
 import responseUtils from "../utils/response";
+import { ErrorCode } from "../types/responses";
 
 export const getDbClient = (
   req: Request,
@@ -28,7 +29,7 @@ export const getDbClient = (
         .status(500)
         .json(
           responseUtils.writeError(
-            "SERVER_ERROR",
+            ErrorCode.SERVER_ERROR,
             `Unable to make database connection, request aborted.`
           )
         );

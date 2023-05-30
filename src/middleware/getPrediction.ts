@@ -4,6 +4,7 @@ import { isNoMoreThan, isNumberParseableString } from "../helpers/typeguards";
 import predictions from "../queries/predictions";
 import { APIPredictions } from "../types/predicitions";
 import responseUtils from "../utils/response";
+import { ErrorCode } from "../types/responses";
 
 export const getPrediction = async (
   req: Request,
@@ -25,7 +26,7 @@ export const getPrediction = async (
         .status(404)
         .json(
           responseUtils.writeError(
-            "BAD_REQUEST",
+            ErrorCode.BAD_REQUEST,
             `Predicton with id ${prediction_id} does not exist.`
           )
         );
@@ -37,7 +38,10 @@ export const getPrediction = async (
     return res
       .status(500)
       .json(
-        responseUtils.writeError("SERVER_ERROR", "Unable to fetch prediction.")
+        responseUtils.writeError(
+          ErrorCode.SERVER_ERROR,
+          "Unable to fetch prediction."
+        )
       );
   }
 };

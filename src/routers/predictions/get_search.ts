@@ -6,6 +6,7 @@ import { SortByOption } from "../../queries/predictions_search";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
 import users from "../../queries/users";
+import { ErrorCode } from "../../types/responses";
 const router = express.Router();
 
 const isPredictionLifeCycle = (val: any): val is PredictionLifeCycle => {
@@ -61,7 +62,7 @@ router.get(
         .status(400)
         .json(
           responseUtils.writeError(
-            "MALFORMED_QUERY_PARAMS",
+            ErrorCode.MALFORMED_QUERY_PARAMS,
             `Please provide at least one query parameter in your search.`
           )
         );
@@ -72,7 +73,7 @@ router.get(
         .status(400)
         .json(
           responseUtils.writeError(
-            "MALFORMED_QUERY_PARAMS",
+            ErrorCode.MALFORMED_QUERY_PARAMS,
             `Filtering by both "creator" and "unbetter" is not allowed. You can only filter by one or the other.`
           )
         );
@@ -92,7 +93,7 @@ router.get(
           .status(400)
           .json(
             responseUtils.writeError(
-              "MALFORMED_QUERY_PARAMS",
+              ErrorCode.MALFORMED_QUERY_PARAMS,
               `Status must be any of the following: ${Object.values(
                 PredictionLifeCycle
               ).join(", ")}`
@@ -106,7 +107,7 @@ router.get(
         .status(400)
         .json(
           responseUtils.writeError(
-            "MALFORMED_QUERY_PARAMS",
+            ErrorCode.MALFORMED_QUERY_PARAMS,
             `Sort option must be any of the following: ${Object.values(
               SortByOption
             ).join(", ")}`
@@ -128,7 +129,12 @@ router.get(
         console.error(err);
         return res
           .status(500)
-          .json(responseUtils.writeError("BAD_REQUEST", "User does not exist"));
+          .json(
+            responseUtils.writeError(
+              ErrorCode.BAD_REQUEST,
+              "User does not exist"
+            )
+          );
       }
     }
 

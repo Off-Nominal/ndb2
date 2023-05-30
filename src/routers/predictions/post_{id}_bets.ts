@@ -11,6 +11,7 @@ import responseUtils from "../../utils/response";
 import { getDbClient } from "../../middleware/getDbClient";
 import { add, isAfter } from "date-fns";
 import GAME_MECHANICS from "../../config/game_mechanics";
+import { ErrorCode } from "../../types/responses";
 const router = express.Router();
 
 router.post(
@@ -40,7 +41,7 @@ router.post(
           .status(400)
           .json(
             responseUtils.writeError(
-              "BAD_REQUEST",
+              ErrorCode.BAD_REQUEST,
               `You have already ${
                 bet.endorsed ? "endorsed" : "undorsed"
               } this prediction. No change necessary.`,
@@ -60,7 +61,7 @@ router.post(
           .status(403)
           .json(
             responseUtils.writeError(
-              "BAD_REQUEST",
+              ErrorCode.BAD_REQUEST,
               `Bets cannot be changed past the allowable time window of ${GAME_MECHANICS.predictionUpdateWindow} hours since the bet was made.`
             )
           );
@@ -84,7 +85,9 @@ router.post(
         console.error(err);
         res
           .status(500)
-          .json(responseUtils.writeError("SERVER_ERROR", "Error Adding bet"));
+          .json(
+            responseUtils.writeError(ErrorCode.SERVER_ERROR, "Error Adding bet")
+          );
       });
   }
 );

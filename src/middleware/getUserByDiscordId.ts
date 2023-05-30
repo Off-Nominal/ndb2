@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import users from "../queries/users";
 import responseUtils from "../utils/response";
+import { ErrorCode } from "../types/responses";
 
 export const getUserByDiscordId = async (
   req: Request,
@@ -23,7 +24,7 @@ export const getUserByDiscordId = async (
       .status(500)
       .json(
         responseUtils.writeError(
-          "SERVER_ERROR",
+          ErrorCode.SERVER_ERROR,
           "Error Fetching or Adding user"
         )
       );

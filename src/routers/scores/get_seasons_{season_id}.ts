@@ -4,6 +4,7 @@ import scores from "../../queries/scores";
 import responseUtils from "../../utils/response";
 import { isScoreView, ScoreView } from "./get";
 import paramValidator from "../../middleware/paramValidator";
+import { ErrorCode } from "../../types/responses";
 const router = express.Router();
 
 router.get(
@@ -31,7 +32,7 @@ router.get(
         .status(400)
         .json(
           responseUtils.writeError(
-            "MALFORMED_BODY_DATA",
+            ErrorCode.MALFORMED_BODY_DATA,
             `View must be any of the following: ${Object.values(ScoreView).join(
               ", "
             )}`

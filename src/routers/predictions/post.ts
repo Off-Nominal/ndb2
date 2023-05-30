@@ -7,6 +7,7 @@ import paramValidator from "../../middleware/paramValidator";
 import dateValidator from "../../middleware/dateValidator";
 import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
 import { getDbClient } from "../../middleware/getDbClient";
+import { ErrorCode } from "../../types/responses";
 const router = express.Router();
 
 router.post(
@@ -43,7 +44,10 @@ router.post(
         res
           .status(500)
           .json(
-            responseUtils.writeError("SERVER_ERROR", "Error Adding prediction")
+            responseUtils.writeError(
+              ErrorCode.SERVER_ERROR,
+              "Error Adding prediction"
+            )
           );
       });
   }

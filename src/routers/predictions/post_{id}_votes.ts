@@ -9,6 +9,7 @@ import votes from "../../queries/votes";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
 import { getDbClient } from "../../middleware/getDbClient";
+import { ErrorCode } from "../../types/responses";
 const router = express.Router();
 
 router.post(
@@ -64,7 +65,7 @@ router.post(
           .status(500)
           .json(
             responseUtils.writeError(
-              "SERVER_ERROR",
+              ErrorCode.SERVER_ERROR,
               "There was an error updating this vote."
             )
           );

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { APIResponse } from "../types/responses";
+import { APIResponse, ErrorCode } from "../types/responses";
 
 export const authenticateApplication = (
   req: Request,
@@ -11,7 +11,7 @@ export const authenticateApplication = (
   if (!authId || authId !== `Bearer ${validID}`) {
     const error: APIResponse = {
       success: false,
-      errorCode: "AUTHENTICATION_ERROR",
+      errorCode: ErrorCode.AUTHENTICATION_ERROR,
       message: "Unauthorized. Please ensure your API key is valid.",
       data: null,
     };
