@@ -124,9 +124,11 @@ router.get(
         const user = await users.getByDiscordId(req.dbClient)(
           userParam as string
         );
+        if (!user) {
+          throw new Error("User does not exist");
+        }
         user_id = user.id;
       } catch (err) {
-        console.error(err);
         return res
           .status(500)
           .json(
