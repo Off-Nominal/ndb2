@@ -77,12 +77,12 @@ export const generate_GET_USER_BET_SUMMARY_with_SEASON = (
             COUNT(b.id) FILTER 
               (WHERE 
                 ((p.status = 'successful' AND b.endorsed IS TRUE) OR
-                (p.status = 'failed' AND b.endorsed IS FALSE))${whereClause}
+                (p.status = 'failed' AND b.endorsed IS FALSE)) AND b.valid IS TRUE${whereClause}
               )::INT DESC,
             COUNT(b.id) FILTER 
               (WHERE 
                 ((p.status = 'successful' AND b.endorsed IS FALSE) OR
-                (p.status = 'failed' AND b.endorsed IS TRUE))${whereClause}
+                (p.status = 'failed' AND b.endorsed IS TRUE)) AND b.valid IS TRUE${whereClause}
               )::INT ASC
         ) as rank,
         COUNT(b.id) FILTER 
