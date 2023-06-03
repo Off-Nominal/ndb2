@@ -76,8 +76,8 @@ export namespace APIPredictions {
     "bets" | "votes"
   > & {
     bets: {
-      endorsed: number;
-      undorsed: number;
+      endorsements: number;
+      undorsements: number;
       invalid: number;
     };
     votes: {
