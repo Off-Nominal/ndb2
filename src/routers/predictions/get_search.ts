@@ -125,16 +125,26 @@ router.get(
           userParam as string
         );
         if (!user) {
-          throw new Error("User does not exist");
+          throw null;
         }
         user_id = user.id;
       } catch (err) {
+        if (err === null) {
+          return res
+            .status(404)
+            .json(
+              responseUtils.writeError(
+                ErrorCode.BAD_REQUEST,
+                "User does not exist"
+              )
+            );
+        }
         return res
           .status(500)
           .json(
             responseUtils.writeError(
               ErrorCode.BAD_REQUEST,
-              "User does not exist"
+              "There was an error looking for the user in your query."
             )
           );
       }

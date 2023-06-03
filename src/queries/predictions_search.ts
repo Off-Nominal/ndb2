@@ -123,7 +123,7 @@ export const generate_SEARCH_PREDICTIONS = (
   whereClause += whereClauses.join(" AND ");
 
   // set up ORDER BY clauses
-  let orderByClause = options.sort_by || options.keyword ? `ORDER BY ` : "";
+  let orderByClause = `ORDER BY `;
 
   const orderByClauses = [];
 
@@ -148,6 +148,8 @@ export const generate_SEARCH_PREDICTIONS = (
       });
     }
   }
+
+  orderByClauses.push(`p.id ASC`);
 
   // merge ORDER BY clauses together
   orderByClause += orderByClauses.join(", ");
