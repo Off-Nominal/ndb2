@@ -74,7 +74,17 @@ export namespace APIPredictions {
   export type ShortEnhancedPrediction = Omit<
     EnhancedPrediction,
     "bets" | "votes"
-  >;
+  > & {
+    bets: {
+      endorsed: number;
+      undorsed: number;
+      invalid: number;
+    };
+    votes: {
+      yes: number;
+      no: number;
+    };
+  };
 
   export type AddPrediction = EnhancedPrediction;
 
