@@ -8,6 +8,7 @@ const GET_CURRENT_SEASON = `SELECT
     "end",
     wager_cap
   FROM seasons WHERE start <= NOW() AND "end" > NOW()`;
+
 const GET_LAST_SEASON = `SELECT 
     id,
     name,
@@ -15,6 +16,23 @@ const GET_LAST_SEASON = `SELECT
     "end",
     wager_cap
   FROM seasons WHERE "end" < NOW() ORDER BY "end" DESC LIMIT 1`;
+
+const GET_SEASONS = `
+  SELECT
+    id,
+    name,
+    start,
+    "end",
+    wager_cap
+  FROM seasons
+  ORDER BY "end" DESC`;
+
+const getAll = (client: PoolClient) =>
+  function (): Promise<APISeasons.GetSeasons[]> {
+    return client
+      .query<APISeasons.GetSeasons>(GET_SEASONS)
+      .then((response) => response.rows);
+  };
 
 const getSeasonByIdentifier = (client: PoolClient) =>
   function (
@@ -29,5 +47,6 @@ const getSeasonByIdentifier = (client: PoolClient) =>
   };
 
 export default {
+  getAll,
   getSeasonByIdentifier,
 };
