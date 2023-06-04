@@ -15,7 +15,7 @@ export const authenticateApplication = (
       message: "Unauthorized. Please ensure your API key is valid.",
       data: null,
     };
-    return res.json(error);
+    return res.status(401).json(error);
   } else {
     return next();
   }
