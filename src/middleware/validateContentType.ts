@@ -7,7 +7,10 @@ export const validateContentType = (
   res: Response,
   next: NextFunction
 ) => {
-  if (req.headers["content-type"] !== "application/json") {
+  if (
+    req.method === "POST" &&
+    req.headers["content-type"] !== "application/json"
+  ) {
     return res
       .status(400)
       .json(

@@ -68,13 +68,15 @@ router.get(
         );
     }
 
-    if (creator && unbetter) {
+    console.log(creator, unbetter);
+
+    if (creator && unbetter && creator === unbetter) {
       return res
         .status(400)
         .json(
           responseUtils.writeError(
             ErrorCode.MALFORMED_QUERY_PARAMS,
-            `Filtering by both "creator" and "unbetter" is not allowed. You can only filter by one or the other.`
+            `Filtering by the same "creator" and "unbetter" is not allowed. These values must be different or omitted.`
           )
         );
     }
@@ -116,18 +118,49 @@ router.get(
     }
 
     // check for user
-    const userParam = creator || unbetter;
-    let user_id: string;
+    let creator_id: string;
+    let unbetter_id: string;
 
-    if (userParam) {
+    if (creator) {
       try {
         const user = await users.getByDiscordId(req.dbClient)(
-          userParam as string
+          creator as string
         );
         if (!user) {
           throw null;
         }
-        user_id = user.id;
+        creator_id = user.id;
+      } catch (err) {
+        if (err === null) {
+          return res
+            .status(404)
+            .json(
+              responseUtils.writeError(
+                ErrorCode.BAD_REQUEST,
+                "User does not exist"
+              )
+            );
+        }
+        return res
+          .status(500)
+          .json(
+            responseUtils.writeError(
+              ErrorCode.BAD_REQUEST,
+              "There was an error looking for the user in your query."
+            )
+          );
+      }
+    }
+
+    if (unbetter) {
+      try {
+        const user = await users.getByDiscordId(req.dbClient)(
+          unbetter as string
+        );
+        if (!user) {
+          throw null;
+        }
+        unbetter_id = user.id;
       } catch (err) {
         if (err === null) {
           return res
@@ -156,8 +189,8 @@ router.get(
         sort_by: sort_by as SortByOption,
         statuses: statuses as PredictionLifeCycle[],
         page: Number(page),
-        predictor_id: creator && user_id,
-        non_better_id: unbetter && user_id,
+        predictor_id: creator && creator_id,
+        non_better_id: unbetter && unbetter_id,
         season_id: season_id as string,
       })
       .then((predictions) => {
