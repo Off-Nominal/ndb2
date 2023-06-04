@@ -68,8 +68,6 @@ router.get(
         );
     }
 
-    console.log(creator, unbetter);
-
     if (creator && unbetter && creator === unbetter) {
       return res
         .status(400)
