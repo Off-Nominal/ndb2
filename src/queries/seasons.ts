@@ -23,7 +23,13 @@ const GET_SEASONS = `
     name,
     start,
     "end",
-    wager_cap
+    wager_cap,
+    (SELECT CASE
+        WHEN start <= NOW() AND "end" > NOW() THEN 'current'
+        WHEN "end" < NOW() THEN 'past'
+        ELSE 'future' 
+      END
+    ) as identifier
   FROM seasons
   ORDER BY "end" DESC`;
 
