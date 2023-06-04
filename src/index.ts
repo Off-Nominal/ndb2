@@ -3,6 +3,7 @@ dotenv.config();
 
 import express from "express";
 import { authenticateApplication } from "./middleware/authenticateApplication";
+import { validateContentType } from "./middleware/validateContentType";
 import PredictionMonitor from "./classes/PredictionMonitor";
 
 const app = express();
@@ -16,6 +17,7 @@ if (process.env.NODE_ENV === "dev") {
 app.use(express.json());
 
 // Authentication
+app.use(validateContentType);
 app.use(authenticateApplication);
 
 // Routers
@@ -27,6 +29,10 @@ app.use("/api/users", usersRouter);
 
 import scoresRouter from "./routers/scores";
 app.use("/api/scores", scoresRouter);
+
+import seasonsRouter from "./routers/seasons";
+
+app.use("/api/seasons", seasonsRouter);
 
 app.get("*", (req, res) => {
   return res.status(404).json({ error: "Not found" });

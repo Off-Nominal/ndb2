@@ -8,4 +8,8 @@ export namespace APISeasons {
   };
 
   export type GetSeasonByIdentifier = Season;
+
+  export type GetSeasons = Season & {
+    identifier: "current" | "past" | "future";
+  };
 }

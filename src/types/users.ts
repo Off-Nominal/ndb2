@@ -1,3 +1,5 @@
+import { APIBets } from "./bets";
+
 export namespace APIUsers {
   export type User = {
     id: string;
@@ -39,4 +41,6 @@ export namespace APIUsers {
       pending: number;
     };
   };
+
+  export type GetBetsByUserId = Omit<APIBets.Bet, "user_id">;
 }

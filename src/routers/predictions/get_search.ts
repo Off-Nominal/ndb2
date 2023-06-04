@@ -124,15 +124,27 @@ router.get(
         const user = await users.getByDiscordId(req.dbClient)(
           userParam as string
         );
+        if (!user) {
+          throw null;
+        }
         user_id = user.id;
       } catch (err) {
-        console.error(err);
+        if (err === null) {
+          return res
+            .status(404)
+            .json(
+              responseUtils.writeError(
+                ErrorCode.BAD_REQUEST,
+                "User does not exist"
+              )
+            );
+        }
         return res
           .status(500)
           .json(
             responseUtils.writeError(
               ErrorCode.BAD_REQUEST,
-              "User does not exist"
+              "There was an error looking for the user in your query."
             )
           );
       }

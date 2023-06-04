@@ -123,7 +123,7 @@ export const generate_SEARCH_PREDICTIONS = (
   whereClause += whereClauses.join(" AND ");
 
   // set up ORDER BY clauses
-  let orderByClause = options.sort_by || options.keyword ? `ORDER BY ` : "";
+  let orderByClause = `ORDER BY `;
 
   const orderByClauses = [];
 
@@ -148,6 +148,8 @@ export const generate_SEARCH_PREDICTIONS = (
       });
     }
   }
+
+  orderByClauses.push(`p.id ASC`);
 
   // merge ORDER BY clauses together
   orderByClause += orderByClauses.join(", ");
@@ -186,6 +188,23 @@ export const generate_SEARCH_PREDICTIONS = (
       p.judged_date,
       p.retired_date,
       p.status,
+      (SELECT row_to_json(bs) FROM
+          (SELECT
+            COUNT(b.id) FILTER (WHERE b.endorsed IS TRUE AND b.valid IS TRUE) as endorsements,
+            COUNT(b.id) FILTER (WHERE b.endorsed IS FALSE AND b.valid IS TRUE) as undorsements,
+            COUNT(b.id) FILTER (WHERE b.valid IS FALSE) as invalid
+            FROM bets b
+            WHERE b.prediction_id = p.id
+          ) bs
+      ) as bets,
+      (SELECT row_to_json(vs) FROM
+          (SELECT
+            COUNT(v.id) FILTER (WHERE v.vote IS TRUE) as yes,
+            COUNT(v.id) FILTER (WHERE v.vote IS FALSE) as no
+            FROM votes v
+            WHERE v.prediction_id = p.id
+          ) vs
+      ) as votes,
       (SELECT row_to_json(payout_sum)
         FROM(
           SELECT p.endorse_ratio as endorse, p.undorse_ratio as undorse

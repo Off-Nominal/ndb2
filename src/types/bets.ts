@@ -7,6 +7,7 @@ export namespace APIBets {
     date: string;
     valid: boolean;
     payout: number;
+    season_payout: number;
   };
 
   export type AddBet = Bet;

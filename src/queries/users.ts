@@ -8,6 +8,7 @@ import {
 } from "./scores";
 import { PoolClient } from "pg";
 import { seasonManager } from "../classes/SeasonManager";
+import { APIBets } from "../types/bets";
 
 const GET_USER_BY_DISCORD_ID = `
   SELECT id, discord_id 
@@ -18,6 +19,19 @@ const ADD_USER = `
   INSERT INTO users (id, discord_id) 
   VALUES ($1, $2) 
   RETURNING id, discord_id`;
+
+const GET_BETS_BY_USER_ID = `
+  SELECT
+    id,
+    prediction_id,
+    date,
+    endorsed,
+    wager,
+    valid,
+    payout,
+    season_payout
+  FROM bets b
+  WHERE b.user_id = $1`;
 
 const generate_GET_USER_SCORE_BY_ID_with_SEASON = (
   userId: number | string,
@@ -116,8 +130,16 @@ const getUserScoreById = (client: PoolClient) =>
       .then((response) => response.rows[0]);
   };
 
+const getBetsByUserId = (client: PoolClient) =>
+  function (userId: number | string): Promise<Omit<APIBets.Bet, "user_id">[]> {
+    return client
+      .query<APIUsers.GetBetsByUserId>(GET_BETS_BY_USER_ID, [userId])
+      .then((response) => response.rows);
+  };
+
 export default {
   add,
   getByDiscordId,
   getUserScoreById,
+  getBetsByUserId,
 };
