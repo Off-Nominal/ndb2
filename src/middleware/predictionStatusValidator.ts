@@ -16,7 +16,7 @@ const predictionStatusValidator = (
         .status(400)
         .json(
           responseUtils.writeError(
-            ErrorCode.BAD_REQUEST,
+            ErrorCode.INVALID_PREDICTION_STATUS,
             `The requested change to this prediction is invalid because its status is '${status}'. Allowable statuses are ${allowedStatuses
               .map((s) => `'${s}'`)
               .join(", ")}.`
