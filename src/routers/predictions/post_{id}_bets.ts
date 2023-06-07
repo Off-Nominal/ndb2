@@ -41,7 +41,7 @@ router.post(
           .status(400)
           .json(
             responseUtils.writeError(
-              ErrorCode.BAD_REQUEST,
+              ErrorCode.BETS_NO_CHANGE,
               `You have already ${
                 bet.endorsed ? "endorsed" : "undorsed"
               } this prediction. No change necessary.`,
@@ -61,7 +61,7 @@ router.post(
           .status(403)
           .json(
             responseUtils.writeError(
-              ErrorCode.BAD_REQUEST,
+              ErrorCode.BETS_UNCHANGEABLE,
               `Bets cannot be changed past the allowable time window of ${GAME_MECHANICS.predictionUpdateWindow} hours since the bet was made.`
             )
           );
