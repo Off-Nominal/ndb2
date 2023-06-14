@@ -11,6 +11,7 @@ interface WebhookEvent {
   new_vote: (prediction: APIPredictions.EnhancedPrediction) => void;
   judged_prediction: (prediction: APIPredictions.EnhancedPrediction) => void;
   season_start: (season: APISeasons.Season) => void;
+  season_end: (results: APISeasons.GetResultsBySeasonId) => void;
 }
 
 type WebhookNotification<T> = {
@@ -108,6 +109,15 @@ export class WebhookManager extends EventEmitter {
     this.on("season_start", (season: APISeasons.Season) => {
       this.notifySubscribers(
         this.generateResponse<APISeasons.Season>("season_start", season)
+      );
+    });
+
+    this.on("season_end", (results: APISeasons.GetResultsBySeasonId) => {
+      this.notifySubscribers(
+        this.generateResponse<APISeasons.GetResultsBySeasonId>(
+          "season_end",
+          results
+        )
       );
     });
   }

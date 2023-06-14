@@ -4,6 +4,7 @@ import pool from "../db";
 import { APISeasons } from "../types/seasons";
 import schedule from "node-schedule";
 import webhookManager from "../config/webhook_subscribers";
+import { isAfter, sub } from "date-fns";
 
 export class SeasonManager {
   private seasons: APISeasons.EnhancedSeason[] = [];
@@ -22,6 +23,36 @@ export class SeasonManager {
 
   private fetchAllSeasons(client: PoolClient) {
     return seasons.getAll(client);
+  }
+
+  private postCompletedSeasonResults() {
+    let job;
+    let poolClient: PoolClient;
+
+    job = schedule.scheduleJob("0 0 * * *", () => {
+      pool
+        .connect()
+        .then((client) => {
+          poolClient = client;
+          return seasons.getResultsBySeasonId(client)(
+            this.getSeasonByIdentifier("last")?.id
+          );
+        })
+        .then((results) => {
+          webhookManager.emit("season_end", results);
+          job.cancel();
+        })
+        .catch((err) => {
+          console.error("Error emiting season results");
+          console.error(err);
+        })
+        .finally(() => {
+          job.cancel();
+          poolClient.release();
+        });
+    });
+
+    console.log("[SM]: Seasons results scheduled.");
   }
 
   private refreshSeasons() {
@@ -46,13 +77,17 @@ export class SeasonManager {
           webhookManager.emit("season_start", newCurrentSeason);
         }
         this.seasons = allSeasons;
-        const results = seasons
-          .getResultsBySeasonId(poolClient)(
-            this.getSeasonByIdentifier("current")?.id
-          )
-          .then((res) => {
-            console.log(res);
-          });
+
+        const now = new Date();
+
+        if (
+          true ||
+          isAfter(new Date(newLastSeason.end), sub(now, { days: 1 }))
+        ) {
+          // Season results need to be scheduled
+
+          this.postCompletedSeasonResults();
+        }
       })
       .catch((err) => {
         console.error(err);
