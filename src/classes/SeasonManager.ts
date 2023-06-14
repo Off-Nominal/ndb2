@@ -25,16 +25,19 @@ export class SeasonManager {
   }
 
   private refreshSeasons() {
+    let poolClient: PoolClient;
+
     return pool
       .connect()
       .then((client) => {
-        return this.fetchAllSeasons(client)().finally(() => client.release());
+        poolClient = client;
+        return this.fetchAllSeasons(poolClient)();
       })
-      .then((seasons) => {
-        const newCurrentSeason = seasons.find(
+      .then((allSeasons) => {
+        const newCurrentSeason = allSeasons.find(
           (season) => season.identifier === "current"
         );
-        const newLastSeason = seasons.find(
+        const newLastSeason = allSeasons.find(
           (season) => season.identifier === "past"
         );
 
@@ -42,12 +45,20 @@ export class SeasonManager {
           // Season has changed
           webhookManager.emit("season_start", newCurrentSeason);
         }
-        this.seasons = seasons;
+        this.seasons = allSeasons;
+        const results = seasons
+          .getResultsBySeasonId(poolClient)(
+            this.getSeasonByIdentifier("current")?.id
+          )
+          .then((res) => {
+            console.log(res);
+          });
       })
       .catch((err) => {
         console.error(err);
         console.error("Could not refresh seasons.");
-      });
+      })
+      .finally(() => poolClient.release());
   }
 
   public getSeasonByIdentifier(identifier: "current" | "last") {
