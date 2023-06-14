@@ -80,12 +80,7 @@ export class SeasonManager {
 
         const now = new Date();
 
-        if (
-          true ||
-          isAfter(new Date(newLastSeason.end), sub(now, { days: 1 }))
-        ) {
-          // Season results need to be scheduled
-
+        if (isAfter(new Date(newLastSeason.end), sub(now, { days: 1 }))) {
           this.postCompletedSeasonResults();
         }
       })
