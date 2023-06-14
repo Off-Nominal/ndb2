@@ -4,7 +4,7 @@ import pool from "../db";
 import { APISeasons } from "../types/seasons";
 import schedule from "node-schedule";
 import webhookManager from "../config/webhook_subscribers";
-import { isAfter, sub } from "date-fns";
+import { add, isAfter, sub } from "date-fns";
 
 export class SeasonManager {
   private seasons: APISeasons.EnhancedSeason[] = [];
@@ -25,11 +25,11 @@ export class SeasonManager {
     return seasons.getAll(client);
   }
 
-  private postCompletedSeasonResults() {
+  private postCompletedSeasonResults(date: Date) {
     let job;
     let poolClient: PoolClient;
 
-    job = schedule.scheduleJob("0 0 * * *", () => {
+    job = schedule.scheduleJob(date, () => {
       pool
         .connect()
         .then((client) => {
@@ -51,7 +51,7 @@ export class SeasonManager {
         });
     });
 
-    console.log("[SM]: Seasons results scheduled.");
+    console.log("[SM]: Seasons results scheduled. for ", date);
   }
 
   private refreshSeasons() {
@@ -78,9 +78,10 @@ export class SeasonManager {
         this.seasons = allSeasons;
 
         const now = new Date();
+        const postDate = add(new Date(newLastSeason.end), { days: 2 });
 
-        if (isAfter(new Date(newLastSeason.end), sub(now, { days: 1 }))) {
-          this.postCompletedSeasonResults();
+        if (isAfter(postDate, now)) {
+          this.postCompletedSeasonResults(postDate);
         }
       })
       .catch((err) => {
