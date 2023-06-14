@@ -42,7 +42,7 @@ export class SeasonManager {
           webhookManager.emit("season_end", results);
         })
         .catch((err) => {
-          console.error("Error emiting season results");
+          console.error("Error emitting season results");
           console.error(err);
         })
         .finally(() => {
@@ -51,7 +51,7 @@ export class SeasonManager {
         });
     });
 
-    console.log("[SM]: Seasons results scheduled. for ", date);
+    console.log("[SM]: Seasons results scheduled for", date);
   }
 
   private refreshSeasons() {
