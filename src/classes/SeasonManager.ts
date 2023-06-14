@@ -40,7 +40,6 @@ export class SeasonManager {
         })
         .then((results) => {
           webhookManager.emit("season_end", results);
-          job.cancel();
         })
         .catch((err) => {
           console.error("Error emiting season results");

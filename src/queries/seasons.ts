@@ -1,4 +1,4 @@
-import { Pool, PoolClient } from "pg";
+import { PoolClient } from "pg";
 import { APISeasons } from "../types/seasons";
 
 const GET_CURRENT_SEASON = `SELECT 
@@ -35,7 +35,16 @@ const GET_SEASONS = `
 
 const GET_RESULTS_BY_SEASON_ID = `
   SELECT
-    (SELECT jsonb_agg(p) FROM (
+    (SELECT row_to_json(s) FROM (
+      SELECT 
+        id,
+        name,
+        start,
+        "end",
+        wager_cap
+      FROM seasons WHERE id = $1
+    ) s ) as season,
+    (SELECT row_to_json(p) FROM (
       SELECT
         COUNT(*) FILTER (WHERE closed_date IS NOT NULL) as closed,
         COUNT(*) FILTER (WHERE status = 'successful') as successes,
@@ -43,7 +52,7 @@ const GET_RESULTS_BY_SEASON_ID = `
       FROM predictions
       WHERE season_id = $1
     ) p ) as predictions,
-    (SELECT jsonb_agg(b) FROM (
+    (SELECT row_to_json(b) FROM (
       SELECT
         COUNT(bets.*) FILTER (WHERE predictions.closed_date IS NOT NULL) as closed,
         COUNT(bets.*) FILTER (WHERE bets.season_payout IS NOT NULL AND bets.season_payout > 0) as successes,
@@ -52,7 +61,7 @@ const GET_RESULTS_BY_SEASON_ID = `
       JOIN predictions ON predictions.id = bets.prediction_id
       WHERE predictions.season_id = $1 AND bets.valid IS TRUE
     ) b ) as bets,
-    (SELECT jsonb_agg(s) FROM (
+    (SELECT row_to_json(s) FROM (
       SELECT
         SUM(bets.season_payout) FILTER (WHERE bets.season_payout IS NOT NULL AND bets.season_payout > 0) as payouts,
         SUM(bets.season_payout) FILTER (WHERE bets.season_payout IS NOT NULL AND bets.season_payout < 0) as penalties

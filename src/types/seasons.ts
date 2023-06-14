@@ -16,6 +16,13 @@ export namespace APISeasons {
   export type GetSeasons = EnhancedSeason;
 
   export type GetResultsBySeasonId = {
+    season: {
+      id: number;
+      name: string;
+      start: string;
+      end: string;
+      wager_cap: number;
+    };
     predictions: {
       closed: number;
       successes: number;
@@ -32,7 +39,7 @@ export namespace APISeasons {
     };
     largest_payout: {
       value: number;
-      prediction: number;
+      prediction_id: number;
       better: {
         id: string;
         discord_id: string;
@@ -40,7 +47,7 @@ export namespace APISeasons {
     };
     largest_penalty: {
       value: number;
-      prediction: number;
+      prediction_id: number;
       better: {
         id: string;
         discord_id: string;
