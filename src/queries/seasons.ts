@@ -7,6 +7,7 @@ const GET_CURRENT_SEASON = `SELECT
     start,
     "end",
     wager_cap
+    closed,
   FROM seasons WHERE start <= NOW() AND "end" > NOW()`;
 
 const GET_LAST_SEASON = `SELECT 
@@ -15,6 +16,7 @@ const GET_LAST_SEASON = `SELECT
     start,
     "end",
     wager_cap
+    closed,
   FROM seasons WHERE "end" < NOW() ORDER BY "end" DESC LIMIT 1`;
 
 const GET_SEASONS = `
@@ -24,6 +26,7 @@ const GET_SEASONS = `
     start,
     "end",
     wager_cap,
+    closed,
     (SELECT CASE
         WHEN start <= NOW() AND "end" > NOW() THEN 'current'
         WHEN "end" < NOW() THEN 'past'
@@ -33,6 +36,13 @@ const GET_SEASONS = `
   FROM seasons
   ORDER BY "end" DESC`;
 
+const CLOSE_SEASON_BY_ID = `
+  UPDATE seasons
+  SET closed = TRUE
+  WHERE id = $1
+  RETURNING id
+`;
+
 const GET_RESULTS_BY_SEASON_ID = `
   SELECT
     (SELECT row_to_json(s) FROM (
@@ -41,7 +51,8 @@ const GET_RESULTS_BY_SEASON_ID = `
         name,
         start,
         "end",
-        wager_cap
+        wager_cap,
+        closed
       FROM seasons WHERE id = $1
     ) s ) as season,
     (SELECT row_to_json(p) FROM (
@@ -131,8 +142,16 @@ const getResultsBySeasonId = (client: PoolClient) =>
       .then((response) => response.rows[0]);
   };
 
+const closeSeasonById = (client: PoolClient) =>
+  function (id: number | string): Promise<APISeasons.CloseSeasonById> {
+    return client
+      .query<APISeasons.CloseSeasonById>(CLOSE_SEASON_BY_ID, [id])
+      .then((response) => response.rows[0]);
+  };
+
 export default {
   getAll,
   getSeasonByIdentifier,
   getResultsBySeasonId,
+  closeSeasonById,
 };

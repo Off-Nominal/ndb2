@@ -5,6 +5,7 @@ export namespace APISeasons {
     start: string;
     end: string;
     wager_cap: number;
+    closed: boolean;
   };
 
   export type EnhancedSeason = Season & {
@@ -53,5 +54,9 @@ export namespace APISeasons {
         discord_id: string;
       };
     };
+  };
+
+  export type CloseSeasonById = {
+    id: number;
   };
 }
