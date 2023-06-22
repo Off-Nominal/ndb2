@@ -205,7 +205,6 @@ const searchPredictions = (client: PoolClient) =>
     options: SearchOptions
   ): Promise<APIPredictions.SearchPredictions[]> {
     const [query, params] = generate_SEARCH_PREDICTIONS(options);
-    console.log(query, params);
     return client
       .query<APIPredictions.SearchPredictions>(query, params)
       .then((res) => res.rows);
