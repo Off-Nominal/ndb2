@@ -43,6 +43,8 @@ These data are triggered to change directly as a result of normalized data. Core
 - `predictions.season_id`
   - `refresh_prediction_seasons('prediction')` is called to refresh one prediction's season_id on INSERT or UPDATE (due_date, closed_date) on predictions
   - `refresh_prediction_seasons('all)` is called to refresh all predictions' season_ids on INSERT, DELETE or UPDATE (start, "end") on seasons
+- `predictions.season_applicable`
+  - `refresh_prediction_season_applicable()` is called to refresh one prediction's season_applicable ON UPDATE (season_id) on predictions
 - `bets.wager`
   - `refresh_wager('prediction')` is called to update all bets for single prediction on UPDATE (due_date, closed_date) to `predictions` table
   - `refresh_wager('bet')` is called to update a single bet on INSERT to `bets` table
@@ -66,5 +68,5 @@ These data are triggered to change as a result of Level 1 De-normalized data. Co
 These data are triggered to change as a result of LEvel 2 De-normalized data. Core data changes may trigger them as well.
 
 - `bets.payout` and `bets.season_payout`
-  - `refresh_payouts_from_season` is called to refresh both of these ratios on UPDATE (payout_formula, wager_cap) of seasons
-  - `refresh_payouts_from_prediction` is called to refresh both of these ratios on UPDATE (status, endorse_ratio, undorse_ratio) of predictions
+  - `refresh_payouts_from_season` is called to refresh both of these payouts on UPDATE (payout_formula, wager_cap) of seasons
+  - `refresh_payouts_from_prediction` is called to refresh both of these payouts on UPDATE (status, endorse_ratio, undorse_ratio) of predictions

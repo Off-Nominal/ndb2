@@ -32,6 +32,7 @@ const GET_ENHANCED_PREDICTION_BY_ID = `
     as predictor,
     p.text,
     p.season_id,
+    p.season_applicable,
     p.created_date,
     p.due_date,
     p.closed_date,
@@ -204,6 +205,7 @@ const searchPredictions = (client: PoolClient) =>
     options: SearchOptions
   ): Promise<APIPredictions.SearchPredictions[]> {
     const [query, params] = generate_SEARCH_PREDICTIONS(options);
+    console.log(query, params);
     return client
       .query<APIPredictions.SearchPredictions>(query, params)
       .then((res) => res.rows);
