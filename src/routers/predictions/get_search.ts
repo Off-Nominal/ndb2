@@ -40,6 +40,10 @@ router.get(
     paramValidator.string("creator", { type: "query", optional: true }),
     paramValidator.string("unbetter", { type: "query", optional: true }),
     paramValidator.string("season_id", { type: "query", optional: true }),
+    paramValidator.boolean("include_non_season_applicable", {
+      type: "query",
+      optional: true,
+    }),
     paramValidator.integerParseableString("page", {
       type: "query",
       optional: true,
@@ -47,8 +51,16 @@ router.get(
     getDbClient,
   ],
   async (req: Request, res: Response) => {
-    const { status, sort_by, page, keyword, creator, unbetter, season_id } =
-      req.query;
+    const {
+      status,
+      sort_by,
+      page,
+      keyword,
+      creator,
+      unbetter,
+      season_id,
+      include_non_season_applicable,
+    } = req.query;
 
     if (
       !status &&
@@ -63,7 +75,7 @@ router.get(
         .json(
           responseUtils.writeError(
             ErrorCode.MALFORMED_QUERY_PARAMS,
-            `Please provide at least one query parameter in your search.`
+            `Please provide at least one standard query parameter in your search.`
           )
         );
     }
@@ -190,6 +202,7 @@ router.get(
         predictor_id: creator && creator_id,
         non_better_id: unbetter && unbetter_id,
         season_id: season_id as string,
+        include_non_applicable: include_non_season_applicable === "true",
       })
       .then((predictions) => {
         res.json(

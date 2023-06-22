@@ -23,6 +23,7 @@ export type SearchOptions = {
   predictor_id?: string;
   non_better_id?: string;
   season_id?: string;
+  include_non_applicable?: boolean;
 };
 
 const sortByOptions = {
@@ -117,6 +118,10 @@ export const generate_SEARCH_PREDICTIONS = (
   if (options.season_id) {
     params.push(options.season_id);
     whereClauses.push(`p.season_id = $${params.length}`);
+
+    if (!options.include_non_applicable) {
+      whereClauses.push(`p.season_applicable IS TRUE`);
+    }
   }
 
   // merge all the where clauses together
@@ -177,6 +182,7 @@ export const generate_SEARCH_PREDICTIONS = (
       p.closed_date,
       p.triggered_date,
       p.season_id,
+      p.season_applicable,
       (SELECT row_to_json(trig) FROM 
           (SELECT 
               p.triggerer_id as id, 

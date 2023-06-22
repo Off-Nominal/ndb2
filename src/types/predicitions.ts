@@ -7,23 +7,6 @@ export enum PredictionLifeCycle {
 }
 
 export namespace APIPredictions {
-  export type Prediction = {
-    id: number;
-    user_id: string;
-    text: string;
-    created_date: string;
-    due_date: string;
-    closed_date: string | null;
-    triggered_date: string | null;
-    triggerer_id: string | null;
-    judged_date: string | null;
-    retired_date: string | null;
-    status: PredictionLifeCycle;
-    season_id: number;
-    endorse_ratio: number;
-    undorse_ratio: number;
-  };
-
   export type EnhancedPrediction = {
     id: number;
     predictor: {
@@ -32,6 +15,7 @@ export namespace APIPredictions {
     };
     text: string;
     season_id: number;
+    season_applicable: boolean;
     created_date: string;
     due_date: string;
     closed_date: string | null;

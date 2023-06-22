@@ -32,6 +32,7 @@ const GET_ENHANCED_PREDICTION_BY_ID = `
     as predictor,
     p.text,
     p.season_id,
+    p.season_applicable,
     p.created_date,
     p.due_date,
     p.closed_date,
