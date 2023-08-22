@@ -14,7 +14,7 @@ export namespace APIPredictions {
       discord_id: string;
     };
     text: string;
-    season_id: number;
+    season_id: number | null;
     season_applicable: boolean;
     created_date: string;
     due_date: string;
