@@ -8,7 +8,7 @@ const GET_CURRENT_SEASON = `SELECT
     "end",
     wager_cap
     closed,
-  FROM seasons WHERE start <= NOW() AND "end" > NOW()`;
+  FROM seasons WHERE start < NOW() AND "end" >= NOW()`;
 
 const GET_LAST_SEASON = `SELECT 
     id,
@@ -28,7 +28,7 @@ const GET_SEASONS = `
     wager_cap,
     closed,
     (SELECT CASE
-        WHEN start <= NOW() AND "end" > NOW() THEN 'current'
+        WHEN start < NOW() AND "end" >= NOW() THEN 'current'
         WHEN "end" < NOW() THEN 'past'
         ELSE 'future' 
       END
