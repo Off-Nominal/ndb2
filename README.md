@@ -69,4 +69,4 @@ These data are triggered to change as a result of LEvel 2 De-normalized data. Co
 
 - `bets.payout` and `bets.season_payout`
   - `refresh_payouts_from_season` is called to refresh both of these payouts on UPDATE (payout_formula, wager_cap) of seasons
-  - `refresh_payouts_from_prediction` is called to refresh both of these payouts on UPDATE (status, endorse_ratio, undorse_ratio) of predictions
+  - `refresh_payouts_from_prediction` is called to refresh both of these payouts on UPDATE (status, endorse_ratio, undorse_ratio) of predictions!
