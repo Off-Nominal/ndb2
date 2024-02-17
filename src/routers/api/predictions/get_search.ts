@@ -1,12 +1,12 @@
 import express, { Request, Response } from "express";
-import { getDbClient } from "../../middleware/getDbClient";
-import paramValidator from "../../middleware/paramValidator";
-import predictions from "../../queries/predictions";
-import { SortByOption } from "../../queries/predictions_search";
-import { PredictionLifeCycle } from "../../types/predicitions";
-import responseUtils from "../../utils/response";
-import users from "../../queries/users";
-import { ErrorCode } from "../../types/responses";
+import { getDbClient } from "../../../middleware/getDbClient";
+import paramValidator from "../../../middleware/paramValidator";
+import predictions from "../../../queries/predictions";
+import { SortByOption } from "../../../queries/predictions_search";
+import { PredictionLifeCycle } from "../../../types/predicitions";
+import responseUtils from "../../../utils/response";
+import users from "../../../queries/users";
+import { ErrorCode } from "../../../types/responses";
 const router = express.Router();
 
 const isPredictionLifeCycle = (val: any): val is PredictionLifeCycle => {

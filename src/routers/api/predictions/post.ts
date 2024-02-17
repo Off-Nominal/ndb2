@@ -1,13 +1,13 @@
 import express, { Request, Response } from "express";
-import webhookManager from "../../config/webhook_subscribers";
-import bets from "../../queries/bets";
-import predictions from "../../queries/predictions";
-import responseUtils from "../../utils/response";
-import paramValidator from "../../middleware/paramValidator";
-import dateValidator from "../../middleware/dateValidator";
-import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
-import { getDbClient } from "../../middleware/getDbClient";
-import { ErrorCode } from "../../types/responses";
+import webhookManager from "../../../config/webhook_subscribers";
+import bets from "../../../queries/bets";
+import predictions from "../../../queries/predictions";
+import responseUtils from "../../../utils/response";
+import paramValidator from "../../../middleware/paramValidator";
+import dateValidator from "../../../middleware/dateValidator";
+import { getUserByDiscordId } from "../../../middleware/getUserByDiscordId";
+import { getDbClient } from "../../../middleware/getDbClient";
+import { ErrorCode } from "../../../types/responses";
 const router = express.Router();
 
 router.post(

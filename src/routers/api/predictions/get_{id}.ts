@@ -1,8 +1,8 @@
 import express, { Request, Response } from "express";
-import { getDbClient } from "../../middleware/getDbClient";
-import { getPrediction } from "../../middleware/getPrediction";
-import paramValidator from "../../middleware/paramValidator";
-import responseUtils from "../../utils/response";
+import { getDbClient } from "../../../middleware/getDbClient";
+import { getPrediction } from "../../../middleware/getPrediction";
+import paramValidator from "../../../middleware/paramValidator";
+import responseUtils from "../../../utils/response";
 const router = express.Router();
 
 router.get(

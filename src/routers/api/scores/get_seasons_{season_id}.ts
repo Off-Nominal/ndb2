@@ -1,10 +1,10 @@
 import express, { Request, Response } from "express";
-import { getDbClient } from "../../middleware/getDbClient";
-import scores from "../../queries/scores";
-import responseUtils from "../../utils/response";
+import { getDbClient } from "../../../middleware/getDbClient";
+import scores from "../../../queries/scores";
+import responseUtils from "../../../utils/response";
 import { isScoreView, ScoreView } from "./get";
-import paramValidator from "../../middleware/paramValidator";
-import { ErrorCode } from "../../types/responses";
+import paramValidator from "../../../middleware/paramValidator";
+import { ErrorCode } from "../../../types/responses";
 const router = express.Router();
 
 router.get(

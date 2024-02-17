@@ -1,15 +1,15 @@
 import { add, isAfter } from "date-fns";
 import express, { Request, Response } from "express";
-import GAME_MECHANICS from "../../config/game_mechanics";
-import webhookManager from "../../config/webhook_subscribers";
-import paramValidator from "../../middleware/paramValidator";
-import { getPrediction } from "../../middleware/getPrediction";
-import predictionStatusValidator from "../../middleware/predictionStatusValidator";
-import predictions from "../../queries/predictions";
-import { PredictionLifeCycle } from "../../types/predicitions";
-import responseUtils from "../../utils/response";
-import { getDbClient } from "../../middleware/getDbClient";
-import { ErrorCode } from "../../types/responses";
+import GAME_MECHANICS from "../../../config/game_mechanics";
+import webhookManager from "../../../config/webhook_subscribers";
+import paramValidator from "../../../middleware/paramValidator";
+import { getPrediction } from "../../../middleware/getPrediction";
+import predictionStatusValidator from "../../../middleware/predictionStatusValidator";
+import predictions from "../../../queries/predictions";
+import { PredictionLifeCycle } from "../../../types/predicitions";
+import responseUtils from "../../../utils/response";
+import { getDbClient } from "../../../middleware/getDbClient";
+import { ErrorCode } from "../../../types/responses";
 const router = express.Router();
 
 router.patch(

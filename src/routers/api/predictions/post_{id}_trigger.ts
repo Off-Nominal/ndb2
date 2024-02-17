@@ -1,16 +1,16 @@
 import { isBefore } from "date-fns";
 import express, { Request, Response } from "express";
-import webhookManager from "../../config/webhook_subscribers";
-import dateValidator from "../../middleware/dateValidator";
-import { getDbClient } from "../../middleware/getDbClient";
-import { getPrediction } from "../../middleware/getPrediction";
-import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
-import paramValidator from "../../middleware/paramValidator";
-import predictionStatusValidator from "../../middleware/predictionStatusValidator";
-import predictions from "../../queries/predictions";
-import { PredictionLifeCycle } from "../../types/predicitions";
-import responseUtils from "../../utils/response";
-import { ErrorCode } from "../../types/responses";
+import webhookManager from "../../../config/webhook_subscribers";
+import dateValidator from "../../../middleware/dateValidator";
+import { getDbClient } from "../../../middleware/getDbClient";
+import { getPrediction } from "../../../middleware/getPrediction";
+import { getUserByDiscordId } from "../../../middleware/getUserByDiscordId";
+import paramValidator from "../../../middleware/paramValidator";
+import predictionStatusValidator from "../../../middleware/predictionStatusValidator";
+import predictions from "../../../queries/predictions";
+import { PredictionLifeCycle } from "../../../types/predicitions";
+import responseUtils from "../../../utils/response";
+import { ErrorCode } from "../../../types/responses";
 const router = express.Router();
 
 router.post(

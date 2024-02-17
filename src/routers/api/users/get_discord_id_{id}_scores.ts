@@ -1,9 +1,9 @@
 import express, { Request, Response } from "express";
-import { getDbClient } from "../../middleware/getDbClient";
-import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
-import paramValidator from "../../middleware/paramValidator";
-import users from "../../queries/users";
-import responseUtils from "../../utils/response";
+import { getDbClient } from "../../../middleware/getDbClient";
+import { getUserByDiscordId } from "../../../middleware/getUserByDiscordId";
+import paramValidator from "../../../middleware/paramValidator";
+import users from "../../../queries/users";
+import responseUtils from "../../../utils/response";
 const router = express.Router();
 
 router.get(
