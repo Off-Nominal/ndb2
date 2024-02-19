@@ -1,6 +1,3 @@
-const dotenv = require("dotenv");
-dotenv.config();
-
 const EMPTY_TABLES = `
   TRUNCATE
     seasons,

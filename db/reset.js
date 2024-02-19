@@ -3,10 +3,6 @@ const empty = require("./empty");
 
 const pg = require("pg");
 const path = require("node:path");
-const dotenv = require("dotenv");
-dotenv.config({
-  path: path.join(__dirname, "..", "..", ".env"),
-});
 
 const { Client } = pg;
 

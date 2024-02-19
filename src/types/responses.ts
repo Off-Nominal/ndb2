@@ -13,6 +13,8 @@
 // 05 - Bets
 // 06 - Votes
 
+// 51 - Web App
+
 export enum ErrorCode {
   // Generic
   SERVER_ERROR = 90000,
@@ -20,12 +22,16 @@ export enum ErrorCode {
   BAD_REQUEST = 90002,
   MALFORMED_BODY_DATA = 90003,
   MALFORMED_QUERY_PARAMS = 90004,
+  NOT_FOUND = 90005,
 
   INVALID_PREDICTION_STATUS = 90010,
 
   // Bets
   BETS_NO_CHANGE = 90501,
   BETS_UNCHANGEABLE = 90502,
+
+  // Web App
+  WEB_APP_DATA_FETCH_ERROR = 95100,
 }
 
 export type APIResponse<T = null> = {

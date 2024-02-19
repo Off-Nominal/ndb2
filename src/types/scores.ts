@@ -6,14 +6,14 @@ export namespace APIScores {
   }
 
   export interface PointsLeader extends Leader {
-    points: number;
+    points: number | undefined;
   }
 
   export interface BetsLeader extends Leader {
     bets: {
       successful: number;
       unsuccessful: number;
-      total: number;
+      total: number | undefined;
     };
   }
 
@@ -21,13 +21,13 @@ export namespace APIScores {
     predictions: {
       successful: number;
       unsuccessful: number;
-      total: number;
+      total: number | undefined;
     };
   }
 
   export type LeaderboardType = "points" | "predictions" | "bets";
 
-  type GetLeaderboard<T> = {
+  export type GetLeaderboard<T> = {
     type: LeaderboardType;
     season?: {
       id: number;

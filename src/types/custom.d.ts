@@ -8,6 +8,7 @@ declare global {
       prediction?: APIPredictions.EnhancedPrediction;
       user_id?: string;
       dbClient?: PoolClient;
+      authenticated_user?: APIAuth.User;
     }
   }
 }

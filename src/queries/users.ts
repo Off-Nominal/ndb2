@@ -1,5 +1,4 @@
 import { APIUsers } from "../types/users";
-import { v4 as uuidv4 } from "uuid";
 import {
   generate_GET_USER_BET_SUMMARY_with_SEASON,
   generate_GET_USER_PREDICTION_SUMMARY_with_SEASON,
@@ -9,6 +8,7 @@ import {
 import { PoolClient } from "pg";
 import { seasonManager } from "../classes/SeasonManager";
 import { APIBets } from "../types/bets";
+import { randomUUID } from "crypto";
 
 const GET_USER_BY_DISCORD_ID = `
   SELECT id, discord_id 
@@ -92,7 +92,7 @@ const generate_GET_USER_SCORE_BY_ID_with_SEASON = (
 
 const add = (client: PoolClient) =>
   function (discordId: number | string): Promise<APIUsers.User> {
-    const id = uuidv4();
+    const id = randomUUID();
     return client
       .query<APIUsers.AddUser>(ADD_USER, [id, discordId])
       .then((response) => response.rows[0]);

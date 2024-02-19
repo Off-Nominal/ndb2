@@ -4,12 +4,13 @@
     "module": "commonjs",
     "sourceMap": true,
     "outDir": "dist",
-    "lib": ["es2021.string"],
+    "lib": ["es2021.string", "dom"],
     "downlevelIteration": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "jsx": "react-jsx"
   },
-  "include": ["src/**/*", "db/empty.js"],
+  "include": ["src/**/*", "src/views/**/*.eta", "db/empty.js"],
   "exclude": ["node_modules"]
 }
