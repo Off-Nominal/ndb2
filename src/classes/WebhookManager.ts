@@ -1,4 +1,3 @@
-import axios from "axios";
 import EventEmitter from "events";
 import { APIPredictions } from "../types/predicitions";
 import { APISeasons } from "../types/seasons";
@@ -136,18 +135,27 @@ export class WebhookManager extends EventEmitter {
     const requests = [];
 
     for (const sub of this.subscribers) {
-      const request = axios
-        .post(sub, data, {
-          headers: {
-            authorization: `Bearer ${process.env.DISCORD_CLIENT_API_KEY}`,
-          },
+      const request: RequestInit = {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.DISCORD_CLIENT_API_KEY}`,
+        },
+      };
+
+      const promise = fetch(sub, request)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(response.statusText);
+          }
         })
         .catch((err) => {
           console.error("Subscriber webhook request failed: ", sub);
           console.error(err);
         });
 
-      requests.push(request);
+      requests.push(promise);
     }
   };
 }
