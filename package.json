@@ -1,6 +1,6 @@
 {
   "name": "ndb2",
-  "version": "0.2.0",
+  "version": "2.1.0",
   "description": "Nostradambot 2.0 Betting Game for the Off-Nominal Discord",
   "main": "index.js",
   "scripts": {
@@ -50,6 +50,6 @@
     "typescript": "^5.6.2"
   },
   "engines": {
-    "node": "20.x"
+    "node": "22.x"
   }
 }
