@@ -9,6 +9,7 @@ interface WebhookEvent {
   triggered_prediction: (prediction: APIPredictions.EnhancedPrediction) => void;
   new_vote: (prediction: APIPredictions.EnhancedPrediction) => void;
   judged_prediction: (prediction: APIPredictions.EnhancedPrediction) => void;
+  checked_prediction: (prediction: APIPredictions.EnhancedPrediction) => void;
   season_start: (season: APISeasons.Season) => void;
   season_end: (results: APISeasons.GetResultsBySeasonId) => void;
 }
@@ -99,6 +100,18 @@ export class WebhookManager extends EventEmitter {
         this.notifySubscribers(
           this.generateResponse<APIPredictions.EnhancedPrediction>(
             "judged_prediction",
+            prediction
+          )
+        );
+      }
+    );
+
+    this.on(
+      "checked_prediction",
+      (prediction: APIPredictions.EnhancedPrediction) => {
+        this.notifySubscribers(
+          this.generateResponse<APIPredictions.EnhancedPrediction>(
+            "checked_prediction",
             prediction
           )
         );

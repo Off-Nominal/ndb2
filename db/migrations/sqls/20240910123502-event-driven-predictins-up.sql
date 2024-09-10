@@ -13,9 +13,8 @@ ALTER TABLE predictions
 CREATE TABLE IF NOT EXISTS checks (
   id SERIAL PRIMARY KEY,
   prediction_id INT REFERENCES predictions(id) ON DELETE CASCADE,
-  check_date TIMESTAMPTZ NOT NULL,
+  check_date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   closed BOOLEAN NOT NULL DEFAULT false,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   closed_at TIMESTAMPTZ
 );
 

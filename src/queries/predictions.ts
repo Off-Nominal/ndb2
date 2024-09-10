@@ -4,6 +4,7 @@ import {
   generate_SEARCH_PREDICTIONS,
   SearchOptions,
 } from "./predictions_search";
+import checks from "./checks";
 
 const ADD_DATE_DRIVEN_PREDICTION = `
   INSERT INTO predictions (
@@ -118,6 +119,30 @@ const GET_ENHANCED_PREDICTION_BY_ID = `
         ORDER BY voted_date DESC
       ) p_votes
   ) as votes,
+  (SELECT
+    COALESCE(jsonb_agg(p_checks), '[]')
+    FROM
+      (SELECT
+          c.id as check_id,
+          c.check_date,
+          c.closed,
+          (SELECT row_to_json(vals)
+            FROM(
+              SELECT
+                COUNT(uc.*) FILTER (WHERE uc.value = 0) as trigger,
+                COUNT(uc.*) FILTER (WHERE uc.value = 1) as day,
+                COUNT(uc.*) FILTER (WHERE uc.value = 7) as week,
+                COUNT(uc.*) FILTER (WHERE uc.value = 30) as month,
+                COUNT(uc.*) FILTER (WHERE uc.value = 90) as quarter,
+                COUNT(uc.*) FILTER (WHERE uc.value = 365) as year
+              FROM user_checks uc
+            ) vals
+          ) as values
+        FROM checks c
+        WHERE c.prediction_id = p.id
+        ORDER BY c.check_date DESC
+      ) p_checks
+  ) as checks,
   (SELECT row_to_json(payout_sum)
     FROM(
       SELECT p.endorse_ratio as endorse, p.undorse_ratio as undorse
@@ -139,12 +164,39 @@ const JUDGE_PREDICTION_BY_ID = `
   UPDATE predictions SET judged_date = NOW() WHERE predictions.id = $1;
 `;
 
+const CHECK_PREDICTION_BY_ID = `
+  UPDATE predictions SET last_checked_date = $2 WHERE predictions.id = $1;
+`;
+
 const GET_NEXT_PREDICTION_TO_TRIGGER = `
-  SELECT id, due_date FROM predictions WHERE due_date < NOW() AND triggered_date IS NULL AND retired_date IS NULL ORDER BY due_date ASC LIMIT 1
+  SELECT 
+    id, 
+    due_date 
+  FROM predictions 
+  WHERE driver = 'date' 
+    AND due_date < NOW() 
+    AND status = 'open'
+  ORDER BY due_date ASC LIMIT 1
 `;
 
 const GET_NEXT_PREDICTION_TO_JUDGE = `
-  SELECT id FROM predictions WHERE judged_date IS NULL AND triggered_date + '1 day' < NOW() ORDER BY due_date ASC LIMIT 1
+  SELECT 
+    id 
+  FROM predictions 
+  WHERE status = 'closed'
+    AND triggered_date + '1 day' < NOW() 
+  ORDER BY due_date ASC LIMIT 1
+`;
+
+const GET_NEXT_PREDICTION_TO_CHECK = `
+  SELECT 
+    id, 
+    check_date 
+  FROM predictions 
+  WHERE driver = 'event' 
+    AND check_date < NOW() 
+    AND status = 'open' 
+  ORDER BY check_date ASC LIMIT 1
 `;
 
 const add = (client: PoolClient) =>
@@ -215,11 +267,31 @@ const judgePredictionById = (client: PoolClient) =>
       .then((response) => response.rows[0]);
   };
 
+const checkPredictionById = (client: PoolClient) =>
+  function (
+    prediction_id: number | string
+  ): Promise<APIPredictions.CheckPredictionById> {
+    const currentCheckDate = new Date();
+
+    return client
+      .query<null>(CHECK_PREDICTION_BY_ID, [prediction_id, currentCheckDate])
+      .then(() => checks.add(client)(prediction_id, currentCheckDate));
+  };
+
 const getNextPredictionToTrigger = (client: PoolClient) =>
   function (): Promise<APIPredictions.GetNextPredictionToTrigger | undefined> {
     return client
       .query<APIPredictions.GetNextPredictionToTrigger>(
         GET_NEXT_PREDICTION_TO_TRIGGER
+      )
+      .then((res) => res.rows[0]);
+  };
+
+const getNextPredictionToCheck = (client: PoolClient) =>
+  function (): Promise<APIPredictions.GetNextPredictionToCheck | undefined> {
+    return client
+      .query<APIPredictions.GetNextPredictionToCheck>(
+        GET_NEXT_PREDICTION_TO_CHECK
       )
       .then((res) => res.rows[0]);
   };
@@ -249,7 +321,9 @@ export default {
   retirePredictionById,
   closePredictionById,
   judgePredictionById,
+  checkPredictionById,
   getNextPredictionToTrigger,
+  getNextPredictionToCheck,
   getNextPredictionToJudge,
   searchPredictions,
 };

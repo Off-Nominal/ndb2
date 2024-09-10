@@ -4,6 +4,7 @@ import predictions from "../queries/predictions";
 import schedule from "node-schedule";
 
 const triggerSchedule = "0/30 12-21 * * *";
+const checkSchedule = "15/45 12-21 * * *";
 const judgementSchedule = "*/10 * * * *";
 
 export default class PredictionMonitor {
@@ -16,6 +17,11 @@ export default class PredictionMonitor {
     // Judgement Schedule
     schedule.scheduleJob(judgementSchedule, () => {
       this.judgeNextPrediction();
+    });
+
+    // Check Schedule
+    schedule.scheduleJob(checkSchedule, () => {
+      this.checkNextPrediction();
     });
 
     console.log("[PM]: Prediction Monitor running.");
@@ -74,6 +80,35 @@ export default class PredictionMonitor {
       })
       .catch((err) => {
         console.error("[PM]: Failed to get next prediction to judge.");
+        console.error(err);
+      })
+      .finally(() => {
+        client.release();
+      });
+  }
+
+  private async checkNextPrediction() {
+    const client = await pool.connect();
+    predictions
+      .getNextPredictionToCheck(client)()
+      .then((pred) => {
+        if (!pred) {
+          return;
+        }
+        console.log("[PM]: Checking prediction with id,", pred.id);
+        return predictions
+          .checkPredictionById(client)(pred.id)
+          .then(() => predictions.getByPredictionId(client)(pred.id))
+          .then((prediction) => {
+            webhookManager.emit("checked_prediction", prediction);
+          })
+          .catch((err) => {
+            console.error("[PM]: Failed to check next prediction.");
+            console.error(err);
+          });
+      })
+      .catch((err) => {
+        console.error("[PM]: Failed to get next prediction to check.");
         console.error(err);
       })
       .finally(() => {

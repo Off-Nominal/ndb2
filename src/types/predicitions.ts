@@ -1,3 +1,5 @@
+import { APIChecks } from "./checks";
+
 export enum PredictionLifeCycle {
   OPEN = "open",
   RETIRED = "retired",
@@ -54,6 +56,12 @@ export namespace APIPredictions {
         discord_id: string;
       };
     }[];
+    checks: {
+      check_id: number;
+      check_date: string;
+      closed: boolean;
+      values: Record<string, number>;
+    }[];
     payouts: {
       endorse: number;
       undorse: number;
@@ -85,7 +93,11 @@ export namespace APIPredictions {
 
   export type JudgePredictionById = EnhancedPrediction;
 
+  export type CheckPredictionById = APIChecks.Check;
+
   export type GetNextPredictionToTrigger = { id: number; due_date: string };
+
+  export type GetNextPredictionToCheck = { id: number; check_date: string };
 
   export type GetNextPredictionToJudge = { id: number };
 

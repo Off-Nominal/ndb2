@@ -10,8 +10,8 @@ ALTER TABLE predictions
   DROP COLUMN check_date,
   DROP COLUMN last_check_date;
 
-DROP TABLE checks;
-
 DROP TABLE user_checks;
+
+DROP TABLE checks;
 
 COMMIT;
