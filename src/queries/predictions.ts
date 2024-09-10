@@ -1,23 +1,46 @@
 import { PoolClient } from "pg";
-import { APIPredictions } from "../types/predicitions";
+import { APIPredictions, PredictionDriver } from "../types/predicitions";
 import {
   generate_SEARCH_PREDICTIONS,
   SearchOptions,
 } from "./predictions_search";
 
-const ADD_PREDICTION = `
+const ADD_DATE_DRIVEN_PREDICTION = `
   INSERT INTO predictions (
     user_id,
     text,
-    due_date,
-    created_date
+    created_date,
+    driver,
+    due_date
   ) VALUES (
     $1,
     $2,
     $3,
-    $4
-  ) RETURNING id, user_id, text, created_date, due_date, closed_date, judged_date
+    $4,
+    $5
+  ) RETURNING id
 `;
+
+const ADD_EVENT_DRIVEN_PREDICTION = `
+  INSERT INTO predictions (
+    user_id,
+    text,
+    created_date,
+    driver,
+    check_date
+  ) VALUES (
+    $1,
+    $2,
+    $3,
+    $4,
+    $5
+  ) RETURNING id
+`;
+
+const addPredictionQueries: Record<PredictionDriver, string> = {
+  event: ADD_EVENT_DRIVEN_PREDICTION,
+  date: ADD_DATE_DRIVEN_PREDICTION,
+};
 
 const GET_ENHANCED_PREDICTION_BY_ID = `
   SELECT
@@ -31,10 +54,13 @@ const GET_ENHANCED_PREDICTION_BY_ID = `
       pred)
     as predictor,
     p.text,
+    p.driver,
     p.season_id,
     p.season_applicable,
     p.created_date,
     p.due_date,
+    p.check_date,
+    p.last_check_date,
     p.closed_date,
     p.triggered_date,
     (SELECT row_to_json(trig) FROM 
@@ -125,15 +151,22 @@ const add = (client: PoolClient) =>
   function (
     user_id: string,
     text: string,
-    due_date: Date,
-    created_date: Date = new Date()
+    drive_date: Date,
+    created_date: Date = new Date(),
+    driver: PredictionDriver
   ): Promise<APIPredictions.AddPrediction> {
+    const query = addPredictionQueries[driver];
+    if (!query) {
+      throw new Error(`Invalid driver: ${driver}`);
+    }
+
     return client
-      .query<APIPredictions.AddPrediction>(ADD_PREDICTION, [
+      .query<APIPredictions.AddPrediction>(query, [
         user_id,
         text,
-        due_date,
         created_date,
+        driver,
+        drive_date,
       ])
       .then((response) => response.rows[0]);
   };

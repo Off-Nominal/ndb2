@@ -6,6 +6,8 @@ export enum PredictionLifeCycle {
   FAILED = "failed",
 }
 
+export type PredictionDriver = "event" | "date";
+
 export namespace APIPredictions {
   export type EnhancedPrediction = {
     id: number;
@@ -14,10 +16,13 @@ export namespace APIPredictions {
       discord_id: string;
     };
     text: string;
+    driver: PredictionDriver;
     season_id: number | null;
     season_applicable: boolean;
     created_date: string;
-    due_date: string;
+    due_date: string | null;
+    check_date: string | null;
+    last_check_date: string | null;
     closed_date: string | null;
     triggered_date: string | null;
     triggerer: {
@@ -70,7 +75,7 @@ export namespace APIPredictions {
     };
   };
 
-  export type AddPrediction = EnhancedPrediction;
+  export type AddPrediction = { id: number };
 
   export type GetPredictionById = EnhancedPrediction;
 
