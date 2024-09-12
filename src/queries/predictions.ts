@@ -42,7 +42,7 @@ const addPredictionQueries: Record<PredictionDriver, string> = {
   date: ADD_DATE_DRIVEN_PREDICTION,
 };
 
-const GET_ENHANCED_PREDICTION_BY_ID = `
+export const GET_ENHANCED_PREDICTION_BY_ID = `
   SELECT
     p.id,
     (SELECT row_to_json(pred) FROM 
@@ -119,28 +119,30 @@ const GET_ENHANCED_PREDICTION_BY_ID = `
       ) p_votes
   ) as votes,
   (SELECT
-    COALESCE(jsonb_agg(p_checks), '[]')
+    COALESCE(jsonb_agg(p_snooze_checks), '[]')
     FROM
       (SELECT
-          c.id as check_id,
-          c.check_date,
-          c.closed,
+          sc.id,
+          sc.check_date,
+          sc.closed,
+          sc.closed_at,
           (SELECT row_to_json(vals)
             FROM(
               SELECT
-                COUNT(uc.*) FILTER (WHERE uc.value = 0) as trigger,
-                COUNT(uc.*) FILTER (WHERE uc.value = 1) as day,
-                COUNT(uc.*) FILTER (WHERE uc.value = 7) as week,
-                COUNT(uc.*) FILTER (WHERE uc.value = 30) as month,
-                COUNT(uc.*) FILTER (WHERE uc.value = 90) as quarter,
-                COUNT(uc.*) FILTER (WHERE uc.value = 365) as year
-              FROM user_checks uc
+                COUNT(sv.*) FILTER (WHERE sv.value = 0) as trigger,
+                COUNT(sv.*) FILTER (WHERE sv.value = 1) as day,
+                COUNT(sv.*) FILTER (WHERE sv.value = 7) as week,
+                COUNT(sv.*) FILTER (WHERE sv.value = 30) as month,
+                COUNT(sv.*) FILTER (WHERE sv.value = 90) as quarter,
+                COUNT(sv.*) FILTER (WHERE sv.value = 365) as year
+              FROM snooze_votes sv
+              WHERE sv.snooze_check_id = sc.id
             ) vals
           ) as values
-        FROM checks c
-        WHERE c.prediction_id = p.id
-        ORDER BY c.check_date DESC
-      ) p_checks
+        FROM snooze_checks sc
+        WHERE sc.prediction_id = p.id
+        ORDER BY sc.check_date DESC
+      ) p_snooze_checks
   ) as checks,
   (SELECT row_to_json(payout_sum)
     FROM(
@@ -155,12 +157,16 @@ const RETIRE_PREDICTION_BY_ID = `
   UPDATE predictions SET retired_date = NOW() WHERE predictions.id = $1;
 `;
 
-const CLOSE_PREDICTION_BY_ID = `
+export const CLOSE_PREDICTION_BY_ID = `
   UPDATE predictions SET triggerer_id = $2, closed_date = $3, triggered_date = NOW() WHERE predictions.id = $1;
 `;
 
 const JUDGE_PREDICTION_BY_ID = `
   UPDATE predictions SET judged_date = NOW() WHERE predictions.id = $1;
+`;
+
+export const SNOOZE_PREDICTION_BY_ID = `
+  UPDATE predictions SET check_date = predictions.check_date + interval '$2 day' WHERE predictions.id = $1;
 `;
 
 const GET_NEXT_PREDICTION_TO_TRIGGER = `

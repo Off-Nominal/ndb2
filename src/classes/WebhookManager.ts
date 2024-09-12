@@ -9,7 +9,9 @@ interface WebhookEvent {
   triggered_prediction: (prediction: APIPredictions.EnhancedPrediction) => void;
   new_vote: (prediction: APIPredictions.EnhancedPrediction) => void;
   judged_prediction: (prediction: APIPredictions.EnhancedPrediction) => void;
-  checked_prediction: (prediction: APIPredictions.EnhancedPrediction) => void;
+  new_snooze_check: (prediction: APIPredictions.EnhancedPrediction) => void;
+  new_snooze_vote: (prediction: APIPredictions.EnhancedPrediction) => void;
+  snoozed_prediction: (prediction: APIPredictions.EnhancedPrediction) => void;
   season_start: (season: APISeasons.Season) => void;
   season_end: (results: APISeasons.GetResultsBySeasonId) => void;
 }
@@ -107,11 +109,35 @@ export class WebhookManager extends EventEmitter {
     );
 
     this.on(
-      "checked_prediction",
+      "new_snooze_check",
       (prediction: APIPredictions.EnhancedPrediction) => {
         this.notifySubscribers(
           this.generateResponse<APIPredictions.EnhancedPrediction>(
-            "checked_prediction",
+            "new_snooze_check",
+            prediction
+          )
+        );
+      }
+    );
+
+    this.on(
+      "new_snooze_vote",
+      (prediction: APIPredictions.EnhancedPrediction) => {
+        this.notifySubscribers(
+          this.generateResponse<APIPredictions.EnhancedPrediction>(
+            "new_snooze_vote",
+            prediction
+          )
+        );
+      }
+    );
+
+    this.on(
+      "snoozed_prediction",
+      (prediction: APIPredictions.EnhancedPrediction) => {
+        this.notifySubscribers(
+          this.generateResponse<APIPredictions.EnhancedPrediction>(
+            "snoozed_prediction",
             prediction
           )
         );

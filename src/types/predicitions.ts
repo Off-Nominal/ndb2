@@ -1,7 +1,8 @@
-import { APIChecks } from "./checks";
+import { APISnoozes } from "./snoozes";
 
 export enum PredictionLifeCycle {
   OPEN = "open",
+  CHECKING = "checking",
   RETIRED = "retired",
   CLOSED = "closed",
   SUCCESSFUL = "successful",
@@ -56,12 +57,7 @@ export namespace APIPredictions {
         discord_id: string;
       };
     }[];
-    checks: {
-      check_id: number;
-      check_date: string;
-      closed: boolean;
-      values: Record<string, number>;
-    }[];
+    checks: Omit<APISnoozes.EnhancedSnoozeCheck, "prediction_id">[];
     payouts: {
       endorse: number;
       undorse: number;

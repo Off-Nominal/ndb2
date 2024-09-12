@@ -9,6 +9,7 @@ import patch_id_retire from "./patch_{id}_retire";
 import post_id_trigger from "./post_{id}_trigger";
 import post_id_votes from "./post_{id}_votes";
 import post_id_bets from "./post_{id}_bets";
+import post_id_snooze_checks from "./post_{id}_snooze_checks_{id}";
 
 // Assign route handlers
 router.use("/", get_search);
@@ -18,5 +19,6 @@ router.use("/", patch_id_retire);
 router.use("/", post_id_trigger);
 router.use("/", post_id_votes);
 router.use("/", post_id_bets);
+router.use("/", post_id_snooze_checks);
 
 export default router;

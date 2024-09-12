@@ -2,6 +2,7 @@ import express from "express";
 import { authenticateApplication } from "./middleware/authenticateApplication";
 import { validateContentType } from "./middleware/validateContentType";
 import PredictionMonitor from "./classes/PredictionMonitor";
+import { monitors } from "./config/monitors";
 
 const app = express();
 
@@ -35,6 +36,7 @@ import scoresRouter from "./routers/scores";
 autheticatedRouter.use("/api/scores", scoresRouter);
 
 import seasonsRouter from "./routers/seasons";
+
 autheticatedRouter.use("/api/seasons", seasonsRouter);
 
 app.use(autheticatedRouter);
@@ -47,4 +49,6 @@ app.listen(PORT, () => {
   console.log(`[NDB2]: Application listening on port:`, PORT);
 });
 
-const monitor = new PredictionMonitor();
+// Prediction Monitor Initiation
+const monitor = new PredictionMonitor(monitors);
+monitor.initiate();

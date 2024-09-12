@@ -2,7 +2,7 @@
 
 BEGIN;
 
-DROP TRIGGER prediction_last_check_date_from_checks ON checks;
+DROP TRIGGER prediction_last_check_date_from_snooze_checks ON snooze_checks;
 
 DROP FUNCTION IF EXISTS refresh_last_checked_date;
 
@@ -55,7 +55,6 @@ CREATE TRIGGER prediction_season_update_from_prediction AFTER INSERT OR UPDATE o
   FOR EACH ROW EXECUTE PROCEDURE refresh_prediction_seasons('prediction');
 
 DROP TRIGGER prediction_status_update_from_prediction ON predictions;
-DROP TRIGGER prediction_status_update_from_checks ON checks;
 
 CREATE OR REPLACE FUNCTION refresh_prediction_status() RETURNS trigger
   SECURITY definer
@@ -84,9 +83,9 @@ $$;
 CREATE TRIGGER prediction_status_update_from_prediction AFTER INSERT OR UPDATE of retired_date, closed_date, judged_date ON predictions
   FOR EACH ROW EXECUTE PROCEDURE refresh_prediction_status();
 
-DROP TABLE user_checks;
+DROP TABLE snooze_votes;
 
-DROP TABLE checks;
+DROP TABLE snooze_checks;
 
 ALTER TABLE predictions
   ALTER COLUMN due_date SET NOT NULL;
