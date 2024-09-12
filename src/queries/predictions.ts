@@ -4,7 +4,6 @@ import {
   generate_SEARCH_PREDICTIONS,
   SearchOptions,
 } from "./predictions_search";
-import checks from "./checks";
 
 const ADD_DATE_DRIVEN_PREDICTION = `
   INSERT INTO predictions (
@@ -164,10 +163,6 @@ const JUDGE_PREDICTION_BY_ID = `
   UPDATE predictions SET judged_date = NOW() WHERE predictions.id = $1;
 `;
 
-const CHECK_PREDICTION_BY_ID = `
-  UPDATE predictions SET last_checked_date = $2 WHERE predictions.id = $1;
-`;
-
 const GET_NEXT_PREDICTION_TO_TRIGGER = `
   SELECT 
     id, 
@@ -267,17 +262,6 @@ const judgePredictionById = (client: PoolClient) =>
       .then((response) => response.rows[0]);
   };
 
-const checkPredictionById = (client: PoolClient) =>
-  function (
-    prediction_id: number | string
-  ): Promise<APIPredictions.CheckPredictionById> {
-    const currentCheckDate = new Date();
-
-    return client
-      .query<null>(CHECK_PREDICTION_BY_ID, [prediction_id, currentCheckDate])
-      .then(() => checks.add(client)(prediction_id, currentCheckDate));
-  };
-
 const getNextPredictionToTrigger = (client: PoolClient) =>
   function (): Promise<APIPredictions.GetNextPredictionToTrigger | undefined> {
     return client
@@ -321,7 +305,6 @@ export default {
   retirePredictionById,
   closePredictionById,
   judgePredictionById,
-  checkPredictionById,
   getNextPredictionToTrigger,
   getNextPredictionToCheck,
   getNextPredictionToJudge,

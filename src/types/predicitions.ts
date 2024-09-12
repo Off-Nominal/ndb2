@@ -93,8 +93,6 @@ export namespace APIPredictions {
 
   export type JudgePredictionById = EnhancedPrediction;
 
-  export type CheckPredictionById = APIChecks.Check;
-
   export type GetNextPredictionToTrigger = { id: number; due_date: string };
 
   export type GetNextPredictionToCheck = { id: number; check_date: string };

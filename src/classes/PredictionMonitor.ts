@@ -1,5 +1,6 @@
 import webhookManager from "../config/webhook_subscribers";
 import pool from "../db";
+import checks from "../queries/checks";
 import predictions from "../queries/predictions";
 import schedule from "node-schedule";
 
@@ -96,8 +97,8 @@ export default class PredictionMonitor {
           return;
         }
         console.log("[PM]: Checking prediction with id,", pred.id);
-        return predictions
-          .checkPredictionById(client)(pred.id)
+        return checks
+          .add(client)(pred.id)
           .then(() => predictions.getByPredictionId(client)(pred.id))
           .then((prediction) => {
             webhookManager.emit("checked_prediction", prediction);
