@@ -27,7 +27,7 @@ export const monitors: MonitorConfig[] = [
   },
   {
     name: "Snooze Check",
-    schedule: "*/1 12-21 * * *", // every 30 minutes, on the 15 and 45, between 12pm and 9pm UTC
+    schedule: "15/45 12-21 * * *", // every 30 minutes, on the 15 and 45, between 12pm and 9pm UTC
     callback: (client: PoolClient, log: MonitorLog) => {
       return predictions
         .getNextPredictionToCheck(client)()
@@ -35,12 +35,32 @@ export const monitors: MonitorConfig[] = [
           if (!pred) {
             return;
           }
-          console.log("[PM]: Checking prediction with id,", pred.id);
+          log(`Checking prediction with id ${pred.id}`);
           return snoozes
             .addCheck(client)(pred.id)
             .then(() => predictions.getPredictionById(client)(pred.id))
             .then((prediction) => {
               webhookManager.emit("new_snooze_check", prediction);
+            });
+        });
+    },
+  },
+  {
+    name: "Unactioned Snooze Check",
+    schedule: "12/50 12-21 * * *", // every 30 minutes, on the 20 and 50, between 12pm and 9pm UTC
+    callback: (client: PoolClient, log: MonitorLog) => {
+      return snoozes
+        .getNextUnactionedSnoozeCheck(client)()
+        .then((check) => {
+          if (!check) {
+            return;
+          }
+          log(`Snoozing unactioned Snooze Check with id ${check.id} for 1 day`);
+          return predictions
+            .snoozePredictionById(client)(check.id, 1)
+            .then(() => predictions.getPredictionById(client)(check.id))
+            .then((prediction) => {
+              webhookManager.emit("snoozed_prediction", prediction);
             });
         });
     },

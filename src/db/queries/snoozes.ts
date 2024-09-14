@@ -1,77 +1,25 @@
 import { PoolClient } from "pg";
 import { APISnoozes } from "../../types/snoozes";
 import { APIPredictions } from "../../types/predicitions";
-import predictions, {
-  CLOSE_PREDICTION_BY_ID,
-  SNOOZE_PREDICTION_BY_ID,
-} from "./predictions";
-import sqlFileRunner from "./index";
-import sqlFileLoader from "./index";
-
-// const GET_SNOOZE_CHECK = `
-//   SELECT
-//     id,
-//     prediction_id,
-//     check_date,
-//     closed,
-//     closed_at,
-//     (SELECT row_to_json(vals)
-//       FROM(
-//         SELECT
-//           COUNT(sv.*) FILTER (WHERE sv.value = 0) as trigger,
-//           COUNT(sv.*) FILTER (WHERE sv.value = 1) as day,
-//           COUNT(sv.*) FILTER (WHERE sv.value = 7) as week,
-//           COUNT(sv.*) FILTER (WHERE sv.value = 30) as month,
-//           COUNT(sv.*) FILTER (WHERE sv.value = 90) as quarter,
-//           COUNT(sv.*) FILTER (WHERE sv.value = 365) as year
-//         FROM snooze_votes sv
-//         WHERE sv.snooze_check_id = $1
-//       ) vals
-//     ) as votes
-//   FROM snooze_checks
-//   WHERE id = $1
-// `;
-
-const ADD_SNOOZE_CHECK = `
-  INSERT INTO snooze_checks (
-    prediction_id
-  ) VALUES (
-    $1
-  ) RETURNING id, prediction_id, check_date, closed, closed_at
-`;
-
-const CLOSE_SNOOZE_CHECK = `
-  UPDATE snooze_checks
-  SET closed = true, closed_at = NOW()
-  WHERE id = $1
-  RETURNING id, prediction_id, check_date, closed, closed_at
-`;
-
-const ADD_SNOOZE_VOTE = `
-  INSERT INTO snooze_votes (
-    snooze_check_id,
-    user_id,
-    value,
-    created_at
-  ) VALUES (
-    $1,
-    $2,
-    $3,
-    $4
-  )   
-    ON CONFLICT (snooze_check_id, user_id)
-      DO UPDATE SET value = $3, created_at = $4 
-    RETURNING snooze_check_id, user_id, value, created_at
-`;
+import predictions from "./predictions";
+import query from "./index";
 
 const getSnoozeCheck = (client: PoolClient) =>
   function (
     snooze_check_id: number | string
   ): Promise<APISnoozes.GetSnoozeCheck> {
     return client
-      .query<APISnoozes.GetSnoozeCheck>(
-        sqlFileRunner.get("GetSnoozeCheckById"),
-        [snooze_check_id]
+      .query<APISnoozes.GetSnoozeCheck>(query.get("GetSnoozeCheckById"), [
+        snooze_check_id,
+      ])
+      .then((response) => response.rows[0]);
+  };
+
+const getNextUnactionedSnoozeCheck = (client: PoolClient) =>
+  function (): Promise<APISnoozes.GetNextUnactionedCheck> {
+    return client
+      .query<APISnoozes.GetNextUnactionedCheck>(
+        query.get("GetNextUnactionedCheck")
       )
       .then((response) => response.rows[0]);
   };
@@ -81,7 +29,18 @@ const addCheck = (client: PoolClient) =>
     prediction_id: number | string
   ): Promise<APISnoozes.AddSnoozeCheck> {
     return client
-      .query<APISnoozes.AddSnoozeCheck>(ADD_SNOOZE_CHECK, [prediction_id])
+      .query<APISnoozes.AddSnoozeCheck>(query.get("InsertSnoozeCheck"), [
+        prediction_id,
+      ])
+      .then((response) => response.rows[0]);
+  };
+
+const closeSnoozeCheckById = (client: PoolClient) =>
+  function (snooze_check_id: number | string): Promise<APISnoozes.SnoozeCheck> {
+    return client
+      .query<APISnoozes.SnoozeCheck>(query.get("CloseSnoozeCheckById"), [
+        snooze_check_id,
+      ])
       .then((response) => response.rows[0]);
   };
 
@@ -96,51 +55,53 @@ const addVote = (client: PoolClient) =>
     const now = new Date();
 
     // Add Snooze Vote
-    await client.query<APISnoozes.SnoozeVote>(ADD_SNOOZE_VOTE, [
-      check_id,
-      user_id,
-      value,
-      now,
-    ]);
+    try {
+      await client.query<APISnoozes.SnoozeVote>(query.get("InsertSnoozeVote"), [
+        check_id,
+        user_id,
+        value,
+        now,
+      ]);
 
-    // Validate updated Snooze Check
-    let check: APISnoozes.EnhancedSnoozeCheck;
-
-    check = await getSnoozeCheck(client)(check_id);
-
-    const snoozeValue = getClosedSnoozeValue(check);
-    const shouldClose = shouldCloseSnoozeCheck(check, snoozeValue);
-
-    // If necessary to close, continue close procedure
-    if (shouldClose) {
-      await client
-        .query<APISnoozes.SnoozeCheck>(CLOSE_SNOOZE_CHECK, [check_id])
-        .then((response) => response.rows[0]);
-
-      if (snoozeValue === APISnoozes.SnoozeOptions.TRIGGER) {
-        await client.query(CLOSE_PREDICTION_BY_ID, [
-          check.prediction_id,
-          null,
-          now,
-        ]);
-      } else {
-        await client.query(SNOOZE_PREDICTION_BY_ID, [
-          check.prediction_id,
-          snoozeValue,
-        ]);
-      }
+      // Validate updated Snooze Check
+      let check: APISnoozes.EnhancedSnoozeCheck;
 
       check = await getSnoozeCheck(client)(check_id);
+
+      const snoozeValue = getClosedSnoozeValue(check);
+      const shouldClose = shouldCloseSnoozeCheck(check, snoozeValue);
+
+      // If necessary to close, continue close procedure
+      if (shouldClose) {
+        await closeSnoozeCheckById(client)(check_id);
+
+        if (snoozeValue === APISnoozes.SnoozeOptions.TRIGGER) {
+          await predictions.closePredictionById(client)(
+            check.prediction_id,
+            null,
+            now
+          );
+        } else {
+          await predictions.snoozePredictionById(client)(
+            check.prediction_id,
+            snoozeValue
+          );
+        }
+
+        check = await getSnoozeCheck(client)(check_id);
+      }
+
+      // Get final results
+      const finalPrediction = await predictions.getPredictionById(client)(
+        check.prediction_id
+      );
+
+      await client.query("COMMIT");
+      return finalPrediction;
+    } catch (err) {
+      await client.query("ROLLBACK");
+      throw err;
     }
-
-    // Get final results
-    const finalPrediction = await predictions.getPredictionById(client)(
-      check.prediction_id
-    );
-
-    await client.query("COMMIT");
-
-    return finalPrediction;
   };
 
 const getClosedSnoozeValue = (
@@ -179,6 +140,8 @@ const shouldCloseSnoozeCheck = (
 
 export default {
   getSnoozeCheck,
+  getNextUnactionedSnoozeCheck,
+  closeSnoozeCheckById,
   addCheck,
   addVote,
 };

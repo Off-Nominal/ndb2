@@ -96,4 +96,6 @@ export namespace APIPredictions {
   export type GetNextPredictionToJudge = { id: number };
 
   export type SearchPredictions = ShortEnhancedPrediction;
+
+  export type SnoozePredictionById = { id: number };
 }

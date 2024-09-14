@@ -45,11 +45,14 @@ router.post(
         );
     }
 
-    // Verify Snooze Check is associated with this Prediction
+    // Verify Snooze Check is associated with this Prediction and open
     let found = false;
+    let open = false;
+
     for (const check of req.prediction.checks) {
       if (check.id === parseInt(snooze_check_id)) {
         found = true;
+        open = !check.closed;
         break;
       }
     }
@@ -61,6 +64,17 @@ router.post(
           responseUtils.writeError(
             ErrorCode.BAD_REQUEST,
             "Snooze Check is not associated with this Prediction."
+          )
+        );
+    }
+
+    if (!open) {
+      return res
+        .status(400)
+        .json(
+          responseUtils.writeError(
+            ErrorCode.BAD_REQUEST,
+            "Snooze Check is not open anymore."
           )
         );
     }

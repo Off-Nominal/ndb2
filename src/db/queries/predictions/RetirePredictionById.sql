@@ -1,0 +1,1 @@
+UPDATE predictions SET retired_date = NOW() WHERE predictions.id = $1;
