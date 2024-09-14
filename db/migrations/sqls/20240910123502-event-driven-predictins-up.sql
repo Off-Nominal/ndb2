@@ -2,6 +2,11 @@
 
 BEGIN;
 
+ALTER TABLE bets
+  DROP CONSTRAINT bets_prediction_id_fk,
+  ADD CONSTRAINT bets_prediction_id_fk FOREIGN KEY (prediction_id) REFERENCES predictions(id) ON DELETE CASCADE;
+
+
 ALTER TABLE predictions
   ALTER COLUMN due_date DROP NOT NULL;
 
@@ -21,7 +26,7 @@ CREATE TABLE IF NOT EXISTS snooze_checks (
 CREATE TABLE IF NOT EXISTS snooze_votes (
   snooze_check_id INT REFERENCES snooze_checks(id) ON DELETE CASCADE,
   user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-  value SMALLINT NOT NULL CHECK (value in (0, 1, 7, 30, 90, 365)),
+  value SMALLINT NOT NULL CHECK (value in (1, 7, 30, 90, 365)),
   created_at TIMESTAMPTZ NOT NULL,
   CONSTRAINT snooze_votes_pkey PRIMARY KEY (snooze_check_id, user_id)
 );

@@ -1,11 +1,11 @@
 import { PoolClient } from "pg";
-import { APIPredictions, PredictionDriver } from "../../types/predicitions";
+import { APIPredictions, PredictionDriver } from "../../../types/predicitions";
 import {
   generate_SEARCH_PREDICTIONS,
   SearchOptions,
-} from "./predictions_search";
-import queries from ".";
-import { APISnoozes } from "../../types/snoozes";
+} from "../predictions_search";
+import queries from "..";
+import { APISnoozes } from "../../../types/snoozes";
 
 const add = (client: PoolClient) =>
   function (
@@ -39,7 +39,6 @@ const getPredictionById = (client: PoolClient) =>
     prediction_id: number | string
   ): Promise<APIPredictions.GetPredictionById | null> {
     const query = queries.get("GetPredictionById");
-
     return client
       .query<APIPredictions.GetPredictionById>(query, [prediction_id])
       .then((response) => response.rows[0] ?? null);

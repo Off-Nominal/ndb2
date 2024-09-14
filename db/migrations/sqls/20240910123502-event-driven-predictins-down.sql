@@ -95,4 +95,8 @@ ALTER TABLE predictions
   DROP COLUMN check_date,
   DROP COLUMN last_check_date;
 
+ALTER TABLE bets
+  DROP CONSTRAINT bets_prediction_id_fk,
+  ADD CONSTRAINT bets_prediction_id_fk FOREIGN KEY (prediction_id) REFERENCES predictions(id) ON DELETE SET NULL;
+
 COMMIT;

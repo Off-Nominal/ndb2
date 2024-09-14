@@ -80,14 +80,13 @@ router.post(
     }
 
     return snoozes
-      .addVote(req.dbClient)(snooze_check_id, req.user_id, value)
+      .addSnoozeVote(req.dbClient)(snooze_check_id, req.user_id, value)
       .then((prediction) => {
         // Notify Subscribers
         webhookManager.emit("new_snooze_vote", prediction);
 
-        if (prediction.status === PredictionLifeCycle.CLOSED) {
-          webhookManager.emit("triggered_prediction", prediction);
-        } else if (prediction.check_date !== req.prediction.check_date) {
+        // If the prediction is now open, notify subscribers of a snoozing
+        if (prediction.status === PredictionLifeCycle.OPEN) {
           webhookManager.emit("snoozed_prediction", prediction);
         }
 

@@ -177,12 +177,15 @@ export const generate_SEARCH_PREDICTIONS = (
         pred)
       as predictor,
       p.text,
-      p.created_date,
-      p.due_date,
-      p.closed_date,
-      p.triggered_date,
+      p.driver,
       p.season_id,
       p.season_applicable,
+      p.created_date,
+      p.due_date,
+      p.check_date,
+      p.last_check_date,
+      p.closed_date,
+      p.triggered_date,
       (SELECT row_to_json(trig) FROM 
           (SELECT 
               p.triggerer_id as id, 

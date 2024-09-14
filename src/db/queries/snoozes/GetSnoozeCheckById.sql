@@ -7,7 +7,6 @@
     (SELECT row_to_json(vals)
       FROM(
         SELECT
-          COUNT(sv.*) FILTER (WHERE sv.value = 0) as trigger,
           COUNT(sv.*) FILTER (WHERE sv.value = 1) as day,
           COUNT(sv.*) FILTER (WHERE sv.value = 7) as week,
           COUNT(sv.*) FILTER (WHERE sv.value = 30) as month,

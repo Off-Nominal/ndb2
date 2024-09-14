@@ -55,7 +55,11 @@ export class SeasonManager {
       try {
         remainingPredictions = await predictions.searchPredictions(poolClient)({
           season_id: lastSeason.id.toString(),
-          statuses: [PredictionLifeCycle.OPEN, PredictionLifeCycle.CLOSED],
+          statuses: [
+            PredictionLifeCycle.OPEN,
+            PredictionLifeCycle.CHECKING,
+            PredictionLifeCycle.CLOSED,
+          ],
         });
       } catch (err) {
         console.error(

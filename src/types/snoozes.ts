@@ -1,6 +1,5 @@
 export namespace APISnoozes {
   export type SnoozeCheckResults = {
-    trigger: number;
     day: number;
     week: number;
     month: number;
@@ -28,7 +27,6 @@ export namespace APISnoozes {
   };
 
   export enum SnoozeOptions {
-    TRIGGER = 0,
     DAY = 1,
     WEEK = 7,
     MONTH = 30,

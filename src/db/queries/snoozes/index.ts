@@ -1,8 +1,8 @@
 import { PoolClient } from "pg";
-import { APISnoozes } from "../../types/snoozes";
-import { APIPredictions } from "../../types/predicitions";
-import predictions from "./predictions";
-import query from "./index";
+import { APISnoozes } from "../../../types/snoozes";
+import { APIPredictions } from "../../../types/predicitions";
+import predictions from "../predictions";
+import query from "../index";
 
 const getSnoozeCheck = (client: PoolClient) =>
   function (
@@ -44,7 +44,7 @@ const closeSnoozeCheckById = (client: PoolClient) =>
       .then((response) => response.rows[0]);
   };
 
-const addVote = (client: PoolClient) =>
+const addSnoozeVote = (client: PoolClient) =>
   async function (
     check_id: number | string,
     user_id: number | string,
@@ -74,19 +74,10 @@ const addVote = (client: PoolClient) =>
       // If necessary to close, continue close procedure
       if (shouldClose) {
         await closeSnoozeCheckById(client)(check_id);
-
-        if (snoozeValue === APISnoozes.SnoozeOptions.TRIGGER) {
-          await predictions.closePredictionById(client)(
-            check.prediction_id,
-            null,
-            now
-          );
-        } else {
-          await predictions.snoozePredictionById(client)(
-            check.prediction_id,
-            snoozeValue
-          );
-        }
+        await predictions.snoozePredictionById(client)(
+          check.prediction_id,
+          snoozeValue
+        );
 
         check = await getSnoozeCheck(client)(check_id);
       }
@@ -115,8 +106,6 @@ const getClosedSnoozeValue = (
 
   if (triggerValue !== undefined) {
     switch (triggerValue) {
-      case "trigger":
-        return APISnoozes.SnoozeOptions.TRIGGER;
       case "day":
         return APISnoozes.SnoozeOptions.DAY;
       case "week":
@@ -143,5 +132,5 @@ export default {
   getNextUnactionedSnoozeCheck,
   closeSnoozeCheckById,
   addCheck,
-  addVote,
+  addSnoozeVote,
 };
