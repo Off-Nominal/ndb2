@@ -35,7 +35,11 @@ router.get(
       optional: true,
       allowArray: true,
     }),
-    paramValidator.string("sort_by", { type: "query", optional: true }),
+    paramValidator.string("sort_by", {
+      type: "query",
+      optional: true,
+      allowArray: true,
+    }),
     paramValidator.string("keyword", { type: "query", optional: true }),
     paramValidator.string("creator", { type: "query", optional: true }),
     paramValidator.string("unbetter", { type: "query", optional: true }),
@@ -114,17 +118,27 @@ router.get(
       }
     }
 
-    if (sort_by !== undefined && !isSortByOption(sort_by)) {
-      return res
-        .status(400)
-        .json(
-          responseUtils.writeError(
-            ErrorCode.MALFORMED_QUERY_PARAMS,
-            `Sort option must be any of the following: ${Object.values(
-              SortByOption
-            ).join(", ")}`
-          )
-        );
+    let sort_bys = [];
+
+    if (Array.isArray(sort_by)) {
+      sort_bys = sort_by;
+    } else if (typeof sort_by === "string") {
+      sort_bys.push(status);
+    }
+
+    for (const sortBy of sort_bys) {
+      if (sortBy !== undefined && !isSortByOption(sortBy)) {
+        return res
+          .status(400)
+          .json(
+            responseUtils.writeError(
+              ErrorCode.MALFORMED_QUERY_PARAMS,
+              `Sort option must be any of the following: ${Object.values(
+                SortByOption
+              ).join(", ")}`
+            )
+          );
+      }
     }
 
     // check for user
@@ -196,7 +210,7 @@ router.get(
     predictions
       .searchPredictions(req.dbClient)({
         keyword: keyword as string,
-        sort_by: sort_by as SortByOption,
+        sort_by: sort_bys as SortByOption[],
         statuses: statuses as PredictionLifeCycle[],
         page: Number(page),
         predictor_id: creator && creator_id,
