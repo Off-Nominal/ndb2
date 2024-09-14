@@ -1,4 +1,4 @@
-import { PredictionLifeCycle } from "../types/predicitions";
+import { PredictionLifeCycle } from "../../types/predicitions";
 
 export enum SortByOption {
   CREATED_ASC = "created_date-asc",

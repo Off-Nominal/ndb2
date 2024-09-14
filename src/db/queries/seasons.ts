@@ -1,5 +1,5 @@
 import { PoolClient } from "pg";
-import { APISeasons } from "../types/seasons";
+import { APISeasons } from "../../types/seasons";
 
 const GET_CURRENT_SEASON = `SELECT 
     id,

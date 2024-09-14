@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import users from "../queries/users";
+import users from "../db/queries/users";
 import responseUtils from "../utils/response";
 import { ErrorCode } from "../types/responses";
 

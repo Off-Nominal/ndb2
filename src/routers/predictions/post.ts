@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import webhookManager from "../../config/webhook_subscribers";
-import bets from "../../queries/bets";
-import predictions from "../../queries/predictions";
+import bets from "../../db/queries/bets";
+import predictions from "../../db/queries/predictions";
 import responseUtils from "../../utils/response";
 import paramValidator from "../../middleware/paramValidator";
 import dateValidator from "../../middleware/dateValidator";
@@ -70,7 +70,7 @@ router.post(
       .then((p) =>
         bets.add(req.dbClient)(req.user_id, p.id, true, created_date)
       )
-      .then((b) => predictions.getByPredictionId(req.dbClient)(b.prediction_id))
+      .then((b) => predictions.getPredictionById(req.dbClient)(b.prediction_id))
       .then((ep) => {
         res.json(
           responseUtils.writeSuccess(ep, "Prediction created successfully.")

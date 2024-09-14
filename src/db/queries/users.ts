@@ -1,4 +1,4 @@
-import { APIUsers } from "../types/users";
+import { APIUsers } from "../../types/users";
 import {
   generate_GET_USER_BET_SUMMARY_with_SEASON,
   generate_GET_USER_PREDICTION_SUMMARY_with_SEASON,
@@ -6,8 +6,8 @@ import {
   generate_GET_USER_VOTE_SUMMARY_with_SEASON,
 } from "./scores";
 import { PoolClient } from "pg";
-import { seasonManager } from "../classes/SeasonManager";
-import { APIBets } from "../types/bets";
+import { seasonManager } from "../../classes/SeasonManager";
+import { APIBets } from "../../types/bets";
 import { randomUUID } from "crypto";
 
 const GET_USER_BY_DISCORD_ID = `

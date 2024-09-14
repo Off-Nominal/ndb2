@@ -8,7 +8,7 @@ import { getPrediction } from "../../middleware/getPrediction";
 import { isAllowableSnooze } from "../../types/snoozes";
 import responseUtils from "../../utils/response";
 import { ErrorCode } from "../../types/responses";
-import snoozes from "../../queries/snoozes";
+import snoozes from "../../db/queries/snoozes";
 import webhookManager from "../../config/webhook_subscribers";
 
 const router = express.Router();

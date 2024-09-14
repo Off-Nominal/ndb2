@@ -1,36 +1,36 @@
 import { PoolClient } from "pg";
-import { APISnoozes } from "../types/snoozes";
-import webhookManager from "../config/webhook_subscribers";
-import { APIPredictions } from "../types/predicitions";
-import {
+import { APISnoozes } from "../../types/snoozes";
+import { APIPredictions } from "../../types/predicitions";
+import predictions, {
   CLOSE_PREDICTION_BY_ID,
-  GET_ENHANCED_PREDICTION_BY_ID,
   SNOOZE_PREDICTION_BY_ID,
 } from "./predictions";
+import sqlFileRunner from "./index";
+import sqlFileLoader from "./index";
 
-const GET_SNOOZE_CHECK = `
-  SELECT 
-    id, 
-    prediction_id, 
-    check_date, 
-    closed, 
-    closed_at,
-    (SELECT row_to_json(vals)
-      FROM(
-        SELECT
-          COUNT(sv.*) FILTER (WHERE sv.value = 0) as trigger,
-          COUNT(sv.*) FILTER (WHERE sv.value = 1) as day,
-          COUNT(sv.*) FILTER (WHERE sv.value = 7) as week,
-          COUNT(sv.*) FILTER (WHERE sv.value = 30) as month,
-          COUNT(sv.*) FILTER (WHERE sv.value = 90) as quarter,
-          COUNT(sv.*) FILTER (WHERE sv.value = 365) as year
-        FROM snooze_votes sv
-        WHERE sv.snooze_check_id = $1
-      ) vals
-    ) as votes
-  FROM snooze_checks
-  WHERE id = $1
-`;
+// const GET_SNOOZE_CHECK = `
+//   SELECT
+//     id,
+//     prediction_id,
+//     check_date,
+//     closed,
+//     closed_at,
+//     (SELECT row_to_json(vals)
+//       FROM(
+//         SELECT
+//           COUNT(sv.*) FILTER (WHERE sv.value = 0) as trigger,
+//           COUNT(sv.*) FILTER (WHERE sv.value = 1) as day,
+//           COUNT(sv.*) FILTER (WHERE sv.value = 7) as week,
+//           COUNT(sv.*) FILTER (WHERE sv.value = 30) as month,
+//           COUNT(sv.*) FILTER (WHERE sv.value = 90) as quarter,
+//           COUNT(sv.*) FILTER (WHERE sv.value = 365) as year
+//         FROM snooze_votes sv
+//         WHERE sv.snooze_check_id = $1
+//       ) vals
+//     ) as votes
+//   FROM snooze_checks
+//   WHERE id = $1
+// `;
 
 const ADD_SNOOZE_CHECK = `
   INSERT INTO snooze_checks (
@@ -69,7 +69,10 @@ const getSnoozeCheck = (client: PoolClient) =>
     snooze_check_id: number | string
   ): Promise<APISnoozes.GetSnoozeCheck> {
     return client
-      .query<APISnoozes.GetSnoozeCheck>(GET_SNOOZE_CHECK, [snooze_check_id])
+      .query<APISnoozes.GetSnoozeCheck>(
+        sqlFileRunner.get("GetSnoozeCheckById"),
+        [snooze_check_id]
+      )
       .then((response) => response.rows[0]);
   };
 
@@ -103,9 +106,7 @@ const addVote = (client: PoolClient) =>
     // Validate updated Snooze Check
     let check: APISnoozes.EnhancedSnoozeCheck;
 
-    check = await client
-      .query<APISnoozes.EnhancedSnoozeCheck>(GET_SNOOZE_CHECK, [check_id])
-      .then((response) => response.rows[0]);
+    check = await getSnoozeCheck(client)(check_id);
 
     const snoozeValue = getClosedSnoozeValue(check);
     const shouldClose = shouldCloseSnoozeCheck(check, snoozeValue);
@@ -129,17 +130,13 @@ const addVote = (client: PoolClient) =>
         ]);
       }
 
-      check = await client
-        .query<APISnoozes.EnhancedSnoozeCheck>(GET_SNOOZE_CHECK, [check_id])
-        .then((response) => response.rows[0]);
+      check = await getSnoozeCheck(client)(check_id);
     }
 
     // Get final results
-    const finalPrediction = await client
-      .query<APIPredictions.EnhancedPrediction>(GET_ENHANCED_PREDICTION_BY_ID, [
-        check.prediction_id,
-      ])
-      .then((response) => response.rows[0]);
+    const finalPrediction = await predictions.getPredictionById(client)(
+      check.prediction_id
+    );
 
     await client.query("COMMIT");
 

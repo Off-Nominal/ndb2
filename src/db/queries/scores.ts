@@ -1,6 +1,6 @@
 import { PoolClient, QueryResult } from "pg";
-import { APIScores } from "../types/scores";
-import { seasonManager } from "../classes/SeasonManager";
+import { APIScores } from "../../types/scores";
+import { seasonManager } from "../../classes/SeasonManager";
 
 export const generate_GET_USER_SCORE_SUMMARY_with_SEASON = (
   parameterizedSeasonId?: string

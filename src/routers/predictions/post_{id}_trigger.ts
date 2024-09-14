@@ -7,7 +7,7 @@ import { getPrediction } from "../../middleware/getPrediction";
 import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
 import paramValidator from "../../middleware/paramValidator";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
-import predictions from "../../queries/predictions";
+import predictions from "../../db/queries/predictions";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
 import { ErrorCode } from "../../types/responses";
@@ -51,7 +51,7 @@ router.post(
         closed_date ? closedDate : new Date()
       )
       .then(() =>
-        predictions.getByPredictionId(req.dbClient)(req.prediction.id)
+        predictions.getPredictionById(req.dbClient)(req.prediction.id)
       )
       .then((prediction) => {
         // Notify Subscribers

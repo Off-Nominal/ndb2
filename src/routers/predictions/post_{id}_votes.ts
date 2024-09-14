@@ -4,8 +4,8 @@ import paramValidator from "../../middleware/paramValidator";
 import { getPrediction } from "../../middleware/getPrediction";
 import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
-import predictions from "../../queries/predictions";
-import votes from "../../queries/votes";
+import predictions from "../../db/queries/predictions";
+import votes from "../../db/queries/votes";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
 import { getDbClient } from "../../middleware/getDbClient";
@@ -46,7 +46,7 @@ router.post(
 
     return votes
       .add(req.dbClient)(req.user_id, req.prediction.id, vote)
-      .then((v) => predictions.getByPredictionId(req.dbClient)(v.prediction_id))
+      .then((v) => predictions.getPredictionById(req.dbClient)(v.prediction_id))
       .then((prediction) => {
         // Notify Subscribers
         webhookManager.emit("new_vote", prediction);

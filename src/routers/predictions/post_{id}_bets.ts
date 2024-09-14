@@ -4,8 +4,8 @@ import paramValidator from "../../middleware/paramValidator";
 import { getPrediction } from "../../middleware/getPrediction";
 import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
-import bets from "../../queries/bets";
-import predictions from "../../queries/predictions";
+import bets from "../../db/queries/bets";
+import predictions from "../../db/queries/predictions";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
 import { getDbClient } from "../../middleware/getDbClient";
@@ -70,7 +70,7 @@ router.post(
 
     bets
       .add(req.dbClient)(req.user_id, req.prediction.id, endorsed)
-      .then((b) => predictions.getByPredictionId(req.dbClient)(b.prediction_id))
+      .then((b) => predictions.getPredictionById(req.dbClient)(b.prediction_id))
       .then((ep) => {
         // Notify subscribers
         webhookManager.emit("new_bet", ep);

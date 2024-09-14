@@ -1,8 +1,8 @@
 import { PoolClient } from "pg";
-import predictions from "../queries/predictions";
+import predictions from "../db/queries/predictions";
 import webhookManager from "./webhook_subscribers";
 import { MonitorConfig, MonitorLog } from "../classes/PredictionMonitor";
-import snoozes from "../queries/snoozes";
+import snoozes from "../db/queries/snoozes";
 
 export const monitors: MonitorConfig[] = [
   {
@@ -18,7 +18,7 @@ export const monitors: MonitorConfig[] = [
           log(`Triggering prediction with id ${pred.id}`);
           return predictions
             .closePredictionById(client)(pred.id, null, new Date(pred.due_date))
-            .then(() => predictions.getByPredictionId(client)(pred.id))
+            .then(() => predictions.getPredictionById(client)(pred.id))
             .then((prediction) => {
               webhookManager.emit("triggered_prediction", prediction);
             });
@@ -38,7 +38,7 @@ export const monitors: MonitorConfig[] = [
           console.log("[PM]: Checking prediction with id,", pred.id);
           return snoozes
             .addCheck(client)(pred.id)
-            .then(() => predictions.getByPredictionId(client)(pred.id))
+            .then(() => predictions.getPredictionById(client)(pred.id))
             .then((prediction) => {
               webhookManager.emit("new_snooze_check", prediction);
             });
@@ -58,7 +58,7 @@ export const monitors: MonitorConfig[] = [
           log(`Judging prediction with id ${pred.id}`);
           return predictions
             .judgePredictionById(client)(pred.id)
-            .then(() => predictions.getByPredictionId(client)(pred.id))
+            .then(() => predictions.getPredictionById(client)(pred.id))
             .then((prediction) => {
               webhookManager.emit("judged_prediction", prediction);
             });

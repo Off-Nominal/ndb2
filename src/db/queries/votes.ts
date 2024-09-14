@@ -1,5 +1,5 @@
 import { PoolClient } from "pg";
-import { APIVotes } from "../types/votes";
+import { APIVotes } from "../../types/votes";
 
 const ADD_VOTE = `
   INSERT INTO votes (

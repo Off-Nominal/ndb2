@@ -1,11 +1,11 @@
 import express, { Request, Response } from "express";
 import { getDbClient } from "../../middleware/getDbClient";
 import paramValidator from "../../middleware/paramValidator";
-import predictions from "../../queries/predictions";
-import { SortByOption } from "../../queries/predictions_search";
+import predictions from "../../db/queries/predictions";
+import { SortByOption } from "../../db/queries/predictions_search";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
-import users from "../../queries/users";
+import users from "../../db/queries/users";
 import { ErrorCode } from "../../types/responses";
 const router = express.Router();
 

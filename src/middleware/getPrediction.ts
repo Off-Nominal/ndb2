@@ -1,7 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import pool from "../db";
-import { isNoMoreThan, isNumberParseableString } from "../helpers/typeguards";
-import predictions from "../queries/predictions";
+import predictions from "../db/queries/predictions";
 import { APIPredictions } from "../types/predicitions";
 import responseUtils from "../utils/response";
 import { ErrorCode } from "../types/responses";
@@ -17,7 +15,7 @@ export const getPrediction = async (
   let prediction: APIPredictions.EnhancedPrediction;
 
   try {
-    prediction = await predictions.getByPredictionId(req.dbClient)(
+    prediction = await predictions.getPredictionById(req.dbClient)(
       prediction_id
     );
 
