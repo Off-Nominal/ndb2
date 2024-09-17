@@ -74,10 +74,9 @@ const addSnoozeVote = (client: PoolClient) =>
       // If necessary to close, continue close procedure
       if (shouldClose) {
         await closeSnoozeCheckById(client)(check_id);
-        await predictions.snoozePredictionById(client)(
-          check.prediction_id,
-          snoozeValue
-        );
+        await predictions.snoozePredictionById(client)(check.prediction_id, {
+          days: snoozeValue,
+        });
 
         check = await getSnoozeCheck(client)(check_id);
       }

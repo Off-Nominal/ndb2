@@ -113,13 +113,13 @@ const searchPredictions = (client: PoolClient) =>
 const snoozePredictionById = (client: PoolClient) =>
   function (
     prediction_id: number | string,
-    snooze_value: APISnoozes.SnoozeOptions
+    options: { days: APISnoozes.SnoozeOptions }
   ): Promise<APIPredictions.SnoozePredictionById> {
     const query = queries.get("SnoozePredictionById");
     return client
       .query<APIPredictions.SnoozePredictionById>(query, [
         prediction_id,
-        snooze_value,
+        options.days,
       ])
       .then((response) => response.rows[0]);
   };

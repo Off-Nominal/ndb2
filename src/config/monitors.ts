@@ -27,7 +27,7 @@ export const monitors: MonitorConfig[] = [
   },
   {
     name: "Snooze Check",
-    schedule: "15/45 12-21 * * *", // every 30 minutes, on the 15 and 45, between 12pm and 9pm UTC
+    schedule: "*/1 * * * *", // every 30 minutes, on the 15 and 45, between 12pm and 9pm UTC
     callback: (client: PoolClient, log: MonitorLog) => {
       return predictions
         .getNextPredictionToCheck(client)()
@@ -56,8 +56,14 @@ export const monitors: MonitorConfig[] = [
             return;
           }
           log(`Snoozing unactioned Snooze Check with id ${check.id} for 1 day`);
-          return predictions
-            .snoozePredictionById(client)(check.id, 1)
+
+          return snoozes
+            .closeSnoozeCheckById(client)(check.id)
+            .then(() => {
+              return predictions.snoozePredictionById(client)(check.id, {
+                days: 1,
+              });
+            })
             .then(() => predictions.getPredictionById(client)(check.id))
             .then((prediction) => {
               webhookManager.emit("snoozed_prediction", prediction);

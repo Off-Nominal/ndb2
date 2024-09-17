@@ -57,8 +57,7 @@ export const generate_SEARCH_PREDICTIONS = (
     options.statuses.length > 0 ||
     options.predictor_id ||
     options.non_better_id ||
-    options.season_id ||
-    options.sort_by.length > 0;
+    options.season_id;
 
   let whereClause = hasWhereClause ? "WHERE " : "";
 

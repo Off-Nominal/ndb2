@@ -123,7 +123,7 @@ router.get(
     if (Array.isArray(sort_by)) {
       sort_bys = sort_by;
     } else if (typeof sort_by === "string") {
-      sort_bys.push(status);
+      sort_bys.push(sort_by);
     }
 
     for (const sortBy of sort_bys) {
