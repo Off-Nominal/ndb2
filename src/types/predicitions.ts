@@ -85,7 +85,7 @@ export namespace APIPredictions {
 
   export type RetirePredictionById = EnhancedPrediction;
 
-  export type ClosePredictionById = EnhancedPrediction;
+  export type ClosePredictionById = null;
 
   export type JudgePredictionById = EnhancedPrediction;
 
@@ -98,4 +98,6 @@ export namespace APIPredictions {
   export type SearchPredictions = ShortEnhancedPrediction;
 
   export type SnoozePredictionById = { id: number };
+
+  export type UndoClosePredictionById = null;
 }

@@ -7,6 +7,12 @@ interface WebhookEvent {
   retired_prediction: (prediction: APIPredictions.EnhancedPrediction) => void;
   new_bet: (bet: APIPredictions.EnhancedPrediction) => void;
   triggered_prediction: (prediction: APIPredictions.EnhancedPrediction) => void;
+  triggered_snooze_check: (
+    prediction: APIPredictions.EnhancedPrediction
+  ) => void;
+  untriggered_prediction: (
+    prediction: APIPredictions.EnhancedPrediction
+  ) => void;
   new_vote: (prediction: APIPredictions.EnhancedPrediction) => void;
   judged_prediction: (prediction: APIPredictions.EnhancedPrediction) => void;
   new_snooze_check: (prediction: APIPredictions.EnhancedPrediction) => void;
@@ -72,6 +78,30 @@ export class WebhookManager extends EventEmitter {
         this.notifySubscribers(
           this.generateResponse<APIPredictions.EnhancedPrediction>(
             "triggered_prediction",
+            prediction
+          )
+        );
+      }
+    );
+
+    this.on(
+      "triggered_snooze_check",
+      (prediction: APIPredictions.EnhancedPrediction) => {
+        this.notifySubscribers(
+          this.generateResponse<APIPredictions.EnhancedPrediction>(
+            "triggered_prediction",
+            prediction
+          )
+        );
+      }
+    );
+
+    this.on(
+      "untriggered_prediction",
+      (prediction: APIPredictions.EnhancedPrediction) => {
+        this.notifySubscribers(
+          this.generateResponse<APIPredictions.EnhancedPrediction>(
+            "untriggered_prediction",
             prediction
           )
         );

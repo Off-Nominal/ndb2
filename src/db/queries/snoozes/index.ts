@@ -2,14 +2,14 @@ import { PoolClient } from "pg";
 import { APISnoozes } from "../../../types/snoozes";
 import { APIPredictions } from "../../../types/predicitions";
 import predictions from "../predictions";
-import query from "../index";
+import queries from "../index";
 
 const getSnoozeCheck = (client: PoolClient) =>
   function (
     snooze_check_id: number | string
   ): Promise<APISnoozes.GetSnoozeCheck> {
     return client
-      .query<APISnoozes.GetSnoozeCheck>(query.get("GetSnoozeCheckById"), [
+      .query<APISnoozes.GetSnoozeCheck>(queries.get("GetSnoozeCheckById"), [
         snooze_check_id,
       ])
       .then((response) => response.rows[0]);
@@ -19,7 +19,7 @@ const getNextUnactionedSnoozeCheck = (client: PoolClient) =>
   function (): Promise<APISnoozes.GetNextUnactionedCheck> {
     return client
       .query<APISnoozes.GetNextUnactionedCheck>(
-        query.get("GetNextUnactionedCheck")
+        queries.get("GetNextUnactionedCheck")
       )
       .then((response) => response.rows[0]);
   };
@@ -29,7 +29,7 @@ const addCheck = (client: PoolClient) =>
     prediction_id: number | string
   ): Promise<APISnoozes.AddSnoozeCheck> {
     return client
-      .query<APISnoozes.AddSnoozeCheck>(query.get("InsertSnoozeCheck"), [
+      .query<APISnoozes.AddSnoozeCheck>(queries.get("InsertSnoozeCheck"), [
         prediction_id,
       ])
       .then((response) => response.rows[0]);
@@ -38,7 +38,7 @@ const addCheck = (client: PoolClient) =>
 const closeSnoozeCheckById = (client: PoolClient) =>
   function (snooze_check_id: number | string): Promise<APISnoozes.SnoozeCheck> {
     return client
-      .query<APISnoozes.SnoozeCheck>(query.get("CloseSnoozeCheckById"), [
+      .query<APISnoozes.SnoozeCheck>(queries.get("CloseSnoozeCheckById"), [
         snooze_check_id,
       ])
       .then((response) => response.rows[0]);
@@ -56,12 +56,10 @@ const addSnoozeVote = (client: PoolClient) =>
 
     // Add Snooze Vote
     try {
-      await client.query<APISnoozes.SnoozeVote>(query.get("InsertSnoozeVote"), [
-        check_id,
-        user_id,
-        value,
-        now,
-      ]);
+      await client.query<APISnoozes.SnoozeVote>(
+        queries.get("InsertSnoozeVote"),
+        [check_id, user_id, value, now]
+      );
 
       // Validate updated Snooze Check
       let check: APISnoozes.EnhancedSnoozeCheck;

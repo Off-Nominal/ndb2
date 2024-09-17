@@ -8,4 +8,6 @@ export namespace APIVotes {
   };
 
   export type AddVote = Vote;
+
+  export type DeleteVotesByPredictionId = null;
 }

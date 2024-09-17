@@ -55,15 +55,38 @@ const retirePredictionById = (client: PoolClient) =>
   };
 
 const closePredictionById = (client: PoolClient) =>
-  function (
+  async function (
     prediction_id: number | string,
     triggerer_id: number | string | null,
     closed_date: Date
   ): Promise<APIPredictions.ClosePredictionById> {
-    const query = queries.get("ClosePredictionById");
-    return client
-      .query<null>(query, [prediction_id, triggerer_id, closed_date])
-      .then((response) => response.rows[0]);
+    client.query("BEGIN");
+
+    try {
+      // Ensure any open checks are closed
+      const prediction = await client
+        .query<APIPredictions.GetPredictionById>(
+          queries.get("GetPredictionById"),
+          [prediction_id]
+        )
+        .then((response) => response.rows[0]);
+      const openCheck = prediction.checks.find((check) => !check.closed);
+      if (openCheck) {
+        await client.query(queries.get("CloseSnoozeCheckById"), [openCheck.id]);
+      }
+
+      const query = queries.get("ClosePredictionById");
+      await client.query<null>(query, [
+        prediction_id,
+        triggerer_id,
+        closed_date,
+      ]);
+
+      return client.query("COMMIT").then((response) => response.rows[0]);
+    } catch (err) {
+      await client.query("ROLLBACK");
+      throw err;
+    }
   };
 
 const judgePredictionById = (client: PoolClient) =>
@@ -124,6 +147,42 @@ const snoozePredictionById = (client: PoolClient) =>
       .then((response) => response.rows[0]);
   };
 
+const undoClosePredictionById = (client: PoolClient) =>
+  async function (
+    prediction_id: number | string
+  ): Promise<APIPredictions.UndoClosePredictionById> {
+    client.query("BEGIN");
+
+    try {
+      const prediction = await client
+        .query(queries.get("GetPredictionById"), [prediction_id])
+        .then((res) => res.rows[0]);
+
+      // remove any votes
+      await client.query(queries.get("DeleteVotesByPredictionId"), [
+        prediction_id,
+      ]);
+
+      // remove any triggerer data
+      // remove triggered date
+      await client.query(queries.get("ClearTriggerDataByPredictionId"), [
+        prediction_id,
+      ]);
+
+      // if event driven, set check date to now
+      if (prediction.driver === "event") {
+        await client.query(queries.get("ResetPredictionCheckDateById"), [
+          prediction_id,
+        ]);
+      }
+
+      return client.query<null>("COMMIT").then((response) => response.rows[0]);
+    } catch (err) {
+      await client.query("ROLLBACK");
+      throw err;
+    }
+  };
+
 export default {
   add,
   getPredictionById,
@@ -135,4 +194,5 @@ export default {
   getNextPredictionToJudge,
   searchPredictions,
   snoozePredictionById,
+  undoClosePredictionById,
 };

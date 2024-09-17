@@ -5,7 +5,7 @@ import { getPrediction } from "../../middleware/getPrediction";
 import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
 import predictions from "../../db/queries/predictions";
-import votes from "../../db/queries/votes";
+import votes from "../../db/queries/votes/index.ts";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
 import { getDbClient } from "../../middleware/getDbClient";

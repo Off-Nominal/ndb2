@@ -1,10 +1,8 @@
 import { isBefore } from "date-fns";
 import express, { Request, Response } from "express";
 import webhookManager from "../../config/webhook_subscribers";
-import dateValidator from "../../middleware/dateValidator";
 import { getDbClient } from "../../middleware/getDbClient";
 import { getPrediction } from "../../middleware/getPrediction";
-import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
 import paramValidator from "../../middleware/paramValidator";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
 import predictions from "../../db/queries/predictions";
@@ -13,61 +11,29 @@ import responseUtils from "../../utils/response";
 import { ErrorCode } from "../../types/responses";
 const router = express.Router();
 
-router.post(
+router.delete(
   "/:prediction_id/trigger",
   [
-    dateValidator.isValid("closed_date", { optional: true }),
-    dateValidator.isPast("closed_date", { optional: true }),
-    paramValidator.numberParseableString("discord_id", { type: "body" }),
     paramValidator.integerParseableString("prediction_id", { type: "params" }),
     paramValidator.isPostgresInt("prediction_id", { type: "params" }),
     getDbClient,
-    getUserByDiscordId,
     getPrediction,
-    predictionStatusValidator([
-      PredictionLifeCycle.OPEN,
-      PredictionLifeCycle.CHECKING,
-    ]),
+    predictionStatusValidator([PredictionLifeCycle.CLOSED]),
   ],
   async (req: Request, res: Response) => {
-    const { closed_date } = req.body;
-    const closedDate = new Date(closed_date);
-
-    if (closed_date) {
-      // Verify closed date is after prediction's creation date
-      if (isBefore(closedDate, new Date(req.prediction.created_date))) {
-        return res
-          .status(400)
-          .json(
-            responseUtils.writeError(
-              ErrorCode.BAD_REQUEST,
-              "Closed date cannot be before prediction's created date"
-            )
-          );
-      }
-    }
-
     return predictions
-      .closePredictionById(req.dbClient)(
-        req.prediction.id,
-        req.user_id,
-        closed_date ? closedDate : new Date()
-      )
+      .undoClosePredictionById(req.dbClient)(req.prediction.id)
       .then(() =>
         predictions.getPredictionById(req.dbClient)(req.prediction.id)
       )
       .then((prediction) => {
         // Notify Subscribers
-        if (req.prediction.status === PredictionLifeCycle.CHECKING) {
-          webhookManager.emit("triggered_snooze_check", prediction);
-        } else {
-          webhookManager.emit("triggered_prediction", prediction);
-        }
+        webhookManager.emit("untriggered_prediction", prediction);
 
         return res.json(
           responseUtils.writeSuccess(
             prediction,
-            "Prediction triggered successfully."
+            "Prediction untriggered successfully."
           )
         );
       })
@@ -78,7 +44,7 @@ router.post(
           .json(
             responseUtils.writeError(
               ErrorCode.SERVER_ERROR,
-              "There was an error triggering this prediction."
+              "There was an error untriggering this prediction."
             )
           );
       });
