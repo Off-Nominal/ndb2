@@ -58,6 +58,7 @@ router.patch(
         webhookManager.emit("prediction_edit", prediction, {
           check_date: { old: oldCheckDate, new: checkDate },
         });
+        webhookManager.emit("snoozed_prediction", prediction);
 
         return res.json(
           responseUtils.writeSuccess(

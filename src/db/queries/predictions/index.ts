@@ -148,24 +148,42 @@ const snoozePredictionById = (client: PoolClient) =>
   };
 
 const setCheckDateByPredictionId = (client: PoolClient) =>
-  function (
+  async function (
     prediction_id: number | string,
     options: { date: Date }
   ): Promise<APIPredictions.SetCheckDateByPredictionId> {
-    const query = queries.get("SetCheckDateByPredictionId");
-    return client
-      .query<APIPredictions.SetCheckDateByPredictionId>(query, [
+    await client.query("BEGIN");
+
+    try {
+      // Closes any existing snoozes under way
+      const query = queries.get("CloseSnoozeChecksByPredictionId");
+      await client.query<APISnoozes.CloseSnoozeChecksByPredictionId>(query, [
+        prediction_id,
+      ]);
+    } catch (err) {
+      await client.query("ROLLBACK");
+      throw err;
+    }
+
+    try {
+      const query = queries.get("SetCheckDateByPredictionId");
+      await client.query<APIPredictions.SetCheckDateByPredictionId>(query, [
         prediction_id,
         options.date,
-      ])
-      .then((response) => response.rows[0]);
+      ]);
+    } catch (err) {
+      await client.query("ROLLBACK");
+      throw err;
+    }
+
+    return client.query("COMMIT").then(() => null);
   };
 
 const undoClosePredictionById = (client: PoolClient) =>
   async function (
     prediction_id: number | string
   ): Promise<APIPredictions.UndoClosePredictionById> {
-    client.query("BEGIN");
+    await client.query("BEGIN");
 
     try {
       const prediction = await client

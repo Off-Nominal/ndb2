@@ -41,6 +41,8 @@ export namespace APISnoozes {
   export type AddSnoozeVote = EnhancedSnoozeCheck;
 
   export type GetNextUnactionedCheck = { id: number };
+
+  export type CloseSnoozeChecksByPredictionId = null;
 }
 
 export const isAllowableSnooze = (
