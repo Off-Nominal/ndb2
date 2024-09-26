@@ -10,7 +10,7 @@ const add =
     vote: boolean
   ): Promise<APIVotes.AddVote> => {
     return client
-      .query<APIVotes.AddVote>(queries.get("addVote"), [
+      .query<APIVotes.AddVote>(queries.get("AddVote"), [
         user_id,
         prediction_id,
         vote,
@@ -25,7 +25,7 @@ const deleteVotesByPredictionId =
   ): Promise<APIVotes.DeleteVotesByPredictionId> => {
     return client
       .query<APIVotes.DeleteVotesByPredictionId>(
-        queries.get("deleteVotesByPredictionId"),
+        queries.get("DeleteVotesByPredictionId"),
         [prediction_id]
       )
       .then((response) => response.rows[0]);

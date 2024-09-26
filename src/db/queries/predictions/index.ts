@@ -147,6 +147,20 @@ const snoozePredictionById = (client: PoolClient) =>
       .then((response) => response.rows[0]);
   };
 
+const setCheckDateByPredictionId = (client: PoolClient) =>
+  function (
+    prediction_id: number | string,
+    options: { date: Date }
+  ): Promise<APIPredictions.SetCheckDateByPredictionId> {
+    const query = queries.get("SetCheckDateByPredictionId");
+    return client
+      .query<APIPredictions.SetCheckDateByPredictionId>(query, [
+        prediction_id,
+        options.date,
+      ])
+      .then((response) => response.rows[0]);
+  };
+
 const undoClosePredictionById = (client: PoolClient) =>
   async function (
     prediction_id: number | string
@@ -194,5 +208,6 @@ export default {
   getNextPredictionToJudge,
   searchPredictions,
   snoozePredictionById,
+  setCheckDateByPredictionId,
   undoClosePredictionById,
 };

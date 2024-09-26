@@ -100,4 +100,6 @@ export namespace APIPredictions {
   export type SnoozePredictionById = { id: number };
 
   export type UndoClosePredictionById = null;
+
+  export type SetCheckDateByPredictionId = null;
 }

@@ -2,6 +2,13 @@ import EventEmitter from "events";
 import { APIPredictions } from "../types/predicitions";
 import { APISeasons } from "../types/seasons";
 
+type PredictionEditChangedFields = {
+  check_date?: {
+    old: Date;
+    new: Date;
+  };
+};
+
 interface WebhookEvent {
   new_prediction: (prediction: APIPredictions.EnhancedPrediction) => void;
   retired_prediction: (prediction: APIPredictions.EnhancedPrediction) => void;
@@ -18,6 +25,10 @@ interface WebhookEvent {
   new_snooze_check: (prediction: APIPredictions.EnhancedPrediction) => void;
   new_snooze_vote: (prediction: APIPredictions.EnhancedPrediction) => void;
   snoozed_prediction: (prediction: APIPredictions.EnhancedPrediction) => void;
+  prediction_edit: (
+    prediction: APIPredictions.EnhancedPrediction,
+    edited_fields: PredictionEditChangedFields
+  ) => void;
   season_start: (season: APISeasons.Season) => void;
   season_end: (results: APISeasons.GetResultsBySeasonId) => void;
 }
@@ -52,10 +63,9 @@ export class WebhookManager extends EventEmitter {
       "new_prediction",
       (prediction: APIPredictions.EnhancedPrediction) => {
         this.notifySubscribers(
-          this.generateResponse<APIPredictions.EnhancedPrediction>(
-            "new_prediction",
-            prediction
-          )
+          this.generateResponse<{
+            prediction: APIPredictions.EnhancedPrediction;
+          }>("new_prediction", { prediction })
         );
       }
     );
@@ -64,10 +74,9 @@ export class WebhookManager extends EventEmitter {
       "retired_prediction",
       (prediction: APIPredictions.EnhancedPrediction) => {
         this.notifySubscribers(
-          this.generateResponse<APIPredictions.EnhancedPrediction>(
-            "retired_prediction",
-            prediction
-          )
+          this.generateResponse<{
+            prediction: APIPredictions.EnhancedPrediction;
+          }>("retired_prediction", { prediction })
         );
       }
     );
@@ -76,10 +85,9 @@ export class WebhookManager extends EventEmitter {
       "triggered_prediction",
       (prediction: APIPredictions.EnhancedPrediction) => {
         this.notifySubscribers(
-          this.generateResponse<APIPredictions.EnhancedPrediction>(
-            "triggered_prediction",
-            prediction
-          )
+          this.generateResponse<{
+            prediction: APIPredictions.EnhancedPrediction;
+          }>("triggered_prediction", { prediction })
         );
       }
     );
@@ -88,10 +96,9 @@ export class WebhookManager extends EventEmitter {
       "triggered_snooze_check",
       (prediction: APIPredictions.EnhancedPrediction) => {
         this.notifySubscribers(
-          this.generateResponse<APIPredictions.EnhancedPrediction>(
-            "triggered_prediction",
-            prediction
-          )
+          this.generateResponse<{
+            prediction: APIPredictions.EnhancedPrediction;
+          }>("triggered_snooze_check", { prediction })
         );
       }
     );
@@ -100,29 +107,26 @@ export class WebhookManager extends EventEmitter {
       "untriggered_prediction",
       (prediction: APIPredictions.EnhancedPrediction) => {
         this.notifySubscribers(
-          this.generateResponse<APIPredictions.EnhancedPrediction>(
-            "untriggered_prediction",
-            prediction
-          )
+          this.generateResponse<{
+            prediction: APIPredictions.EnhancedPrediction;
+          }>("untriggered_prediction", { prediction })
         );
       }
     );
 
     this.on("new_bet", (prediction: APIPredictions.EnhancedPrediction) => {
       this.notifySubscribers(
-        this.generateResponse<APIPredictions.EnhancedPrediction>(
-          "new_bet",
-          prediction
-        )
+        this.generateResponse<{
+          prediction: APIPredictions.EnhancedPrediction;
+        }>("new_bet", { prediction })
       );
     });
 
     this.on("new_vote", (prediction: APIPredictions.EnhancedPrediction) => {
       this.notifySubscribers(
-        this.generateResponse<APIPredictions.EnhancedPrediction>(
-          "new_vote",
-          prediction
-        )
+        this.generateResponse<{
+          prediction: APIPredictions.EnhancedPrediction;
+        }>("new_vote", { prediction })
       );
     });
 
@@ -130,10 +134,9 @@ export class WebhookManager extends EventEmitter {
       "judged_prediction",
       (prediction: APIPredictions.EnhancedPrediction) => {
         this.notifySubscribers(
-          this.generateResponse<APIPredictions.EnhancedPrediction>(
-            "judged_prediction",
-            prediction
-          )
+          this.generateResponse<{
+            prediction: APIPredictions.EnhancedPrediction;
+          }>("judged_prediction", { prediction })
         );
       }
     );
@@ -142,10 +145,9 @@ export class WebhookManager extends EventEmitter {
       "new_snooze_check",
       (prediction: APIPredictions.EnhancedPrediction) => {
         this.notifySubscribers(
-          this.generateResponse<APIPredictions.EnhancedPrediction>(
-            "new_snooze_check",
-            prediction
-          )
+          this.generateResponse<{
+            prediction: APIPredictions.EnhancedPrediction;
+          }>("new_snooze_check", { prediction })
         );
       }
     );
@@ -154,10 +156,9 @@ export class WebhookManager extends EventEmitter {
       "new_snooze_vote",
       (prediction: APIPredictions.EnhancedPrediction) => {
         this.notifySubscribers(
-          this.generateResponse<APIPredictions.EnhancedPrediction>(
-            "new_snooze_vote",
-            prediction
-          )
+          this.generateResponse<{
+            prediction: APIPredictions.EnhancedPrediction;
+          }>("new_snooze_vote", { prediction })
         );
       }
     );
@@ -166,25 +167,41 @@ export class WebhookManager extends EventEmitter {
       "snoozed_prediction",
       (prediction: APIPredictions.EnhancedPrediction) => {
         this.notifySubscribers(
-          this.generateResponse<APIPredictions.EnhancedPrediction>(
-            "snoozed_prediction",
-            prediction
-          )
+          this.generateResponse<{
+            prediction: APIPredictions.EnhancedPrediction;
+          }>("snoozed_prediction", { prediction })
+        );
+      }
+    );
+
+    this.on(
+      "prediction_edit",
+      (
+        prediction: APIPredictions.EnhancedPrediction,
+        edited_fields: PredictionEditChangedFields
+      ) => {
+        this.notifySubscribers(
+          this.generateResponse<{
+            prediction: APIPredictions.EnhancedPrediction;
+            edited_fields: PredictionEditChangedFields;
+          }>("prediction_edit", { prediction, edited_fields })
         );
       }
     );
 
     this.on("season_start", (season: APISeasons.Season) => {
       this.notifySubscribers(
-        this.generateResponse<APISeasons.Season>("season_start", season)
+        this.generateResponse<{ season: APISeasons.Season }>("season_start", {
+          season,
+        })
       );
     });
 
     this.on("season_end", (results: APISeasons.GetResultsBySeasonId) => {
       this.notifySubscribers(
-        this.generateResponse<APISeasons.GetResultsBySeasonId>(
+        this.generateResponse<{ results: APISeasons.GetResultsBySeasonId }>(
           "season_end",
-          results
+          { results }
         )
       );
     });

@@ -11,6 +11,7 @@ import delete_id_trigger from "./delete_{id}_trigger";
 import post_id_votes from "./post_{id}_votes";
 import post_id_bets from "./post_{id}_bets";
 import post_id_snooze_checks from "./post_{id}_snooze_checks_{id}";
+import patch_id_snooze from "./patch_{id}_snooze";
 
 // Assign route handlers
 router.use("/", get_search);
@@ -22,5 +23,6 @@ router.use("/", delete_id_trigger);
 router.use("/", post_id_votes);
 router.use("/", post_id_bets);
 router.use("/", post_id_snooze_checks);
+router.use("/", patch_id_snooze);
 
 export default router;
