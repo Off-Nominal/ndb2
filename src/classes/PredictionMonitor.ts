@@ -1,83 +1,44 @@
-import webhookManager from "../config/webhook_subscribers";
-import pool from "../db";
-import predictions from "../queries/predictions";
 import schedule from "node-schedule";
 
-const triggerSchedule = "0/30 12-21 * * *";
-const judgementSchedule = "*/10 * * * *";
+export type MonitorLog = (message: string) => void;
+
+export type MonitorConfig = {
+  name: string;
+  schedule: string;
+  callback: (log: MonitorLog) => Promise<void>;
+};
 
 export default class PredictionMonitor {
-  constructor() {
-    // Trigger Schedule
-    schedule.scheduleJob(triggerSchedule, () => {
-      this.triggerNextPrediction();
-    });
+  monitors: MonitorConfig[];
 
-    // Judgement Schedule
-    schedule.scheduleJob(judgementSchedule, () => {
-      this.judgeNextPrediction();
-    });
-
-    console.log("[PM]: Prediction Monitor running.");
+  constructor(monitors: MonitorConfig[]) {
+    this.monitors = monitors;
   }
 
-  private async triggerNextPrediction() {
-    console.log("[PM]: Scheduled Trigger");
-    const client = await pool.connect();
-
-    predictions
-      .getNextPredictionToTrigger(client)()
-      .then((pred) => {
-        if (!pred) {
-          return;
-        }
-        console.log("[PM]: Triggering prediction with id ", pred.id);
-        return predictions
-          .closePredictionById(client)(pred.id, null, new Date(pred.due_date))
-          .then(() => predictions.getByPredictionId(client)(pred.id))
-          .then((prediction) => {
-            webhookManager.emit("triggered_prediction", prediction);
-          })
-          .catch((err) => {
-            console.error("[PM]: Failed to trigger prediction.");
-            console.error(err);
-          });
-      })
-      .catch((err) => {
-        console.error("[PM]: Failed to fetch next prediction trigger.");
-        console.error(err);
-      })
-      .finally(() => {
-        client.release();
+  public initiate() {
+    for (const monitor of this.monitors) {
+      schedule.scheduleJob(monitor.schedule, () => {
+        this.executeMonitorCallback(monitor);
       });
+    }
+
+    this.log("Prediction Monitor running.");
   }
 
-  private async judgeNextPrediction() {
-    const client = await pool.connect();
-    predictions
-      .getNextPredictionToJudge(client)()
-      .then((pred) => {
-        if (!pred) {
-          return;
-        }
-        console.log("[PM]: Judging prediction with id,", pred.id);
-        return predictions
-          .judgePredictionById(client)(pred.id)
-          .then(() => predictions.getByPredictionId(client)(pred.id))
-          .then((prediction) => {
-            webhookManager.emit("judged_prediction", prediction);
-          })
-          .catch((err) => {
-            console.error("[PM]: Failed to judge next prediction.");
-            console.error(err);
-          });
-      })
-      .catch((err) => {
-        console.error("[PM]: Failed to get next prediction to judge.");
-        console.error(err);
-      })
-      .finally(() => {
-        client.release();
-      });
+  private async executeMonitorCallback(monitor: MonitorConfig) {
+    this.log(`Running monitor: ${monitor.name}`);
+
+    monitor.callback(this.log).catch((err) => {
+      this.error(`Running monitor ${monitor.name} failed`, err);
+    });
+  }
+
+  private log(message: string) {
+    console.log(`[PM]: ${message}`);
+  }
+
+  private error(message: string, err: any) {
+    console.error(`[PM]: ${message}`);
+    console.error(err);
   }
 }

@@ -5,7 +5,7 @@ import webhookManager from "../../config/webhook_subscribers";
 import paramValidator from "../../middleware/paramValidator";
 import { getPrediction } from "../../middleware/getPrediction";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
-import predictions from "../../queries/predictions";
+import predictions from "../../db/queries/predictions";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
 import { getDbClient } from "../../middleware/getDbClient";
@@ -63,7 +63,7 @@ router.patch(
     return predictions
       .retirePredictionById(req.dbClient)(req.prediction.id)
       .then(() =>
-        predictions.getByPredictionId(req.dbClient)(req.prediction.id)
+        predictions.getPredictionById(req.dbClient)(req.prediction.id)
       )
       .then((prediction) => {
         // Notify subscribers

@@ -1,10 +1,12 @@
-import { PredictionLifeCycle } from "../types/predicitions";
+import { PredictionLifeCycle } from "../../types/predicitions";
 
 export enum SortByOption {
   CREATED_ASC = "created_date-asc",
   CREATED_DESC = "created_date-desc",
   DUE_ASC = "due_date-asc",
   DUE_DESC = "due_date-desc",
+  CHECK_ASC = "check_date-asc",
+  CHECK_DESC = "check_date-desc",
   RETIRED_ASC = "retired_date-asc",
   RETIRED_DESC = "retired_date-desc",
   TRIGGERED_ASC = "triggered_date-asc",
@@ -19,7 +21,7 @@ export type SearchOptions = {
   keyword?: string;
   page?: number;
   statuses?: PredictionLifeCycle[];
-  sort_by?: SortByOption;
+  sort_by?: SortByOption[];
   predictor_id?: string;
   non_better_id?: string;
   season_id?: string;
@@ -29,16 +31,18 @@ export type SearchOptions = {
 const sortByOptions = {
   [SortByOption.CREATED_ASC]: `p.created_date ASC`,
   [SortByOption.CREATED_DESC]: `p.created_date DESC`,
-  [SortByOption.DUE_ASC]: `p.due_date ASC`,
-  [SortByOption.DUE_DESC]: `p.due_date DESC`,
-  [SortByOption.RETIRED_ASC]: `p.retired_date ASC`,
-  [SortByOption.RETIRED_DESC]: `p.retired_date DESC`,
-  [SortByOption.TRIGGERED_ASC]: `p.triggered_date ASC`,
-  [SortByOption.TRIGGERED_DESC]: `p.triggered_date DESC`,
-  [SortByOption.CLOSED_ASC]: `p.closed_date ASC`,
-  [SortByOption.CLOSED_DESC]: `p.closed_date DESC`,
-  [SortByOption.JUDGED_ASC]: `p.judged_date ASC`,
-  [SortByOption.JUDGED_DESC]: `p.judged_date DESC`,
+  [SortByOption.DUE_ASC]: `p.due_date ASC NULLS LAST`,
+  [SortByOption.DUE_DESC]: `p.due_date DESC NULLS LAST`,
+  [SortByOption.CHECK_ASC]: `p.check_date ASC NULLS LAST`,
+  [SortByOption.CHECK_DESC]: `p.check_date DESC NULLS LAST`,
+  [SortByOption.RETIRED_ASC]: `p.retired_date ASC NULLS LAST`,
+  [SortByOption.RETIRED_DESC]: `p.retired_date DESC NULLS LAST`,
+  [SortByOption.TRIGGERED_ASC]: `p.triggered_date AS NULLS LAST`,
+  [SortByOption.TRIGGERED_DESC]: `p.triggered_date DESC NULLS LAST`,
+  [SortByOption.CLOSED_ASC]: `p.closed_date ASC NULLS LAST`,
+  [SortByOption.CLOSED_DESC]: `p.closed_date DESC NULLS LAST`,
+  [SortByOption.JUDGED_ASC]: `p.judged_date ASC NULLS LAST`,
+  [SortByOption.JUDGED_DESC]: `p.judged_date DESC NULLS LAST`,
 };
 
 export const generate_SEARCH_PREDICTIONS = (
@@ -50,15 +54,7 @@ export const generate_SEARCH_PREDICTIONS = (
     options.statuses.length > 0 ||
     options.predictor_id ||
     options.non_better_id ||
-    options.season_id ||
-    options.sort_by === SortByOption.RETIRED_ASC ||
-    options.sort_by === SortByOption.RETIRED_DESC ||
-    options.sort_by === SortByOption.TRIGGERED_ASC ||
-    options.sort_by === SortByOption.TRIGGERED_DESC ||
-    options.sort_by === SortByOption.CLOSED_ASC ||
-    options.sort_by === SortByOption.CLOSED_DESC ||
-    options.sort_by === SortByOption.JUDGED_ASC ||
-    options.sort_by === SortByOption.JUDGED_DESC;
+    options.season_id;
 
   let whereClause = hasWhereClause ? "WHERE " : "";
 
@@ -74,30 +70,6 @@ export const generate_SEARCH_PREDICTIONS = (
       })
       .join(" OR ");
     whereClauses.push(`(${statusClauses})`);
-  }
-
-  // Any time a sort by date is added, omit any predictions which don't have that data
-  switch (options.sort_by) {
-    case SortByOption.RETIRED_ASC:
-    case SortByOption.RETIRED_DESC: {
-      whereClauses.push(`p.retired_date IS NOT NULL`);
-      break;
-    }
-    case SortByOption.TRIGGERED_ASC:
-    case SortByOption.TRIGGERED_DESC: {
-      whereClauses.push(`p.triggered_date IS NOT NULL`);
-      break;
-    }
-    case SortByOption.CLOSED_ASC:
-    case SortByOption.CLOSED_DESC: {
-      whereClauses.push(`p.closed_date IS NOT NULL`);
-      break;
-    }
-    case SortByOption.JUDGED_ASC:
-    case SortByOption.JUDGED_DESC: {
-      whereClauses.push(`p.judged_date IS NOT NULL`);
-      break;
-    }
   }
 
   // Add predictor filter
@@ -143,15 +115,9 @@ export const generate_SEARCH_PREDICTIONS = (
 
   // multiple sort by is supported, ranked in order of the query string
   if (options.sort_by) {
-    if (typeof options.sort_by === "string") {
-      orderByClauses.push(sortByOptions[options.sort_by]);
-    }
-
-    if (Array.isArray(options.sort_by)) {
-      options.sort_by.forEach((opt) => {
-        orderByClauses.push(sortByOptions[opt]);
-      });
-    }
+    options.sort_by.forEach((opt) => {
+      orderByClauses.push(sortByOptions[opt]);
+    });
   }
 
   orderByClauses.push(`p.id ASC`);
@@ -177,12 +143,15 @@ export const generate_SEARCH_PREDICTIONS = (
         pred)
       as predictor,
       p.text,
-      p.created_date,
-      p.due_date,
-      p.closed_date,
-      p.triggered_date,
+      p.driver,
       p.season_id,
       p.season_applicable,
+      p.created_date,
+      p.due_date,
+      p.check_date,
+      p.last_check_date,
+      p.closed_date,
+      p.triggered_date,
       (SELECT row_to_json(trig) FROM 
           (SELECT 
               p.triggerer_id as id, 

@@ -1,5 +1,5 @@
 import { PoolClient } from "pg";
-import { APIBets } from "../types/bets";
+import { APIBets } from "../../types/bets";
 
 const ADD_BET = `
   INSERT INTO bets (

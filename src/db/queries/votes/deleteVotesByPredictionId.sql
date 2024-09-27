@@ -1,0 +1,1 @@
+DELETE FROM votes WHERE prediction_id = $1;

@@ -1,6 +1,6 @@
 import { PoolClient, QueryResult } from "pg";
-import { APIScores } from "../types/scores";
-import { seasonManager } from "../classes/SeasonManager";
+import { APIScores } from "../../types/scores";
+import { seasonManager } from "../../classes/SeasonManager";
 
 export const generate_GET_USER_SCORE_SUMMARY_with_SEASON = (
   parameterizedSeasonId?: string
@@ -50,7 +50,7 @@ export const generate_GET_USER_PREDICTION_SUMMARY_with_SEASON = (
           as successful,
         COUNT(DISTINCT p.id) FILTER (WHERE p.status = 'failed'${whereClause})::INT
           as failed,
-        COUNT(DISTINCT p.id) FILTER (WHERE (p.status = 'open' OR p.status = 'closed')${whereClause})::INT
+        COUNT(DISTINCT p.id) FILTER (WHERE (p.status = 'open' OR p.status = 'closed' OR p.status = 'checking')${whereClause})::INT
           as pending,
         COUNT(DISTINCT p.id) FILTER (WHERE p.status = 'retired'${whereClause})::INT
           as retired
@@ -102,7 +102,7 @@ export const generate_GET_USER_BET_SUMMARY_with_SEASON = (
             )${whereClause}
           )::INT as failed,
         COUNT(b.id) FILTER 
-          (WHERE (p.status = 'open' OR p.status = 'closed') AND b.valid IS TRUE${whereClause})::INT as pending,
+          (WHERE (p.status = 'open' OR p.status = 'closed' OR p.status = 'checking') AND b.valid IS TRUE${whereClause})::INT as pending,
         COUNT(b.id) FILTER (WHERE p.status = 'retired'${whereClause})::INT as retired,
         COUNT(b.id) FILTER (WHERE b.valid IS FALSE${whereClause})::INT as invalid
       FROM users u

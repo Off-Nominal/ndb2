@@ -1,10 +1,10 @@
 import { PoolClient } from "pg";
-import seasons from "../queries/seasons";
+import seasons from "../db/queries/seasons";
 import pool from "../db";
 import { APISeasons } from "../types/seasons";
 import schedule from "node-schedule";
 import webhookManager from "../config/webhook_subscribers";
-import predictions from "../queries/predictions";
+import predictions from "../db/queries/predictions";
 import { APIPredictions, PredictionLifeCycle } from "../types/predicitions";
 
 export class SeasonManager {
@@ -55,7 +55,11 @@ export class SeasonManager {
       try {
         remainingPredictions = await predictions.searchPredictions(poolClient)({
           season_id: lastSeason.id.toString(),
-          statuses: [PredictionLifeCycle.OPEN, PredictionLifeCycle.CLOSED],
+          statuses: [
+            PredictionLifeCycle.OPEN,
+            PredictionLifeCycle.CHECKING,
+            PredictionLifeCycle.CLOSED,
+          ],
         });
       } catch (err) {
         console.error(

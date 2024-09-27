@@ -13,7 +13,7 @@ const createChecker = (
   return (req: Request, res: Response, next: NextFunction) => {
     const value = req.body[key];
 
-    if (optional && value === undefined) {
+    if (optional && (value === undefined || value === "")) {
       return next();
     }
 

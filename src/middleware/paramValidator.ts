@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import {
   isBoolean,
+  isInteger,
   isIntegerParseableString,
   isNoMoreThan,
   isNumberParseableString,
@@ -62,6 +63,17 @@ type ParamValidatorOptions = {
 };
 
 const paramValidator = {
+  integer: (key: string, options?: ParamValidatorOptions) => {
+    return createChecker(
+      key,
+      isInteger,
+      "must be an integer",
+      400,
+      options?.optional || false,
+      options?.type || "body",
+      options?.allowArray || false
+    );
+  },
   numberParseableString: (key: string, options?: ParamValidatorOptions) => {
     return createChecker(
       key,

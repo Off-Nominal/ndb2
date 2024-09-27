@@ -24,7 +24,7 @@ Many variables are preloaded with default configurations, but you'll need to add
 
 ### Migrations
 
-To create a new migration, run `npm run migrate:create my-migration-description -- --sql-file`.
+To create a new migration, run `npm run db:migrate:create my-migration-description -- --sql-file`.
 
 ## Denormalized Data
 
@@ -39,14 +39,17 @@ This README aims to keep a running list of denormalized data and the functions w
 These data are triggered to change directly as a result of normalized data. Core data changes trigger them.
 
 - `predictions.status`
-  - `refresh_prediction_status()` is called to refresh one prediction's status on INSERT or UPDATE (retired_date, closed_date, judged_date) on predictions
+  - `refresh_prediction_status()` is called to refresh one prediction's status on INSERT or UPDATE (retired_date, closed_date, judged_date, check_date, last_check_date) on predictions
+  - `refresh_prediction_status()` is called to refresh one prediction's status on UPDATE (closed) on checks
 - `predictions.season_id`
-  - `refresh_prediction_seasons('prediction')` is called to refresh one prediction's season_id on INSERT or UPDATE (due_date, closed_date) on predictions
+  - `refresh_prediction_seasons('prediction')` is called to refresh one prediction's season_id on INSERT or UPDATE (due_date, closed_date, check_date) on predictions
   - `refresh_prediction_seasons('all)` is called to refresh all predictions' season_ids on INSERT, DELETE or UPDATE (start, "end") on seasons
 - `predictions.season_applicable`
   - `refresh_prediction_season_applicable()` is called to refresh one prediction's season_applicable ON UPDATE (season_id) on predictions
+- `predictions.last_check_date`
+  - `refresh_last_checked_date()` is called to refresh one prediction's last_check_date on INSERT to `checks`
 - `bets.wager`
-  - `refresh_wager('prediction')` is called to update all bets for single prediction on UPDATE (due_date, closed_date) to `predictions` table
+  - `refresh_wager('prediction')` is called to update all bets for single prediction on UPDATE (due_date, closed_date, check_date) to `predictions` table
   - `refresh_wager('bet')` is called to update a single bet on INSERT to `bets` table
 - `bets.valid`
   - `refresh_valid('prediction')` is called to update all bets for single prediction on UPDATE (closed_date) to `predictions` table
