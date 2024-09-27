@@ -6,7 +6,6 @@ ALTER TABLE bets
   DROP CONSTRAINT bets_prediction_id_fk,
   ADD CONSTRAINT bets_prediction_id_fk FOREIGN KEY (prediction_id) REFERENCES predictions(id) ON DELETE CASCADE;
 
-
 ALTER TABLE predictions
   ALTER COLUMN due_date DROP NOT NULL;
 

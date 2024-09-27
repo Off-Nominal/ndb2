@@ -17,9 +17,6 @@ export enum SortByOption {
   JUDGED_DESC = "judged_date-desc",
 }
 
-const isSortByOption = (value: string): value is SortByOption =>
-  Object.values(SortByOption).includes(value as SortByOption);
-
 export type SearchOptions = {
   keyword?: string;
   page?: number;

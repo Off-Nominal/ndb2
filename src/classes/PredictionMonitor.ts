@@ -1,13 +1,11 @@
-import pool from "../db";
 import schedule from "node-schedule";
-import { PoolClient } from "pg";
 
 export type MonitorLog = (message: string) => void;
 
 export type MonitorConfig = {
   name: string;
   schedule: string;
-  callback: (client: PoolClient, log: MonitorLog) => Promise<any>;
+  callback: (log: MonitorLog) => Promise<void>;
 };
 
 export default class PredictionMonitor {
@@ -29,16 +27,10 @@ export default class PredictionMonitor {
 
   private async executeMonitorCallback(monitor: MonitorConfig) {
     this.log(`Running monitor: ${monitor.name}`);
-    const client = await pool.connect();
 
-    monitor
-      .callback(client, this.log)
-      .catch((err) => {
-        this.error(`Running monitor ${monitor.name} failed`, err);
-      })
-      .finally(() => {
-        client.release();
-      });
+    monitor.callback(this.log).catch((err) => {
+      this.error(`Running monitor ${monitor.name} failed`, err);
+    });
   }
 
   private log(message: string) {
