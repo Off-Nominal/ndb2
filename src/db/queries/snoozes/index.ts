@@ -4,10 +4,17 @@ import { APIPredictions } from "../../../types/predicitions";
 import predictions from "../predictions";
 import queries from "../index";
 
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
+
+import { GetSnoozeCheckById } from "@prisma/client/sql";
+
 const getSnoozeCheck = (client: PoolClient) =>
-  function (
-    snooze_check_id: number | string
-  ): Promise<APISnoozes.GetSnoozeCheck> {
+  async function (snooze_check_id: number): Promise<APISnoozes.GetSnoozeCheck> {
+    const result = await prisma.$queryRawTyped(
+      GetSnoozeCheckById(snooze_check_id)
+    );
+
     return client
       .query<APISnoozes.GetSnoozeCheck>(queries.get("GetSnoozeCheckById"), [
         snooze_check_id,

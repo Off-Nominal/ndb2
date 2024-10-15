@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["typedSql"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model bets {
+  id            Int         @id @default(autoincrement())
+  user_id       String      @db.Uuid
+  prediction_id Int
+  date          DateTime    @db.Timestamptz(6)
+  endorsed      Boolean
+  wager         Int?
+  valid         Boolean     @default(true)
+  payout        Int?
+  season_payout Int?
+  predictions   predictions @relation(fields: [prediction_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "bets_prediction_id_fk")
+  users         users       @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "bets_user_id_fk")
+
+  @@unique([user_id, prediction_id])
+  @@index([prediction_id])
+}
+
+model migrations {
+  id     Int      @id @default(autoincrement())
+  name   String   @db.VarChar(255)
+  run_on DateTime @db.Timestamp(6)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model predictions {
+  id                                    Int             @id @default(autoincrement())
+  user_id                               String          @db.Uuid
+  text                                  String
+  created_date                          DateTime        @db.Timestamptz(6)
+  due_date                              DateTime?       @db.Timestamptz(6)
+  closed_date                           DateTime?       @db.Timestamptz(6)
+  judged_date                           DateTime?       @db.Timestamptz(6)
+  retired_date                          DateTime?       @db.Timestamptz(6)
+  triggered_date                        DateTime?       @db.Timestamptz(6)
+  triggerer_id                          String?         @db.Uuid
+  status                                String?
+  season_id                             Int?
+  endorse_ratio                         Decimal         @default(1) @db.Decimal
+  undorse_ratio                         Decimal         @default(1) @db.Decimal
+  season_applicable                     Boolean         @default(true)
+  driver                                String          @default("date")
+  check_date                            DateTime?       @db.Timestamptz(6)
+  last_check_date                       DateTime?       @db.Timestamptz(6)
+  bets                                  bets[]
+  users_predictions_triggerer_idTousers users?          @relation("predictions_triggerer_idTousers", fields: [triggerer_id], references: [id], onUpdate: NoAction, map: "predictions_triggerer_id_fk")
+  users_predictions_user_idTousers      users           @relation("predictions_user_idTousers", fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "predictions_user_id_fk")
+  snooze_checks                         snooze_checks[]
+  votes                                 votes[]
+}
+
+model seasons {
+  id             Int      @id @default(autoincrement())
+  name           String
+  start          DateTime @db.Timestamptz(6)
+  end            DateTime @db.Timestamptz(6)
+  payout_formula String
+  wager_cap      Int      @default(90)
+  closed         Boolean  @default(false)
+}
+
+model snooze_checks {
+  id            Int            @id @default(autoincrement())
+  prediction_id Int?
+  check_date    DateTime       @default(now()) @db.Timestamptz(6)
+  closed        Boolean        @default(false)
+  closed_at     DateTime?      @db.Timestamptz(6)
+  predictions   predictions?   @relation(fields: [prediction_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  snooze_votes  snooze_votes[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model snooze_votes {
+  snooze_check_id Int
+  user_id         String        @db.Uuid
+  value           Int           @db.SmallInt
+  created_at      DateTime      @db.Timestamptz(6)
+  snooze_checks   snooze_checks @relation(fields: [snooze_check_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users           users         @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+
+  @@id([snooze_check_id, user_id])
+}
+
+model users {
+  id                                          String         @id @db.Uuid
+  discord_id                                  String         @unique @db.VarChar
+  bets                                        bets[]
+  predictions_predictions_triggerer_idTousers predictions[]  @relation("predictions_triggerer_idTousers")
+  predictions_predictions_user_idTousers      predictions[]  @relation("predictions_user_idTousers")
+  snooze_votes                                snooze_votes[]
+  votes                                       votes[]
+}
+
+model votes {
+  id            Int         @id @default(autoincrement())
+  user_id       String      @db.Uuid
+  prediction_id Int
+  vote          Boolean
+  voted_date    DateTime    @db.Timestamptz(6)
+  predictions   predictions @relation(fields: [prediction_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "votes_prediction_id_fk")
+  users         users       @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "votes_user_id_fk")
+
+  @@unique([user_id, prediction_id])
+}
