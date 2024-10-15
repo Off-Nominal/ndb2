@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { getDbClient } from "../../middleware/getDbClient";
-import seasons from "../../db/queries/seasons";
+import seasons from "../../db/oldQueries/seasons";
 import responseUtils from "../../utils/response";
 
 const router = express.Router();

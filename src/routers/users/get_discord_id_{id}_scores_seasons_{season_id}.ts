@@ -1,8 +1,8 @@
 import express, { Request, Response } from "express";
 import { getDbClient } from "../../middleware/getDbClient";
-import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
+import { fetchUser } from "../../middleware/fetchUser";
 import paramValidator from "../../middleware/paramValidator";
-import users from "../../db/queries/users";
+import users from "../../db/oldQueries/users";
 import responseUtils from "../../utils/response";
 const router = express.Router();
 
@@ -14,7 +14,7 @@ router.get(
       type: "params",
     }),
     getDbClient,
-    getUserByDiscordId,
+    fetchUser,
   ],
   async (req: Request, res: Response) => {
     const { season_id } = req.params;

@@ -1,9 +1,10 @@
 import express, { Request, Response } from "express";
 import { getDbClient } from "../../middleware/getDbClient";
-import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
+import { fetchUser } from "../../middleware/fetchUser";
 import paramValidator from "../../middleware/paramValidator";
-import users from "../../db/queries/users";
+import users from "../../db/oldQueries/users";
 import responseUtils from "../../utils/response";
+import { getBetsByUserId } from "../../db/queries/bets/bets.queries";
 const router = express.Router();
 
 router.get(
@@ -11,11 +12,11 @@ router.get(
   [
     paramValidator.numberParseableString("discord_id", { type: "params" }),
     getDbClient,
-    getUserByDiscordId,
+    fetchUser,
   ],
-  async (req: Request, res: Response) => {
-    users
-      .getBetsByUserId(req.dbClient)(req.user_id)
+  (req: Request, res: Response) => {
+    getBetsByUserId
+      .run({ user_id: req.user_id }, req.dbClient)
       .then((response) => {
         res.json(
           responseUtils.writeSuccess(response, "Bets fetched successfully.")

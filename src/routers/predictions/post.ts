@@ -1,11 +1,11 @@
 import express, { Request, Response } from "express";
 import webhookManager from "../../config/webhook_subscribers";
-import bets from "../../db/queries/bets";
-import predictions from "../../db/queries/predictions";
+import { bets } from "../../db/queries/bets";
+import predictions from "../../db/oldQueries/predictions";
 import responseUtils from "../../utils/response";
 import paramValidator from "../../middleware/paramValidator";
 import dateValidator from "../../middleware/dateValidator";
-import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
+import { fetchUser } from "../../middleware/fetchUser";
 import { getDbClient } from "../../middleware/getDbClient";
 import { ErrorCode } from "../../types/responses";
 import { PredictionDriver } from "../../types/predicitions";
@@ -21,7 +21,7 @@ router.post(
     dateValidator.isValid("check_date", { optional: true }),
     dateValidator.isFuture("check_date", { optional: true }),
     getDbClient,
-    getUserByDiscordId,
+    fetchUser,
   ],
   async (req: Request, res: Response) => {
     const { text, due_date, check_date } = req.body;
@@ -68,9 +68,19 @@ router.post(
         driver
       )
       .then((p) =>
-        bets.add(req.dbClient)(req.user_id, p.id, true, created_date)
+        bets.add(
+          {
+            user_id: req.user_id,
+            prediction_id: p.id,
+            endorsed: true,
+            date: created_date,
+          },
+          req.dbClient
+        )
       )
-      .then((b) => predictions.getPredictionById(req.dbClient)(b.prediction_id))
+      .then(([b]) =>
+        predictions.getPredictionById(req.dbClient)(b.prediction_id)
+      )
       .then((ep) => {
         res.json(
           responseUtils.writeSuccess(ep, "Prediction created successfully.")

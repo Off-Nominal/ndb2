@@ -4,10 +4,10 @@ import webhookManager from "../../config/webhook_subscribers";
 import dateValidator from "../../middleware/dateValidator";
 import { getDbClient } from "../../middleware/getDbClient";
 import { getPrediction } from "../../middleware/getPrediction";
-import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
+import { fetchUser } from "../../middleware/fetchUser";
 import paramValidator from "../../middleware/paramValidator";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
-import predictions from "../../db/queries/predictions";
+import predictions from "../../db/oldQueries/predictions";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
 import { ErrorCode } from "../../types/responses";
@@ -22,7 +22,7 @@ router.post(
     paramValidator.integerParseableString("prediction_id", { type: "params" }),
     paramValidator.isPostgresInt("prediction_id", { type: "params" }),
     getDbClient,
-    getUserByDiscordId,
+    fetchUser,
     getPrediction,
     predictionStatusValidator([
       PredictionLifeCycle.OPEN,

@@ -2,16 +2,16 @@ import express, { Request, Response } from "express";
 import webhookManager from "../../config/webhook_subscribers";
 import paramValidator from "../../middleware/paramValidator";
 import { getPrediction } from "../../middleware/getPrediction";
-import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
+import { fetchUser } from "../../middleware/fetchUser";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
-import bets from "../../db/queries/bets";
-import predictions from "../../db/queries/predictions";
+import predictions from "../../db/oldQueries/predictions";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
 import { getDbClient } from "../../middleware/getDbClient";
 import { add, isAfter } from "date-fns";
 import GAME_MECHANICS from "../../config/game_mechanics";
 import { ErrorCode } from "../../types/responses";
+import { bets } from "../../db/queries/bets";
 const router = express.Router();
 
 router.post(
@@ -22,7 +22,7 @@ router.post(
     paramValidator.integerParseableString("prediction_id", { type: "params" }),
     paramValidator.isPostgresInt("prediction_id", { type: "params" }),
     getDbClient,
-    getUserByDiscordId,
+    fetchUser,
     getPrediction,
     predictionStatusValidator(PredictionLifeCycle.OPEN),
   ],
@@ -69,8 +69,17 @@ router.post(
     }
 
     bets
-      .add(req.dbClient)(req.user_id, req.prediction.id, endorsed)
-      .then((b) => predictions.getPredictionById(req.dbClient)(b.prediction_id))
+      .add(
+        {
+          user_id: req.user_id,
+          prediction_id: req.prediction.id,
+          endorsed,
+        },
+        req.dbClient
+      )
+      .then(([b]) =>
+        predictions.getPredictionById(req.dbClient)(b.prediction_id)
+      )
       .then((ep) => {
         // Notify subscribers
         webhookManager.emit("new_bet", ep);

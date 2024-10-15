@@ -1,8 +1,8 @@
 import { Pool, PoolClient } from "pg";
-import predictions from "../db/queries/predictions";
+import predictions from "../db/oldQueries/predictions";
 import webhookManager from "./webhook_subscribers";
 import { MonitorConfig, MonitorLog } from "../classes/PredictionMonitor";
-import snoozes from "../db/queries/snoozes";
+import snoozes from "../db/oldQueries/snoozes";
 import pool from "../db/index";
 
 const getPoolClient = (

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import predictions from "../db/queries/predictions";
+import predictions from "../db/oldQueries/predictions";
 import { APIPredictions } from "../types/predicitions";
 import responseUtils from "../utils/response";
 import { ErrorCode } from "../types/responses";

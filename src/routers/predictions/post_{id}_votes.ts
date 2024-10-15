@@ -2,14 +2,14 @@ import express, { Request, Response } from "express";
 import webhookManager from "../../config/webhook_subscribers";
 import paramValidator from "../../middleware/paramValidator";
 import { getPrediction } from "../../middleware/getPrediction";
-import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
+import { fetchUser } from "../../middleware/fetchUser";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
-import predictions from "../../db/queries/predictions";
-import votes from "../../db/queries/votes/index.ts";
+import predictions from "../../db/oldQueries/predictions";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
 import { getDbClient } from "../../middleware/getDbClient";
 import { ErrorCode } from "../../types/responses";
+import { votes } from "../../db/queries/votes";
 const router = express.Router();
 
 router.post(
@@ -20,7 +20,7 @@ router.post(
     paramValidator.integerParseableString("prediction_id", { type: "params" }),
     paramValidator.isPostgresInt("prediction_id", { type: "params" }),
     getDbClient,
-    getUserByDiscordId,
+    fetchUser,
     getPrediction,
     predictionStatusValidator(PredictionLifeCycle.CLOSED),
   ],
@@ -45,8 +45,18 @@ router.post(
     }
 
     return votes
-      .add(req.dbClient)(req.user_id, req.prediction.id, vote)
-      .then((v) => predictions.getPredictionById(req.dbClient)(v.prediction_id))
+      .add(
+        {
+          user_id: req.user_id,
+          prediction_id: req.prediction.id,
+          vote: vote,
+        },
+        req.dbClient
+      )
+      .then((v) => {
+        console.log(v);
+        return predictions.getPredictionById(req.dbClient)(req.prediction.id);
+      })
       .then((prediction) => {
         // Notify Subscribers
         webhookManager.emit("new_vote", prediction);

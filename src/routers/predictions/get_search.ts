@@ -1,12 +1,12 @@
 import express, { Request, Response } from "express";
 import { getDbClient } from "../../middleware/getDbClient";
 import paramValidator from "../../middleware/paramValidator";
-import predictions from "../../db/queries/predictions";
-import { SortByOption } from "../../db/queries/predictions_search";
+import predictions from "../../db/oldQueries/predictions";
+import { SortByOption } from "../../db/oldQueries/predictions_search";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
-import users from "../../db/queries/users";
 import { ErrorCode } from "../../types/responses";
+import { users } from "../../db/queries/users";
 const router = express.Router();
 
 const isPredictionLifeCycle = (val: any): val is PredictionLifeCycle => {
@@ -147,8 +147,9 @@ router.get(
 
     if (creator) {
       try {
-        const user = await users.getByDiscordId(req.dbClient)(
-          creator as string
+        const [user] = await users.getByDiscordId(
+          { discord_id: creator as string },
+          req.dbClient
         );
         if (!user) {
           throw null;
@@ -178,8 +179,9 @@ router.get(
 
     if (unbetter) {
       try {
-        const user = await users.getByDiscordId(req.dbClient)(
-          unbetter as string
+        const [user] = await users.getByDiscordId(
+          { discord_id: unbetter as string },
+          req.dbClient
         );
         if (!user) {
           throw null;

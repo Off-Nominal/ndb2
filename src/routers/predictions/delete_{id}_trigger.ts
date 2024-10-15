@@ -4,7 +4,7 @@ import { getDbClient } from "../../middleware/getDbClient";
 import { getPrediction } from "../../middleware/getPrediction";
 import paramValidator from "../../middleware/paramValidator";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
-import predictions from "../../db/queries/predictions";
+import predictions from "../../db/oldQueries/predictions";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils from "../../utils/response";
 import { ErrorCode } from "../../types/responses";

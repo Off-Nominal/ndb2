@@ -6,6 +6,8 @@ import {
 } from "../predictions_search";
 import queries from "..";
 import { APISnoozes } from "../../../types/snoozes";
+import { deleteAllVotesByPredictionId } from "../../queries/votes/votes.queries";
+import { votes } from "../../queries/votes";
 
 const add = (client: PoolClient) =>
   function (
@@ -181,7 +183,7 @@ const setCheckDateByPredictionId = (client: PoolClient) =>
 
 const undoClosePredictionById = (client: PoolClient) =>
   async function (
-    prediction_id: number | string
+    prediction_id: number
   ): Promise<APIPredictions.UndoClosePredictionById> {
     await client.query("BEGIN");
 
@@ -191,9 +193,12 @@ const undoClosePredictionById = (client: PoolClient) =>
         .then((res) => res.rows[0]);
 
       // remove any votes
-      await client.query(queries.get("DeleteVotesByPredictionId"), [
-        prediction_id,
-      ]);
+      await votes.deleteAllByPredictionId(
+        {
+          prediction_id,
+        },
+        client
+      );
 
       // remove any triggerer data
       // remove triggered date

@@ -3,12 +3,12 @@ import { PredictionLifeCycle } from "../../types/predicitions";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
 import paramValidator from "../../middleware/paramValidator";
 import { getDbClient } from "../../middleware/getDbClient";
-import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
+import { fetchUser } from "../../middleware/fetchUser";
 import { getPrediction } from "../../middleware/getPrediction";
 import { isAllowableSnooze } from "../../types/snoozes";
 import responseUtils from "../../utils/response";
 import { ErrorCode } from "../../types/responses";
-import snoozes from "../../db/queries/snoozes";
+import snoozes from "../../db/oldQueries/snoozes";
 import webhookManager from "../../config/webhook_subscribers";
 
 const router = express.Router();
@@ -25,7 +25,7 @@ router.post(
     paramValidator.isPostgresInt("snooze_check_id", { type: "params" }),
     paramValidator.integer("value", { type: "body" }),
     getDbClient,
-    getUserByDiscordId,
+    fetchUser,
     getPrediction,
     predictionStatusValidator(PredictionLifeCycle.CHECKING),
   ],

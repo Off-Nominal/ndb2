@@ -232,13 +232,22 @@ export class WebhookManager extends EventEmitter {
 
       const promise = fetch(sub, request)
         .then((response) => {
+          console.log("response", response);
           if (!response.ok) {
             throw new Error(response.statusText);
           }
         })
         .catch((err) => {
-          console.error("Subscriber webhook request failed: ", sub);
-          console.error(err);
+          if (err instanceof Error) {
+            console.error(
+              "[WM]: Subscriber webhook request failed.\n  Subscriber:",
+              sub,
+              "\n  Error:",
+              err.message
+            );
+          } else {
+            console.error(err);
+          }
         });
 
       requests.push(promise);

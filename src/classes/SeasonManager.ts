@@ -1,10 +1,10 @@
 import { PoolClient } from "pg";
-import seasons from "../db/queries/seasons";
+import seasons from "../db/oldQueries/seasons";
 import pool from "../db";
 import { APISeasons } from "../types/seasons";
 import schedule from "node-schedule";
 import webhookManager from "../config/webhook_subscribers";
-import predictions from "../db/queries/predictions";
+import predictions from "../db/oldQueries/predictions";
 import { APIPredictions, PredictionLifeCycle } from "../types/predicitions";
 
 export class SeasonManager {
