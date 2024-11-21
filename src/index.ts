@@ -3,6 +3,13 @@ import { authenticateApplication } from "./middleware/authenticateApplication";
 import { validateContentType } from "./middleware/validateContentType";
 import PredictionMonitor from "./classes/PredictionMonitor";
 import { monitors } from "./config/monitors";
+import { seasonsManager } from "./classes/SeasonManager";
+
+// Routers
+import predictionsRouter from "./routers/predictions";
+import usersRouter from "./routers/users";
+import scoresRouter from "./routers/scores";
+import seasonsRouter from "./routers/seasons";
 
 const app = express();
 
@@ -26,17 +33,9 @@ const autheticatedRouter = express.Router();
 autheticatedRouter.use(authenticateApplication);
 
 // Routers
-import predictionsRouter from "./routers/predictions";
 autheticatedRouter.use("/api/predictions", predictionsRouter);
-
-import usersRouter from "./routers/users";
 autheticatedRouter.use("/api/users", usersRouter);
-
-import scoresRouter from "./routers/scores";
 autheticatedRouter.use("/api/scores", scoresRouter);
-
-import seasonsRouter from "./routers/seasons";
-
 autheticatedRouter.use("/api/seasons", seasonsRouter);
 
 app.use(autheticatedRouter);
@@ -49,6 +48,9 @@ app.listen(PORT, () => {
   console.log(`[NDB2]: Application listening on port:`, PORT);
 });
 
-// Prediction Monitor Initiation
+// Prediction Monitor Initialization
 const monitor = new PredictionMonitor(monitors);
 monitor.initiate();
+
+// Seasons Manager Initialization
+seasonsManager.initialize();

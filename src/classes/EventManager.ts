@@ -14,8 +14,8 @@ const events = {
   ) => null,
 };
 
-class EventManager extends TypedEventEmitter {
-  constructor(events) {
-    super(events);
-  }
-}
+// class EventManager extends TypedEventEmitter {
+//   constructor(events) {
+//     super(events);
+//   }
+// }
