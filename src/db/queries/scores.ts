@@ -1,6 +1,6 @@
 import { PoolClient, QueryResult } from "pg";
 import { APIScores } from "../../types/scores";
-import { seasonManager } from "../../classes/SeasonManager";
+import { seasonsManager } from "../../classes/SeasonManager";
 
 export const generate_GET_USER_SCORE_SUMMARY_with_SEASON = (
   parameterizedSeasonId?: string
@@ -246,7 +246,7 @@ const getLeaderboard =
       if (typeof seasonIdentifier === "number") {
         seasonId = seasonIdentifier;
       } else {
-        seasonId = seasonManager.getSeasonByIdentifier(seasonIdentifier).id;
+        seasonId = seasonsManager.getSeasonByIdentifier(seasonIdentifier).id;
       }
     }
 

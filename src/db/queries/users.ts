@@ -6,7 +6,7 @@ import {
   generate_GET_USER_VOTE_SUMMARY_with_SEASON,
 } from "./scores";
 import { PoolClient } from "pg";
-import { seasonManager } from "../../classes/SeasonManager";
+import { seasonsManager } from "../../classes/SeasonManager";
 import { APIBets } from "../../types/bets";
 import { randomUUID } from "crypto";
 
@@ -116,7 +116,7 @@ const getUserScoreById = (client: PoolClient) =>
       if (typeof seasonIdentifier === "number") {
         seasonId = seasonIdentifier;
       } else {
-        seasonId = seasonManager.getSeasonByIdentifier(seasonIdentifier).id;
+        seasonId = seasonsManager.getSeasonByIdentifier(seasonIdentifier).id;
       }
     }
 
