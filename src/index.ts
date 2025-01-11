@@ -10,6 +10,7 @@ import predictionsRouter from "./routers/predictions";
 import usersRouter from "./routers/users";
 import scoresRouter from "./routers/scores";
 import seasonsRouter from "./routers/seasons";
+import { apiV2Router } from "./v2";
 
 const app = express();
 
@@ -27,18 +28,21 @@ app.get("/health", (req, res) => {
   return res.status(200).json({ status: "healthy" });
 });
 
-const autheticatedRouter = express.Router();
+const authenticatedRouter = express.Router();
 
 // Authentication
-autheticatedRouter.use(authenticateApplication);
+authenticatedRouter.use(authenticateApplication);
 
 // Routers
-autheticatedRouter.use("/api/predictions", predictionsRouter);
-autheticatedRouter.use("/api/users", usersRouter);
-autheticatedRouter.use("/api/scores", scoresRouter);
-autheticatedRouter.use("/api/seasons", seasonsRouter);
+authenticatedRouter.use("/api/predictions", predictionsRouter);
+authenticatedRouter.use("/api/users", usersRouter);
+authenticatedRouter.use("/api/scores", scoresRouter);
+authenticatedRouter.use("/api/seasons", seasonsRouter);
 
-app.use(autheticatedRouter);
+app.use(authenticatedRouter);
+
+// V2
+authenticatedRouter.use("/api/v2", apiV2Router);
 
 app.get("*", (req, res) => {
   return res.status(404).json({ error: "Not found" });
