@@ -30,6 +30,11 @@ app.get("/health", (req, res) => {
 
 const authenticatedRouter = express.Router();
 
+authenticatedRouter.use((req, res, next) => {
+  console.log("authRouter", req.params);
+  next();
+});
+
 // Authentication
 authenticatedRouter.use(authenticateApplication);
 

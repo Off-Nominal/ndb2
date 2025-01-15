@@ -1,9 +1,11 @@
 import { Router } from "express";
 import seasons from "../../queries/seasons";
 import responseUtils from "../../../utils/response";
+import { getDbClient } from "../../../middleware/getDbClient";
+import { NDB2Route } from "../../utils/routerMap";
 
-export const getSeasonsRouterHandler = (router: Router) => {
-  router.get("/", async (req, res) => {
+export const getAllSeasons: NDB2Route = (router: Router) => {
+  router.get("/", getDbClient, async (req, res) => {
     seasons
       .getAll(req.dbClient)()
       .then((response) => {
@@ -12,4 +14,6 @@ export const getSeasonsRouterHandler = (router: Router) => {
         );
       });
   });
+
+  return router;
 };
