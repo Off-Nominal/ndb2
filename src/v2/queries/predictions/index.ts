@@ -2,7 +2,10 @@ import { Predictions } from "../../types/predictions";
 import { getBetsByPredictionId } from "../bets/bets.queries";
 import { getSnoozeChecksByPredictionId } from "../snooze_checks/snooze_checks.queries";
 import { getVotesByPredictionId } from "../votes/votes.queries";
-import { getPredictionsById } from "./predictions.queries";
+import {
+  getPredictionsById,
+  untriggerPredictionById,
+} from "./predictions.queries";
 
 export default {
   getById:
@@ -88,5 +91,11 @@ export default {
       };
 
       return predictionDTO;
+    },
+  untriggerById:
+    (dbClient: any) =>
+    async (prediction_id: number): Promise<Predictions.DELETE_ById_trigger> => {
+      await untriggerPredictionById.run({ prediction_id }, dbClient);
+      return null;
     },
 };

@@ -24,3 +24,10 @@ SELECT
   JOIN users u ON u.id = p.user_id
   LEFT JOIN users t ON t.id = p.triggerer_id
   WHERE p.id = :prediction_id!;
+
+  /* @name untriggerPredictionById */
+UPDATE predictions SET 
+  triggerer_id = NULL,
+  triggered_date = NULL,
+  closed_date = NULL
+WHERE id = :prediction_id!;

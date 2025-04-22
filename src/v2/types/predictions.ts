@@ -74,4 +74,6 @@ export namespace Predictions {
   };
 
   export type GET_ById = Prediction;
+
+  export type DELETE_ById_trigger = void;
 }

@@ -1,6 +1,11 @@
 import EventEmitter from "events";
-import { APIPredictions } from "../types/predicitions";
+
+// V1 Types
 import { APISeasons } from "../types/seasons";
+import { APIPredictions } from "../types/predicitions";
+
+// V2 Types
+import { Predictions } from "../v2/types/predictions";
 
 type PredictionEditChangedFields = {
   check_date?: {
@@ -18,7 +23,7 @@ interface WebhookEvent {
     prediction: APIPredictions.EnhancedPrediction
   ) => void;
   untriggered_prediction: (
-    prediction: APIPredictions.EnhancedPrediction
+    prediction: APIPredictions.EnhancedPrediction | Predictions.GET_ById
   ) => void;
   new_vote: (prediction: APIPredictions.EnhancedPrediction) => void;
   judged_prediction: (prediction: APIPredictions.EnhancedPrediction) => void;
@@ -105,10 +110,12 @@ export class WebhookManager extends EventEmitter {
 
     this.on(
       "untriggered_prediction",
-      (prediction: APIPredictions.EnhancedPrediction) => {
+      <T extends APIPredictions.EnhancedPrediction | Predictions.GET_ById>(
+        prediction: T
+      ) => {
         this.notifySubscribers(
           this.generateResponse<{
-            prediction: APIPredictions.EnhancedPrediction;
+            prediction: T;
           }>("untriggered_prediction", { prediction })
         );
       }

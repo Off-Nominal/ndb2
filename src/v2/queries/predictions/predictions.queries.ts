@@ -75,3 +75,32 @@ const getPredictionsByIdIR: any = {"usedParamSet":{"prediction_id":true},"params
 export const getPredictionsById = new PreparedQuery<IGetPredictionsByIdParams,IGetPredictionsByIdResult>(getPredictionsByIdIR);
 
 
+/** 'UntriggerPredictionById' parameters type */
+export interface IUntriggerPredictionByIdParams {
+  prediction_id: number;
+}
+
+/** 'UntriggerPredictionById' return type */
+export type IUntriggerPredictionByIdResult = void;
+
+/** 'UntriggerPredictionById' query type */
+export interface IUntriggerPredictionByIdQuery {
+  params: IUntriggerPredictionByIdParams;
+  result: IUntriggerPredictionByIdResult;
+}
+
+const untriggerPredictionByIdIR: any = {"usedParamSet":{"prediction_id":true},"params":[{"name":"prediction_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":104,"b":118}]}],"statement":"UPDATE predictions SET \n  triggerer_id = NULL,\n  triggered_date = NULL,\n  closed_date = NULL\nWHERE id = :prediction_id!"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * UPDATE predictions SET 
+ *   triggerer_id = NULL,
+ *   triggered_date = NULL,
+ *   closed_date = NULL
+ * WHERE id = :prediction_id!
+ * ```
+ */
+export const untriggerPredictionById = new PreparedQuery<IUntriggerPredictionByIdParams,IUntriggerPredictionByIdResult>(untriggerPredictionByIdIR);
+
+
