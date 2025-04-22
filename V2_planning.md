@@ -28,3 +28,10 @@ GET /seasons/:season_id - Get One season infomation
 GET /users/discord/:discord_id/ - Get One user with achievements, pennants, trophies plus meta info
 GET /users/discord/:discord_id/predictions - Get all predictions by user
 GET /users/discord/:discord_id/scores - Get Scores with query params for season
+
+# Observations
+
+- Creating enums/special types in Postgres itself becomes more useful/necessary. Column check constraints were not recognized by PGTyped, but Enums were
+- PgTyped could not compare Postgres Enums with Typescript Enums, but could with unions
+- Numeric type as string - used parseInt, could also override. Is Numeric the right type?
+-
