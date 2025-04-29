@@ -1,4 +1,4 @@
-import NDB2API from "ndb2-api-types";
+import NDB2API from "@offnominal/ndb2-api-types";
 
 export const example: NDB2API.Example = {
   id: "1",
