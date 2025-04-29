@@ -9,7 +9,15 @@
     "build": "pnpm --filter ndb2-api build",
     "clear": "pnpm --filter ndb2-api clear"
   },
+  "bugs": {
+    "url": "https://github.com/mendahu/ndb2/issues"
+  },
   "author": "Jake Robins",
   "license": "ISC",
-  "packageManager": "pnpm@10.10.0"
+  "packageManager": "pnpm@10.10.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mendahu/ndb2.git"
+  },
+  "homepage": "https://github.com/mendahu/ndb2#readme"
 }

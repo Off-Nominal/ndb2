@@ -15,18 +15,10 @@
     "db:migrate:down": "db-migrate down -m ./db/migrations",
     "db:migrate:up-prod": "db-migrate up -m ./db/migrations -e prod",
     "db:reset": "NODE_ENV=dev node ./db/reset.js",
-    "db:copy": "pg_restore --verbose --clean --no-acl --no-owner -h localhost -U ndb2_owner -d ndb2"
+    "db:copy": "pg_restore --verbose --clean --no-acl --no-owner -h localhost -U ndb2_owner -d ndb2",
+    "sql-watch": "dotenv -- pgtyped -w -c pgtyped.config.json"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/mendahu/ndb2.git"
-  },
-  "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/mendahu/ndb2/issues"
-  },
-  "homepage": "https://github.com/mendahu/ndb2#readme",
   "dependencies": {
     "@pgtyped/runtime": "^2.4.2",
     "date-fns": "^3.6.0",
@@ -38,14 +30,17 @@
   },
   "devDependencies": {
     "@offnominal/ndb2-api-types": "workspace:../types",
+    "@pgtyped/cli": "^2.4.3",
     "@types/db-migrate-base": "^0.0.14",
     "@types/db-migrate-pg": "^0.0.13",
     "@types/express": "^4.17.21",
     "@types/node": "^22.5.4",
     "@types/node-schedule": "^2.1.7",
     "@types/pg": "^8.11.8",
+    "api": "^6.1.3",
     "db-migrate": "^0.11.14",
     "db-migrate-pg": "^1.5.2",
+    "dotenv-cli": "^8.0.0",
     "morgan": "^1.10.0",
     "nodemon": "^3.1.4",
     "typescript": "^5.6.2"

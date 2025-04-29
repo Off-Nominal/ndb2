@@ -1,5 +1,5 @@
 /** Types generated for queries found in "src/v2/queries/bets/bets.sql" */
-import { PreparedQuery } from "@pgtyped/runtime";
+import { PreparedQuery } from '@pgtyped/runtime';
 
 /** 'GetBetsByPredictionId' parameters type */
 export interface IGetBetsByPredictionIdParams {
@@ -26,24 +26,12 @@ export interface IGetBetsByPredictionIdQuery {
   result: IGetBetsByPredictionIdResult;
 }
 
-const getBetsByPredictionIdIR: any = {
-  usedParamSet: { prediction_id: true },
-  params: [
-    {
-      name: "prediction_id",
-      required: true,
-      transform: { type: "scalar" },
-      locs: [{ a: 269, b: 283 }],
-    },
-  ],
-  statement:
-    "SELECT \n    b.id,\n    b.prediction_id,\n    b.user_id as better_id,\n    u.discord_id as better_discord_id,\n    b.date,\n    b.endorsed,\n    b.wager,\n    b.valid,\n    b.payout,\n    b.season_payout\n  FROM bets b\n  JOIN users u ON u.id = b.user_id\n  WHERE b.prediction_id = :prediction_id!\n  ORDER BY date ASC",
-};
+const getBetsByPredictionIdIR: any = {"usedParamSet":{"prediction_id":true},"params":[{"name":"prediction_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":269,"b":283}]}],"statement":"SELECT \n    b.id,\n    b.prediction_id,\n    b.user_id as better_id,\n    u.discord_id as better_discord_id,\n    b.date,\n    b.endorsed,\n    b.wager,\n    b.valid,\n    b.payout,\n    b.season_payout\n  FROM bets b\n  JOIN users u ON u.id = b.user_id\n  WHERE b.prediction_id = :prediction_id!\n  ORDER BY date ASC"};
 
 /**
  * Query generated from SQL:
  * ```
- * SELECT
+ * SELECT 
  *     b.id,
  *     b.prediction_id,
  *     b.user_id as better_id,
@@ -60,7 +48,6 @@ const getBetsByPredictionIdIR: any = {
  *   ORDER BY date ASC
  * ```
  */
-export const getBetsByPredictionId = new PreparedQuery<
-  IGetBetsByPredictionIdParams,
-  IGetBetsByPredictionIdResult
->(getBetsByPredictionIdIR);
+export const getBetsByPredictionId = new PreparedQuery<IGetBetsByPredictionIdParams,IGetBetsByPredictionIdResult>(getBetsByPredictionIdIR);
+
+
