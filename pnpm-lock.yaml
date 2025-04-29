@@ -23,6 +23,9 @@ importers:
         specifier: ^8.12.0
         version: 8.15.6
     devDependencies:
+      '@offnominal/ndb2-api-types':
+        specifier: workspace:../types
+        version: link:../types
       '@types/db-migrate-base':
         specifier: ^0.0.14
         version: 0.0.14
@@ -50,9 +53,6 @@ importers:
       morgan:
         specifier: ^1.10.0
         version: 1.10.0
-      ndb2-api-types:
-        specifier: workspace:../types
-        version: link:../types
       nodemon:
         specifier: ^3.1.4
         version: 3.1.10
