@@ -44,7 +44,9 @@ router.patch(
     const expiryWindow = add(new Date(req.prediction.created_date), {
       hours: GAME_MECHANICS.predictionUpdateWindow,
     });
-    const dueDate = new Date(req.prediction.due_date);
+    const dueDate = new Date(
+      req.prediction.due_date || req.prediction.check_date
+    );
     const effectiveExpiryWindow = isAfter(expiryWindow, dueDate)
       ? dueDate
       : expiryWindow;
