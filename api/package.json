@@ -1,7 +1,7 @@
 {
   "name": "ndb2-api",
   "version": "2.1.0",
-  "description": "Nostradambot 2.0 Betting Game for the Off-Nominal Discord",
+  "description": "Nostradambot 2.0 API",
   "main": "index.js",
   "scripts": {
     "clear": "rm -rf ./dist",
