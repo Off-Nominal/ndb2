@@ -14,7 +14,7 @@ importers:
         specifier: ^3.6.0
         version: 3.6.0
       express:
-        specifier: ^4.20.0
+        specifier: ^4.21.2
         version: 4.21.2
       node-schedule:
         specifier: ^2.1.1
