@@ -1,6 +1,6 @@
 {
   "name": "ndb2",
-  "version": "1.0.0",
+  "version": "2.1.0",
   "description": "Nostradambot 2.0 Betting Game for the Off-Nominal Discord",
   "main": "index.js",
   "scripts": {
@@ -9,8 +9,7 @@
     "build": "pnpm --filter ndb2-api build",
     "clear": "pnpm --filter ndb2-api clear"
   },
-  "keywords": [],
-  "author": "",
+  "author": "Jake Robins",
   "license": "ISC",
   "packageManager": "pnpm@10.10.0"
 }
