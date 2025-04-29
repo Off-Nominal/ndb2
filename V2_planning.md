@@ -34,4 +34,4 @@ GET /users/discord/:discord_id/scores - Get Scores with query params for season
 - Creating enums/special types in Postgres itself becomes more useful/necessary. Column check constraints were not recognized by PGTyped, but Enums were
 - PgTyped could not compare Postgres Enums with Typescript Enums, but could with unions
 - Numeric type as string - used parseInt, could also override. Is Numeric the right type?
--
+- Zod is cool

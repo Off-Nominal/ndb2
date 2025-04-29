@@ -1,11 +1,11 @@
-import { APIResponse } from "../types/responses";
+import { APIResponse, ErrorCode } from "../types/responses";
 
 const responseUtils = {
-  writeError: function (
-    errorCode: APIResponse["errorCode"],
+  writeError: function <T extends any>(
+    errorCode: ErrorCode,
     message: string = "NA",
-    data: any = null
-  ): APIResponse {
+    data: T = null
+  ): APIResponse<T> {
     return {
       success: false,
       errorCode,
@@ -14,7 +14,10 @@ const responseUtils = {
     };
   },
 
-  writeSuccess: function (data: any, message?: string) {
+  writeSuccess: function <T extends any>(
+    data: any,
+    message?: string
+  ): APIResponse<T> {
     return {
       success: true,
       message,

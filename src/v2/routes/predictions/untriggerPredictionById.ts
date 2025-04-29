@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { z } from "zod";
-import { validateRequest } from "zod-express-middleware";
 import { predictionIdSchema } from "../../validations";
 import { NDB2Route } from "../../utils/routerMap";
 import predictions from "../../queries/predictions";
@@ -8,6 +7,7 @@ import { getDbClient } from "../../../middleware/getDbClient";
 import responseUtils from "../../../utils/response";
 import { ErrorCode } from "../../../types/responses";
 import webhookManager from "../../../config/webhook_subscribers";
+import validate from "express-zod-safe";
 
 const RequestSchema = {
   params: z.object({
@@ -18,7 +18,7 @@ const RequestSchema = {
 export const untriggerPredictionById: NDB2Route = (router: Router) => {
   router.delete(
     "/:prediction_id/trigger",
-    [validateRequest(RequestSchema), getDbClient],
+    [validate({ params: RequestSchema }), getDbClient],
     async (req, res) => {
       const { prediction_id } = req.params;
 

@@ -9,7 +9,7 @@ export const authenticateApplication = (
   const authId = req.get("authorization");
   const validID = process.env.DISCORD_CLIENT_API_KEY;
   if (!authId || authId !== `Bearer ${validID}`) {
-    const error: APIResponse = {
+    const error: APIResponse<null> = {
       success: false,
       errorCode: ErrorCode.AUTHENTICATION_ERROR,
       message: "Unauthorized. Please ensure your API key is valid.",

@@ -1,14 +1,37 @@
 import { Router } from "express";
 import { z } from "zod";
-import { validateRequest } from "zod-express-middleware";
 import { predictionIdSchema } from "../../validations";
 import { NDB2Route } from "../../utils/routerMap";
 import predictions from "../../queries/predictions";
 import { getDbClient } from "../../../middleware/getDbClient";
 import responseUtils from "../../../utils/response";
 import { ErrorCode } from "../../../types/responses";
+import validate from "express-zod-safe";
 
-const RequestSchema = {
+const RequestSchema: Parameters<typeof validate>[0] = {
+  handler: (errors, req, res, next) => {
+    const err = errors[0];
+
+    if (err.type === "params") {
+      res
+        .status(400)
+        .json(
+          responseUtils.writeError(
+            ErrorCode.MALFORMED_QUERY_PARAMS,
+            err.errors.issues.map((issue) => issue.message).join(", ")
+          )
+        );
+    } else {
+      res
+        .status(500)
+        .json(
+          responseUtils.writeError(
+            ErrorCode.SERVER_ERROR,
+            "There was an error processing your request."
+          )
+        );
+    }
+  },
   params: z.object({
     prediction_id: predictionIdSchema,
   }),
@@ -17,7 +40,7 @@ const RequestSchema = {
 export const getPredictionByIdHandler: NDB2Route = (router: Router) => {
   router.get(
     "/:prediction_id",
-    [validateRequest(RequestSchema), getDbClient],
+    [validate(RequestSchema), getDbClient],
     async (req, res) => {
       const { prediction_id } = req.params;
 
@@ -29,17 +52,18 @@ export const getPredictionByIdHandler: NDB2Route = (router: Router) => {
               .status(404)
               .json(
                 responseUtils.writeError(
-                  ErrorCode.BAD_REQUEST,
+                  ErrorCode.NOT_FOUND,
                   `Predicton with id ${prediction_id} does not exist.`
                 )
               );
           }
 
-          const response = responseUtils.writeSuccess(
-            prediction,
-            "Prediction fetched successfully."
+          res.json(
+            responseUtils.writeSuccess(
+              prediction,
+              "Prediction fetched successfully."
+            )
           );
-          res.json(response);
         })
         .catch((err) => {
           console.error(err);
