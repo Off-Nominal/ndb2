@@ -1,9 +1,15 @@
 /** Types generated for queries found in "src/v2/queries/predictions/predictions.sql" */
-import { PreparedQuery } from '@pgtyped/runtime';
+import { PreparedQuery } from "@pgtyped/runtime";
 
-export type prediction_driver = 'date' | 'event';
+export type prediction_driver = "date" | "event";
 
-export type prediction_status = 'checking' | 'closed' | 'failed' | 'open' | 'retired' | 'successful';
+export type prediction_status =
+  | "checking"
+  | "closed"
+  | "failed"
+  | "open"
+  | "retired"
+  | "successful";
 
 /** 'GetPredictionsById' parameters type */
 export interface IGetPredictionsByIdParams {
@@ -40,7 +46,19 @@ export interface IGetPredictionsByIdQuery {
   result: IGetPredictionsByIdResult;
 }
 
-const getPredictionsByIdIR: any = {"usedParamSet":{"prediction_id":true},"params":[{"name":"prediction_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":569,"b":583}]}],"statement":"SELECT\n    p.id,\n    p.user_id as predictor_id,\n    u.discord_id as predictor_discord_id,\n    p.text,\n    p.driver,\n    p.season_id,\n    p.season_applicable,\n    p.created_date,\n    p.due_date,\n    p.check_date,\n    p.last_check_date,\n    p.closed_date,\n    p.triggered_date,\n    p.triggerer_id,\n    t.discord_id as trigerer_discord_id,\n    p.judged_date,\n    p.retired_date,\n    p.status,\n    p.endorse_ratio as endorse,\n    p.undorse_ratio as undorse\n  FROM predictions p\n  JOIN users u ON u.id = p.user_id\n  LEFT JOIN users t ON t.id = p.triggerer_id\n  WHERE p.id = :prediction_id!"};
+const getPredictionsByIdIR: any = {
+  usedParamSet: { prediction_id: true },
+  params: [
+    {
+      name: "prediction_id",
+      required: true,
+      transform: { type: "scalar" },
+      locs: [{ a: 569, b: 583 }],
+    },
+  ],
+  statement:
+    "SELECT\n    p.id,\n    p.user_id as predictor_id,\n    u.discord_id as predictor_discord_id,\n    p.text,\n    p.driver,\n    p.season_id,\n    p.season_applicable,\n    p.created_date,\n    p.due_date,\n    p.check_date,\n    p.last_check_date,\n    p.closed_date,\n    p.triggered_date,\n    p.triggerer_id,\n    t.discord_id as trigerer_discord_id,\n    p.judged_date,\n    p.retired_date,\n    p.status,\n    p.endorse_ratio as endorse,\n    p.undorse_ratio as undorse\n  FROM predictions p\n  JOIN users u ON u.id = p.user_id\n  LEFT JOIN users t ON t.id = p.triggerer_id\n  WHERE p.id = :prediction_id!",
+};
 
 /**
  * Query generated from SQL:
@@ -72,8 +90,10 @@ const getPredictionsByIdIR: any = {"usedParamSet":{"prediction_id":true},"params
  *   WHERE p.id = :prediction_id!
  * ```
  */
-export const getPredictionsById = new PreparedQuery<IGetPredictionsByIdParams,IGetPredictionsByIdResult>(getPredictionsByIdIR);
-
+export const getPredictionsById = new PreparedQuery<
+  IGetPredictionsByIdParams,
+  IGetPredictionsByIdResult
+>(getPredictionsByIdIR);
 
 /** 'UntriggerPredictionById' parameters type */
 export interface IUntriggerPredictionByIdParams {
@@ -89,18 +109,31 @@ export interface IUntriggerPredictionByIdQuery {
   result: IUntriggerPredictionByIdResult;
 }
 
-const untriggerPredictionByIdIR: any = {"usedParamSet":{"prediction_id":true},"params":[{"name":"prediction_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":104,"b":118}]}],"statement":"UPDATE predictions SET \n  triggerer_id = NULL,\n  triggered_date = NULL,\n  closed_date = NULL\nWHERE id = :prediction_id!"};
+const untriggerPredictionByIdIR: any = {
+  usedParamSet: { prediction_id: true },
+  params: [
+    {
+      name: "prediction_id",
+      required: true,
+      transform: { type: "scalar" },
+      locs: [{ a: 104, b: 118 }],
+    },
+  ],
+  statement:
+    "UPDATE predictions SET \n  triggerer_id = NULL,\n  triggered_date = NULL,\n  closed_date = NULL\nWHERE id = :prediction_id!",
+};
 
 /**
  * Query generated from SQL:
  * ```
- * UPDATE predictions SET 
+ * UPDATE predictions SET
  *   triggerer_id = NULL,
  *   triggered_date = NULL,
  *   closed_date = NULL
  * WHERE id = :prediction_id!
  * ```
  */
-export const untriggerPredictionById = new PreparedQuery<IUntriggerPredictionByIdParams,IUntriggerPredictionByIdResult>(untriggerPredictionByIdIR);
-
-
+export const untriggerPredictionById = new PreparedQuery<
+  IUntriggerPredictionByIdParams,
+  IUntriggerPredictionByIdResult
+>(untriggerPredictionByIdIR);
