@@ -1,6 +1,6 @@
 {
   "name": "@offnominal/ndb2-api-types",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "main": "index.d.ts",
   "author": "Jake Robins",
   "types": "index.d.ts",
