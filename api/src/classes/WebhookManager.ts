@@ -5,7 +5,7 @@ import { APISeasons } from "../types/seasons";
 import { APIPredictions } from "../types/predicitions";
 
 // V2 Types
-import { Predictions } from "../v2/types/predictions";
+import { V2 as API } from "@offnominal/ndb2-api-types/v2";
 
 type PredictionEditChangedFields = {
   check_date?: {
@@ -23,7 +23,9 @@ interface WebhookEvent {
     prediction: APIPredictions.EnhancedPrediction
   ) => void;
   untriggered_prediction: (
-    prediction: APIPredictions.EnhancedPrediction | Predictions.GET_ById
+    prediction:
+      | APIPredictions.EnhancedPrediction
+      | API.Endpoints.Predictions.GET_ById.Data
   ) => void;
   new_vote: (prediction: APIPredictions.EnhancedPrediction) => void;
   judged_prediction: (prediction: APIPredictions.EnhancedPrediction) => void;
@@ -110,7 +112,11 @@ export class WebhookManager extends EventEmitter {
 
     this.on(
       "untriggered_prediction",
-      <T extends APIPredictions.EnhancedPrediction | Predictions.GET_ById>(
+      <
+        T extends
+          | APIPredictions.EnhancedPrediction
+          | API.Endpoints.Predictions.GET_ById.Data
+      >(
         prediction: T
       ) => {
         this.notifySubscribers(

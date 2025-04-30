@@ -119,4 +119,16 @@ ALTER TABLE predictions
 ALTER TABLE predictions
   ALTER COLUMN driver SET DEFAULT 'date'::prediction_driver;
 
+ALTER TABLE predictions
+  ALTER COLUMN status SET DEFAULT 'open'::prediction_status;
+
+ALTER TABLE predictions
+  ALTER COLUMN status SET NOT NULL;
+
+ALTER TABLE bets
+  ALTER COLUMN wager SET DEFAULT 0;
+
+ALTER TABLE bets
+  ALTER COLUMN wager SET NOT NULL;
+
 COMMIT;

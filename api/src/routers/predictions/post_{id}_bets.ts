@@ -7,7 +7,7 @@ import predictionStatusValidator from "../../middleware/predictionStatusValidato
 import bets from "../../db/queries/bets";
 import predictions from "../../db/queries/predictions";
 import { PredictionLifeCycle } from "../../types/predicitions";
-import responseUtils from "../../utils/response";
+import responseUtils_deprecated from "../../utils/response";
 import { getDbClient } from "../../middleware/getDbClient";
 import { add, isAfter } from "date-fns";
 import GAME_MECHANICS from "../../config/game_mechanics";
@@ -40,7 +40,7 @@ router.post(
         return res
           .status(400)
           .json(
-            responseUtils.writeError(
+            responseUtils_deprecated.writeError(
               ErrorCode.BETS_NO_CHANGE,
               `You have already ${
                 bet.endorsed ? "endorsed" : "undorsed"
@@ -60,7 +60,7 @@ router.post(
         return res
           .status(403)
           .json(
-            responseUtils.writeError(
+            responseUtils_deprecated.writeError(
               ErrorCode.BETS_UNCHANGEABLE,
               `Bets cannot be changed past the allowable time window of ${GAME_MECHANICS.predictionUpdateWindow} hours since the bet was made.`
             )
@@ -79,14 +79,17 @@ router.post(
           ? "Bet successfully changed"
           : "Bet created successfully";
 
-        res.json(responseUtils.writeSuccess(ep, message));
+        res.json(responseUtils_deprecated.writeSuccess(ep, message));
       })
       .catch((err) => {
         console.error(err);
         res
           .status(500)
           .json(
-            responseUtils.writeError(ErrorCode.SERVER_ERROR, "Error Adding bet")
+            responseUtils_deprecated.writeError(
+              ErrorCode.SERVER_ERROR,
+              "Error Adding bet"
+            )
           );
       });
   }

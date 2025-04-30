@@ -1,1 +1,1 @@
-export { NDB2API as default } from "./routes";
+export * as V2 from "./v2/";

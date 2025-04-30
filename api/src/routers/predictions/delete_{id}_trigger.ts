@@ -6,7 +6,7 @@ import paramValidator from "../../middleware/paramValidator";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
 import predictions from "../../db/queries/predictions";
 import { PredictionLifeCycle } from "../../types/predicitions";
-import responseUtils from "../../utils/response";
+import responseUtils_deprecated from "../../utils/response";
 import { ErrorCode } from "../../types/responses";
 
 const router = express.Router();
@@ -31,7 +31,7 @@ router.delete(
         webhookManager.emit("untriggered_prediction", prediction);
 
         return res.json(
-          responseUtils.writeSuccess(
+          responseUtils_deprecated.writeSuccess(
             prediction,
             "Prediction untriggered successfully."
           )
@@ -42,7 +42,7 @@ router.delete(
         return res
           .status(500)
           .json(
-            responseUtils.writeError(
+            responseUtils_deprecated.writeError(
               ErrorCode.SERVER_ERROR,
               "There was an error untriggering this prediction."
             )

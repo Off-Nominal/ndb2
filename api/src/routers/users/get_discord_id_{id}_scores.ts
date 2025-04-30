@@ -3,7 +3,7 @@ import { getDbClient } from "../../middleware/getDbClient";
 import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
 import paramValidator from "../../middleware/paramValidator";
 import users from "../../db/queries/users";
-import responseUtils from "../../utils/response";
+import responseUtils_deprecated from "../../utils/response";
 const router = express.Router();
 
 router.get(
@@ -18,7 +18,10 @@ router.get(
       .getUserScoreById(req.dbClient)(req.user_id)
       .then((response) => {
         res.json(
-          responseUtils.writeSuccess(response, "Score fetched successfully.")
+          responseUtils_deprecated.writeSuccess(
+            response,
+            "Score fetched successfully."
+          )
         );
       });
   }

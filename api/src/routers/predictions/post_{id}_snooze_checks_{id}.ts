@@ -6,7 +6,7 @@ import { getDbClient } from "../../middleware/getDbClient";
 import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
 import { getPrediction } from "../../middleware/getPrediction";
 import { isAllowableSnooze } from "../../types/snoozes";
-import responseUtils from "../../utils/response";
+import responseUtils_deprecated from "../../utils/response";
 import { ErrorCode } from "../../types/responses";
 import snoozes from "../../db/queries/snoozes";
 import webhookManager from "../../config/webhook_subscribers";
@@ -38,7 +38,7 @@ router.post(
       return res
         .status(400)
         .json(
-          responseUtils.writeError(
+          responseUtils_deprecated.writeError(
             ErrorCode.BAD_REQUEST,
             "Invalid snooze value."
           )
@@ -61,7 +61,7 @@ router.post(
       return res
         .status(400)
         .json(
-          responseUtils.writeError(
+          responseUtils_deprecated.writeError(
             ErrorCode.BAD_REQUEST,
             "Snooze Check is not associated with this Prediction."
           )
@@ -72,7 +72,7 @@ router.post(
       return res
         .status(400)
         .json(
-          responseUtils.writeError(
+          responseUtils_deprecated.writeError(
             ErrorCode.BAD_REQUEST,
             "Snooze Check is not open anymore."
           )
@@ -91,7 +91,7 @@ router.post(
         }
 
         return res.json(
-          responseUtils.writeSuccess(
+          responseUtils_deprecated.writeSuccess(
             prediction,
             "Snooze vote updated successfully"
           )
@@ -102,7 +102,7 @@ router.post(
         return res
           .status(500)
           .json(
-            responseUtils.writeError(
+            responseUtils_deprecated.writeError(
               ErrorCode.SERVER_ERROR,
               "There was an error adding this snooze vote"
             )

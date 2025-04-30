@@ -4,7 +4,7 @@ import { predictionIdSchema } from "../../validations";
 import { NDB2Route } from "../../utils/routerMap";
 import predictions from "../../queries/predictions";
 import { getDbClient } from "../../../middleware/getDbClient";
-import responseUtils from "../../../utils/response";
+import responseUtils_deprecated from "../../../utils/response";
 import { ErrorCode } from "../../../types/responses";
 import webhookManager from "../../../config/webhook_subscribers";
 import validate from "express-zod-safe";
@@ -18,7 +18,8 @@ const RequestSchema = {
 export const untriggerPredictionById: NDB2Route = (router: Router) => {
   router.delete(
     "/:prediction_id/trigger",
-    [validate({ params: RequestSchema }), getDbClient],
+    validate(RequestSchema),
+    getDbClient,
     async (req, res) => {
       const { prediction_id } = req.params;
 
@@ -29,7 +30,7 @@ export const untriggerPredictionById: NDB2Route = (router: Router) => {
           // Notify Subscribers
           webhookManager.emit("untriggered_prediction", prediction);
 
-          const response = responseUtils.writeSuccess(
+          const response = responseUtils_deprecated.writeSuccess(
             prediction,
             "Prediction untriggered successfully."
           );
@@ -40,9 +41,10 @@ export const untriggerPredictionById: NDB2Route = (router: Router) => {
           return res
             .status(500)
             .json(
-              responseUtils.writeError(
+              responseUtils_deprecated.writeError(
                 ErrorCode.SERVER_ERROR,
-                "There was an error untriggering this prediction."
+                "There was an error untriggering this prediction.",
+                null
               )
             );
         });

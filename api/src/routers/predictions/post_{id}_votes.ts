@@ -7,7 +7,7 @@ import predictionStatusValidator from "../../middleware/predictionStatusValidato
 import predictions from "../../db/queries/predictions";
 import votes from "../../db/queries/votes/index.ts";
 import { PredictionLifeCycle } from "../../types/predicitions";
-import responseUtils from "../../utils/response";
+import responseUtils_deprecated from "../../utils/response";
 import { getDbClient } from "../../middleware/getDbClient";
 import { ErrorCode } from "../../types/responses";
 const router = express.Router();
@@ -35,7 +35,7 @@ router.post(
       return res
         .status(200)
         .json(
-          responseUtils.writeSuccess(
+          responseUtils_deprecated.writeSuccess(
             req.prediction,
             `You already voted ${
               existingVote.vote === true ? "'yes'" : "'no'"
@@ -57,14 +57,16 @@ router.post(
             }.`
           : `${vote === true ? "'Yes'" : "'No'"} vote added successfully.`;
 
-        return res.json(responseUtils.writeSuccess(prediction, message));
+        return res.json(
+          responseUtils_deprecated.writeSuccess(prediction, message)
+        );
       })
       .catch((err) => {
         console.error(err);
         return res
           .status(500)
           .json(
-            responseUtils.writeError(
+            responseUtils_deprecated.writeError(
               ErrorCode.SERVER_ERROR,
               "There was an error updating this vote."
             )

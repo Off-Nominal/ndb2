@@ -4,9 +4,9 @@ import { predictionIdSchema } from "../../validations";
 import { NDB2Route } from "../../utils/routerMap";
 import predictions from "../../queries/predictions";
 import { getDbClient } from "../../../middleware/getDbClient";
-import responseUtils from "../../../utils/response";
-import { ErrorCode } from "../../../types/responses";
 import validate from "express-zod-safe";
+import responseUtils from "../../utils/response";
+import API from "@offnominal/ndb2-api-types/v2";
 
 const RequestSchema: Parameters<typeof validate>[0] = {
   handler: (errors, req, res, next) => {
@@ -17,7 +17,7 @@ const RequestSchema: Parameters<typeof validate>[0] = {
         .status(400)
         .json(
           responseUtils.writeError(
-            ErrorCode.MALFORMED_QUERY_PARAMS,
+            API.Errors.MALFORMED_QUERY_PARAMS,
             err.errors.issues.map((issue) => issue.message).join(", ")
           )
         );
@@ -26,7 +26,7 @@ const RequestSchema: Parameters<typeof validate>[0] = {
         .status(500)
         .json(
           responseUtils.writeError(
-            ErrorCode.SERVER_ERROR,
+            API.Errors.SERVER_ERROR,
             "There was an error processing your request."
           )
         );
@@ -40,7 +40,8 @@ const RequestSchema: Parameters<typeof validate>[0] = {
 export const getPredictionByIdHandler: NDB2Route = (router: Router) => {
   router.get(
     "/:prediction_id",
-    [validate(RequestSchema), getDbClient],
+    validate(RequestSchema),
+    getDbClient,
     async (req, res) => {
       const { prediction_id } = req.params;
 
@@ -52,7 +53,7 @@ export const getPredictionByIdHandler: NDB2Route = (router: Router) => {
               .status(404)
               .json(
                 responseUtils.writeError(
-                  ErrorCode.NOT_FOUND,
+                  API.Errors.NOT_FOUND,
                   `Predicton with id ${prediction_id} does not exist.`
                 )
               );
@@ -71,7 +72,7 @@ export const getPredictionByIdHandler: NDB2Route = (router: Router) => {
             .status(500)
             .json(
               responseUtils.writeError(
-                ErrorCode.SERVER_ERROR,
+                API.Errors.SERVER_ERROR,
                 "Unable to fetch prediction."
               )
             );

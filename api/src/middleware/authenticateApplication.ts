@@ -1,11 +1,7 @@
-import { NextFunction, Request, Response } from "express";
 import { APIResponse, ErrorCode } from "../types/responses";
+import { WeakRequestHandler } from "express-zod-safe";
 
-export const authenticateApplication = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const authenticateApplication: WeakRequestHandler = (req, res, next) => {
   const authId = req.get("authorization");
   const validID = process.env.DISCORD_CLIENT_API_KEY;
   if (!authId || authId !== `Bearer ${validID}`) {

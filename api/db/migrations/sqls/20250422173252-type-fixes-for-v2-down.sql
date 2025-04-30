@@ -2,6 +2,18 @@
 
 BEGIN;
 
+ALTER TABLE bets
+  ALTER COLUMN wager DROP NOT NULL;
+
+ALTER TABLE bets
+  ALTER COLUMN wager DROP DEFAULT;
+
+ALTER TABLE predictions
+  ALTER COLUMN status DROP NOT NULL;
+
+ALTER TABLE predictions
+  ALTER COLUMN status DROP DEFAULT;
+
 DROP TRIGGER prediction_status_update_from_prediction ON predictions;
 
 DROP TRIGGER  bet_payout_update_from_season on seasons;

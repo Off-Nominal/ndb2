@@ -17,7 +17,7 @@ export interface IGetBetsByPredictionIdResult {
   prediction_id: number;
   season_payout: number | null;
   valid: boolean;
-  wager: number | null;
+  wager: number;
 }
 
 /** 'GetBetsByPredictionId' query type */

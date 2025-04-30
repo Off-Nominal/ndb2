@@ -4,7 +4,7 @@ import paramValidator from "../../middleware/paramValidator";
 import predictions from "../../db/queries/predictions";
 import { SortByOption } from "../../db/queries/predictions_search";
 import { PredictionLifeCycle } from "../../types/predicitions";
-import responseUtils from "../../utils/response";
+import responseUtils_deprecated from "../../utils/response";
 import users from "../../db/queries/users";
 import { ErrorCode } from "../../types/responses";
 const router = express.Router();
@@ -77,7 +77,7 @@ router.get(
       return res
         .status(400)
         .json(
-          responseUtils.writeError(
+          responseUtils_deprecated.writeError(
             ErrorCode.MALFORMED_QUERY_PARAMS,
             `Please provide at least one standard query parameter in your search.`
           )
@@ -88,7 +88,7 @@ router.get(
       return res
         .status(400)
         .json(
-          responseUtils.writeError(
+          responseUtils_deprecated.writeError(
             ErrorCode.MALFORMED_QUERY_PARAMS,
             `Filtering by the same "creator" and "unbetter" is not allowed. These values must be different or omitted.`
           )
@@ -108,7 +108,7 @@ router.get(
         return res
           .status(400)
           .json(
-            responseUtils.writeError(
+            responseUtils_deprecated.writeError(
               ErrorCode.MALFORMED_QUERY_PARAMS,
               `Status must be any of the following: ${Object.values(
                 PredictionLifeCycle
@@ -131,7 +131,7 @@ router.get(
         return res
           .status(400)
           .json(
-            responseUtils.writeError(
+            responseUtils_deprecated.writeError(
               ErrorCode.MALFORMED_QUERY_PARAMS,
               `Sort option must be any of the following: ${Object.values(
                 SortByOption
@@ -159,7 +159,7 @@ router.get(
           return res
             .status(404)
             .json(
-              responseUtils.writeError(
+              responseUtils_deprecated.writeError(
                 ErrorCode.BAD_REQUEST,
                 "User does not exist"
               )
@@ -168,7 +168,7 @@ router.get(
         return res
           .status(500)
           .json(
-            responseUtils.writeError(
+            responseUtils_deprecated.writeError(
               ErrorCode.BAD_REQUEST,
               "There was an error looking for the user in your query."
             )
@@ -190,7 +190,7 @@ router.get(
           return res
             .status(404)
             .json(
-              responseUtils.writeError(
+              responseUtils_deprecated.writeError(
                 ErrorCode.BAD_REQUEST,
                 "User does not exist"
               )
@@ -199,7 +199,7 @@ router.get(
         return res
           .status(500)
           .json(
-            responseUtils.writeError(
+            responseUtils_deprecated.writeError(
               ErrorCode.BAD_REQUEST,
               "There was an error looking for the user in your query."
             )
@@ -220,7 +220,7 @@ router.get(
       })
       .then((predictions) => {
         res.json(
-          responseUtils.writeSuccess(
+          responseUtils_deprecated.writeSuccess(
             predictions,
             "Predictions fetched successfully."
           )

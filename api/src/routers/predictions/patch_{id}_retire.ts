@@ -7,7 +7,7 @@ import { getPrediction } from "../../middleware/getPrediction";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
 import predictions from "../../db/queries/predictions";
 import { PredictionLifeCycle } from "../../types/predicitions";
-import responseUtils from "../../utils/response";
+import responseUtils_deprecated from "../../utils/response";
 import { getDbClient } from "../../middleware/getDbClient";
 import { ErrorCode } from "../../types/responses";
 const router = express.Router();
@@ -30,7 +30,7 @@ router.patch(
       return res
         .status(403)
         .json(
-          responseUtils.writeError(
+          responseUtils_deprecated.writeError(
             ErrorCode.AUTHENTICATION_ERROR,
             "This prediction does not belong to you."
           )
@@ -55,7 +55,7 @@ router.patch(
       return res
         .status(403)
         .json(
-          responseUtils.writeError(
+          responseUtils_deprecated.writeError(
             ErrorCode.BAD_REQUEST,
             "This prediction is past the retirement window. It is locked and cannot be retired."
           )
@@ -72,7 +72,7 @@ router.patch(
         webhookManager.emit("retired_prediction", prediction);
 
         return res.json(
-          responseUtils.writeSuccess(
+          responseUtils_deprecated.writeSuccess(
             prediction,
             "Prediction retired successfully."
           )
@@ -83,7 +83,7 @@ router.patch(
         return res
           .status(500)
           .json(
-            responseUtils.writeError(
+            responseUtils_deprecated.writeError(
               ErrorCode.SERVER_ERROR,
               "There was an error retiring this prediction."
             )

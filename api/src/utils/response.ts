@@ -1,10 +1,10 @@
 import { APIResponse, ErrorCode } from "../types/responses";
 
-const responseUtils = {
-  writeError: function <T extends any>(
+const responseUtils_deprecated = {
+  writeError: function <T extends unknown>(
     errorCode: ErrorCode,
     message: string = "NA",
-    data: T = null
+    data: T
   ): APIResponse<T> {
     return {
       success: false,
@@ -20,10 +20,10 @@ const responseUtils = {
   ): APIResponse<T> {
     return {
       success: true,
-      message,
+      message: message || null,
       data,
     };
   },
 };
 
-export default responseUtils;
+export default responseUtils_deprecated;

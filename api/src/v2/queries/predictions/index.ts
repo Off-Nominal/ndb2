@@ -1,4 +1,3 @@
-import { Predictions } from "../../types/predictions";
 import { getBetsByPredictionId } from "../bets/bets.queries";
 import { getSnoozeChecksByPredictionId } from "../snooze_checks/snooze_checks.queries";
 import { getVotesByPredictionId } from "../votes/votes.queries";
@@ -6,11 +5,14 @@ import {
   getPredictionsById,
   untriggerPredictionById,
 } from "./predictions.queries";
+import type API from "@offnominal/ndb2-api-types/v2";
 
 export default {
   getById:
     (dbClient: any) =>
-    async (prediction_id: number): Promise<Predictions.GET_ById> => {
+    async (
+      prediction_id: number
+    ): Promise<API.Endpoints.Predictions.GET_ById.Data | undefined> => {
       // Queries
       const [predictionResult, betsResult, votesResult, checksResult] =
         await Promise.all([
@@ -26,7 +28,15 @@ export default {
 
       const prediction = predictionResult[0];
 
-      const predictionDTO: Predictions.GET_ById = {
+      const triggerer =
+        prediction.triggerer_id === null
+          ? null
+          : {
+              id: prediction.triggerer_id,
+              discord_id: prediction.trigerer_discord_id,
+            };
+
+      const predictionDTO: API.Endpoints.Predictions.GET_ById.Data = {
         id: prediction.id,
         predictor: {
           id: prediction.predictor_id,
@@ -42,10 +52,7 @@ export default {
         last_check_date: prediction.last_check_date,
         closed_date: prediction.closed_date,
         triggered_date: prediction.triggered_date,
-        triggerer: {
-          id: prediction.triggerer_id,
-          discord_id: prediction.trigerer_discord_id,
-        },
+        triggerer,
         judged_date: prediction.judged_date,
         retired_date: prediction.retired_date,
         status: prediction.status,
@@ -94,7 +101,9 @@ export default {
     },
   untriggerById:
     (dbClient: any) =>
-    async (prediction_id: number): Promise<Predictions.DELETE_ById_trigger> => {
+    async (
+      prediction_id: number
+    ): Promise<API.Endpoints.Predictions.DELETE_ById_trigger.Data> => {
       await untriggerPredictionById.run({ prediction_id }, dbClient);
       return null;
     },

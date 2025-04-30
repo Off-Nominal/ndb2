@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import webhookManager from "../../config/webhook_subscribers";
 import bets from "../../db/queries/bets";
 import predictions from "../../db/queries/predictions";
-import responseUtils from "../../utils/response";
+import responseUtils_deprecated from "../../utils/response";
 import paramValidator from "../../middleware/paramValidator";
 import dateValidator from "../../middleware/dateValidator";
 import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
@@ -30,7 +30,7 @@ router.post(
       return res
         .status(400)
         .json(
-          responseUtils.writeError(
+          responseUtils_deprecated.writeError(
             ErrorCode.MALFORMED_BODY_DATA,
             "Due date and check date cannot be set simultaneously."
           )
@@ -41,7 +41,7 @@ router.post(
       return res
         .status(400)
         .json(
-          responseUtils.writeError(
+          responseUtils_deprecated.writeError(
             ErrorCode.MALFORMED_BODY_DATA,
             "Must have either a due date or a check date."
           )
@@ -73,7 +73,10 @@ router.post(
       .then((b) => predictions.getPredictionById(req.dbClient)(b.prediction_id))
       .then((ep) => {
         res.json(
-          responseUtils.writeSuccess(ep, "Prediction created successfully.")
+          responseUtils_deprecated.writeSuccess(
+            ep,
+            "Prediction created successfully."
+          )
         );
         // Notify subscribers
         webhookManager.emit("new_prediction", ep);
@@ -83,7 +86,7 @@ router.post(
         res
           .status(500)
           .json(
-            responseUtils.writeError(
+            responseUtils_deprecated.writeError(
               ErrorCode.SERVER_ERROR,
               "Error Adding prediction"
             )

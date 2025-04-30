@@ -26,7 +26,7 @@ export interface IGetPredictionsByIdResult {
   retired_date: Date | null;
   season_applicable: boolean;
   season_id: number | null;
-  status: prediction_status | null;
+  status: prediction_status;
   text: string;
   trigerer_discord_id: string;
   triggered_date: Date | null;

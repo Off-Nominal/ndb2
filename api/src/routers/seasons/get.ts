@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import { getDbClient } from "../../middleware/getDbClient";
 import seasons from "../../db/queries/seasons";
-import responseUtils from "../../utils/response";
+import responseUtils_deprecated from "../../utils/response";
 
 const router = express.Router();
 
@@ -10,7 +10,10 @@ router.get("/", getDbClient, async (req: Request, res: Response) => {
     .getAll(req.dbClient)()
     .then((response) => {
       res.json(
-        responseUtils.writeSuccess(response, "Seasons fetched successfully.")
+        responseUtils_deprecated.writeSuccess(
+          response,
+          "Seasons fetched successfully."
+        )
       );
     });
 });

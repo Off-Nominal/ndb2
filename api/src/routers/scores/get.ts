@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import { getDbClient } from "../../middleware/getDbClient";
 import scores from "../../db/queries/scores";
-import responseUtils from "../../utils/response";
+import responseUtils_deprecated from "../../utils/response";
 import { ErrorCode } from "../../types/responses";
 const router = express.Router();
 
@@ -26,7 +26,7 @@ router.get("/", getDbClient, async (req: Request, res: Response) => {
     return res
       .status(400)
       .json(
-        responseUtils.writeError(
+        responseUtils_deprecated.writeError(
           ErrorCode.MALFORMED_BODY_DATA,
           `View must be any of the following: ${Object.values(ScoreView).join(
             ", "
@@ -39,7 +39,7 @@ router.get("/", getDbClient, async (req: Request, res: Response) => {
     .getLeaderboard(req.dbClient)(view)
     .then((response) => {
       res.json(
-        responseUtils.writeSuccess(
+        responseUtils_deprecated.writeSuccess(
           response,
           "Leaderboard fetched successfully."
         )
