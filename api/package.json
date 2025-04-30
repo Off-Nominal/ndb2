@@ -26,6 +26,7 @@
     "express-zod-safe": "^1.5.0",
     "node-schedule": "^2.1.1",
     "pg": "^8.12.0",
+    "typed-emitter": "^2.1.0",
     "zod": "^3.24.3"
   },
   "devDependencies": {
@@ -37,7 +38,6 @@
     "@types/node": "^22.5.4",
     "@types/node-schedule": "^2.1.7",
     "@types/pg": "^8.11.8",
-    "api": "^6.1.3",
     "db-migrate": "^0.11.14",
     "db-migrate-pg": "^1.5.2",
     "dotenv-cli": "^8.0.0",

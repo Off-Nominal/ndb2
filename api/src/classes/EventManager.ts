@@ -1,4 +1,3 @@
-import { TypedEventEmitter } from "../libs/TypedEventEmitter";
 import { APIPredictions } from "../types/predicitions";
 
 // WIP
