@@ -10,5 +10,5 @@ export namespace GET_ById {
 // DELETE /predictions/{prediction_id}/trigger
 export namespace DELETE_ById_trigger {
   export type Data = null;
-  export type Response = _APIResponse<void>;
+  export type Response = APIResponse<null>;
 }
