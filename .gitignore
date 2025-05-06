@@ -5,3 +5,5 @@ dist
 db/dumps
 
 manual_queries.sql
+
+.DS_Store
