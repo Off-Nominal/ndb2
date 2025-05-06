@@ -1,4 +1,4 @@
-import API from "@offnominal/ndb2-api-types";
+import API from "@offnominal/ndb2-api-types/v2";
 
 export default {
   writeError: function (
