@@ -6,11 +6,17 @@
   "main": "./src/index.d.ts",
   "exports": {
     ".": {
-      "import": "./src/index.d.ts",
-      "require": "./src/index.d.ts",
-      "default": "./src/index.d.ts"
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./v2": {
+      "types": "./src/v2/index.d.ts",
+      "default": "./src/v2/index.js"
     }
   },
+  "files": [
+    "src/index.d.ts"
+  ],
   "license": "ISC",
   "description": "Typescript Types for NDB2 API",
   "homepage": "https://github.com/mendahu/ndb2#readme"

@@ -1,3 +1,3 @@
-import * as V2 from "./v2";
+import * as v2 from "./v2";
 
-export default V2;
+export default v2;

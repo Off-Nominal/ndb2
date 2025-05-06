@@ -6,7 +6,7 @@ import predictions from "../../queries/predictions";
 import { getDbClient } from "../../../middleware/getDbClient";
 import validate from "express-zod-safe";
 import responseUtils from "../../utils/response";
-import API from "@offnominal/ndb2-api-types";
+import API from "@offnominal/ndb2-api-types/v2";
 
 const RequestSchema: Parameters<typeof validate>[0] = {
   handler: (errors, req, res, next) => {
