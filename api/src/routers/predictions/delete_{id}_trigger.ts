@@ -21,12 +21,30 @@ router.delete(
     predictionStatusValidator([PredictionLifeCycle.CLOSED]),
   ],
   async (req: Request, res: Response) => {
+    if (!req.prediction || !req.dbClient) {
+      return res
+        .status(500)
+        .json(
+          responseUtils_deprecated.writeError(
+            ErrorCode.SERVER_ERROR,
+            "Something went wrong. Please try again.",
+            null
+          )
+        );
+    }
+
     return predictions
       .undoClosePredictionById(req.dbClient)(req.prediction.id)
-      .then(() =>
-        predictions.getPredictionById(req.dbClient)(req.prediction.id)
-      )
+      .then(() => {
+        if (!req.prediction || !req.dbClient) {
+          throw new Error("Prediction or DB client is not defined");
+        }
+        return predictions.getPredictionById(req.dbClient)(req.prediction.id);
+      })
       .then((prediction) => {
+        if (!prediction) {
+          throw new Error("Prediction not found");
+        }
         // Notify Subscribers
         webhookManager.emit("untriggered_prediction", prediction);
 
@@ -44,7 +62,8 @@ router.delete(
           .json(
             responseUtils_deprecated.writeError(
               ErrorCode.SERVER_ERROR,
-              "There was an error untriggering this prediction."
+              "There was an error untriggering this prediction.",
+              null
             )
           );
       });

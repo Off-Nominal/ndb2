@@ -24,6 +24,18 @@ router.post(
     getUserByDiscordId,
   ],
   async (req: Request, res: Response) => {
+    if (!req.user_id || !req.dbClient) {
+      return res
+        .status(500)
+        .json(
+          responseUtils_deprecated.writeError(
+            ErrorCode.SERVER_ERROR,
+            "Something went wrong. Please try again.",
+            null
+          )
+        );
+    }
+
     const { text, due_date, check_date } = req.body;
 
     if (due_date !== undefined && check_date !== undefined) {
@@ -32,7 +44,8 @@ router.post(
         .json(
           responseUtils_deprecated.writeError(
             ErrorCode.MALFORMED_BODY_DATA,
-            "Due date and check date cannot be set simultaneously."
+            "Due date and check date cannot be set simultaneously.",
+            null
           )
         );
     }
@@ -43,7 +56,8 @@ router.post(
         .json(
           responseUtils_deprecated.writeError(
             ErrorCode.MALFORMED_BODY_DATA,
-            "Must have either a due date or a check date."
+            "Must have either a due date or a check date.",
+            null
           )
         );
     }
@@ -67,11 +81,24 @@ router.post(
         created_date,
         driver
       )
-      .then((p) =>
-        bets.add(req.dbClient)(req.user_id, p.id, true, created_date)
-      )
-      .then((b) => predictions.getPredictionById(req.dbClient)(b.prediction_id))
+      .then((p) => {
+        if (!req.dbClient || !req.user_id) {
+          throw new Error("DB client is not defined");
+        }
+
+        return bets.add(req.dbClient)(req.user_id, p.id, true, created_date);
+      })
+      .then((b) => {
+        if (!req.dbClient || !req.user_id) {
+          throw new Error("DB client is not defined");
+        }
+        return predictions.getPredictionById(req.dbClient)(b.prediction_id);
+      })
       .then((ep) => {
+        if (!ep) {
+          throw new Error("Prediction not found");
+        }
+
         res.json(
           responseUtils_deprecated.writeSuccess(
             ep,
@@ -88,7 +115,8 @@ router.post(
           .json(
             responseUtils_deprecated.writeError(
               ErrorCode.SERVER_ERROR,
-              "Error Adding prediction"
+              "Error Adding prediction",
+              null
             )
           );
       });

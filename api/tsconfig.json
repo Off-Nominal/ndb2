@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es2015",
-    "module": "commonjs",
+    "module": "Node16",
     "sourceMap": true,
     "outDir": "dist",
     "lib": ["es2021.string"],

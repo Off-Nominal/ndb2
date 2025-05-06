@@ -33,6 +33,18 @@ router.post(
     const { closed_date } = req.body;
     const closedDate = new Date(closed_date);
 
+    if (!req.prediction || !req.dbClient || !req.user_id) {
+      return res
+        .status(500)
+        .json(
+          responseUtils_deprecated.writeError(
+            ErrorCode.SERVER_ERROR,
+            "Something went wrong. Please try again.",
+            null
+          )
+        );
+    }
+
     if (closed_date) {
       // Verify closed date is after prediction's creation date
       if (isBefore(closedDate, new Date(req.prediction.created_date))) {
@@ -41,7 +53,8 @@ router.post(
           .json(
             responseUtils_deprecated.writeError(
               ErrorCode.BAD_REQUEST,
-              "Closed date cannot be before prediction's created date"
+              "Closed date cannot be before prediction's created date",
+              null
             )
           );
       }
@@ -53,10 +66,19 @@ router.post(
         req.user_id,
         closed_date ? closedDate : new Date()
       )
-      .then(() =>
-        predictions.getPredictionById(req.dbClient)(req.prediction.id)
-      )
+      .then(() => {
+        if (!req.prediction) {
+          throw new Error("Prediction not found");
+        }
+        if (!req.dbClient) {
+          throw new Error("DB client not found");
+        }
+        return predictions.getPredictionById(req.dbClient)(req.prediction.id);
+      })
       .then((prediction) => {
+        if (!prediction || !req.prediction) {
+          throw new Error("Prediction not found");
+        }
         // Notify Subscribers
         if (req.prediction.status === PredictionLifeCycle.CHECKING) {
           webhookManager.emit("triggered_snooze_check", prediction);
@@ -78,7 +100,8 @@ router.post(
           .json(
             responseUtils_deprecated.writeError(
               ErrorCode.SERVER_ERROR,
-              "There was an error triggering this prediction."
+              "There was an error triggering this prediction.",
+              null
             )
           );
       });

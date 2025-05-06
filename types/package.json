@@ -1,9 +1,16 @@
 {
   "name": "@offnominal/ndb2-api-types",
   "version": "0.2.0",
-  "main": "index.d.ts",
   "author": "Jake Robins",
-  "types": "index.d.ts",
+  "types": "./src/index.d.ts",
+  "main": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.d.ts",
+      "require": "./src/index.d.ts",
+      "default": "./src/index.d.ts"
+    }
+  },
   "license": "ISC",
   "description": "Typescript Types for NDB2 API",
   "homepage": "https://github.com/mendahu/ndb2#readme"

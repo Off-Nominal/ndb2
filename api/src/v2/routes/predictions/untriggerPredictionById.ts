@@ -6,8 +6,8 @@ import predictions from "../../queries/predictions";
 import { getDbClient } from "../../../middleware/getDbClient";
 import responseUtils_deprecated from "../../../utils/response";
 import { ErrorCode } from "../../../types/responses";
-import webhookManager from "../../../config/webhook_subscribers";
 import validate from "express-zod-safe";
+import { EventManager } from "../../../classes/EventManager";
 
 const RequestSchema = {
   params: z.object({
@@ -27,8 +27,20 @@ export const untriggerPredictionById: NDB2Route = (router: Router) => {
         .untriggerById(req.dbClient)(prediction_id)
         .then(() => predictions.getById(req.dbClient)(prediction_id))
         .then((prediction) => {
-          // Notify Subscribers
-          webhookManager.emit("untriggered_prediction", prediction);
+          if (!prediction) {
+            return res
+              .status(404)
+              .json(
+                responseUtils_deprecated.writeError(
+                  ErrorCode.NOT_FOUND,
+                  `Prediction with id ${prediction_id} does not exist.`,
+                  null
+                )
+              );
+          }
+
+          // Log Event
+          EventManager.emit("untriggered_prediction", prediction);
 
           const response = responseUtils_deprecated.writeSuccess(
             prediction,

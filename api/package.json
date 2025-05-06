@@ -22,7 +22,7 @@
   "dependencies": {
     "@pgtyped/runtime": "^2.4.2",
     "date-fns": "^3.6.0",
-    "express": "^4.20.0",
+    "express": "^4.21.2",
     "express-zod-safe": "^1.5.0",
     "node-schedule": "^2.1.1",
     "pg": "^8.12.0",
@@ -30,7 +30,7 @@
     "zod": "^3.24.3"
   },
   "devDependencies": {
-    "@offnominal/ndb2-api-types": "workspace:../types",
+    "@offnominal/ndb2-api-types": "workspace:*",
     "@pgtyped/cli": "^2.4.3",
     "@types/db-migrate-base": "^0.0.14",
     "@types/db-migrate-pg": "^0.0.13",

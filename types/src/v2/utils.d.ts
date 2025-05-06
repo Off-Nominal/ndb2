@@ -1,4 +1,4 @@
-import { NDB2APIErrorCode } from "./errors";
+import { Errors } from ".";
 
 export type SuccessResponse<T> = {
   success: true;
@@ -8,7 +8,7 @@ export type SuccessResponse<T> = {
 
 export type ErrorResponse = {
   success: false;
-  errorCode: NDB2APIErrorCode;
+  errorCode: Errors;
   message: string | null;
   data: null;
 };

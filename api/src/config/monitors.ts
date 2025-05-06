@@ -34,6 +34,9 @@ export const monitors: MonitorConfig[] = [
               )
               .then(() => predictions.getPredictionById(client)(pred.id))
               .then((prediction) => {
+                if (!prediction) {
+                  return;
+                }
                 webhookManager.emit("triggered_prediction", prediction);
               });
           });
@@ -58,6 +61,9 @@ export const monitors: MonitorConfig[] = [
               .addCheck(client)(pred.id)
               .then(() => predictions.getPredictionById(client)(pred.id))
               .then((prediction) => {
+                if (!prediction) {
+                  return;
+                }
                 webhookManager.emit("new_snooze_check", prediction);
               });
           });
@@ -90,6 +96,9 @@ export const monitors: MonitorConfig[] = [
               })
               .then(() => predictions.getPredictionById(client)(check.id))
               .then((prediction) => {
+                if (!prediction) {
+                  return;
+                }
                 webhookManager.emit("snoozed_prediction", prediction);
               });
           });
@@ -114,6 +123,9 @@ export const monitors: MonitorConfig[] = [
               .judgePredictionById(client)(pred.id)
               .then(() => predictions.getPredictionById(client)(pred.id))
               .then((prediction) => {
+                if (!prediction) {
+                  return;
+                }
                 webhookManager.emit("judged_prediction", prediction);
               });
           });

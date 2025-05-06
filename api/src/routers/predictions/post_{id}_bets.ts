@@ -27,6 +27,17 @@ router.post(
     predictionStatusValidator(PredictionLifeCycle.OPEN),
   ],
   async (req: Request, res: Response) => {
+    if (!req.prediction || !req.dbClient || !req.user_id) {
+      return res
+        .status(500)
+        .json(
+          responseUtils_deprecated.writeError(
+            ErrorCode.SERVER_ERROR,
+            "Something went wrong. Please try again.",
+            null
+          )
+        );
+    }
     const { discord_id, endorsed } = req.body;
 
     // Validate if bet has already been made by the user
@@ -62,7 +73,8 @@ router.post(
           .json(
             responseUtils_deprecated.writeError(
               ErrorCode.BETS_UNCHANGEABLE,
-              `Bets cannot be changed past the allowable time window of ${GAME_MECHANICS.predictionUpdateWindow} hours since the bet was made.`
+              `Bets cannot be changed past the allowable time window of ${GAME_MECHANICS.predictionUpdateWindow} hours since the bet was made.`,
+              null
             )
           );
       }
@@ -70,8 +82,16 @@ router.post(
 
     bets
       .add(req.dbClient)(req.user_id, req.prediction.id, endorsed)
-      .then((b) => predictions.getPredictionById(req.dbClient)(b.prediction_id))
+      .then((b) => {
+        if (!req.prediction || !req.dbClient) {
+          throw new Error("Prediction or DB client is not defined");
+        }
+        return predictions.getPredictionById(req.dbClient)(b.prediction_id);
+      })
       .then((ep) => {
+        if (!ep) {
+          throw new Error("Prediction not found");
+        }
         // Notify subscribers
         webhookManager.emit("new_bet", ep);
 
@@ -88,7 +108,8 @@ router.post(
           .json(
             responseUtils_deprecated.writeError(
               ErrorCode.SERVER_ERROR,
-              "Error Adding bet"
+              "Error Adding bet",
+              null
             )
           );
       });

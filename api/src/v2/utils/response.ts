@@ -1,10 +1,10 @@
-import type { V2 as API } from "@offnominal/ndb2-api-types/v2";
+import API from "@offnominal/ndb2-api-types";
 
 export default {
   writeError: function (
-    errorCode: API.ErrorCode,
+    errorCode: API.Errors,
     message: string = "NA"
-  ): API.ErrorResponse {
+  ): API.Utils.ErrorResponse {
     return {
       success: false,
       errorCode,
@@ -16,7 +16,7 @@ export default {
   writeSuccess: function <T extends any>(
     data: any,
     message?: string
-  ): API.SuccessResponse<T> {
+  ): API.Utils.SuccessResponse<T> {
     return {
       success: true,
       message: message || null,

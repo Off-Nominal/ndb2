@@ -39,7 +39,9 @@ const generate_GET_USER_SCORE_BY_ID_with_SEASON = (
 ): [string, string[]] => {
   const params = [userId.toString()];
 
-  if (seasonId) {
+  const hasSelectedSeason = seasonId !== undefined;
+
+  if (hasSelectedSeason) {
     params.push(seasonId.toString());
   }
 
@@ -58,19 +60,19 @@ const generate_GET_USER_SCORE_BY_ID_with_SEASON = (
     WITH 
       users_scores_summary 
         AS (${generate_GET_USER_SCORE_SUMMARY_with_SEASON(
-          seasonId && parameterizedSeasonId
+          hasSelectedSeason ? parameterizedSeasonId : undefined
         )}),
       users_predictions_summary 
         AS (${generate_GET_USER_PREDICTION_SUMMARY_with_SEASON(
-          seasonId && parameterizedSeasonId
+          hasSelectedSeason ? parameterizedSeasonId : undefined
         )}),
       users_bets_summary 
         AS (${generate_GET_USER_BET_SUMMARY_with_SEASON(
-          seasonId && parameterizedSeasonId
+          hasSelectedSeason ? parameterizedSeasonId : undefined
         )}),
       users_votes_summary 
         AS (${generate_GET_USER_VOTE_SUMMARY_with_SEASON(
-          seasonId && parameterizedSeasonId
+          hasSelectedSeason ? parameterizedSeasonId : undefined
         )})
     SELECT
       ${season}
@@ -110,7 +112,7 @@ const getUserScoreById = (client: PoolClient) =>
     userId: number | string,
     seasonIdentifier?: "current" | "last" | number
   ): Promise<APIUsers.GetUserScoreByDiscordId> {
-    let seasonId: number;
+    let seasonId: number | undefined = undefined;
 
     if (seasonIdentifier) {
       if (typeof seasonIdentifier === "number") {

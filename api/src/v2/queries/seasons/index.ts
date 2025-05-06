@@ -17,7 +17,7 @@ const getIdentifier = (start: Date, end: Date): Seasons.Identifier => {
 
 export default {
   getAll: (dbClient: any) => async (): Promise<Seasons.GET> => {
-    const result = await getAllSeasons.run(null, dbClient);
+    const result = await getAllSeasons.run(undefined, dbClient);
 
     const seasons: Seasons.GET = result.map((season) => ({
       ...season,

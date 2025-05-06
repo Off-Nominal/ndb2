@@ -55,6 +55,18 @@ router.get(
     getDbClient,
   ],
   async (req: Request, res: Response) => {
+    if (!req.dbClient) {
+      return res
+        .status(500)
+        .json(
+          responseUtils_deprecated.writeError(
+            ErrorCode.SERVER_ERROR,
+            "Something went wrong. Please try again.",
+            null
+          )
+        );
+    }
+
     const {
       status,
       sort_by,
@@ -79,7 +91,8 @@ router.get(
         .json(
           responseUtils_deprecated.writeError(
             ErrorCode.MALFORMED_QUERY_PARAMS,
-            `Please provide at least one standard query parameter in your search.`
+            `Please provide at least one standard query parameter in your search.`,
+            null
           )
         );
     }
@@ -90,7 +103,8 @@ router.get(
         .json(
           responseUtils_deprecated.writeError(
             ErrorCode.MALFORMED_QUERY_PARAMS,
-            `Filtering by the same "creator" and "unbetter" is not allowed. These values must be different or omitted.`
+            `Filtering by the same "creator" and "unbetter" is not allowed. These values must be different or omitted.`,
+            null
           )
         );
     }
@@ -112,7 +126,8 @@ router.get(
               ErrorCode.MALFORMED_QUERY_PARAMS,
               `Status must be any of the following: ${Object.values(
                 PredictionLifeCycle
-              ).join(", ")}`
+              ).join(", ")}`,
+              null
             )
           );
       }
@@ -135,15 +150,16 @@ router.get(
               ErrorCode.MALFORMED_QUERY_PARAMS,
               `Sort option must be any of the following: ${Object.values(
                 SortByOption
-              ).join(", ")}`
+              ).join(", ")}`,
+              null
             )
           );
       }
     }
 
     // check for user
-    let creator_id: string;
-    let unbetter_id: string;
+    let creator_id: string | undefined = undefined;
+    let unbetter_id: string | undefined = undefined;
 
     if (creator) {
       try {
@@ -161,7 +177,8 @@ router.get(
             .json(
               responseUtils_deprecated.writeError(
                 ErrorCode.BAD_REQUEST,
-                "User does not exist"
+                "User does not exist",
+                null
               )
             );
         }
@@ -170,7 +187,8 @@ router.get(
           .json(
             responseUtils_deprecated.writeError(
               ErrorCode.BAD_REQUEST,
-              "There was an error looking for the user in your query."
+              "There was an error looking for the user in your query.",
+              null
             )
           );
       }
@@ -192,7 +210,8 @@ router.get(
             .json(
               responseUtils_deprecated.writeError(
                 ErrorCode.BAD_REQUEST,
-                "User does not exist"
+                "User does not exist",
+                null
               )
             );
         }
@@ -201,7 +220,8 @@ router.get(
           .json(
             responseUtils_deprecated.writeError(
               ErrorCode.BAD_REQUEST,
-              "There was an error looking for the user in your query."
+              "There was an error looking for the user in your query.",
+              null
             )
           );
       }

@@ -30,6 +30,17 @@ router.post(
     predictionStatusValidator(PredictionLifeCycle.CHECKING),
   ],
   async (req: Request, res: Response) => {
+    if (!req.prediction || !req.dbClient || !req.user_id) {
+      return res
+        .status(500)
+        .json(
+          responseUtils_deprecated.writeError(
+            ErrorCode.SERVER_ERROR,
+            "Something went wrong. Please try again.",
+            null
+          )
+        );
+    }
     const { value } = req.body;
     const { snooze_check_id } = req.params;
 
@@ -40,7 +51,8 @@ router.post(
         .json(
           responseUtils_deprecated.writeError(
             ErrorCode.BAD_REQUEST,
-            "Invalid snooze value."
+            "Invalid snooze value.",
+            null
           )
         );
     }
@@ -63,7 +75,8 @@ router.post(
         .json(
           responseUtils_deprecated.writeError(
             ErrorCode.BAD_REQUEST,
-            "Snooze Check is not associated with this Prediction."
+            "Snooze Check is not associated with this Prediction.",
+            null
           )
         );
     }
@@ -74,7 +87,8 @@ router.post(
         .json(
           responseUtils_deprecated.writeError(
             ErrorCode.BAD_REQUEST,
-            "Snooze Check is not open anymore."
+            "Snooze Check is not open anymore.",
+            null
           )
         );
     }
@@ -104,7 +118,8 @@ router.post(
           .json(
             responseUtils_deprecated.writeError(
               ErrorCode.SERVER_ERROR,
-              "There was an error adding this snooze vote"
+              "There was an error adding this snooze vote",
+              null
             )
           );
       });

@@ -10,13 +10,29 @@ import { PredictionLifeCycle } from "../types/predicitions";
 export class SeasonManager {
   private seasons: APISeasons.EnhancedSeason[] = [];
 
-  public getSeasonByIdentifier(identifier: "current" | "last") {
+  public getSeasonByIdentifier(
+    identifier: "current" | "last"
+  ): APISeasons.EnhancedSeason {
     if (identifier === "current") {
-      return this.seasons.find((season) => season.identifier === "current");
+      const season = this.seasons.find(
+        (season) => season.identifier === "current"
+      );
+      if (!season) {
+        throw new Error("Current season not found");
+      }
+      return season;
     }
     if (identifier === "last") {
-      return this.seasons.find((season) => season.identifier === "past");
+      const season = this.seasons.find(
+        (season) => season.identifier === "past"
+      );
+      if (!season) {
+        throw new Error("Last season not found");
+      }
+      return season;
     }
+
+    throw new Error("Invalid season identifier");
   }
 
   private async fetchAllSeasons(client: PoolClient) {

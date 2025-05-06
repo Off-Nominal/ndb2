@@ -34,13 +34,26 @@ router.patch(
     const { check_date } = req.body;
     const checkDate = new Date(check_date);
 
+    if (!req.prediction || !req.dbClient) {
+      return res
+        .status(500)
+        .json(
+          responseUtils_deprecated.writeError(
+            ErrorCode.SERVER_ERROR,
+            "Something went wrong. Please try again.",
+            null
+          )
+        );
+    }
+
     if (!isAfter(checkDate, req.prediction.created_date)) {
       return res
         .status(400)
         .json(
           responseUtils_deprecated.writeError(
             ErrorCode.BAD_REQUEST,
-            "Check date must be after the prediction was created."
+            "Check date must be after the prediction was created.",
+            null
           )
         );
     }
@@ -49,10 +62,16 @@ router.patch(
       .setCheckDateByPredictionId(req.dbClient)(req.prediction.id, {
         date: checkDate,
       })
-      .then(() =>
-        predictions.getPredictionById(req.dbClient)(req.prediction.id)
-      )
+      .then(() => {
+        if (!req.prediction || !req.dbClient) {
+          throw new Error("Prediction or DB client is not defined");
+        }
+        return predictions.getPredictionById(req.dbClient)(req.prediction.id);
+      })
       .then((prediction) => {
+        if (!req.prediction || !req.prediction.check_date || !prediction) {
+          throw new Error("Prediction is not defined");
+        }
         // Notify Subscribers
         const oldCheckDate = new Date(req.prediction.check_date);
         webhookManager.emit("prediction_edit", prediction, {
@@ -74,7 +93,8 @@ router.patch(
           .json(
             responseUtils_deprecated.writeError(
               ErrorCode.SERVER_ERROR,
-              "There was an error triggering this prediction."
+              "There was an error triggering this prediction.",
+              null
             )
           );
       });

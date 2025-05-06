@@ -27,6 +27,18 @@ router.post(
   async (req: Request, res: Response) => {
     const { discord_id, vote } = req.body;
 
+    if (!req.prediction || !req.dbClient || !req.user_id) {
+      return res
+        .status(500)
+        .json(
+          responseUtils_deprecated.writeError(
+            ErrorCode.SERVER_ERROR,
+            "Something went wrong. Please try again.",
+            null
+          )
+        );
+    }
+
     const existingVote = req.prediction.votes.find(
       (vote) => vote.voter.discord_id === discord_id
     );
@@ -38,7 +50,7 @@ router.post(
           responseUtils_deprecated.writeSuccess(
             req.prediction,
             `You already voted ${
-              existingVote.vote === true ? "'yes'" : "'no'"
+              existingVote?.vote === true ? "'yes'" : "'no'"
             } on this prediction, no change necessary.`
           )
         );
@@ -46,8 +58,17 @@ router.post(
 
     return votes
       .add(req.dbClient)(req.user_id, req.prediction.id, vote)
-      .then((v) => predictions.getPredictionById(req.dbClient)(v.prediction_id))
+      .then((v) => {
+        if (!req.dbClient) {
+          throw new Error("Database client is not available");
+        }
+
+        return predictions.getPredictionById(req.dbClient)(v.prediction_id);
+      })
       .then((prediction) => {
+        if (!prediction) {
+          throw new Error("Prediction not found");
+        }
         // Notify Subscribers
         webhookManager.emit("new_vote", prediction);
 
@@ -68,7 +89,8 @@ router.post(
           .json(
             responseUtils_deprecated.writeError(
               ErrorCode.SERVER_ERROR,
-              "There was an error updating this vote."
+              "There was an error updating this vote.",
+              null
             )
           );
       });

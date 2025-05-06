@@ -1,20 +1,16 @@
-import { APIPredictions } from "../types/predicitions";
+import API from "@offnominal/ndb2-api-types";
+import EventEmitter from "node:events";
+import TypedEmitter from "typed-emitter";
 
-// WIP
-type NDBEventPayload<T> = {
-  emittedAt: string;
-  event: string;
-  data: T;
+// The EventManager is the master class that montiors events,
+// including user actions and server actions, on the API.
+// It can be subscribed to by any service that needs to act on Events.
+
+// Currently supported events:
+type NDBEvents = {
+  untriggered_prediction: (
+    prediction: API.Entities.Predictions.Prediction
+  ) => void;
 };
 
-const events = {
-  new_prediction: (
-    payload: NDBEventPayload<APIPredictions.EnhancedPrediction>
-  ) => null,
-};
-
-// class EventManager extends TypedEventEmitter {
-//   constructor(events) {
-//     super(events);
-//   }
-// }
+export const EventManager = new EventEmitter() as TypedEmitter<NDBEvents>;
