@@ -20,4 +20,4 @@ jobs:
       - name: Run migrations
         working-directory: ./db
         run: |
-          dbmate --url ${{ secrets.DATABASE_URL }} up
+          dbmate --no-dump-schema --migrations-dir ./migrations --url ${{ secrets.DATABASE_URL }} up
