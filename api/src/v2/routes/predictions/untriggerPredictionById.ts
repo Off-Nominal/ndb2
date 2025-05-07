@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { predictionIdSchema } from "../../validations";
-import { NDB2Route } from "../../utils/routerMap";
+import { Route } from "../../utils/routerMap";
 import predictions from "../../queries/predictions";
 import { getDbClient } from "../../../middleware/getDbClient";
 import responseUtils_deprecated from "../../../utils/response";
@@ -15,7 +15,7 @@ const RequestSchema = {
   }),
 };
 
-export const untriggerPredictionById: NDB2Route = (router: Router) => {
+export const untriggerPredictionById: Route = (router: Router) => {
   router.delete(
     "/:prediction_id/trigger",
     validate(RequestSchema),

@@ -1,8 +1,8 @@
 import express, { Router } from "express";
 
-export type NDB2Route = (router: Router) => void;
+export type Route = (router: Router) => void;
 
-export const routerMap = (routes: NDB2Route[]) => {
+export const mapRoutes = (routes: Route[]) => {
   const router = express.Router();
 
   routes.forEach((route) => {
