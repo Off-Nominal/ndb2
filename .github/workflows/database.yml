@@ -1,0 +1,23 @@
+name: Database Migration
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "db/**"
+jobs:
+  migrate:
+    name: "Migrate Database"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64
+          sudo chmod +x /usr/local/bin/dbmate
+          /usr/local/bin/dbmate --help
+      - name: Run migrations
+        working-directory: ./db
+        run: |
+          dbmate --no-dump-schema --migrations-dir ./migrations --url ${{ secrets.DATABASE_URL }} up
