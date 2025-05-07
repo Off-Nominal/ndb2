@@ -65,9 +65,22 @@ importers:
 
   db:
     dependencies:
+      date-fns:
+        specifier: ^3.6.0
+        version: 3.6.0
       dbmate:
         specifier: ^2.27.0
         version: 2.27.0
+      pg:
+        specifier: ^8.15.6
+        version: 8.15.6
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.3
+        version: 22.15.3
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
 
   types: {}
 
