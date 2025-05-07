@@ -1,14 +1,7 @@
-const seed = require("./seed");
-const empty = require("./empty");
+import seed from "./seed";
+import empty from "./empty";
 
-const pg = require("pg");
-const path = require("node:path");
-const dotenv = require("dotenv");
-dotenv.config({
-  path: path.join(__dirname, "..", "..", ".env"),
-});
-
-const { Client } = pg;
+import { Client } from "pg";
 
 const client = new Client({
   connectionString: process.env.DATABASE_URL,

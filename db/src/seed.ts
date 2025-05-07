@@ -1,10 +1,10 @@
-const { add } = require("date-fns");
+import { add } from "date-fns";
 
-const users = require("./seeds/users.json");
-const predictions = require("./seeds/predictions.json");
-const seasons = require("./seeds/seasons.json");
+import users from "./seeds/users.json";
+import predictions from "./seeds/predictions.json";
+import seasons from "./seeds/seasons.json";
 
-const seed = (client) => {
+export default (client) => {
   if (process.env.NODE_ENV === "production") {
     return console.error("Cannot run seeding in production.");
   }
@@ -186,5 +186,3 @@ const seed = (client) => {
       return Promise.all(referencedData);
     });
 };
-
-module.exports = seed;
