@@ -1,6 +1,8 @@
 import EventEmitter from "events";
-import { APIPredictions } from "../types/predicitions";
+
+// V1 Types
 import { APISeasons } from "../types/seasons";
+import { APIPredictions } from "../types/predicitions";
 
 type PredictionEditChangedFields = {
   check_date?: {
@@ -105,10 +107,10 @@ export class WebhookManager extends EventEmitter {
 
     this.on(
       "untriggered_prediction",
-      (prediction: APIPredictions.EnhancedPrediction) => {
+      <T extends APIPredictions.EnhancedPrediction>(prediction: T) => {
         this.notifySubscribers(
           this.generateResponse<{
-            prediction: APIPredictions.EnhancedPrediction;
+            prediction: T;
           }>("untriggered_prediction", { prediction })
         );
       }

@@ -1,11 +1,11 @@
-import { APIResponse } from "../types/responses";
+import { APIResponse, ErrorCode } from "../types/responses";
 
-const responseUtils = {
-  writeError: function (
-    errorCode: APIResponse["errorCode"],
+const responseUtils_deprecated = {
+  writeError: function <T extends unknown>(
+    errorCode: ErrorCode,
     message: string = "NA",
-    data: any = null
-  ): APIResponse {
+    data: T
+  ): APIResponse<T> {
     return {
       success: false,
       errorCode,
@@ -14,13 +14,16 @@ const responseUtils = {
     };
   },
 
-  writeSuccess: function (data: any, message?: string) {
+  writeSuccess: function <T extends any>(
+    data: any,
+    message?: string
+  ): APIResponse<T> {
     return {
       success: true,
-      message,
+      message: message || null,
       data,
     };
   },
 };
 
-export default responseUtils;
+export default responseUtils_deprecated;

@@ -1,25 +1,21 @@
-import { NextFunction, Request, Response } from "express";
 import pool from "../db";
-import responseUtils from "../utils/response";
+import responseUtils_deprecated from "../utils/response";
 import { ErrorCode } from "../types/responses";
+import { type WeakRequestHandler } from "express-zod-safe";
 
-export const getDbClient = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const getDbClient: WeakRequestHandler = (req, res, next) => {
   pool
     .connect()
     .then((client) => {
-      if (!client) {
+      req.dbClient = client;
+
+      if (!req.dbClient) {
         throw new Error();
       }
 
-      req.dbClient = client;
-
       // release client when finished
       res.on("finish", () => {
-        req.dbClient.release();
+        req.dbClient && req.dbClient.release();
       });
 
       next();
@@ -28,9 +24,10 @@ export const getDbClient = (
       return res
         .status(500)
         .json(
-          responseUtils.writeError(
+          responseUtils_deprecated.writeError(
             ErrorCode.SERVER_ERROR,
-            `Unable to make database connection, request aborted.`
+            `Unable to make database connection, request aborted.`,
+            null
           )
         );
     });

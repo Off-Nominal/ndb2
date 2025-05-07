@@ -24,10 +24,7 @@ const deleteVotesByPredictionId =
     prediction_id: number | string
   ): Promise<APIVotes.DeleteVotesByPredictionId> => {
     return client
-      .query<APIVotes.DeleteVotesByPredictionId>(
-        queries.get("DeleteVotesByPredictionId"),
-        [prediction_id]
-      )
+      .query(queries.get("DeleteVotesByPredictionId"), [prediction_id])
       .then((response) => response.rows[0]);
   };
 

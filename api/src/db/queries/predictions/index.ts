@@ -47,10 +47,10 @@ const getPredictionById = (client: PoolClient) =>
 const retirePredictionById = (client: PoolClient) =>
   function (
     prediction_id: number | string
-  ): Promise<APIPredictions.RetirePredictionById> {
+  ): Promise<APIPredictions.RetirePredictionById | null> {
     const query = queries.get("RetirePredictionById");
     return client
-      .query<null>(query, [prediction_id])
+      .query(query, [prediction_id])
       .then((response) => response.rows[0]);
   };
 
@@ -76,11 +76,7 @@ const closePredictionById = (client: PoolClient) =>
       }
 
       const query = queries.get("ClosePredictionById");
-      await client.query<null>(query, [
-        prediction_id,
-        triggerer_id,
-        closed_date,
-      ]);
+      await client.query(query, [prediction_id, triggerer_id, closed_date]);
 
       return client.query("COMMIT").then((response) => response.rows[0]);
     } catch (err) {
@@ -95,7 +91,7 @@ const judgePredictionById = (client: PoolClient) =>
   ): Promise<APIPredictions.JudgePredictionById> {
     const query = queries.get("JudgePredictionById");
     return client
-      .query<null>(query, [prediction_id])
+      .query(query, [prediction_id])
       .then((response) => response.rows[0]);
   };
 
@@ -157,9 +153,7 @@ const setCheckDateByPredictionId = (client: PoolClient) =>
     try {
       // Closes any existing snoozes under way
       const query = queries.get("CloseSnoozeChecksByPredictionId");
-      await client.query<APISnoozes.CloseSnoozeChecksByPredictionId>(query, [
-        prediction_id,
-      ]);
+      await client.query(query, [prediction_id]);
     } catch (err) {
       await client.query("ROLLBACK");
       throw err;
@@ -167,10 +161,7 @@ const setCheckDateByPredictionId = (client: PoolClient) =>
 
     try {
       const query = queries.get("SetCheckDateByPredictionId");
-      await client.query<APIPredictions.SetCheckDateByPredictionId>(query, [
-        prediction_id,
-        options.date,
-      ]);
+      await client.query(query, [prediction_id, options.date]);
     } catch (err) {
       await client.query("ROLLBACK");
       throw err;
@@ -208,7 +199,7 @@ const undoClosePredictionById = (client: PoolClient) =>
         ]);
       }
 
-      return client.query<null>("COMMIT").then((response) => response.rows[0]);
+      return client.query("COMMIT").then((response) => response.rows[0]);
     } catch (err) {
       await client.query("ROLLBACK");
       throw err;

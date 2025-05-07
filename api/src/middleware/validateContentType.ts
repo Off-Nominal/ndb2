@@ -1,12 +1,8 @@
-import { NextFunction, Request, Response } from "express";
-import responseUtils from "../utils/response";
+import responseUtils_deprecated from "../utils/response";
 import { ErrorCode } from "../types/responses";
+import { WeakRequestHandler } from "express-zod-safe";
 
-export const validateContentType = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const validateContentType: WeakRequestHandler = (req, res, next) => {
   if (
     req.method === "POST" &&
     req.headers["content-type"] !== "application/json"
@@ -14,9 +10,10 @@ export const validateContentType = (
     return res
       .status(400)
       .json(
-        responseUtils.writeError(
+        responseUtils_deprecated.writeError(
           ErrorCode.MALFORMED_BODY_DATA,
-          `Content-Type header must be 'application/json'.`
+          `Content-Type header must be 'application/json'.`,
+          null
         )
       );
   }

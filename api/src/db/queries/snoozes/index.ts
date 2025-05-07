@@ -71,6 +71,9 @@ const addSnoozeVote = (client: PoolClient) =>
 
       // If necessary to close, continue close procedure
       if (shouldClose) {
+        if (!snoozeValue) {
+          throw new Error("Snooze value is null");
+        }
         await closeSnoozeCheckById(client)(check_id);
         await predictions.snoozePredictionById(client)(check.prediction_id, {
           days: snoozeValue,
@@ -84,6 +87,10 @@ const addSnoozeVote = (client: PoolClient) =>
         check.prediction_id
       );
 
+      if (!finalPrediction) {
+        throw new Error("Final prediction not found");
+      }
+
       await client.query("COMMIT");
       return finalPrediction;
     } catch (err) {
@@ -95,7 +102,7 @@ const addSnoozeVote = (client: PoolClient) =>
 const getClosedSnoozeValue = (
   check: APISnoozes.EnhancedSnoozeCheck
 ): APISnoozes.SnoozeOptions | null => {
-  let triggerValue: string;
+  let triggerValue: string | undefined = undefined;
 
   for (const [key, value] of Object.entries(check.votes)) {
     if (value >= 3) triggerValue = key;

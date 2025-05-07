@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import { getDbClient } from "../../middleware/getDbClient";
 import { getPrediction } from "../../middleware/getPrediction";
 import paramValidator from "../../middleware/paramValidator";
-import responseUtils from "../../utils/response";
+import responseUtils_deprecated from "../../utils/response";
 const router = express.Router();
 
 router.get(
@@ -15,7 +15,7 @@ router.get(
   ],
   async (req: Request, res: Response) => {
     return res.json(
-      responseUtils.writeSuccess(
+      responseUtils_deprecated.writeSuccess(
         req.prediction,
         "Prediction fetched successfully."
       )

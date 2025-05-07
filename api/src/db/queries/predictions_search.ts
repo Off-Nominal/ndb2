@@ -48,10 +48,10 @@ const sortByOptions = {
 export const generate_SEARCH_PREDICTIONS = (
   options: SearchOptions
 ): [string, string[]] => {
-  const params = [];
+  const params: string[] = [];
 
   const hasWhereClause =
-    options.statuses.length > 0 ||
+    (options.statuses && options.statuses.length > 0) ||
     options.predictor_id ||
     options.non_better_id ||
     options.season_id;
@@ -62,7 +62,7 @@ export const generate_SEARCH_PREDICTIONS = (
 
   // Add Status filters
   // Multiple statuses are joined via OR
-  if (options.statuses.length > 0) {
+  if (options.statuses && options.statuses.length > 0) {
     const statusClauses = options.statuses
       .map((status) => {
         params.push(status);
@@ -127,7 +127,7 @@ export const generate_SEARCH_PREDICTIONS = (
 
   // OFFSET/PAGE
   const page = options.page || 1;
-  params.push(page - 1);
+  params.push((page - 1).toString());
   const offset = `OFFSET ($${params.length}) * 10`;
 
   return [

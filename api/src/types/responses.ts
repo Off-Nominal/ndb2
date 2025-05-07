@@ -20,6 +20,7 @@ export enum ErrorCode {
   BAD_REQUEST = 90002,
   MALFORMED_BODY_DATA = 90003,
   MALFORMED_QUERY_PARAMS = 90004,
+  NOT_FOUND = 90005,
 
   // Predictions
   INVALID_PREDICTION_STATUS = 90201,
@@ -30,9 +31,15 @@ export enum ErrorCode {
   BETS_UNCHANGEABLE = 90502,
 }
 
-export type APIResponse<T = null> = {
-  success: boolean;
-  errorCode?: ErrorCode;
-  message: string | null;
-  data: T;
-};
+export type APIResponse<T extends any> =
+  | {
+      success: true;
+      message: string | null;
+      data: T;
+    }
+  | {
+      success: false;
+      errorCode: ErrorCode;
+      message: string | null;
+      data: T;
+    };

@@ -1,7 +1,7 @@
 import { isFuture, isPast, isValid } from "date-fns";
-import { NextFunction, Request, Response } from "express";
-import responseUtils from "../utils/response";
+import responseUtils_deprecated from "../utils/response";
 import { ErrorCode } from "../types/responses";
+import { WeakRequestHandler } from "express-zod-safe";
 
 const createChecker = (
   key: string,
@@ -9,9 +9,32 @@ const createChecker = (
   error: string,
   statusCode: number,
   optional: boolean
-) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const value = req.body[key];
+): WeakRequestHandler => {
+  return (req, res, next) => {
+    if (!req.body) {
+      return res
+        .status(statusCode)
+        .json(
+          responseUtils_deprecated.writeError(
+            ErrorCode.MALFORMED_BODY_DATA,
+            `Body data is missing.`,
+            null
+          )
+        );
+    }
+
+    if (typeof req.body !== "object") {
+      return res
+        .status(statusCode)
+        .json(
+          responseUtils_deprecated.writeError(
+            ErrorCode.MALFORMED_BODY_DATA,
+            `Body data is not an object.`,
+            null
+          )
+        );
+    }
+    const value = req.body[key as keyof typeof req.body];
 
     if (optional && (value === undefined || value === "")) {
       return next();
@@ -21,9 +44,10 @@ const createChecker = (
       return res
         .status(statusCode)
         .json(
-          responseUtils.writeError(
+          responseUtils_deprecated.writeError(
             ErrorCode.MALFORMED_BODY_DATA,
-            `Body data property '${key}' ${error}`
+            `Body data property '${key}' ${error}`,
+            null
           )
         );
     } else {

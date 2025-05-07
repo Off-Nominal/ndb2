@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import { getDbClient } from "../../middleware/getDbClient";
 import scores from "../../db/queries/scores";
-import responseUtils from "../../utils/response";
+import responseUtils_deprecated from "../../utils/response";
 import { isScoreView, ScoreView } from "./get";
 import paramValidator from "../../middleware/paramValidator";
 import { ErrorCode } from "../../types/responses";
@@ -16,6 +16,17 @@ router.get(
     getDbClient,
   ],
   async (req: Request, res: Response) => {
+    if (!req.dbClient) {
+      return res
+        .status(500)
+        .json(
+          responseUtils_deprecated.writeError(
+            ErrorCode.SERVER_ERROR,
+            "Something went wrong. Please try again.",
+            null
+          )
+        );
+    }
     const view = req.query.view || ScoreView.POINTS;
     const { season_id } = req.params;
 
@@ -31,11 +42,12 @@ router.get(
       return res
         .status(400)
         .json(
-          responseUtils.writeError(
+          responseUtils_deprecated.writeError(
             ErrorCode.MALFORMED_BODY_DATA,
             `View must be any of the following: ${Object.values(ScoreView).join(
               ", "
-            )}`
+            )}`,
+            null
           )
         );
     }
@@ -44,7 +56,7 @@ router.get(
       .getLeaderboard(req.dbClient)(view, seasonIdentifier)
       .then((response) => {
         res.json(
-          responseUtils.writeSuccess(
+          responseUtils_deprecated.writeSuccess(
             response,
             "Leaderboard fetched successfully."
           )
