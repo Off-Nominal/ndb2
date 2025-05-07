@@ -50,6 +50,9 @@ importers:
       db-migrate-pg:
         specifier: ^1.5.2
         version: 1.5.2
+      dbmate:
+        specifier: ^2.27.0
+        version: 2.27.0
       morgan:
         specifier: ^1.10.0
         version: 1.10.0
@@ -60,6 +63,12 @@ importers:
         specifier: ^5.6.2
         version: 5.8.3
 
+  db:
+    dependencies:
+      dbmate:
+        specifier: ^2.27.0
+        version: 2.27.0
+
   types: {}
 
 packages:
@@ -67,6 +76,41 @@ packages:
   '@colors/colors@1.5.0':
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
     engines: {node: '>=0.1.90'}
+
+  '@dbmate/darwin-arm64@2.27.0':
+    resolution: {integrity: sha512-txh4TEmRPmdlBxqI6fXKEBOZxY2cXmlt0wuefjKcYHMkCpTeCzMXg35hcM9f32PmkPo2q7+eXTNE1f6uYx0oRA==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@dbmate/darwin-x64@2.27.0':
+    resolution: {integrity: sha512-3VcnKeFle4K6f+AtlM+luL1d+Gi4q0sVaTiUqj5VkBiENmQTTl/zuYOdW+qGMmY2gyiRFvri6zdGpGgp4952sQ==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@dbmate/linux-arm64@2.27.0':
+    resolution: {integrity: sha512-XfHBNSsri+7xH+XiGBOLTLkapoaEBRjqguo7K5mKatGYpDATI2yMTBBaUyqyW0n3GpRhsCauJZsUJrOmZYqobw==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@dbmate/linux-arm@2.27.0':
+    resolution: {integrity: sha512-MsMBHRmfUfwEUQ/zOPBjv925YnpMrqPZCuUoh0FvYyQjAh8RlZxUAS5l7ZVOiOr+aBqcCk4T2M9AFvPyKUze2g==}
+    cpu: [arm]
+    os: [linux]
+
+  '@dbmate/linux-ia32@2.27.0':
+    resolution: {integrity: sha512-W8E7ik82Fd/8gaGCm6RVdXae9XzBnpPMSMXhuSCb0pPgHkTSkgV/SKRAjxwIMJ0VCsdakPRLNEVDxf4BASWk0A==}
+    cpu: [ia32]
+    os: [linux]
+
+  '@dbmate/linux-x64@2.27.0':
+    resolution: {integrity: sha512-hItgTv+VX51Jag/r8OxFhorxHII1lgFwZOMOxYvQMpDde2QjKUjRm+GoY4UqZ+OUoqunUj/LMFnDkEVmT/ZfGg==}
+    cpu: [x64]
+    os: [linux]
+
+  '@dbmate/win32-x64@2.27.0':
+    resolution: {integrity: sha512-idhE2dbkkAjgGl+NJxNX0O5Xa6NTjmMp7vN9b74F5VHX/mFocqQJ/0gmg0QcFqGeTIUXorc0cvQzedPMkxpWIQ==}
+    cpu: [x64]
+    os: [win32]
 
   '@types/bluebird@3.5.42':
     resolution: {integrity: sha512-Jhy+MWRlro6UjVi578V/4ZGNfeCOcNCp0YaFNIUGFKlImowqwb1O/22wDVk3FDGMLqxdpOV3qQHD5fPEH4hK6A==}
@@ -251,6 +295,10 @@ packages:
   db-migrate@0.11.14:
     resolution: {integrity: sha512-8e+/YsIlM3d69hj+cb6qG6WyubR8nwXfDf9gGLWl4AxHpI6mTomcqhRLNfPrs7Le7AZv2eEsgK8hkXDSQqfIvg==}
     engines: {node: '>=8.0.0'}
+    hasBin: true
+
+  dbmate@2.27.0:
+    resolution: {integrity: sha512-Gga0U5ePzDBtqM26d1B2x5B3htl6uS0Gms+1GXbYKOYe44JArk8bcJpuRW97TLeAW36xLZRjBlXbQ0VY+y0PIg==}
     hasBin: true
 
   debug@2.6.9:
@@ -896,6 +944,27 @@ snapshots:
 
   '@colors/colors@1.5.0': {}
 
+  '@dbmate/darwin-arm64@2.27.0':
+    optional: true
+
+  '@dbmate/darwin-x64@2.27.0':
+    optional: true
+
+  '@dbmate/linux-arm64@2.27.0':
+    optional: true
+
+  '@dbmate/linux-arm@2.27.0':
+    optional: true
+
+  '@dbmate/linux-ia32@2.27.0':
+    optional: true
+
+  '@dbmate/linux-x64@2.27.0':
+    optional: true
+
+  '@dbmate/win32-x64@2.27.0':
+    optional: true
+
   '@types/bluebird@3.5.42': {}
 
   '@types/body-parser@1.19.5':
@@ -1132,6 +1201,16 @@ snapshots:
       yargs: 15.4.1
     transitivePeerDependencies:
       - supports-color
+
+  dbmate@2.27.0:
+    optionalDependencies:
+      '@dbmate/darwin-arm64': 2.27.0
+      '@dbmate/darwin-x64': 2.27.0
+      '@dbmate/linux-arm': 2.27.0
+      '@dbmate/linux-arm64': 2.27.0
+      '@dbmate/linux-ia32': 2.27.0
+      '@dbmate/linux-x64': 2.27.0
+      '@dbmate/win32-x64': 2.27.0
 
   debug@2.6.9:
     dependencies:
