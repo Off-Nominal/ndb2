@@ -10,12 +10,6 @@
     "dev": "NODE_ENV=dev nodemon --exec node --env-file=.env ./dist/index.js -e ts --exec \"pnpm run compile\"",
     "compile": "pnpm run clear && pnpm run build && node --env-file=.env ./dist/index.js",
     "start": "node ./dist/index.js",
-    "db:migrate:create": "db-migrate create -m ./db/migrations",
-    "db:migrate:up": "db-migrate up -m ./db/migrations",
-    "db:migrate:down": "db-migrate down -m ./db/migrations",
-    "db:migrate:up-prod": "db-migrate up -m ./db/migrations -e prod",
-    "db:reset": "NODE_ENV=dev node ./db/reset.js",
-    "db:copy": "pg_restore --verbose --clean --no-acl --no-owner -h localhost -U ndb2_owner -d ndb2",
     "sql-watch": "dotenv -- pgtyped -w -c pgtyped.config.json"
   },
   "license": "ISC",

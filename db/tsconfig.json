@@ -1,15 +1,15 @@
 {
   "compilerOptions": {
-    "target": "es2020",
+    "target": "es2015",
+    "module": "commonjs",
     "sourceMap": true,
     "outDir": "dist",
     "lib": ["es2021.string"],
     "downlevelIteration": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "strict": true,
-    "module": "NodeNext",
-    "moduleResolution": "nodenext"
+    "resolveJsonModule": true,
+    "types": ["node"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]

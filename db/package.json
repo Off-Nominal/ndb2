@@ -4,14 +4,23 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "clear": "rm -rf ./dist",
+    "build": "tsc",
     "db:create": "dbmate new",
-    "db:migrate": "dbmate up"
+    "db:migrate": "dbmate up",
+    "db:seed": "pnpm run clear && pnpm run build && node --env-file=.env ./dist/reset.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.10.0",
   "dependencies": {
-    "dbmate": "^2.27.0"
+    "date-fns": "^3.6.0",
+    "dbmate": "^2.27.0",
+    "pg": "^8.15.6"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "typescript": "^5.8.3"
   }
 }
