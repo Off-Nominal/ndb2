@@ -7,7 +7,7 @@ export type SuccessResponse<T> = {
 };
 
 export type ErrorInfo = {
-  errorCode: NDB2APIError;
+  code: NDB2APIError;
   message: string;
 };
 

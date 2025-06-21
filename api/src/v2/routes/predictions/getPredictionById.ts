@@ -19,7 +19,7 @@ const validator = validate({
       res.status(500).json(
         responseUtils.writeErrors([
           {
-            errorCode: API.Errors.SERVER_ERROR,
+            code: API.Errors.SERVER_ERROR,
             message: "There was an error processing your request.",
           },
         ])
@@ -42,7 +42,7 @@ export const getPredictionById: Route = (router) => {
           return res.status(404).json(
             responseUtils.writeErrors([
               {
-                errorCode: API.Errors.NOT_FOUND,
+                code: API.Errors.NOT_FOUND,
                 message: `Predicton with id ${prediction_id} does not exist.`,
               },
             ])
@@ -61,7 +61,7 @@ export const getPredictionById: Route = (router) => {
         return res.status(500).json(
           responseUtils.writeErrors([
             {
-              errorCode: API.Errors.SERVER_ERROR,
+              code: API.Errors.SERVER_ERROR,
               message: "Unable to fetch prediction.",
             },
           ])

@@ -32,7 +32,7 @@ export default {
    *       res.status(400).json(responseUtils.writeErrors(errorInfos));
    *     } else {
    *       res.status(500).json(responseUtils.writeErrors([{
-   *         errorCode: API.Errors.SERVER_ERROR,
+   *         code: API.Errors.SERVER_ERROR,
    *         message: "There was an error processing your request."
    *       }]));
    *     }
@@ -52,7 +52,7 @@ export default {
           // URL parameter validation errors
           err.errors.issues.forEach((issue: any) => {
             errorInfos.push({
-              errorCode: API.Errors.MALFORMED_URL_PARAMS,
+              code: API.Errors.MALFORMED_URL_PARAMS,
               message: issue.message,
             });
           });
@@ -62,7 +62,7 @@ export default {
           // Query string validation errors
           err.errors.issues.forEach((issue: any) => {
             errorInfos.push({
-              errorCode: API.Errors.MALFORMED_QUERY_PARAMS,
+              code: API.Errors.MALFORMED_QUERY_PARAMS,
               message: issue.message,
             });
           });
@@ -72,7 +72,7 @@ export default {
           // Request body validation errors
           err.errors.issues.forEach((issue: any) => {
             errorInfos.push({
-              errorCode: API.Errors.MALFORMED_BODY_DATA,
+              code: API.Errors.MALFORMED_BODY_DATA,
               message: issue.message,
             });
           });
