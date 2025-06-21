@@ -5,7 +5,7 @@ import {
   getPredictionsById,
   untriggerPredictionById,
 } from "./predictions.queries";
-import API from "@offnominal/ndb2-api-types/v2";
+import * as API from "@offnominal/ndb2-api-types/v2";
 
 export default {
   getById:

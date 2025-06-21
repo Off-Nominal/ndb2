@@ -1,8 +1,8 @@
-import API from "@offnominal/ndb2-api-types/v2";
+import * as API from "@offnominal/ndb2-api-types/v2";
 
 export default {
   writeError: function (
-    errorCode: API.Errors,
+    errorCode: API.NDB2APIError,
     message: string = "NA"
   ): API.Utils.ErrorResponse {
     return {

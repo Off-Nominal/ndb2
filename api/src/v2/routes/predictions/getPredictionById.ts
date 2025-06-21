@@ -5,7 +5,7 @@ import predictions from "../../queries/predictions";
 import { getDbClient } from "../../../middleware/getDbClient";
 import validate from "express-zod-safe";
 import responseUtils from "../../utils/response";
-import API from "@offnominal/ndb2-api-types/v2";
+import * as API from "@offnominal/ndb2-api-types/v2";
 
 const validator = validate({
   handler: (errors, req, res, next) => {
@@ -36,7 +36,7 @@ const validator = validate({
   }),
 });
 
-export const getPredictionByIdHandler: Route = (router) => {
+export const getPredictionById: Route = (router) => {
   router.get("/:prediction_id", validator, getDbClient, async (req, res) => {
     const { prediction_id } = req.params;
 
