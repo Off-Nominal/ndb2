@@ -1,8 +1,7 @@
 name: Test Suite
 
 on:
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
 
 jobs:
   # Job 1: Initialize Test Database
@@ -78,7 +77,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: "npm"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
