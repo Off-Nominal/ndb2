@@ -9,26 +9,21 @@ import * as API from "@offnominal/ndb2-api-types/v2";
 
 const validator = validate({
   handler: (errors, req, res, next) => {
-    const err = errors[0];
+    const errorInfos = responseUtils.handleValidationErrors(errors);
 
-    if (err.type === "params") {
-      res
-        .status(400)
-        .json(
-          responseUtils.writeError(
-            API.Errors.MALFORMED_QUERY_PARAMS,
-            err.errors.issues.map((issue) => issue.message).join(", ")
-          )
-        );
+    if (errorInfos.length > 0) {
+      // Validation errors - return 400 Bad Request
+      res.status(400).json(responseUtils.writeErrors(errorInfos));
     } else {
-      res
-        .status(500)
-        .json(
-          responseUtils.writeError(
-            API.Errors.SERVER_ERROR,
-            "There was an error processing your request."
-          )
-        );
+      // Non-validation errors - return 500 Internal Server Error
+      res.status(500).json(
+        responseUtils.writeErrors([
+          {
+            errorCode: API.Errors.SERVER_ERROR,
+            message: "There was an error processing your request.",
+          },
+        ])
+      );
     }
   },
   params: z.object({
@@ -44,14 +39,14 @@ export const getPredictionById: Route = (router) => {
       .getById(req.dbClient)(prediction_id)
       .then((prediction) => {
         if (!prediction) {
-          return res
-            .status(404)
-            .json(
-              responseUtils.writeError(
-                API.Errors.NOT_FOUND,
-                `Predicton with id ${prediction_id} does not exist.`
-              )
-            );
+          return res.status(404).json(
+            responseUtils.writeErrors([
+              {
+                errorCode: API.Errors.NOT_FOUND,
+                message: `Predicton with id ${prediction_id} does not exist.`,
+              },
+            ])
+          );
         }
 
         res.json(
@@ -63,14 +58,14 @@ export const getPredictionById: Route = (router) => {
       })
       .catch((err) => {
         console.error(err);
-        return res
-          .status(500)
-          .json(
-            responseUtils.writeError(
-              API.Errors.SERVER_ERROR,
-              "Unable to fetch prediction."
-            )
-          );
+        return res.status(500).json(
+          responseUtils.writeErrors([
+            {
+              errorCode: API.Errors.SERVER_ERROR,
+              message: "Unable to fetch prediction.",
+            },
+          ])
+        );
       });
   });
 };

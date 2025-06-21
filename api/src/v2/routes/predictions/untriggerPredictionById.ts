@@ -4,8 +4,8 @@ import { predictionIdSchema } from "../../validations";
 import { Route } from "../../utils/routerMap";
 import predictions from "../../queries/predictions";
 import { getDbClient } from "../../../middleware/getDbClient";
-import responseUtils_deprecated from "../../../utils/response";
-import { ErrorCode } from "../../../types/responses";
+import responseUtils from "../../utils/response";
+import * as API from "@offnominal/ndb2-api-types/v2";
 import validate from "express-zod-safe";
 import { EventManager } from "../../../classes/EventManager";
 
@@ -28,21 +28,20 @@ export const untriggerPredictionById: Route = (router: Router) => {
         .then(() => predictions.getById(req.dbClient)(prediction_id))
         .then((prediction) => {
           if (!prediction) {
-            return res
-              .status(404)
-              .json(
-                responseUtils_deprecated.writeError(
-                  ErrorCode.NOT_FOUND,
-                  `Prediction with id ${prediction_id} does not exist.`,
-                  null
-                )
-              );
+            return res.status(404).json(
+              responseUtils.writeErrors([
+                {
+                  errorCode: API.Errors.NOT_FOUND,
+                  message: `Prediction with id ${prediction_id} does not exist.`,
+                },
+              ])
+            );
           }
 
           // Log Event
           EventManager.emit("untriggered_prediction", prediction);
 
-          const response = responseUtils_deprecated.writeSuccess(
+          const response = responseUtils.writeSuccess(
             prediction,
             "Prediction untriggered successfully."
           );
@@ -50,15 +49,14 @@ export const untriggerPredictionById: Route = (router: Router) => {
         })
         .catch((err) => {
           console.error(err);
-          return res
-            .status(500)
-            .json(
-              responseUtils_deprecated.writeError(
-                ErrorCode.SERVER_ERROR,
-                "There was an error untriggering this prediction.",
-                null
-              )
-            );
+          return res.status(500).json(
+            responseUtils.writeErrors([
+              {
+                errorCode: API.Errors.SERVER_ERROR,
+                message: "There was an error untriggering this prediction.",
+              },
+            ])
+          );
         });
     }
   );

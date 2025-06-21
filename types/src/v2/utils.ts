@@ -6,10 +6,14 @@ export type SuccessResponse<T> = {
   data: T;
 };
 
+export type ErrorInfo = {
+  errorCode: NDB2APIError;
+  message: string;
+};
+
 export type ErrorResponse = {
   success: false;
-  errorCode: NDB2APIError;
-  message: string | null;
+  errors: ErrorInfo[];
   data: null;
 };
 
