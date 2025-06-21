@@ -1,0 +1,71 @@
+name: Database Tests Only
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "db/**"
+      - "api/src/v2/queries/**"
+      - "api/src/db/**"
+  push:
+    branches: [main, develop]
+    paths:
+      - "db/**"
+      - "api/src/v2/queries/**"
+      - "api/src/db/**"
+
+jobs:
+  test-database:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: ndb2_test
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5433:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Wait for database
+        run: |
+          until pg_isready -h localhost -p 5433 -U test_user -d ndb2_test; do
+            echo "Waiting for database..."
+            sleep 2
+          done
+
+      - name: Initialize database schema
+        run: |
+          PGPASSWORD=test_password psql -h localhost -p 5433 -U test_user -d ndb2_test -f db/schema.sql
+
+      - name: Run database tests
+        working-directory: ./api
+        env:
+          TEST_DATABASE_URL: postgresql://test_user:test_password@localhost:5433/ndb2_test
+          NODE_ENV: test
+        run: |
+          pnpm test:db

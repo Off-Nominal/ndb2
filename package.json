@@ -8,7 +8,11 @@
     "start": "pnpm --filter ndb2-api start",
     "build": "pnpm --filter ndb2-api build",
     "compile": "pnpm --filter ndb2-api compile",
-    "test": "pnpm --filter ndb2-api test"
+    "test": "pnpm --filter ndb2-api test",
+    "test:db:start": "cd docker/test-database && ./start-test-db.sh",
+    "test:db:stop": "cd docker/test-database && ./stop-test-db.sh",
+    "test:db:reset": "cd docker/test-database && ./reset-test-db.sh",
+    "test:db": "vitest --run src/**/*.db.test.ts"
   },
   "bugs": {
     "url": "https://github.com/mendahu/ndb2/issues"

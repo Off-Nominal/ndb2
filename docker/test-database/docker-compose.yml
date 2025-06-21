@@ -1,0 +1,29 @@
+services:
+  ndb2-test-database:
+    image: postgres:16-alpine
+    container_name: ndb2-test-db
+    environment:
+      POSTGRES_DB: ndb2_test
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5433:5432" # Use different port to avoid conflicts
+    volumes:
+      - test_db_data:/var/lib/postgresql/data
+      - ../../db/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d ndb2_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - test-network
+
+volumes:
+  test_db_data:
+
+networks:
+  test-network:
+    driver: bridge
