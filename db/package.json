@@ -5,14 +5,15 @@
   "main": "index.js",
   "scripts": {
     "clear": "rm -rf ./dist",
-    "build": "tsc",
+    "build": "tsc && cp -r src/seeds dist/",
     "db:create": "dbmate new",
     "db:migrate": "dbmate up",
-    "db:seed": "pnpm run clear && pnpm run build && node --env-file=.env ./dist/reset.js",
+    "test:db:seed": "pnpm run clear && pnpm run build && node --env-file=.env.test ./dist/reset.js",
     "test:db:start": "./scripts/start-db.sh test",
     "test:db:stop": "./scripts/stop-db.sh test",
+    "dev:db:seed": "pnpm run clear && pnpm run build && node --env-file=.env.dev ./dist/reset.js",
     "dev:db:start": "./scripts/start-db.sh dev",
-    "dev:db:stop": "./scripts/stop-db.s devh"
+    "dev:db:stop": "./scripts/stop-db.sh dev"
   },
   "keywords": [],
   "author": "",

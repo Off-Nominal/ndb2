@@ -4,15 +4,17 @@
   "description": "Nostradambot 2.0 Betting Game for the Off-Nominal Discord",
   "main": "index.js",
   "scripts": {
-    "dev": "pnpm --filter @offnominal/ndb2-api-types build && concurrently \"pnpm --filter @offnominal/ndb2-api-types dev\" \"pnpm --filter ndb2-api dev\"",
+    "dev": "NODE_ENV=dev pnpm --filter @offnominal/ndb2-api-types build && concurrently \"pnpm --filter @offnominal/ndb2-api-types dev\" \"pnpm --filter ndb2-api dev\"",
     "start": "pnpm --filter ndb2-api start",
     "build": "pnpm --filter ndb2-api build",
     "compile": "pnpm --filter ndb2-api compile",
     "test": "pnpm --filter ndb2-api test",
     "test:db:start": "pnpm --filter db test:db:start",
     "test:db:stop": "pnpm --filter db test:db:stop",
+    "test:db:seed": "NODE_ENV=test pnpm --filter db test:db:seed",
     "dev:db:start": "pnpm --filter db dev:db:start",
-    "dev:db:stop": "pnpm --filter db dev:db:stop"
+    "dev:db:stop": "pnpm --filter db dev:db:stop",
+    "dev:db:seed": "NODE_ENV=dev pnpm --filter db dev:db:seed"
   },
   "bugs": {
     "url": "https://github.com/mendahu/ndb2/issues"
