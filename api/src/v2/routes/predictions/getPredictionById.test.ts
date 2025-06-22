@@ -31,6 +31,6 @@ describe("GET /predictions/:prediction_id", () => {
   it("should return a prediction if it exists", async () => {
     const response = await request(app).get("/1");
     expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty("prediction");
+    expect(response.body.data).toHaveProperty("id");
   });
 });

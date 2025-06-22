@@ -5,7 +5,6 @@ export default defineConfig({
   test: {
     include: ["src/**/*.test.ts"],
     globals: true,
-    setupFiles: ["src/test/setup.ts"],
     globalSetup: ["src/test/global-setup.ts"],
     environment: "node",
     testTimeout: 30000, // 30 seconds for database operations
