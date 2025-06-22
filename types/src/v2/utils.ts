@@ -1,4 +1,4 @@
-import { Errors, NDB2APIError } from "./errors";
+import { NDB2APIError } from "./errors";
 
 export type SuccessResponse<T> = {
   success: true;

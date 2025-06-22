@@ -16,6 +16,9 @@ const validator = validate({
       res.status(400).json(responseUtils.writeErrors(errorInfos));
     } else {
       // Non-validation errors - return 500 Internal Server Error
+      console.error("Zod Validation Handler run without any errors.");
+      console.error(errors);
+
       res.status(500).json(
         responseUtils.writeErrors([
           {
@@ -42,7 +45,7 @@ export const getPredictionById: Route = (router) => {
           return res.status(404).json(
             responseUtils.writeErrors([
               {
-                code: API.Errors.NOT_FOUND,
+                code: API.Errors.PREDICTION_NOT_FOUND,
                 message: `Predicton with id ${prediction_id} does not exist.`,
               },
             ])

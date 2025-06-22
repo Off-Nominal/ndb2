@@ -31,7 +31,7 @@ export const untriggerPredictionById: Route = (router: Router) => {
             return res.status(404).json(
               responseUtils.writeErrors([
                 {
-                  code: API.Errors.NOT_FOUND,
+                  code: API.Errors.PREDICTION_NOT_FOUND,
                   message: `Prediction with id ${prediction_id} does not exist.`,
                 },
               ])

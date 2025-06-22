@@ -15,9 +15,13 @@
   ],
   "scripts": {
     "build": "tsc",
+    "clear": "rm -rf ./dist",
+    "compile": "pnpm run clear && pnpm run build && node ./dist/index.js",
+    "dev": "NODE_ENV=dev nodemon --exec \"pnpm run build\"",
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
+    "nodemon": "^3.1.10",
     "typescript": "^5.8.3"
   },
   "license": "ISC",
