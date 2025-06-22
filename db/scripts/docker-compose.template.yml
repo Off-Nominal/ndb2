@@ -1,0 +1,28 @@
+services:
+  ndb2-${ENV}-database:
+    image: postgres:16-alpine
+    container_name: ndb2-${ENV}-db
+    environment:
+      POSTGRES_DB: ndb2_${ENV}
+      POSTGRES_USER: ${ENV}_user
+      POSTGRES_PASSWORD: ${ENV}_password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "${PORT}:5432"
+    volumes:
+      - ndb2_${ENV}_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${ENV}_user -d ndb2_${ENV}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - ndb2_${ENV}_network
+
+volumes:
+  ndb2_${ENV}_db_data:
+
+networks:
+  ndb2_${ENV}_network:
+    driver: bridge

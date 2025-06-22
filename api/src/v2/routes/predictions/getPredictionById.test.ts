@@ -21,10 +21,16 @@ describe("GET /predictions/:prediction_id", () => {
     expect(response.status).toBe(404);
     expect(response.body).toHaveProperty("errors");
     expect(
-      response.body.errors.find(
-        (error: API.Utils.ErrorInfo) =>
-          error.code === API.Errors.PREDICTION_NOT_FOUND
+      response.body.errors.some(
+        (err: API.Utils.ErrorInfo) =>
+          err.code === API.Errors.PREDICTION_NOT_FOUND
       )
-    ).toBeDefined();
+    ).toBeTruthy();
+  });
+
+  it("should return a prediction if it exists", async () => {
+    const response = await request(app).get("/1");
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("prediction");
   });
 });

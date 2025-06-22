@@ -8,7 +8,11 @@
     "build": "tsc",
     "db:create": "dbmate new",
     "db:migrate": "dbmate up",
-    "db:seed": "pnpm run clear && pnpm run build && node --env-file=.env ./dist/reset.js"
+    "db:seed": "pnpm run clear && pnpm run build && node --env-file=.env ./dist/reset.js",
+    "test:db:start": "./scripts/start-db.sh test",
+    "test:db:stop": "./scripts/stop-db.sh test",
+    "dev:db:start": "./scripts/start-db.sh dev",
+    "dev:db:stop": "./scripts/stop-db.s devh"
   },
   "keywords": [],
   "author": "",
