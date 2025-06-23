@@ -3,6 +3,7 @@ import EventEmitter from "events";
 // V1 Types
 import { APISeasons } from "../types/seasons";
 import { APIPredictions } from "../types/predicitions";
+import * as API from "@offnominal/ndb2-api-types/v2";
 
 type PredictionEditChangedFields = {
   check_date?: {
@@ -31,7 +32,7 @@ interface WebhookEvent {
     prediction: APIPredictions.EnhancedPrediction,
     edited_fields: PredictionEditChangedFields
   ) => void;
-  season_start: (season: APISeasons.Season) => void;
+  season_start: (season: API.Entities.Seasons.Season) => void;
   season_end: (results: APISeasons.GetResultsBySeasonId) => void;
 }
 
@@ -191,11 +192,14 @@ export class WebhookManager extends EventEmitter {
       }
     );
 
-    this.on("season_start", (season: APISeasons.Season) => {
+    this.on("season_start", (season: API.Entities.Seasons.Season) => {
       this.notifySubscribers(
-        this.generateResponse<{ season: APISeasons.Season }>("season_start", {
-          season,
-        })
+        this.generateResponse<{ season: API.Entities.Seasons.Season }>(
+          "season_start",
+          {
+            season,
+          }
+        )
       );
     });
 

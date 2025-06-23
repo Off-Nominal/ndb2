@@ -1,18 +1,20 @@
 import { PoolClient } from "pg";
-import seasons from "../db/queries/seasons";
 import pool from "../db";
-import { APISeasons } from "../types/seasons";
 import schedule from "node-schedule";
 import webhookManager from "../config/webhook_subscribers";
 import predictions from "../db/queries/predictions";
 import { PredictionLifeCycle } from "../types/predicitions";
+import seasonsV2 from "../v2/queries/seasons";
+import seasons from "../db/queries/seasons";
+import { APISeasons } from "../types/seasons";
+import * as API from "@offnominal/ndb2-api-types/v2";
 
 export class SeasonManager {
-  private seasons: APISeasons.EnhancedSeason[] = [];
+  private seasons: API.Entities.Seasons.Season[] = [];
 
   public getSeasonByIdentifier(
     identifier: "current" | "last"
-  ): APISeasons.EnhancedSeason {
+  ): API.Entities.Seasons.Season {
     if (identifier === "current") {
       const season = this.seasons.find(
         (season) => season.identifier === "current"
@@ -35,8 +37,10 @@ export class SeasonManager {
     throw new Error("Invalid season identifier");
   }
 
-  private async fetchAllSeasons(client: PoolClient) {
-    return seasons.getAll(client)();
+  private async fetchAllSeasons(
+    client: PoolClient
+  ): Promise<API.Entities.Seasons.Season[]> {
+    return seasonsV2.getAll(client)();
   }
 
   private refreshSeasons(client: PoolClient) {
