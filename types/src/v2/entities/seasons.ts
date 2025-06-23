@@ -1,3 +1,5 @@
+export type Identifier = "current" | "past" | "future";
+
 export type Season = {
   id: number;
   name: string;
@@ -5,4 +7,5 @@ export type Season = {
   end: string;
   wager_cap: number;
   closed: boolean;
+  identifier: Identifier;
 };
