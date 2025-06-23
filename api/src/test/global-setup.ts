@@ -59,29 +59,11 @@ export default async function globalSetup() {
 
   if (!isConnected) {
     console.log("Test database not accessible, attempting to start it...");
-    try {
-      const dbPath = path.resolve(__dirname, "../../../db");
-      execSync("pnpm run test:db:start", {
-        cwd: dbPath,
-        stdio: "inherit",
-        env: { ...process.env },
-      });
-    } catch (error) {
-      console.error("Failed to start test database:", error);
-      throw new Error(
-        "Test database could not be started. Please ensure Docker is running and the test database setup is available."
-      );
-    }
+    throw new Error("Test database not accessible");
   }
 
   // Reset the database to ensure clean state
   await resetTestDatabase();
-
-  // Verify connection after reset
-  const finalCheck = await checkDatabaseConnection();
-  if (!finalCheck) {
-    throw new Error("Test database is not accessible after reset");
-  }
 
   console.log("Test environment setup completed successfully");
 }
