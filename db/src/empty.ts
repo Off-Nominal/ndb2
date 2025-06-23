@@ -1,3 +1,5 @@
+import { Client, PoolClient } from "pg";
+
 const TRUNCATE_ALL_TABLES = `
   DO $$ 
   DECLARE 
@@ -36,7 +38,7 @@ const RESET_SEQUENCES = `
   END $$;
 `;
 
-export default async (client) => {
+export default async (client: Client | PoolClient) => {
   if (process.env.NODE_ENV === "production") {
     return console.error("Cannot run seeding in production.");
   }

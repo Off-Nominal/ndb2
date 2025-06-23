@@ -2,11 +2,13 @@ import { getPredictionById } from "./getPredictionById";
 import express from "express";
 import request from "supertest";
 import * as API from "@offnominal/ndb2-api-types/v2";
+import { resetTestDatabase } from "../../../test/global-setup";
 
 describe("GET /predictions/:prediction_id", () => {
   let app: express.Application;
 
-  beforeAll(() => {
+  beforeAll(async () => {
+    await resetTestDatabase();
     app = express();
     getPredictionById(app);
   });
@@ -31,6 +33,6 @@ describe("GET /predictions/:prediction_id", () => {
   it("should return a prediction if it exists", async () => {
     const response = await request(app).get("/1");
     expect(response.status).toBe(200);
-    expect(response.body.data).toHaveProperty("id");
+    expect(response.body.data.id).toBe(1);
   });
 });

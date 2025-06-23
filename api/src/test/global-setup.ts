@@ -3,6 +3,8 @@
 
 import { execSync } from "child_process";
 import path from "path";
+import { Client } from "pg";
+import { reset } from "@offnominal/ndb2-db";
 
 // Set the DATABASE_URL to point to the test database
 process.env.DATABASE_URL =
@@ -17,7 +19,6 @@ process.env.NODE_ENV = "test";
 async function checkDatabaseConnection(): Promise<boolean> {
   try {
     // Try to connect to the test database
-    const { Client } = await import("pg");
     const client = new Client({
       connectionString: process.env.DATABASE_URL,
     });
@@ -33,21 +34,19 @@ async function checkDatabaseConnection(): Promise<boolean> {
 }
 
 // Function to reset the test database
-async function resetTestDatabase(): Promise<void> {
+export async function resetTestDatabase(): Promise<void> {
   try {
-    const dbPath = path.resolve(__dirname, "../../../db");
-    console.log("Seeding test database using db package...");
+    console.log("Resetting test database using db package...");
 
-    // Run the db package's test:db:seed script
-    execSync("pnpm run test:db:seed", {
-      cwd: dbPath,
-      stdio: "inherit",
-      env: { ...process.env },
+    const client = new Client({
+      connectionString: process.env.DATABASE_URL,
     });
 
-    console.log("Test database seeded successfully");
+    await reset(client);
+
+    console.log("Test database reset completed successfully");
   } catch (error) {
-    console.error("Failed to seed test database:", error);
+    console.error("Failed to reset test database:", error);
     throw error;
   }
 }
@@ -61,9 +60,9 @@ export default async function globalSetup() {
   if (!isConnected) {
     console.log("Test database not accessible, attempting to start it...");
     try {
-      const testDbPath = path.resolve(__dirname, "../../../db/test-database");
-      execSync("./start-test-db.sh", {
-        cwd: testDbPath,
+      const dbPath = path.resolve(__dirname, "../../../db");
+      execSync("pnpm run test:db:start", {
+        cwd: dbPath,
         stdio: "inherit",
         env: { ...process.env },
       });

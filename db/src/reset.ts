@@ -1,13 +1,8 @@
 import seed from "./seed";
 import empty from "./empty";
+import { Client, PoolClient } from "pg";
 
-import { Client } from "pg";
-
-const client = new Client({
-  connectionString: process.env.DATABASE_URL,
-});
-
-const reset = async (client) => {
+export default async (client: Client | PoolClient) => {
   if (process.env.NODE_ENV === "production") {
     return console.error("Cannot run db reset in production.");
   }
@@ -24,9 +19,7 @@ const reset = async (client) => {
     await seed(client);
   } catch (err) {
     console.error(err);
+  } finally {
+    await client.end();
   }
-
-  client.end();
 };
-
-reset(client);
