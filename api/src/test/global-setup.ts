@@ -1,8 +1,6 @@
 // Vitest global setup file
 // This file runs once before all tests and configures the environment for testing
 
-import { execSync } from "child_process";
-import path from "path";
 import { Client } from "pg";
 import { reset } from "@offnominal/ndb2-db";
 
@@ -29,18 +27,18 @@ async function checkDatabaseConnection(): Promise<boolean> {
     return true;
   } catch (error) {
     console.error("Failed to connect to test database:", error);
-    return false;
+    throw new Error("Test database not accessible");
   }
 }
 
 // Function to reset the test database
-export async function resetTestDatabase(): Promise<void> {
+export async function resetTestDatabase(
+  client: Client = new Client({
+    connectionString: process.env.DATABASE_URL,
+  })
+): Promise<void> {
   try {
     console.log("Resetting test database using db package...");
-
-    const client = new Client({
-      connectionString: process.env.DATABASE_URL,
-    });
 
     await reset(client);
 
@@ -51,16 +49,11 @@ export async function resetTestDatabase(): Promise<void> {
   }
 }
 
-export default async function globalSetup() {
+export default async function setup() {
   console.log("Setting up test environment...");
 
   // Check if test database is accessible
-  const isConnected = await checkDatabaseConnection();
-
-  if (!isConnected) {
-    console.log("Test database not accessible, attempting to start it...");
-    throw new Error("Test database not accessible");
-  }
+  await checkDatabaseConnection();
 
   // Reset the database to ensure clean state
   await resetTestDatabase();
