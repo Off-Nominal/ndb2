@@ -40,7 +40,7 @@ export async function resetTestDatabase(
   try {
     console.log("Resetting test database using db package...");
 
-    await reset(client);
+    await reset(client, { verbose: false });
 
     console.log("Test database reset completed successfully");
   } catch (error) {

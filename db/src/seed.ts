@@ -13,8 +13,16 @@ import {
   BetSeed,
   VoteSeed,
 } from "./types";
+import { createLogger } from "./utils";
 
-export default async (client: any) => {
+interface SeedOptions {
+  verbose?: boolean;
+}
+
+export default async (client: any, options: SeedOptions = {}) => {
+  const { verbose = false } = options;
+  const log = createLogger(verbose);
+
   if (process.env.NODE_ENV === "production") {
     return console.error("Cannot run seeding in production.");
   }
@@ -35,8 +43,8 @@ export default async (client: any) => {
     throw error;
   }
 
-  console.log(`Loading seeds from ${seedPath} directory`);
-  console.log(
+  log(`Loading seeds from ${seedPath} directory`);
+  log(
     `Found ${users.length} users, ${seasons.length} seasons, ${predictions.length} predictions`
   );
 
@@ -44,15 +52,15 @@ export default async (client: any) => {
 
   try {
     // Insert all users in bulk
-    console.log("Inserting users...");
+    log("Inserting users...");
     await insertUsersBulk(client, users);
 
     // Insert all seasons in bulk
-    console.log("Inserting seasons...");
+    log("Inserting seasons...");
     await insertSeasonsBulk(client, seasons, baseDate);
 
     // Insert all predictions in bulk and get their IDs
-    console.log("Inserting predictions...");
+    log("Inserting predictions...");
     const predictionsResult = await insertPredictionsBulk(
       client,
       predictions,
@@ -61,7 +69,7 @@ export default async (client: any) => {
     const predictionIds = predictionsResult.rows.map((row) => row.id);
 
     // Aggregate all bets and votes for bulk insertion
-    console.log("Aggregating related data...");
+    log("Aggregating related data...");
     const allBets: BetSeed[] = [];
     const allVotes: VoteSeed[] = [];
     const betPredictionIds: number[] = [];
@@ -90,17 +98,17 @@ export default async (client: any) => {
 
     // Insert all bets in bulk (if any exist)
     if (allBets.length > 0) {
-      console.log(`Inserting ${allBets.length} bets...`);
+      log(`Inserting ${allBets.length} bets...`);
       await insertBetsBulk(client, allBets, betPredictionIds, baseDate);
     }
 
     // Insert all votes in bulk (if any exist)
     if (allVotes.length > 0) {
-      console.log(`Inserting ${allVotes.length} votes...`);
+      log(`Inserting ${allVotes.length} votes...`);
       await insertVotesBulk(client, allVotes, votePredictionIds, baseDate);
     }
 
-    console.log("Seeding completed successfully!");
+    log("Seeding completed successfully!");
   } catch (error) {
     console.error("Error during seeding:", error);
     throw error;
