@@ -19,31 +19,8 @@ vi.mock("node-schedule", () => ({
   },
 }));
 
-// Mock the webhook manager
-// const mockWebhookManager = {
-//   emit: vi.fn(),
-// };
-
-// vi.mock("../config/webhook_subscribers", () => ({
-//   default: mockWebhookManager,
-// }));
-
 describe("SeasonManager", () => {
-  // let client: PoolClient;
-
-  beforeAll(async () => {
-    // Reset the test database before each test
-    // await resetTestDatabase();
-    // Get a database client
-    // client = await pool.connect();
-  });
-
   afterEach(async () => {
-    // Release the client after each test
-    // if (client) {
-    //   client.release();
-    // }
-
     // Clear all mocks
     vi.clearAllMocks();
   });
