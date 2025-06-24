@@ -1,5 +1,5 @@
 import { BetSeed } from "../types";
-import { add } from "date-fns";
+import { resolveSeedDate } from "../utils/dateUtils";
 
 export const INSERT_BETS_BULK_SQL = `
   INSERT INTO bets (
@@ -37,7 +37,7 @@ export function createBetsBulkInsertData(
     user_ids: betSeeds.map((bet) => bet.user_id),
     prediction_ids: predictionIds,
     endorseds: betSeeds.map((bet) => bet.endorsed),
-    dates: betSeeds.map((bet) => add(baseDate, { hours: bet.created })),
+    dates: betSeeds.map((bet) => resolveSeedDate(bet.created, baseDate)),
   };
 }
 

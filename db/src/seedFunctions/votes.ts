@@ -1,5 +1,5 @@
 import { VoteSeed } from "../types";
-import { add } from "date-fns";
+import { resolveSeedDate } from "../utils/dateUtils";
 
 export const INSERT_VOTES_BULK_SQL = `
   INSERT INTO votes (
@@ -37,7 +37,7 @@ export function createVotesBulkInsertData(
     user_ids: voteSeeds.map((vote) => vote.user_id),
     prediction_ids: predictionIds,
     votes: voteSeeds.map((vote) => vote.vote),
-    voted_dates: voteSeeds.map((vote) => add(baseDate, { hours: vote.voted })),
+    voted_dates: voteSeeds.map((vote) => resolveSeedDate(vote.voted, baseDate)),
   };
 }
 

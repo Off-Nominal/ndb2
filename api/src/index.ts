@@ -4,6 +4,7 @@ import { validateContentType } from "./middleware/validateContentType";
 import PredictionMonitor from "./classes/PredictionMonitor";
 import { monitors } from "./config/monitors";
 import { seasonsManager } from "./classes/SeasonManager";
+import { createLogger } from "./utils/logger";
 
 // Routers
 import predictionsRouter from "./routers/predictions";
@@ -11,6 +12,8 @@ import usersRouter from "./routers/users";
 import scoresRouter from "./routers/scores";
 import seasonsRouter from "./routers/seasons";
 import { apiV2Router } from "./v2";
+
+const logger = createLogger("NDB2");
 
 const app = express();
 
@@ -49,7 +52,7 @@ app.get("*", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`[NDB2]: Application listening on port:`, PORT);
+  logger.log(`Application listening on port: ${PORT}`);
 });
 
 // Prediction Monitor Initialization

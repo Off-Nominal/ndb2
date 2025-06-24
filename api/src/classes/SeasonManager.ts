@@ -6,6 +6,9 @@ import predictions from "../db/queries/predictions";
 import { PredictionLifeCycle } from "../types/predicitions";
 import seasonsV2, { SeasonWithDates } from "../v2/queries/seasons";
 import seasons from "../db/queries/seasons";
+import { createLogger } from "../utils/logger";
+
+const logger = createLogger("SM");
 
 export class SeasonManager {
   private seasons: SeasonWithDates[] = [];
@@ -66,7 +69,7 @@ export class SeasonManager {
       }
 
       this.seasons = allSeasons;
-      console.log("[SM]: Successfully refreshed seasons cache.");
+      logger.log("Successfully refreshed seasons cache.");
     });
   }
 
@@ -74,7 +77,7 @@ export class SeasonManager {
     try {
       await this.refreshSeasons(client);
     } catch (err) {
-      return console.error("[SM]: Could not refresh seasons.", err);
+      return logger.error("Could not refresh seasons.", err);
     }
 
     const lastSeason = this.getSeasonByIdentifier("last");
@@ -100,8 +103,8 @@ export class SeasonManager {
         return;
       }
     } catch (err) {
-      return console.error(
-        "[SM]: Could not fetch predictions to determine if season is closed.",
+      return logger.error(
+        "Could not fetch predictions to determine if season is closed.",
         err
       );
     }
@@ -114,9 +117,9 @@ export class SeasonManager {
       webhookManager.emit("season_end", results);
       await client.query("COMMIT");
 
-      console.log("[SM]: Season results posted.");
+      logger.log("Season results posted.");
     } catch (err) {
-      return console.error("Could not post season results.", err);
+      return logger.error("Could not post season results.", err);
     }
   }
 
@@ -136,7 +139,7 @@ export class SeasonManager {
       });
     });
 
-    console.log("[SM]: Seasons Manager running.");
+    logger.log("Seasons Manager running.");
   }
 }
 

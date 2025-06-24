@@ -1,5 +1,5 @@
 import { PredictionSeed } from "../types";
-import { add } from "date-fns";
+import { resolveSeedDate } from "../utils/dateUtils";
 
 export const INSERT_PREDICTIONS_BULK_SQL = `
   INSERT INTO predictions (
@@ -56,22 +56,22 @@ export function createPredictionsBulkInsertData(
     user_ids: predictionSeeds.map((pred) => pred.user_id),
     texts: predictionSeeds.map((pred) => pred.text),
     created_dates: predictionSeeds.map((pred) =>
-      add(baseDate, { hours: pred.created })
+      resolveSeedDate(pred.created, baseDate)
     ),
     due_dates: predictionSeeds.map((pred) =>
-      add(baseDate, { hours: pred.due })
+      resolveSeedDate(pred.due, baseDate)
     ),
     closed_dates: predictionSeeds.map((pred) =>
-      pred.closed ? add(baseDate, { hours: pred.closed }) : null
+      pred.closed ? resolveSeedDate(pred.closed, baseDate) : null
     ),
     retired_dates: predictionSeeds.map((pred) =>
-      pred.retired ? add(baseDate, { hours: pred.retired }) : null
+      pred.retired ? resolveSeedDate(pred.retired, baseDate) : null
     ),
     triggered_dates: predictionSeeds.map((pred) =>
-      pred.triggered ? add(baseDate, { hours: pred.triggered }) : null
+      pred.triggered ? resolveSeedDate(pred.triggered, baseDate) : null
     ),
     judged_dates: predictionSeeds.map((pred) =>
-      pred.judged ? add(baseDate, { hours: pred.judged }) : null
+      pred.judged ? resolveSeedDate(pred.judged, baseDate) : null
     ),
     triggerer_ids: predictionSeeds.map((pred) => pred.triggerer || null),
   };
@@ -83,6 +83,7 @@ export function insertPredictionsBulk(
   baseDate: Date
 ) {
   const bulkData = createPredictionsBulkInsertData(predictionSeeds, baseDate);
+
   return client.query(INSERT_PREDICTIONS_BULK_SQL, [
     bulkData.user_ids,
     bulkData.texts,
