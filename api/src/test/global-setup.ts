@@ -3,6 +3,9 @@
 
 import { Client } from "pg";
 import { reset } from "@offnominal/ndb2-db";
+import { createLogger } from "../utils/logger";
+
+const logger = createLogger("TEST");
 
 // Set the DATABASE_URL to point to the test database
 process.env.DATABASE_URL =
@@ -26,7 +29,7 @@ async function checkDatabaseConnection(): Promise<boolean> {
     await client.end();
     return true;
   } catch (error) {
-    console.error("Failed to connect to test database:", error);
+    logger.error("Failed to connect to test database:", error);
     throw new Error("Test database not accessible");
   }
 }
@@ -38,25 +41,17 @@ export async function resetTestDatabase(
   })
 ): Promise<void> {
   try {
-    console.log("Resetting test database using db package...");
-
     await reset(client, { verbose: false });
-
-    console.log("Test database reset completed successfully");
   } catch (error) {
-    console.error("Failed to reset test database:", error);
+    logger.error("Failed to reset test database:", error);
     throw error;
   }
 }
 
 export default async function setup() {
-  console.log("Setting up test environment...");
-
   // Check if test database is accessible
   await checkDatabaseConnection();
 
   // Reset the database to ensure clean state
   await resetTestDatabase();
-
-  console.log("Test environment setup completed successfully");
 }
