@@ -2,16 +2,18 @@
   "name": "@offnominal/ndb2-api-types",
   "version": "0.2.0",
   "author": "Jake Robins",
-  "types": "./dist/v2/index.d.ts",
+  "types": "./src/v2/index.ts",
   "main": "./dist/v2/index.js",
   "exports": {
     "./v2": {
-      "types": "./dist/v2/index.d.ts",
-      "default": "./dist/v2/index.js"
+      "types": "./src/v2/index.ts",
+      "default": "./dist/v2/index.js",
+      "source": "./src/v2/index.ts"
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "scripts": {
     "build": "tsc",
