@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { Logger, createLogger } from "./logger";
+import { Logger } from "./logger";
 
 describe("Logger", () => {
   let originalEnv: string | undefined;
