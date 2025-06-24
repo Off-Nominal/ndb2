@@ -7,7 +7,6 @@ import { getDbClient } from "../../../middleware/getDbClient";
 import responseUtils from "../../utils/response";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import validate from "express-zod-safe";
-import { EventManager } from "../../../classes/EventManager";
 
 const RequestSchema = {
   params: z.object({
@@ -37,9 +36,6 @@ export const untriggerPredictionById: Route = (router: Router) => {
               ])
             );
           }
-
-          // Log Event
-          EventManager.emit("untriggered_prediction", prediction);
 
           const response = responseUtils.writeSuccess(
             prediction,
