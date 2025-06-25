@@ -5,6 +5,8 @@ import {
   insertPredictionsBulk,
   insertBetsBulk,
   insertVotesBulk,
+  insertSnoozeChecksBulk,
+  insertSnoozeVotesBulk,
 } from "./seedFunctions";
 import {
   UserSeed,
@@ -12,8 +14,18 @@ import {
   PredictionSeed,
   BetSeed,
   VoteSeed,
+  SnoozeCheckSeed,
+  SnoozeVoteSeed,
 } from "./types";
 import { createLogger } from "./utils";
+
+// Import seed data
+import devUsers from "./seeds/dev/users.json";
+import devPredictions from "./seeds/dev/predictions.json";
+import devSeasons from "./seeds/dev/seasons.json";
+import testUsers from "./seeds/test/users.json";
+import testPredictions from "./seeds/test/predictions.json";
+import testSeasons from "./seeds/test/seasons.json";
 
 interface SeedOptions {
   verbose?: boolean;
@@ -27,23 +39,14 @@ export default async (client: any, options: SeedOptions = {}) => {
     return console.error("Cannot run seeding in production.");
   }
 
-  // Determine seed directory based on NODE_ENV
+  // Determine seed data based on NODE_ENV
   const seedEnv = process.env.NODE_ENV === "test" ? "test" : "dev";
-  const seedPath = path.join(__dirname, "seeds", seedEnv);
 
-  // Dynamically import seed files
-  let users: UserSeed[], predictions: PredictionSeed[], seasons: SeasonSeed[];
+  const users = seedEnv === "test" ? testUsers : devUsers;
+  const predictions = seedEnv === "test" ? testPredictions : devPredictions;
+  const seasons = seedEnv === "test" ? testSeasons : devSeasons;
 
-  try {
-    users = require(path.join(seedPath, "users.json"));
-    predictions = require(path.join(seedPath, "predictions.json"));
-    seasons = require(path.join(seedPath, "seasons.json"));
-  } catch (error) {
-    console.error(`Error loading seed files from ${seedPath}:`, error);
-    throw error;
-  }
-
-  log(`Loading seeds from ${seedPath} directory`);
+  log(`Loading seeds from ${seedEnv} environment`);
   log(
     `Found ${users.length} users, ${seasons.length} seasons, ${predictions.length} predictions`
   );
@@ -68,12 +71,16 @@ export default async (client: any, options: SeedOptions = {}) => {
     );
     const predictionIds = predictionsResult.rows.map((row) => row.id);
 
-    // Aggregate all bets and votes for bulk insertion
+    // Aggregate all bets, votes, and snooze checks for bulk insertion
     log("Aggregating related data...");
     const allBets: BetSeed[] = [];
     const allVotes: VoteSeed[] = [];
+    const allSnoozeChecks: SnoozeCheckSeed[] = [];
+
     const betPredictionIds: number[] = [];
     const votePredictionIds: number[] = [];
+    const snoozeCheckPredictionIds: number[] = [];
+    const snoozeCheckToVotesMap: Map<number, SnoozeVoteSeed[]> = new Map();
 
     for (let i = 0; i < predictions.length; i++) {
       const prediction = predictions[i];
@@ -94,6 +101,24 @@ export default async (client: any, options: SeedOptions = {}) => {
           ...Array(prediction.votes.length).fill(predictionId)
         );
       }
+
+      // Collect snooze checks
+      if (prediction.checks && prediction.checks.length > 0) {
+        allSnoozeChecks.push(...prediction.checks);
+        snoozeCheckPredictionIds.push(
+          ...Array(prediction.checks.length).fill(predictionId)
+        );
+
+        // Store snooze votes for later insertion
+        for (let j = 0; j < prediction.checks.length; j++) {
+          const check = prediction.checks[j];
+          if (check.votes && check.votes.length > 0) {
+            const checkIndex =
+              allSnoozeChecks.length - prediction.checks.length + j;
+            snoozeCheckToVotesMap.set(checkIndex, check.votes);
+          }
+        }
+      }
     }
 
     // Insert all bets in bulk (if any exist)
@@ -106,6 +131,41 @@ export default async (client: any, options: SeedOptions = {}) => {
     if (allVotes.length > 0) {
       log(`Inserting ${allVotes.length} votes...`);
       await insertVotesBulk(client, allVotes, votePredictionIds, baseDate);
+    }
+
+    // Insert all snooze checks in bulk (if any exist)
+    if (allSnoozeChecks.length > 0) {
+      log(`Inserting ${allSnoozeChecks.length} snooze checks...`);
+      const snoozeChecksResult = await insertSnoozeChecksBulk(
+        client,
+        allSnoozeChecks,
+        snoozeCheckPredictionIds,
+        baseDate
+      );
+      const snoozeCheckIds = snoozeChecksResult.rows.map((row: any) => row.id);
+
+      // Insert snooze votes if any exist
+      const votesToInsert: SnoozeVoteSeed[] = [];
+      const checkIdsForVotes: number[] = [];
+
+      for (let i = 0; i < allSnoozeChecks.length; i++) {
+        const votes = snoozeCheckToVotesMap.get(i);
+        if (votes && votes.length > 0) {
+          votesToInsert.push(...votes);
+          // Repeat the snooze check ID for each vote
+          checkIdsForVotes.push(...Array(votes.length).fill(snoozeCheckIds[i]));
+        }
+      }
+
+      if (votesToInsert.length > 0) {
+        log(`Inserting ${votesToInsert.length} snooze votes...`);
+        await insertSnoozeVotesBulk(
+          client,
+          votesToInsert,
+          checkIdsForVotes,
+          baseDate
+        );
+      }
     }
 
     log("Seeding completed successfully!");

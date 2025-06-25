@@ -1,9 +1,10 @@
-import { SeedDate } from "../types";
+import { BaseSeedDate, isValidQuarter } from "../types";
 import { add } from "date-fns";
+import * as API from "@offnominal/ndb2-api-types";
 
 export function getQuarterDates(
   baseDate: Date,
-  quarter: "last" | "current" | "next"
+  quarter: API.Entities.Seasons.Identifier
 ): { start: Date; end: Date } {
   const currentQuarter = Math.floor(baseDate.getUTCMonth() / 3);
   const currentYear = baseDate.getUTCFullYear();
@@ -12,7 +13,7 @@ export function getQuarterDates(
   let targetYear: number;
 
   switch (quarter) {
-    case "last":
+    case "past":
       if (currentQuarter === 0) {
         targetQuarter = 3;
         targetYear = currentYear - 1;
@@ -25,7 +26,7 @@ export function getQuarterDates(
       targetQuarter = currentQuarter;
       targetYear = currentYear;
       break;
-    case "next":
+    case "future":
       if (currentQuarter === 3) {
         targetQuarter = 0;
         targetYear = currentYear + 1;
@@ -43,20 +44,30 @@ export function getQuarterDates(
   return { start, end };
 }
 
-export function resolveSeedDate(seedDate: SeedDate, baseDate: Date): Date {
+export function resolveSeedDate(seedDate: BaseSeedDate, baseDate: Date): Date {
   // If it's a string, treat it as an ISO timestamp
   if (typeof seedDate === "string") {
     return new Date(seedDate);
   }
 
   // If it's a complex object with quarter and offset
-  const { quarter, days, hours = 0, minutes = 0, seconds = 0 } = seedDate;
+  const { quarter, days = 0, hours = 0, minutes = 0, seconds = 0 } = seedDate;
 
-  // Get the quarter start date
-  const { start: quarterStart } = getQuarterDates(baseDate, quarter);
+  // If it has a quarter, get the quarter start date
+  let result: Date;
+  if (quarter) {
+    if (!isValidQuarter(quarter)) {
+      throw new Error(`Invalid quarter: ${quarter}`);
+    }
+    const { start } = getQuarterDates(baseDate, quarter);
+    result = start;
+  } else {
+    // If no quarter, use the base date directly
+    result = baseDate;
+  }
 
-  // Add the offset from the quarter start
-  const result = add(quarterStart, {
+  // Add the offset from the quarter start (or base date)
+  result = add(result, {
     days,
     hours,
     minutes,

@@ -39,4 +39,91 @@ describe("GET /predictions/:prediction_id", () => {
     expect(response.status).toBe(200);
     expect(response.body.data.id).toBe(1);
   });
+
+  it("should return complete prediction data for prediction #3", async () => {
+    const response = await request(app).get("/3");
+    expect(response.status).toBe(200);
+
+    const prediction = response.body.data;
+
+    // Verify basic prediction info
+    expect(prediction.status).toBe("successful");
+
+    // Verify predictor
+    expect(prediction.predictor).toEqual({
+      id: "550e8400-e29b-41d4-a716-446655440001",
+      discord_id: "111111111111111111",
+    });
+
+    // Verify bets
+    expect(prediction.bets).toHaveLength(2);
+
+    // First bet (endorsed)
+    const firstBet = prediction.bets.find((bet: any) => bet.endorsed === true);
+    expect(firstBet).toBeDefined();
+    expect(firstBet.better).toEqual({
+      id: "550e8400-e29b-41d4-a716-446655440001",
+      discord_id: "111111111111111111",
+    });
+    expect(firstBet.wager).toBe(0);
+    expect(firstBet.valid).toBe(true);
+
+    // Second bet (not endorsed)
+    const secondBet = prediction.bets.find(
+      (bet: any) => bet.endorsed === false
+    );
+    expect(secondBet).toBeDefined();
+    expect(secondBet.better).toEqual({
+      id: "550e8400-e29b-41d4-a716-446655440002",
+      discord_id: "222222222222222222",
+    });
+    expect(secondBet.wager).toBe(0);
+    expect(secondBet.valid).toBe(true);
+
+    // Verify votes
+    expect(prediction.votes).toHaveLength(2);
+
+    // First vote (true)
+    const firstVote = prediction.votes.find((vote: any) => vote.vote === true);
+    expect(firstVote).toBeDefined();
+    expect(firstVote.voter).toEqual({
+      id: "550e8400-e29b-41d4-a716-446655440001",
+      discord_id: "111111111111111111",
+    });
+
+    // Second vote (false)
+    const secondVote = prediction.votes.find(
+      (vote: any) => vote.vote === false
+    );
+    expect(secondVote).toBeDefined();
+    expect(secondVote.voter).toEqual({
+      id: "550e8400-e29b-41d4-a716-446655440002",
+      discord_id: "222222222222222222",
+    });
+
+    // Verify snooze checks
+    expect(prediction.checks).toHaveLength(1);
+    const check = prediction.checks[0];
+    expect(check.id).toBe(1);
+    expect(check.closed).toBe(true);
+    expect(check.votes).toEqual({
+      day: 3,
+      week: 0,
+      month: 0,
+      quarter: 0,
+      year: 0,
+    });
+
+    // Verify payouts
+    expect(prediction.payouts).toBeDefined();
+    expect(typeof prediction.payouts.endorse).toBe("number");
+    expect(typeof prediction.payouts.undorse).toBe("number");
+
+    // Verify dates are present
+    expect(prediction.created_date).toBeDefined();
+    expect(prediction.closed_date).toBeDefined();
+    expect(prediction.triggered_date).toBeDefined();
+    expect(prediction.judged_date).toBeDefined();
+    expect(prediction.check_date).toBeDefined();
+  });
 });

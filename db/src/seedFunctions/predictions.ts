@@ -1,8 +1,10 @@
-import { PredictionSeed } from "../types";
+import { isValidDriver, PredictionSeed } from "../types";
 import { resolveSeedDate } from "../utils/dateUtils";
+import * as API from "@offnominal/ndb2-api-types";
 
 export const INSERT_PREDICTIONS_BULK_SQL = `
   INSERT INTO predictions (
+    id,
     user_id,
     text,
     created_date,
@@ -11,22 +13,28 @@ export const INSERT_PREDICTIONS_BULK_SQL = `
     retired_date,
     triggered_date,
     judged_date,
-    triggerer_id
+    triggerer_id,
+    driver,
+    check_date
   ) 
   SELECT * FROM UNNEST(
-    $1::uuid[],
-    $2::text[],
-    $3::timestamp[],
+    $1::integer[],
+    $2::uuid[],
+    $3::text[],
     $4::timestamp[],
     $5::timestamp[],
     $6::timestamp[],
     $7::timestamp[],
     $8::timestamp[],
-    $9::uuid[]
+    $9::timestamp[],
+    $10::uuid[],
+    $11::prediction_driver[],
+    $12::timestamp[]
   ) RETURNING id
 `;
 
 export interface PredictionInsertData {
+  id: number;
   user_id: string;
   text: string;
   created_date: Date;
@@ -36,12 +44,15 @@ export interface PredictionInsertData {
   triggered_date: Date | null;
   judged_date: Date | null;
   triggerer_id: string | null;
+  driver: API.Entities.Predictions.PredictionDriver;
+  check_date: Date | null;
 }
 
 export function createPredictionsBulkInsertData(
   predictionSeeds: PredictionSeed[],
   baseDate: Date
 ): {
+  ids: number[];
   user_ids: string[];
   texts: string[];
   created_dates: Date[];
@@ -51,29 +62,71 @@ export function createPredictionsBulkInsertData(
   triggered_dates: (Date | null)[];
   judged_dates: (Date | null)[];
   triggerer_ids: (string | null)[];
+  drivers: API.Entities.Predictions.PredictionDriver[];
+  check_dates: (Date | null)[];
 } {
+  const ids: number[] = [];
+  const user_ids: string[] = [];
+  const texts: string[] = [];
+  const created_dates: Date[] = [];
+  const due_dates: Date[] = [];
+  const closed_dates: (Date | null)[] = [];
+  const retired_dates: (Date | null)[] = [];
+  const triggered_dates: (Date | null)[] = [];
+  const judged_dates: (Date | null)[] = [];
+  const triggerer_ids: (string | null)[] = [];
+  const drivers: API.Entities.Predictions.PredictionDriver[] = [];
+  const check_dates: (Date | null)[] = [];
+
+  for (const pred of predictionSeeds) {
+    if (!pred.baseDate) {
+      console.error("Base date is undefined for prediction: ", pred.id);
+      throw new Error("Base date is undefined");
+    }
+
+    const createdDate = resolveSeedDate(pred.baseDate, baseDate);
+
+    ids.push(pred.id);
+    user_ids.push(pred.user_id);
+    texts.push(pred.text);
+    created_dates.push(createdDate);
+    due_dates.push(pred.due ? resolveSeedDate(pred.due, createdDate) : null);
+    closed_dates.push(
+      pred.closed ? resolveSeedDate(pred.closed, createdDate) : null
+    );
+    retired_dates.push(
+      pred.retired ? resolveSeedDate(pred.retired, createdDate) : null
+    );
+    triggered_dates.push(
+      pred.triggered ? resolveSeedDate(pred.triggered, createdDate) : null
+    );
+    judged_dates.push(
+      pred.judged ? resolveSeedDate(pred.judged, createdDate) : null
+    );
+    triggerer_ids.push(pred.triggerer || null);
+
+    if (!isValidDriver(pred.driver)) {
+      throw new Error(`Invalid driver: ${pred.driver}`);
+    }
+    drivers.push(pred.driver);
+    check_dates.push(
+      pred.check_date ? resolveSeedDate(pred.check_date, createdDate) : null
+    );
+  }
+
   return {
-    user_ids: predictionSeeds.map((pred) => pred.user_id),
-    texts: predictionSeeds.map((pred) => pred.text),
-    created_dates: predictionSeeds.map((pred) =>
-      resolveSeedDate(pred.created, baseDate)
-    ),
-    due_dates: predictionSeeds.map((pred) =>
-      resolveSeedDate(pred.due, baseDate)
-    ),
-    closed_dates: predictionSeeds.map((pred) =>
-      pred.closed ? resolveSeedDate(pred.closed, baseDate) : null
-    ),
-    retired_dates: predictionSeeds.map((pred) =>
-      pred.retired ? resolveSeedDate(pred.retired, baseDate) : null
-    ),
-    triggered_dates: predictionSeeds.map((pred) =>
-      pred.triggered ? resolveSeedDate(pred.triggered, baseDate) : null
-    ),
-    judged_dates: predictionSeeds.map((pred) =>
-      pred.judged ? resolveSeedDate(pred.judged, baseDate) : null
-    ),
-    triggerer_ids: predictionSeeds.map((pred) => pred.triggerer || null),
+    ids,
+    user_ids,
+    texts,
+    created_dates,
+    due_dates,
+    closed_dates,
+    retired_dates,
+    triggered_dates,
+    judged_dates,
+    triggerer_ids,
+    drivers,
+    check_dates,
   };
 }
 
@@ -85,6 +138,7 @@ export function insertPredictionsBulk(
   const bulkData = createPredictionsBulkInsertData(predictionSeeds, baseDate);
 
   return client.query(INSERT_PREDICTIONS_BULK_SQL, [
+    bulkData.ids,
     bulkData.user_ids,
     bulkData.texts,
     bulkData.created_dates,
@@ -94,5 +148,7 @@ export function insertPredictionsBulk(
     bulkData.triggered_dates,
     bulkData.judged_dates,
     bulkData.triggerer_ids,
+    bulkData.drivers,
+    bulkData.check_dates,
   ]);
 }

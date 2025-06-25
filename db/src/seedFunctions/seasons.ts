@@ -1,4 +1,4 @@
-import { SeasonSeed } from "../types";
+import { isValidQuarter, SeasonSeed } from "../types";
 import { getQuarterDates } from "../utils/dateUtils";
 
 export const INSERT_SEASONS_BULK_SQL = `
@@ -36,6 +36,9 @@ export function createSeasonsBulkInsertData(
     names: seasonSeeds.map((season) => season.name),
     starts: seasonSeeds.map((season) => {
       if ("quarter" in season) {
+        if (!isValidQuarter(season.quarter)) {
+          throw new Error(`Invalid quarter: ${season.quarter}`);
+        }
         const { start } = getQuarterDates(baseDate, season.quarter);
         return start.toISOString();
       }
@@ -43,6 +46,9 @@ export function createSeasonsBulkInsertData(
     }),
     ends: seasonSeeds.map((season) => {
       if ("quarter" in season) {
+        if (!isValidQuarter(season.quarter)) {
+          throw new Error(`Invalid quarter: ${season.quarter}`);
+        }
         const { end } = getQuarterDates(baseDate, season.quarter);
         return end.toISOString();
       }

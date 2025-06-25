@@ -24,6 +24,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.10.0",
   "dependencies": {
+    "@offnominal/ndb2-api-types": "workspace:*",
     "date-fns": "^3.6.0",
     "dbmate": "^2.27.0",
     "pg": "^8.15.6"

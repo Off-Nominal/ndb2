@@ -9,39 +9,39 @@ describe("getQuarterDates", () => {
     const result = getQuarterDates(baseDateQ1, "current");
 
     expect(result.start).toEqual(new Date("2024-01-01T00:00:00.000Z"));
-    expect(result.end).toEqual(new Date("2024-04-01T00:00:00.000Z"));
+    expect(result.end).toEqual(new Date("2024-04-01T00:00:00Z"));
   });
 
-  it("should return correct dates for next quarter", () => {
-    const result = getQuarterDates(baseDateQ1, "next");
+  it("should return correct dates for future quarter", () => {
+    const result = getQuarterDates(baseDateQ1, "future");
 
     expect(result.start).toEqual(new Date("2024-04-01T00:00:00.000Z"));
-    expect(result.end).toEqual(new Date("2024-07-01T00:00:00.000Z"));
+    expect(result.end).toEqual(new Date("2024-07-01T00:00:00Z"));
   });
 
-  it("should return correct dates for last quarter", () => {
-    const result = getQuarterDates(baseDateQ1, "last");
+  it("should return correct dates for past quarter", () => {
+    const result = getQuarterDates(baseDateQ1, "past");
 
     expect(result.start).toEqual(new Date("2023-10-01T00:00:00.000Z"));
-    expect(result.end).toEqual(new Date("2024-01-01T00:00:00.000Z"));
+    expect(result.end).toEqual(new Date("2024-01-01T00:00:00Z"));
   });
 
   // Test with a date in Q4 2024
   const baseDateQ4 = new Date("2024-12-15T12:00:00Z");
 
-  it("should handle year transition for next quarter from Q4", () => {
-    const result = getQuarterDates(baseDateQ4, "next");
+  it("should handle year transition for future quarter from Q4", () => {
+    const result = getQuarterDates(baseDateQ4, "future");
 
     expect(result.start).toEqual(new Date("2025-01-01T00:00:00.000Z"));
-    expect(result.end).toEqual(new Date("2025-04-01T00:00:00.000Z"));
+    expect(result.end).toEqual(new Date("2025-04-01T00:00:00Z"));
   });
 
-  it("should handle year transition for last quarter from Q1", () => {
+  it("should handle year transition for past quarter from Q1", () => {
     const baseDateQ1 = new Date("2024-01-15T12:00:00Z");
-    const result = getQuarterDates(baseDateQ1, "last");
+    const result = getQuarterDates(baseDateQ1, "past");
 
     expect(result.start).toEqual(new Date("2023-10-01T00:00:00.000Z"));
-    expect(result.end).toEqual(new Date("2024-01-01T00:00:00.000Z"));
+    expect(result.end).toEqual(new Date("2024-01-01T00:00:00Z"));
   });
 
   // Test with a date in Q2 2024
@@ -51,21 +51,21 @@ describe("getQuarterDates", () => {
     const result = getQuarterDates(baseDateQ2, "current");
 
     expect(result.start).toEqual(new Date("2024-04-01T00:00:00.000Z"));
-    expect(result.end).toEqual(new Date("2024-07-01T00:00:00.000Z"));
+    expect(result.end).toEqual(new Date("2024-07-01T00:00:00Z"));
   });
 
-  it("should return correct dates for Q2 next quarter", () => {
-    const result = getQuarterDates(baseDateQ2, "next");
+  it("should return correct dates for Q2 future quarter", () => {
+    const result = getQuarterDates(baseDateQ2, "future");
 
     expect(result.start).toEqual(new Date("2024-07-01T00:00:00.000Z"));
-    expect(result.end).toEqual(new Date("2024-10-01T00:00:00.000Z"));
+    expect(result.end).toEqual(new Date("2024-10-01T00:00:00Z"));
   });
 
-  it("should return correct dates for Q2 last quarter", () => {
-    const result = getQuarterDates(baseDateQ2, "last");
+  it("should return correct dates for Q2 past quarter", () => {
+    const result = getQuarterDates(baseDateQ2, "past");
 
     expect(result.start).toEqual(new Date("2024-01-01T00:00:00.000Z"));
-    expect(result.end).toEqual(new Date("2024-04-01T00:00:00.000Z"));
+    expect(result.end).toEqual(new Date("2024-04-01T00:00:00Z"));
   });
 });
 
@@ -104,19 +104,19 @@ describe("resolveSeedDate", () => {
       expect(result).toEqual(new Date("2024-01-16T06:30:45.000Z"));
     });
 
-    it("should resolve next quarter with day offset", () => {
-      const seedDate = { quarter: "next" as const, days: 1 };
+    it("should resolve future quarter with day offset", () => {
+      const seedDate = { quarter: "future" as const, days: 1 };
       const result = resolveSeedDate(seedDate, baseDate);
 
-      // Next quarter starts 2024-04-01, so day 1 should be 2024-04-02
+      // Future quarter starts 2024-04-01, so day 1 should be 2024-04-02
       expect(result).toEqual(new Date("2024-04-02T00:00:00.000Z"));
     });
 
-    it("should resolve last quarter with day offset", () => {
-      const seedDate = { quarter: "last" as const, days: 30 };
+    it("should resolve past quarter with day offset", () => {
+      const seedDate = { quarter: "past" as const, days: 30 };
       const result = resolveSeedDate(seedDate, baseDate);
 
-      // Last quarter starts 2023-10-01, so day 30 should be 2023-10-31
+      // Past quarter starts 2023-10-01, so day 30 should be 2023-10-31
       expect(result).toEqual(new Date("2023-10-31T00:00:00.000Z"));
     });
 

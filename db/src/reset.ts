@@ -13,22 +13,17 @@ export default async (
   const { verbose = false } = options;
 
   if (process.env.NODE_ENV === "production") {
-    return console.error("Cannot run db reset in production.");
+    throw new Error("Cannot run db reset in production.");
   }
 
-  try {
-    await client.connect();
-  } catch (err) {
-    console.error(err);
-    throw err;
-  }
+  await client.connect();
 
   try {
     await empty(client, { verbose });
     await seed(client, { verbose });
-  } catch (err) {
-    console.error(err);
-  } finally {
     await client.end();
+  } catch (err) {
+    await client.end();
+    throw err;
   }
 };
