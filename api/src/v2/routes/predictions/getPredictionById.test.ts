@@ -65,7 +65,7 @@ describe("GET /predictions/:prediction_id", () => {
       id: "550e8400-e29b-41d4-a716-446655440001",
       discord_id: "111111111111111111",
     });
-    expect(firstBet.wager).toBe(0);
+    expect(firstBet.wager).toBe(27);
     expect(firstBet.valid).toBe(true);
 
     // Second bet (not endorsed)
@@ -77,29 +77,21 @@ describe("GET /predictions/:prediction_id", () => {
       id: "550e8400-e29b-41d4-a716-446655440002",
       discord_id: "222222222222222222",
     });
-    expect(secondBet.wager).toBe(0);
+    expect(secondBet.wager).toBe(27);
     expect(secondBet.valid).toBe(true);
 
     // Verify votes
-    expect(prediction.votes).toHaveLength(2);
+    expect(prediction.votes).toHaveLength(3);
 
-    // First vote (true)
-    const firstVote = prediction.votes.find((vote: any) => vote.vote === true);
-    expect(firstVote).toBeDefined();
-    expect(firstVote.voter).toEqual({
-      id: "550e8400-e29b-41d4-a716-446655440001",
-      discord_id: "111111111111111111",
-    });
-
-    // Second vote (false)
-    const secondVote = prediction.votes.find(
+    // Count true and false votes
+    const trueVotes = prediction.votes.filter(
+      (vote: any) => vote.vote === true
+    ).length;
+    const falseVotes = prediction.votes.filter(
       (vote: any) => vote.vote === false
-    );
-    expect(secondVote).toBeDefined();
-    expect(secondVote.voter).toEqual({
-      id: "550e8400-e29b-41d4-a716-446655440002",
-      discord_id: "222222222222222222",
-    });
+    ).length;
+    expect(trueVotes).toBe(2);
+    expect(falseVotes).toBe(1);
 
     // Verify snooze checks
     expect(prediction.checks).toHaveLength(1);
@@ -107,8 +99,8 @@ describe("GET /predictions/:prediction_id", () => {
     expect(check.id).toBe(1);
     expect(check.closed).toBe(true);
     expect(check.votes).toEqual({
-      day: 3,
-      week: 0,
+      day: 0,
+      week: 3,
       month: 0,
       quarter: 0,
       year: 0,

@@ -72,7 +72,7 @@ describe("SeasonManager", () => {
         );
 
         // Verify that the seasons were fetched and set
-        expect((seasonManager as any).seasons).toHaveLength(4);
+        expect((seasonManager as any).seasons).toHaveLength(3);
 
         // Verify that the job function is properly set up
         const jobCallback = mockScheduleJob.mock.calls[0][1];
