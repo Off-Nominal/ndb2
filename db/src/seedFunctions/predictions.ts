@@ -7,30 +7,49 @@ export const INSERT_PREDICTIONS_BULK_SQL = `
     id,
     user_id,
     text,
+    driver,
     created_date,
     due_date,
-    closed_date,
-    retired_date,
-    triggered_date,
-    judged_date,
-    triggerer_id,
-    driver,
     check_date
   ) 
   SELECT * FROM UNNEST(
     $1::integer[],
     $2::uuid[],
     $3::text[],
-    $4::timestamp[],
+    $4::prediction_driver[],
     $5::timestamp[],
     $6::timestamp[],
-    $7::timestamp[],
-    $8::timestamp[],
-    $9::timestamp[],
-    $10::uuid[],
-    $11::prediction_driver[],
-    $12::timestamp[]
+    $7::timestamp[]
   ) RETURNING id
+`;
+
+// Bulk SQL for updating prediction dates during lifecycle
+export const UPDATE_PREDICTIONS_RETIRED_DATE_BULK_SQL = `
+  UPDATE predictions 
+  SET retired_date = data_table.retired_date
+  FROM (SELECT * FROM UNNEST($1::integer[], $2::timestamp[])) AS data_table(id, retired_date)
+  WHERE predictions.id = data_table.id
+`;
+
+export const UPDATE_PREDICTIONS_TRIGGERED_DATE_BULK_SQL = `
+  UPDATE predictions 
+  SET triggered_date = data_table.triggered_date, closed_date = data_table.closed_date, triggerer_id = data_table.triggerer_id
+  FROM (SELECT * FROM UNNEST($1::integer[], $2::timestamp[], $3::timestamp[], $4::uuid[])) AS data_table(id, triggered_date, closed_date, triggerer_id)
+  WHERE predictions.id = data_table.id
+`;
+
+export const UPDATE_PREDICTIONS_JUDGED_DATE_BULK_SQL = `
+  UPDATE predictions 
+  SET judged_date = data_table.judged_date
+  FROM (SELECT * FROM UNNEST($1::integer[], $2::timestamp[])) AS data_table(id, judged_date)
+  WHERE predictions.id = data_table.id
+`;
+
+export const UPDATE_SNOOZE_CHECKS_CLOSED_DATE_BULK_SQL = `
+  UPDATE snooze_checks 
+  SET closed = true, closed_date = data_table.closed_date
+  FROM (SELECT * FROM UNNEST($1::integer[], $2::timestamp[])) AS data_table(id, closed_date)
+  WHERE snooze_checks.id = data_table.id
 `;
 
 export interface PredictionInsertData {
@@ -39,11 +58,6 @@ export interface PredictionInsertData {
   text: string;
   created_date: Date;
   due_date: Date;
-  closed_date: Date | null;
-  retired_date: Date | null;
-  triggered_date: Date | null;
-  judged_date: Date | null;
-  triggerer_id: string | null;
   driver: API.Entities.Predictions.PredictionDriver;
   check_date: Date | null;
 }
@@ -57,11 +71,6 @@ export function createPredictionsBulkInsertData(
   texts: string[];
   created_dates: Date[];
   due_dates: Date[];
-  closed_dates: (Date | null)[];
-  retired_dates: (Date | null)[];
-  triggered_dates: (Date | null)[];
-  judged_dates: (Date | null)[];
-  triggerer_ids: (string | null)[];
   drivers: API.Entities.Predictions.PredictionDriver[];
   check_dates: (Date | null)[];
 } {
@@ -70,11 +79,6 @@ export function createPredictionsBulkInsertData(
   const texts: string[] = [];
   const created_dates: Date[] = [];
   const due_dates: Date[] = [];
-  const closed_dates: (Date | null)[] = [];
-  const retired_dates: (Date | null)[] = [];
-  const triggered_dates: (Date | null)[] = [];
-  const judged_dates: (Date | null)[] = [];
-  const triggerer_ids: (string | null)[] = [];
   const drivers: API.Entities.Predictions.PredictionDriver[] = [];
   const check_dates: (Date | null)[] = [];
 
@@ -91,19 +95,6 @@ export function createPredictionsBulkInsertData(
     texts.push(pred.text);
     created_dates.push(createdDate);
     due_dates.push(pred.due ? resolveSeedDate(pred.due, createdDate) : null);
-    closed_dates.push(
-      pred.closed ? resolveSeedDate(pred.closed, createdDate) : null
-    );
-    retired_dates.push(
-      pred.retired ? resolveSeedDate(pred.retired, createdDate) : null
-    );
-    triggered_dates.push(
-      pred.triggered ? resolveSeedDate(pred.triggered, createdDate) : null
-    );
-    judged_dates.push(
-      pred.judged ? resolveSeedDate(pred.judged, createdDate) : null
-    );
-    triggerer_ids.push(pred.triggerer || null);
 
     if (!isValidDriver(pred.driver)) {
       throw new Error(`Invalid driver: ${pred.driver}`);
@@ -120,11 +111,6 @@ export function createPredictionsBulkInsertData(
     texts,
     created_dates,
     due_dates,
-    closed_dates,
-    retired_dates,
-    triggered_dates,
-    judged_dates,
-    triggerer_ids,
     drivers,
     check_dates,
   };
@@ -141,14 +127,62 @@ export function insertPredictionsBulk(
     bulkData.ids,
     bulkData.user_ids,
     bulkData.texts,
+    bulkData.drivers,
     bulkData.created_dates,
     bulkData.due_dates,
-    bulkData.closed_dates,
-    bulkData.retired_dates,
-    bulkData.triggered_dates,
-    bulkData.judged_dates,
-    bulkData.triggerer_ids,
-    bulkData.drivers,
     bulkData.check_dates,
+  ]);
+}
+
+// New bulk lifecycle functions
+export async function retirePredictionsBulk(
+  client: any,
+  predictionIds: number[],
+  retiredDates: Date[]
+) {
+  if (predictionIds.length === 0) return;
+  return client.query(UPDATE_PREDICTIONS_RETIRED_DATE_BULK_SQL, [
+    predictionIds,
+    retiredDates,
+  ]);
+}
+
+export async function triggerPredictionsBulk(
+  client: any,
+  predictionIds: number[],
+  triggeredDates: Date[],
+  closedDates: Date[],
+  triggerer_id: string[]
+) {
+  if (predictionIds.length === 0) return;
+  return client.query(UPDATE_PREDICTIONS_TRIGGERED_DATE_BULK_SQL, [
+    predictionIds,
+    triggeredDates,
+    closedDates,
+    triggerer_id,
+  ]);
+}
+
+export async function judgePredictionsBulk(
+  client: any,
+  predictionIds: number[],
+  judgedDates: Date[]
+) {
+  if (predictionIds.length === 0) return;
+  return client.query(UPDATE_PREDICTIONS_JUDGED_DATE_BULK_SQL, [
+    predictionIds,
+    judgedDates,
+  ]);
+}
+
+export async function closeSnoozeChecksBulk(
+  client: any,
+  snoozeCheckIds: number[],
+  closedDates: Date[]
+) {
+  if (snoozeCheckIds.length === 0) return;
+  return client.query(UPDATE_SNOOZE_CHECKS_CLOSED_DATE_BULK_SQL, [
+    snoozeCheckIds,
+    closedDates,
   ]);
 }

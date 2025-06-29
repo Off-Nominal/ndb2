@@ -7,7 +7,7 @@
   },
   {
     "name": "Past",
-    "quarter": "last",
+    "quarter": "past",
     "payout_formula": "(ln($1/$2/2.0)/1.3)+1"
   },
   {
@@ -17,7 +17,7 @@
   },
   {
     "name": "Future",
-    "quarter": "next",
+    "quarter": "future",
     "payout_formula": "(ln($1/$2/2.0)/1.3)+1"
   }
 ]

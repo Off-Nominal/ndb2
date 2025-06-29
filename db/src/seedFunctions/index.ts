@@ -28,3 +28,11 @@ export {
   insertSnoozeVotesBulk,
   insertSnoozeChecksFromPredictions,
 } from "./snooze_checks";
+
+// Export bulk lifecycle functions
+export {
+  retirePredictionsBulk,
+  triggerPredictionsBulk,
+  judgePredictionsBulk,
+  closeSnoozeChecksBulk,
+} from "./predictions";

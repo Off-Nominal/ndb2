@@ -1,4 +1,3 @@
-import path from "path";
 import {
   insertUsersBulk,
   insertSeasonsBulk,
@@ -7,17 +6,14 @@ import {
   insertVotesBulk,
   insertSnoozeChecksBulk,
   insertSnoozeVotesBulk,
+  retirePredictionsBulk,
+  triggerPredictionsBulk,
+  judgePredictionsBulk,
+  closeSnoozeChecksBulk,
 } from "./seedFunctions";
-import {
-  UserSeed,
-  SeasonSeed,
-  PredictionSeed,
-  BetSeed,
-  VoteSeed,
-  SnoozeCheckSeed,
-  SnoozeVoteSeed,
-} from "./types";
+import { BetSeed, VoteSeed, SnoozeCheckSeed, SnoozeVoteSeed } from "./types";
 import { createLogger } from "./utils";
+import { resolveSeedDate } from "./utils/dateUtils";
 
 // Import seed data
 import devUsers from "./seeds/dev/users.json";
@@ -54,16 +50,16 @@ export default async (client: any, options: SeedOptions = {}) => {
   const baseDate = new Date();
 
   try {
-    // Insert all users in bulk
-    log("Inserting users...");
+    // Step 1: Insert all users in bulk
+    log("Step 1: Inserting users...");
     await insertUsersBulk(client, users);
 
-    // Insert all seasons in bulk
-    log("Inserting seasons...");
+    // Step 2: Insert all seasons in bulk
+    log("Step 2: Inserting seasons...");
     await insertSeasonsBulk(client, seasons, baseDate);
 
-    // Insert all predictions in bulk and get their IDs
-    log("Inserting predictions...");
+    // Step 3: Create the base prediction entities with most properties including created_date, check_date, due_date
+    log("Step 3: Inserting base predictions...");
     const predictionsResult = await insertPredictionsBulk(
       client,
       predictions,
@@ -71,14 +67,53 @@ export default async (client: any, options: SeedOptions = {}) => {
     );
     const predictionIds = predictionsResult.rows.map((row) => row.id);
 
-    // Aggregate all bets, votes, and snooze checks for bulk insertion
-    log("Aggregating related data...");
+    // Step 4: Create all the bets entities
+    log("Step 4: Inserting bets...");
     const allBets: BetSeed[] = [];
-    const allVotes: VoteSeed[] = [];
-    const allSnoozeChecks: SnoozeCheckSeed[] = [];
-
     const betPredictionIds: number[] = [];
-    const votePredictionIds: number[] = [];
+
+    for (let i = 0; i < predictions.length; i++) {
+      const prediction = predictions[i];
+      const predictionId = predictionIds[i];
+
+      if (prediction.bets && prediction.bets.length > 0) {
+        allBets.push(...prediction.bets);
+        betPredictionIds.push(
+          ...Array(prediction.bets.length).fill(predictionId)
+        );
+      }
+    }
+
+    if (allBets.length > 0) {
+      log(`Inserting ${allBets.length} bets...`);
+      await insertBetsBulk(client, allBets, betPredictionIds, baseDate);
+    }
+
+    // Step 5: Retire any predictions with retired properties in the seeds
+    log("Step 5: Retiring predictions...");
+    const predictionsToRetire: number[] = [];
+    const retiredDates: Date[] = [];
+
+    for (let i = 0; i < predictions.length; i++) {
+      const prediction = predictions[i];
+      const predictionId = predictionIds[i];
+
+      if ("retired" in prediction && prediction.retired) {
+        const createdDate = resolveSeedDate(prediction.baseDate, baseDate);
+        const retiredDate = resolveSeedDate(prediction.retired, createdDate);
+        predictionsToRetire.push(predictionId);
+        retiredDates.push(retiredDate);
+      }
+    }
+
+    if (predictionsToRetire.length > 0) {
+      log(`Retiring ${predictionsToRetire.length} predictions...`);
+      await retirePredictionsBulk(client, predictionsToRetire, retiredDates);
+    }
+
+    // Step 6: Create any snooze checks and snooze votes
+    log("Step 6: Inserting snooze checks and votes...");
+    const allSnoozeChecks: SnoozeCheckSeed[] = [];
     const snoozeCheckPredictionIds: number[] = [];
     const snoozeCheckToVotesMap: Map<number, SnoozeVoteSeed[]> = new Map();
 
@@ -86,23 +121,6 @@ export default async (client: any, options: SeedOptions = {}) => {
       const prediction = predictions[i];
       const predictionId = predictionIds[i];
 
-      // Collect bets
-      if (prediction.bets && prediction.bets.length > 0) {
-        allBets.push(...prediction.bets);
-        betPredictionIds.push(
-          ...Array(prediction.bets.length).fill(predictionId)
-        );
-      }
-
-      // Collect votes
-      if (prediction.votes && prediction.votes.length > 0) {
-        allVotes.push(...prediction.votes);
-        votePredictionIds.push(
-          ...Array(prediction.votes.length).fill(predictionId)
-        );
-      }
-
-      // Collect snooze checks
       if (prediction.checks && prediction.checks.length > 0) {
         allSnoozeChecks.push(...prediction.checks);
         snoozeCheckPredictionIds.push(
@@ -121,19 +139,6 @@ export default async (client: any, options: SeedOptions = {}) => {
       }
     }
 
-    // Insert all bets in bulk (if any exist)
-    if (allBets.length > 0) {
-      log(`Inserting ${allBets.length} bets...`);
-      await insertBetsBulk(client, allBets, betPredictionIds, baseDate);
-    }
-
-    // Insert all votes in bulk (if any exist)
-    if (allVotes.length > 0) {
-      log(`Inserting ${allVotes.length} votes...`);
-      await insertVotesBulk(client, allVotes, votePredictionIds, baseDate);
-    }
-
-    // Insert all snooze checks in bulk (if any exist)
     if (allSnoozeChecks.length > 0) {
       log(`Inserting ${allSnoozeChecks.length} snooze checks...`);
       const snoozeChecksResult = await insertSnoozeChecksBulk(
@@ -166,6 +171,130 @@ export default async (client: any, options: SeedOptions = {}) => {
           baseDate
         );
       }
+
+      // Step 7: Close any snooze checks with closed_at properties set
+      log("Step 7: Closing snooze checks...");
+      const checksToClose: number[] = [];
+      const checkClosedDates: Date[] = [];
+
+      for (let i = 0; i < allSnoozeChecks.length; i++) {
+        const check = allSnoozeChecks[i];
+        const checkId = snoozeCheckIds[i];
+
+        if (check.closed) {
+          // Find which prediction this snooze check belongs to
+          let predictionIndex = 0;
+          let checkCount = 0;
+          for (let j = 0; j < predictions.length; j++) {
+            const predChecks = predictions[j].checks || [];
+            if (i >= checkCount && i < checkCount + predChecks.length) {
+              predictionIndex = j;
+              break;
+            }
+            checkCount += predChecks.length;
+          }
+
+          const prediction = predictions[predictionIndex];
+          const createdDate = resolveSeedDate(prediction.baseDate, baseDate);
+          const closedDate = resolveSeedDate(check.closed, createdDate);
+          checksToClose.push(checkId);
+          checkClosedDates.push(closedDate);
+        }
+      }
+
+      if (checksToClose.length > 0) {
+        log(`Closing ${checksToClose.length} snooze checks...`);
+        await closeSnoozeChecksBulk(client, checksToClose, checkClosedDates);
+      }
+    }
+
+    // Step 8: Trigger any predictions with triggered_date properties and set their closed_date properties
+    log("Step 8: Triggering predictions...");
+    const predictionsToTrigger: number[] = [];
+    const triggeredDates: Date[] = [];
+    const closedDates: Date[] = [];
+    const triggererIds: string[] = [];
+
+    for (let i = 0; i < predictions.length; i++) {
+      const prediction = predictions[i];
+      const predictionId = predictionIds[i];
+
+      if (
+        "triggered" in prediction &&
+        prediction.triggered &&
+        "closed" in prediction &&
+        prediction.closed
+      ) {
+        const createdDate = resolveSeedDate(prediction.baseDate, baseDate);
+        const triggeredDate = resolveSeedDate(
+          prediction.triggered,
+          createdDate
+        );
+        const closedDate = resolveSeedDate(prediction.closed, createdDate);
+        predictionsToTrigger.push(predictionId);
+        triggeredDates.push(triggeredDate);
+        closedDates.push(closedDate);
+        triggererIds.push(
+          "triggerer" in prediction && prediction.triggerer
+            ? (prediction.triggerer as string)
+            : null
+        );
+      }
+    }
+
+    if (predictionsToTrigger.length > 0) {
+      log(`Triggering ${predictionsToTrigger.length} predictions...`);
+      await triggerPredictionsBulk(
+        client,
+        predictionsToTrigger,
+        triggeredDates,
+        closedDates,
+        triggererIds
+      );
+    }
+
+    // Step 9: Create any votes entities
+    log("Step 9: Inserting votes...");
+    const allVotes: VoteSeed[] = [];
+    const votePredictionIds: number[] = [];
+
+    for (let i = 0; i < predictions.length; i++) {
+      const prediction = predictions[i];
+      const predictionId = predictionIds[i];
+
+      if (prediction.votes && prediction.votes.length > 0) {
+        allVotes.push(...prediction.votes);
+        votePredictionIds.push(
+          ...Array(prediction.votes.length).fill(predictionId)
+        );
+      }
+    }
+
+    if (allVotes.length > 0) {
+      log(`Inserting ${allVotes.length} votes...`);
+      await insertVotesBulk(client, allVotes, votePredictionIds, baseDate);
+    }
+
+    // Step 10: Finalize any predictions with judged_date properties
+    log("Step 10: Judging predictions...");
+    const predictionsToJudge: number[] = [];
+    const judgedDates: Date[] = [];
+
+    for (let i = 0; i < predictions.length; i++) {
+      const prediction = predictions[i];
+      const predictionId = predictionIds[i];
+
+      if ("judged" in prediction && prediction.judged) {
+        const createdDate = resolveSeedDate(prediction.baseDate, baseDate);
+        const judgedDate = resolveSeedDate(prediction.judged, createdDate);
+        predictionsToJudge.push(predictionId);
+        judgedDates.push(judgedDate);
+      }
+    }
+
+    if (predictionsToJudge.length > 0) {
+      log(`Judging ${predictionsToJudge.length} predictions...`);
+      await judgePredictionsBulk(client, predictionsToJudge, judgedDates);
     }
 
     log("Seeding completed successfully!");
