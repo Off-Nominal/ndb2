@@ -7,7 +7,7 @@ import predictionStatusValidator from "../../middleware/predictionStatusValidato
 import bets from "../../db/queries/bets";
 import predictions from "../../db/queries/predictions";
 import { PredictionLifeCycle } from "../../types/predicitions";
-import responseUtils from "../../utils/response";
+import responseUtils_deprecated from "../../utils/response";
 import { getDbClient } from "../../middleware/getDbClient";
 import { add, isAfter } from "date-fns";
 import GAME_MECHANICS from "../../config/game_mechanics";
@@ -27,6 +27,17 @@ router.post(
     predictionStatusValidator(PredictionLifeCycle.OPEN),
   ],
   async (req: Request, res: Response) => {
+    if (!req.prediction || !req.dbClient || !req.user_id) {
+      return res
+        .status(500)
+        .json(
+          responseUtils_deprecated.writeError(
+            ErrorCode.SERVER_ERROR,
+            "Something went wrong. Please try again.",
+            null
+          )
+        );
+    }
     const { discord_id, endorsed } = req.body;
 
     // Validate if bet has already been made by the user
@@ -40,7 +51,7 @@ router.post(
         return res
           .status(400)
           .json(
-            responseUtils.writeError(
+            responseUtils_deprecated.writeError(
               ErrorCode.BETS_NO_CHANGE,
               `You have already ${
                 bet.endorsed ? "endorsed" : "undorsed"
@@ -60,9 +71,10 @@ router.post(
         return res
           .status(403)
           .json(
-            responseUtils.writeError(
+            responseUtils_deprecated.writeError(
               ErrorCode.BETS_UNCHANGEABLE,
-              `Bets cannot be changed past the allowable time window of ${GAME_MECHANICS.predictionUpdateWindow} hours since the bet was made.`
+              `Bets cannot be changed past the allowable time window of ${GAME_MECHANICS.predictionUpdateWindow} hours since the bet was made.`,
+              null
             )
           );
       }
@@ -70,8 +82,16 @@ router.post(
 
     bets
       .add(req.dbClient)(req.user_id, req.prediction.id, endorsed)
-      .then((b) => predictions.getPredictionById(req.dbClient)(b.prediction_id))
+      .then((b) => {
+        if (!req.prediction || !req.dbClient) {
+          throw new Error("Prediction or DB client is not defined");
+        }
+        return predictions.getPredictionById(req.dbClient)(b.prediction_id);
+      })
       .then((ep) => {
+        if (!ep) {
+          throw new Error("Prediction not found");
+        }
         // Notify subscribers
         webhookManager.emit("new_bet", ep);
 
@@ -79,14 +99,18 @@ router.post(
           ? "Bet successfully changed"
           : "Bet created successfully";
 
-        res.json(responseUtils.writeSuccess(ep, message));
+        res.json(responseUtils_deprecated.writeSuccess(ep, message));
       })
       .catch((err) => {
         console.error(err);
         res
           .status(500)
           .json(
-            responseUtils.writeError(ErrorCode.SERVER_ERROR, "Error Adding bet")
+            responseUtils_deprecated.writeError(
+              ErrorCode.SERVER_ERROR,
+              "Error Adding bet",
+              null
+            )
           );
       });
   }

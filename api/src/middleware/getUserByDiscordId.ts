@@ -1,14 +1,52 @@
-import { NextFunction, Request, Response } from "express";
 import users from "../db/queries/users";
-import responseUtils from "../utils/response";
+import responseUtils_deprecated from "../utils/response";
 import { ErrorCode } from "../types/responses";
+import { WeakRequestHandler } from "express-zod-safe";
 
-export const getUserByDiscordId = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
+export const getUserByDiscordId: WeakRequestHandler = async (
+  req,
+  res,
+  next
 ) => {
-  const discord_id = req.params.discord_id || req.body.discord_id;
+  if (!req.dbClient) {
+    return res
+      .status(500)
+      .json(
+        responseUtils_deprecated.writeError(
+          ErrorCode.SERVER_ERROR,
+          "Database client is missing.",
+          null
+        )
+      );
+  }
+
+  if (!req.params) {
+    return res
+      .status(400)
+      .json(
+        responseUtils_deprecated.writeError(
+          ErrorCode.MALFORMED_QUERY_PARAMS,
+          "Query params are missing.",
+          null
+        )
+      );
+  }
+
+  if (!req.body) {
+    return res
+      .status(400)
+      .json(
+        responseUtils_deprecated.writeError(
+          ErrorCode.MALFORMED_BODY_DATA,
+          "Body data is missing.",
+          null
+        )
+      );
+  }
+
+  const discord_id =
+    req.params["discord_id" as keyof typeof req.params] ||
+    req.body["discord_id" as keyof typeof req.body];
 
   try {
     const fetchedUser = await users.getByDiscordId(req.dbClient)(discord_id);
@@ -23,9 +61,10 @@ export const getUserByDiscordId = async (
     return res
       .status(500)
       .json(
-        responseUtils.writeError(
+        responseUtils_deprecated.writeError(
           ErrorCode.SERVER_ERROR,
-          "Error Fetching or Adding user"
+          "Error Fetching or Adding user",
+          null
         )
       );
   }

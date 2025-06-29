@@ -4,12 +4,31 @@
   "description": "Nostradambot 2.0 Betting Game for the Off-Nominal Discord",
   "main": "index.js",
   "scripts": {
-    "dev": "pnpm --filter ndb2-api dev",
+    "dev": "NODE_ENV=dev pnpm --filter @offnominal/ndb2-api-types build && concurrently \"pnpm --filter @offnominal/ndb2-api-types dev\" \"pnpm --filter ndb2-api dev\" \"pnpm --filter ndb2-api sql-watch\"",
     "start": "pnpm --filter ndb2-api start",
     "build": "pnpm --filter ndb2-api build",
-    "clear": "pnpm --filter ndb2-api clear"
+    "compile": "pnpm --filter ndb2-api compile",
+    "test": "concurrently \"pnpm --filter ndb2-api test\" \"pnpm --filter @offnominal/ndb2-db test\"",
+    "test:watch": "concurrently \"pnpm --filter ndb2-api test:watch\" \"pnpm --filter @offnominal/ndb2-db test:watch\"",
+    "test:db:start": "pnpm --filter db test:db:start",
+    "test:db:stop": "pnpm --filter db test:db:stop",
+    "test:db:seed": "NODE_ENV=test pnpm --filter ndb2-db test:db:seed",
+    "dev:db:start": "pnpm --filter db dev:db:start",
+    "dev:db:stop": "pnpm --filter db dev:db:stop",
+    "dev:db:seed": "NODE_ENV=dev pnpm --filter ndb2-db dev:db:seed"
+  },
+  "bugs": {
+    "url": "https://github.com/mendahu/ndb2/issues"
   },
   "author": "Jake Robins",
   "license": "ISC",
-  "packageManager": "pnpm@10.10.0"
+  "packageManager": "pnpm@10.10.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mendahu/ndb2.git"
+  },
+  "homepage": "https://github.com/mendahu/ndb2#readme",
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
 }

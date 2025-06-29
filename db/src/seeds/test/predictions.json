@@ -1,0 +1,189 @@
+[
+  {
+    "id": 1,
+    "user_id": "550e8400-e29b-41d4-a716-446655440001",
+    "text": "A simple date-driven prediction",
+    "driver": "date",
+    "baseDate": {
+      "quarter": "past",
+      "days": 20
+    },
+    "due": {
+      "days": 10
+    },
+    "bets": [
+      {
+        "user_id": "550e8400-e29b-41d4-a716-446655440001",
+        "created": {
+          "days": 0
+        },
+        "endorsed": true
+      },
+      {
+        "user_id": "550e8400-e29b-41d4-a716-446655440002",
+        "created": {
+          "days": 1
+        },
+        "endorsed": true
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "user_id": "550e8400-e29b-41d4-a716-446655440001",
+    "text": "A simple closed date-driven prediction",
+    "driver": "date",
+    "baseDate": {
+      "quarter": "past",
+      "days": 25
+    },
+    "due": {
+      "days": 40
+    },
+    "closed": {
+      "days": 40
+    },
+    "triggered": {
+      "days": 40
+    },
+    "judged": {
+      "days": 41
+    },
+    "bets": [
+      {
+        "user_id": "550e8400-e29b-41d4-a716-446655440001",
+        "created": {
+          "minutes": 5
+        },
+        "endorsed": true
+      },
+      {
+        "user_id": "550e8400-e29b-41d4-a716-446655440002",
+        "created": {
+          "minutes": 15
+        },
+        "endorsed": false
+      }
+    ],
+    "votes": [
+      {
+        "user_id": "550e8400-e29b-41d4-a716-446655440001",
+        "voted": {
+          "days": 40,
+          "minutes": 5
+        },
+        "vote": true
+      },
+      {
+        "user_id": "550e8400-e29b-41d4-a716-446655440002",
+        "voted": {
+          "days": 40,
+          "minutes": 15
+        },
+        "vote": false
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "user_id": "550e8400-e29b-41d4-a716-446655440001",
+    "text": "A simple closed event-driven prediction",
+    "driver": "event",
+    "baseDate": {
+      "quarter": "past",
+      "days": 25
+    },
+    "check_date": {
+      "days": 20
+    },
+    "closed": {
+      "days": 27
+    },
+    "triggered": {
+      "days": 27
+    },
+    "judged": {
+      "days": 28
+    },
+    "bets": [
+      {
+        "user_id": "550e8400-e29b-41d4-a716-446655440001",
+        "created": {
+          "days": 0
+        },
+        "endorsed": true
+      },
+      {
+        "user_id": "550e8400-e29b-41d4-a716-446655440002",
+        "created": {
+          "days": 1,
+          "minutes": 5
+        },
+        "endorsed": false
+      }
+    ],
+    "votes": [
+      {
+        "user_id": "550e8400-e29b-41d4-a716-446655440001",
+        "voted": {
+          "days": 27,
+          "minutes": 5
+        },
+        "vote": true
+      },
+      {
+        "user_id": "550e8400-e29b-41d4-a716-446655440002",
+        "voted": {
+          "days": 27,
+          "minutes": 15
+        },
+        "vote": false
+      },
+      {
+        "user_id": "550e8400-e29b-41d4-a716-446655440003",
+        "voted": {
+          "days": 27,
+          "minutes": 25
+        },
+        "vote": true
+      }
+    ],
+    "checks": [
+      {
+        "checked": {
+          "days": 20
+        },
+        "closed": {
+          "days": 20,
+          "minutes": 30
+        },
+        "votes": [
+          {
+            "user_id": "550e8400-e29b-41d4-a716-446655440001",
+            "value": 7,
+            "created": {
+              "days": 20,
+              "minutes": 5
+            }
+          },
+          {
+            "user_id": "550e8400-e29b-41d4-a716-446655440002",
+            "value": 7,
+            "created": {
+              "days": 20,
+              "minutes": 15
+            }
+          },
+          {
+            "user_id": "550e8400-e29b-41d4-a716-446655440003",
+            "value": 7,
+            "created": {
+              "days": 20,
+              "minutes": 25
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

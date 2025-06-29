@@ -1,44 +1,65 @@
-import { NextFunction, Request, Response } from "express";
 import predictions from "../db/queries/predictions";
 import { APIPredictions } from "../types/predicitions";
-import responseUtils from "../utils/response";
+import responseUtils_deprecated from "../utils/response";
 import { ErrorCode } from "../types/responses";
+import { WeakRequestHandler } from "express-zod-safe";
 
-export const getPrediction = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const { prediction_id } = req.params;
+export const getPrediction: WeakRequestHandler = async (req, res, next) => {
+  if (!req.params) {
+    return res
+      .status(400)
+      .json(
+        responseUtils_deprecated.writeError(
+          ErrorCode.MALFORMED_QUERY_PARAMS,
+          "Query params are missing.",
+          null
+        )
+      );
+  }
+
+  if (!req.dbClient) {
+    return res
+      .status(500)
+      .json(
+        responseUtils_deprecated.writeError(
+          ErrorCode.SERVER_ERROR,
+          "Database client is missing.",
+          null
+        )
+      );
+  }
+
+  const prediction_id = req.params["predicition_id" as keyof typeof req.params];
 
   // Fetch prediction
-  let prediction: APIPredictions.EnhancedPrediction;
-
   try {
-    prediction = await predictions.getPredictionById(req.dbClient)(
+    const response = await predictions.getPredictionById(req.dbClient)(
       prediction_id
     );
 
-    if (!prediction) {
+    if (!response) {
       return res
         .status(404)
         .json(
-          responseUtils.writeError(
+          responseUtils_deprecated.writeError(
             ErrorCode.BAD_REQUEST,
-            `Predicton with id ${prediction_id} does not exist.`
+            `Predicton with id ${prediction_id} does not exist.`,
+            null
           )
         );
     }
-    req.prediction = prediction;
+
+    req.prediction = response;
     return next();
   } catch (err) {
     console.error(err);
     return res
       .status(500)
       .json(
-        responseUtils.writeError(
+        responseUtils_deprecated.writeError(
           ErrorCode.SERVER_ERROR,
-          "Unable to fetch prediction."
+          "Unable to fetch prediction.",
+          null
         )
       );
   }

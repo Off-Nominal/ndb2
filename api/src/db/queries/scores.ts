@@ -142,8 +142,10 @@ const generate_GET_LEADERBOARD_with_SEASON = (
 ): [string, string[]] => {
   const params = [];
 
-  if (seasonId) {
-    params.push(seasonId);
+  const hasSelectedSeason = seasonId !== undefined;
+
+  if (hasSelectedSeason) {
+    params.push(seasonId.toString());
   }
 
   const parameterizedSeasonId = "$".concat(params.length.toString());
@@ -155,7 +157,7 @@ const generate_GET_LEADERBOARD_with_SEASON = (
           WITH 
           users_scores_summary AS 
           (${generate_GET_USER_SCORE_SUMMARY_with_SEASON(
-            seasonId && parameterizedSeasonId
+            hasSelectedSeason ? parameterizedSeasonId : undefined
           )})
         SELECT
           better_id as id,
@@ -174,7 +176,7 @@ const generate_GET_LEADERBOARD_with_SEASON = (
           WITH
           users_predictions_summary AS 
             (${generate_GET_USER_PREDICTION_SUMMARY_with_SEASON(
-              seasonId && parameterizedSeasonId
+              hasSelectedSeason ? parameterizedSeasonId : undefined
             )})
         SELECT
           id,
@@ -198,7 +200,7 @@ const generate_GET_LEADERBOARD_with_SEASON = (
           WITH
           users_bets_summary 
             AS (${generate_GET_USER_BET_SUMMARY_with_SEASON(
-              seasonId && parameterizedSeasonId
+              hasSelectedSeason ? parameterizedSeasonId : undefined
             )})
         SELECT
           id,
@@ -240,14 +242,16 @@ const getLeaderboard =
     type: "points" | "predictions" | "bets",
     seasonIdentifier?: "current" | "last" | number
   ) => {
-    let seasonId: number;
+    let seasonId: number | undefined = undefined;
 
     if (seasonIdentifier) {
       if (typeof seasonIdentifier === "number") {
         seasonId = seasonIdentifier;
       } else {
-        seasonId = seasonsManager.getSeasonByIdentifier(seasonIdentifier).id;
+        seasonId = seasonsManager.getSeasonByIdentifier(seasonIdentifier)?.id;
       }
+    } else {
+      seasonId = undefined;
     }
 
     let query: Promise<
@@ -267,8 +271,7 @@ const getLeaderboard =
         parameterizedQuery,
         params
       );
-    }
-    if (type === "predictions") {
+    } else if (type === "predictions") {
       const [parameterizedQuery, params] = generate_GET_LEADERBOARD_with_SEASON(
         type,
         seasonId
@@ -277,8 +280,7 @@ const getLeaderboard =
         parameterizedQuery,
         params
       );
-    }
-    if (type === "bets") {
+    } else if (type === "bets") {
       const [parameterizedQuery, params] = generate_GET_LEADERBOARD_with_SEASON(
         type,
         seasonId
@@ -287,6 +289,8 @@ const getLeaderboard =
         parameterizedQuery,
         params
       );
+    } else {
+      throw new Error("Invalid leaderboard type");
     }
 
     return query.then((response) => response.rows[0]);

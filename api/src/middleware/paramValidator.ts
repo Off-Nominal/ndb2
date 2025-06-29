@@ -7,8 +7,9 @@ import {
   isNumberParseableString,
   isString,
 } from "../helpers/typeguards";
-import responseUtils from "../utils/response";
+import responseUtils_deprecated from "../utils/response";
 import { ErrorCode } from "../types/responses";
+import { WeakRequestHandler } from "express-zod-safe";
 
 const createChecker = (
   key: string,
@@ -18,17 +19,49 @@ const createChecker = (
   optional: boolean,
   type: "body" | "params" | "query",
   allowArray: boolean
-) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const value = req[type][key];
+): WeakRequestHandler => {
+  return (req, res, next) => {
+    const value = function () {
+      if (type === "body") {
+        if (!req.body) {
+          return res
+            .status(statusCode)
+            .json(
+              responseUtils_deprecated.writeError(
+                ErrorCode.MALFORMED_BODY_DATA,
+                `Body data is missing.`,
+                null
+              )
+            );
+        }
+        return req.body[key as keyof typeof req.body];
+      } else if (type === "params") {
+        if (!req.params) {
+          return res
+            .status(statusCode)
+            .json(
+              responseUtils_deprecated.writeError(
+                ErrorCode.MALFORMED_QUERY_PARAMS,
+                `Query params are missing.`,
+                null
+              )
+            );
+        }
+
+        return req.params[key as keyof typeof req.params];
+      } else {
+        return req.query[key as keyof typeof req.query];
+      }
+    };
 
     if (!allowArray && Array.isArray(value)) {
       return res
         .status(statusCode)
         .json(
-          responseUtils.writeError(
+          responseUtils_deprecated.writeError(
             ErrorCode.MALFORMED_QUERY_PARAMS,
-            `Query param property '${key}' cannot be an array.`
+            `Query param property '${key}' cannot be an array.`,
+            null
           )
         );
     }
@@ -44,9 +77,10 @@ const createChecker = (
         return res
           .status(statusCode)
           .json(
-            responseUtils.writeError(
+            responseUtils_deprecated.writeError(
               ErrorCode.MALFORMED_BODY_DATA,
-              `Body data property '${key}' ${error}`
+              `Body data property '${key}' ${error}`,
+              null
             )
           );
       }

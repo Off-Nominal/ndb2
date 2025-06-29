@@ -3,7 +3,8 @@ import { getDbClient } from "../../middleware/getDbClient";
 import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
 import paramValidator from "../../middleware/paramValidator";
 import users from "../../db/queries/users";
-import responseUtils from "../../utils/response";
+import responseUtils_deprecated from "../../utils/response";
+import { ErrorCode } from "../../types/responses";
 const router = express.Router();
 
 router.get(
@@ -17,6 +18,17 @@ router.get(
     getUserByDiscordId,
   ],
   async (req: Request, res: Response) => {
+    if (!req.dbClient || !req.user_id) {
+      return res
+        .status(500)
+        .json(
+          responseUtils_deprecated.writeError(
+            ErrorCode.SERVER_ERROR,
+            "Something went wrong. Please try again.",
+            null
+          )
+        );
+    }
     const { season_id } = req.params;
 
     let seasonIdentifier: "current" | "last" | number;
@@ -31,7 +43,10 @@ router.get(
       .getUserScoreById(req.dbClient)(req.user_id, seasonIdentifier)
       .then((response) => {
         res.json(
-          responseUtils.writeSuccess(response, "Score fetched successfully.")
+          responseUtils_deprecated.writeSuccess(
+            response,
+            "Score fetched successfully."
+          )
         );
       });
   }

@@ -7,7 +7,7 @@ import { getPrediction } from "../../middleware/getPrediction";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
 import predictions from "../../db/queries/predictions";
 import { PredictionLifeCycle } from "../../types/predicitions";
-import responseUtils from "../../utils/response";
+import responseUtils_deprecated from "../../utils/response";
 import { getDbClient } from "../../middleware/getDbClient";
 import { ErrorCode } from "../../types/responses";
 const router = express.Router();
@@ -25,14 +25,27 @@ router.patch(
   async (req: Request, res: Response) => {
     const { discord_id } = req.body;
 
+    if (!req.prediction || !req.dbClient) {
+      return res
+        .status(500)
+        .json(
+          responseUtils_deprecated.writeError(
+            ErrorCode.SERVER_ERROR,
+            "Something went wrong. Please try again.",
+            null
+          )
+        );
+    }
+
     // Verify prediction is owned by updater
     if (req.prediction.predictor.discord_id !== discord_id) {
       return res
         .status(403)
         .json(
-          responseUtils.writeError(
+          responseUtils_deprecated.writeError(
             ErrorCode.AUTHENTICATION_ERROR,
-            "This prediction does not belong to you."
+            "This prediction does not belong to you.",
+            null
           )
         );
     }
@@ -44,8 +57,9 @@ router.patch(
     const expiryWindow = add(new Date(req.prediction.created_date), {
       hours: GAME_MECHANICS.predictionUpdateWindow,
     });
+
     const dueDate = new Date(
-      req.prediction.due_date || req.prediction.check_date
+      req.prediction.due_date ?? req.prediction.check_date ?? ""
     );
     const effectiveExpiryWindow = isAfter(expiryWindow, dueDate)
       ? dueDate
@@ -55,24 +69,31 @@ router.patch(
       return res
         .status(403)
         .json(
-          responseUtils.writeError(
+          responseUtils_deprecated.writeError(
             ErrorCode.BAD_REQUEST,
-            "This prediction is past the retirement window. It is locked and cannot be retired."
+            "This prediction is past the retirement window. It is locked and cannot be retired.",
+            null
           )
         );
     }
 
     return predictions
       .retirePredictionById(req.dbClient)(req.prediction.id)
-      .then(() =>
-        predictions.getPredictionById(req.dbClient)(req.prediction.id)
-      )
+      .then(() => {
+        if (!req.prediction || !req.dbClient) {
+          throw new Error("Prediction or DB client is not defined");
+        }
+        return predictions.getPredictionById(req.dbClient)(req.prediction.id);
+      })
       .then((prediction) => {
+        if (!prediction) {
+          throw new Error("Prediction not found");
+        }
         // Notify subscribers
         webhookManager.emit("retired_prediction", prediction);
 
         return res.json(
-          responseUtils.writeSuccess(
+          responseUtils_deprecated.writeSuccess(
             prediction,
             "Prediction retired successfully."
           )
@@ -83,9 +104,10 @@ router.patch(
         return res
           .status(500)
           .json(
-            responseUtils.writeError(
+            responseUtils_deprecated.writeError(
               ErrorCode.SERVER_ERROR,
-              "There was an error retiring this prediction."
+              "There was an error retiring this prediction.",
+              null
             )
           );
       });

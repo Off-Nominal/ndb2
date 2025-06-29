@@ -3,6 +3,7 @@
     "target": "es2015",
     "module": "commonjs",
     "sourceMap": true,
+    "declaration": true,
     "outDir": "dist",
     "lib": ["es2021.string"],
     "downlevelIteration": true,

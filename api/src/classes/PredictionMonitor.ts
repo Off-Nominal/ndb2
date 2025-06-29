@@ -1,4 +1,7 @@
 import schedule from "node-schedule";
+import { createLogger } from "../utils/logger";
+
+const logger = createLogger("PM");
 
 export type MonitorLog = (message: string) => void;
 
@@ -22,23 +25,16 @@ export default class PredictionMonitor {
       });
     }
 
-    this.log("Prediction Monitor running.");
+    logger.log("Prediction Monitor running.");
   }
 
   private async executeMonitorCallback(monitor: MonitorConfig) {
-    this.log(`Running monitor: ${monitor.name}`);
+    logger.log(`Running monitor: ${monitor.name}`);
 
-    monitor.callback(this.log).catch((err) => {
-      this.error(`Running monitor ${monitor.name} failed`, err);
-    });
-  }
-
-  private log(message: string) {
-    console.log(`[PM]: ${message}`);
-  }
-
-  private error(message: string, err: any) {
-    console.error(`[PM]: ${message}`);
-    console.error(err);
+    monitor
+      .callback((message: string) => logger.log(message))
+      .catch((err) => {
+        logger.error(`Running monitor ${monitor.name} failed`, err);
+      });
   }
 }

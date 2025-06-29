@@ -1,26 +1,47 @@
 import { PoolClient } from "pg";
-import seasons from "../db/queries/seasons";
 import pool from "../db";
-import { APISeasons } from "../types/seasons";
 import schedule from "node-schedule";
 import webhookManager from "../config/webhook_subscribers";
 import predictions from "../db/queries/predictions";
 import { PredictionLifeCycle } from "../types/predicitions";
+import seasonsV2, { SeasonWithDates } from "../v2/queries/seasons";
+import seasons from "../db/queries/seasons";
+import { createLogger } from "../utils/logger";
+
+const logger = createLogger("SM");
 
 export class SeasonManager {
-  private seasons: APISeasons.EnhancedSeason[] = [];
+  private seasons: SeasonWithDates[] = [];
 
-  public getSeasonByIdentifier(identifier: "current" | "last") {
+  public getSeasonByIdentifier(
+    identifier: "current" | "last"
+  ): SeasonWithDates {
     if (identifier === "current") {
-      return this.seasons.find((season) => season.identifier === "current");
+      const season = this.seasons.find(
+        (season) => season.identifier === "current"
+      );
+      if (!season) {
+        throw new Error("Current season not found");
+      }
+      return season;
     }
     if (identifier === "last") {
-      return this.seasons.find((season) => season.identifier === "past");
+      const season = this.seasons.find(
+        (season) => season.identifier === "past"
+      );
+      if (!season) {
+        throw new Error("Last season not found");
+      }
+      return season;
     }
+
+    throw new Error("Invalid season identifier");
   }
 
-  private async fetchAllSeasons(client: PoolClient) {
-    return seasons.getAll(client)();
+  private async fetchAllSeasons(
+    client: PoolClient
+  ): Promise<SeasonWithDates[]> {
+    return seasonsV2.getAll(client)();
   }
 
   private refreshSeasons(client: PoolClient) {
@@ -40,11 +61,15 @@ export class SeasonManager {
 
       if (!currentSeason || currentSeason.id === newLastSeason.id) {
         // Season has changed
-        webhookManager.emit("season_start", newCurrentSeason);
+        webhookManager.emit("season_start", {
+          ...newCurrentSeason,
+          start: newCurrentSeason.start.toISOString(),
+          end: newCurrentSeason.end.toISOString(),
+        });
       }
 
       this.seasons = allSeasons;
-      console.log("[SM]: Successfully refreshed seasons cache.");
+      logger.log("Successfully refreshed seasons cache.");
     });
   }
 
@@ -52,7 +77,7 @@ export class SeasonManager {
     try {
       await this.refreshSeasons(client);
     } catch (err) {
-      return console.error("[SM]: Could not refresh seasons.", err);
+      return logger.error("Could not refresh seasons.", err);
     }
 
     const lastSeason = this.getSeasonByIdentifier("last");
@@ -78,8 +103,8 @@ export class SeasonManager {
         return;
       }
     } catch (err) {
-      return console.error(
-        "[SM]: Could not fetch predictions to determine if season is closed.",
+      return logger.error(
+        "Could not fetch predictions to determine if season is closed.",
         err
       );
     }
@@ -92,9 +117,9 @@ export class SeasonManager {
       webhookManager.emit("season_end", results);
       await client.query("COMMIT");
 
-      console.log("[SM]: Season results posted.");
+      logger.log("Season results posted.");
     } catch (err) {
-      return console.error("Could not post season results.", err);
+      return logger.error("Could not post season results.", err);
     }
   }
 
@@ -114,7 +139,7 @@ export class SeasonManager {
       });
     });
 
-    console.log("[SM]: Seasons Manager running.");
+    logger.log("Seasons Manager running.");
   }
 }
 

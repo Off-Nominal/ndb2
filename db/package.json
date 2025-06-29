@@ -1,26 +1,37 @@
 {
-  "name": "db",
+  "name": "@offnominal/ndb2-db",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "clear": "rm -rf ./dist",
-    "build": "tsc",
+    "build": "tsc && cp -r src/seeds dist/",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:run": "vitest --run",
     "db:create": "dbmate new",
     "db:migrate": "dbmate up",
-    "db:seed": "pnpm run clear && pnpm run build && node --env-file=.env ./dist/reset.js"
+    "test:db:seed": "pnpm run clear && pnpm run build && node --env-file=.env.test ./dist/reset-db.js",
+    "test:db:start": "./scripts/start-db.sh test",
+    "test:db:stop": "./scripts/stop-db.sh test",
+    "dev:db:seed": "pnpm run clear && pnpm run build && node --env-file=.env.dev ./dist/reset-db.js",
+    "dev:db:start": "./scripts/start-db.sh dev",
+    "dev:db:stop": "./scripts/stop-db.sh dev"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.10.0",
   "dependencies": {
+    "@offnominal/ndb2-api-types": "workspace:*",
     "date-fns": "^3.6.0",
     "dbmate": "^2.27.0",
     "pg": "^8.15.6"
   },
   "devDependencies": {
     "@types/node": "^22.15.3",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.3"
   }
 }

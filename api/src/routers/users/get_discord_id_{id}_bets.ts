@@ -3,7 +3,8 @@ import { getDbClient } from "../../middleware/getDbClient";
 import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
 import paramValidator from "../../middleware/paramValidator";
 import users from "../../db/queries/users";
-import responseUtils from "../../utils/response";
+import responseUtils_deprecated from "../../utils/response";
+import { ErrorCode } from "../../types/responses";
 const router = express.Router();
 
 router.get(
@@ -14,11 +15,26 @@ router.get(
     getUserByDiscordId,
   ],
   async (req: Request, res: Response) => {
+    if (!req.dbClient || !req.user_id) {
+      return res
+        .status(500)
+        .json(
+          responseUtils_deprecated.writeError(
+            ErrorCode.SERVER_ERROR,
+            "Something went wrong. Please try again.",
+            null
+          )
+        );
+    }
+
     users
       .getBetsByUserId(req.dbClient)(req.user_id)
       .then((response) => {
         res.json(
-          responseUtils.writeSuccess(response, "Bets fetched successfully.")
+          responseUtils_deprecated.writeSuccess(
+            response,
+            "Bets fetched successfully."
+          )
         );
       });
   }

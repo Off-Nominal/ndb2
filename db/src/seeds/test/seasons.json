@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Past",
+    "quarter": "past",
+    "payout_formula": "(ln($1/$2/2.0)/1.3)+1"
+  },
+  {
+    "name": "Present",
+    "quarter": "current",
+    "payout_formula": "(ln($1/$2/2.0)/1.3)+1"
+  },
+  {
+    "name": "Future",
+    "quarter": "future",
+    "payout_formula": "(ln($1/$2/2.0)/1.3)+1"
+  }
+]
