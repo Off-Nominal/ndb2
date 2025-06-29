@@ -36,6 +36,7 @@
     "@types/pg": "^8.11.8",
     "@types/supertest": "^6.0.3",
     "dbmate": "^2.27.0",
+    "dotenv-cli": "^8.0.0",
     "morgan": "^1.10.0",
     "nodemon": "^3.1.4",
     "supertest": "^7.1.0",

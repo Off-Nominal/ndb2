@@ -4,7 +4,7 @@
   "description": "Nostradambot 2.0 Betting Game for the Off-Nominal Discord",
   "main": "index.js",
   "scripts": {
-    "dev": "NODE_ENV=dev pnpm --filter @offnominal/ndb2-api-types build && concurrently \"pnpm --filter @offnominal/ndb2-api-types dev\" \"pnpm --filter ndb2-api dev\"",
+    "dev": "NODE_ENV=dev pnpm --filter @offnominal/ndb2-api-types build && concurrently \"pnpm --filter @offnominal/ndb2-api-types dev\" \"pnpm --filter ndb2-api dev\" \"pnpm --filter ndb2-api sql-watch\"",
     "start": "pnpm --filter ndb2-api start",
     "build": "pnpm --filter ndb2-api build",
     "compile": "pnpm --filter ndb2-api compile",
