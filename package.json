@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "NODE_ENV=dev pnpm --filter @offnominal/ndb2-api-types build && concurrently \"pnpm --filter @offnominal/ndb2-api-types dev\" \"pnpm --filter ndb2-api dev\" \"pnpm --filter ndb2-api sql-watch\"",
     "start": "pnpm --filter ndb2-api start",
-    "build": "pnpm --filter ndb2-api build",
+    "build": "pnpm --filter ndb2-api-types build && pnpm --filter ndb2-db build && pnpm --filter ndb2-api build",
     "compile": "pnpm --filter ndb2-api compile",
     "test": "concurrently \"pnpm --filter ndb2-api test\" \"pnpm --filter @offnominal/ndb2-db test\"",
     "test:watch": "concurrently \"pnpm --filter ndb2-api test:watch\" \"pnpm --filter @offnominal/ndb2-db test:watch\"",
