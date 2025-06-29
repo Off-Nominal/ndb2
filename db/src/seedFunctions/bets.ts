@@ -26,7 +26,7 @@ export interface BetInsertData {
 export function createBetsBulkInsertData(
   betSeeds: BetSeed[],
   predictionIds: number[],
-  baseDate: Date
+  createdDates: Date[]
 ): {
   user_ids: string[];
   prediction_ids: number[];
@@ -37,7 +37,9 @@ export function createBetsBulkInsertData(
     user_ids: betSeeds.map((bet) => bet.user_id),
     prediction_ids: predictionIds,
     endorseds: betSeeds.map((bet) => bet.endorsed),
-    dates: betSeeds.map((bet) => resolveSeedDate(bet.created, baseDate)),
+    dates: betSeeds.map((bet, index) =>
+      resolveSeedDate(bet.created, createdDates[index])
+    ),
   };
 }
 
@@ -45,9 +47,13 @@ export function insertBetsBulk(
   client: any,
   betSeeds: BetSeed[],
   predictionIds: number[],
-  baseDate: Date
+  createdDates: Date[]
 ) {
-  const bulkData = createBetsBulkInsertData(betSeeds, predictionIds, baseDate);
+  const bulkData = createBetsBulkInsertData(
+    betSeeds,
+    predictionIds,
+    createdDates
+  );
   return client.query(INSERT_BETS_BULK_SQL, [
     bulkData.user_ids,
     bulkData.prediction_ids,

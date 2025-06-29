@@ -26,7 +26,7 @@ export interface VoteInsertData {
 export function createVotesBulkInsertData(
   voteSeeds: VoteSeed[],
   predictionIds: number[],
-  baseDate: Date
+  createdDates: Date[]
 ): {
   user_ids: string[];
   prediction_ids: number[];
@@ -37,7 +37,9 @@ export function createVotesBulkInsertData(
     user_ids: voteSeeds.map((vote) => vote.user_id),
     prediction_ids: predictionIds,
     votes: voteSeeds.map((vote) => vote.vote),
-    voted_dates: voteSeeds.map((vote) => resolveSeedDate(vote.voted, baseDate)),
+    voted_dates: voteSeeds.map((vote, index) =>
+      resolveSeedDate(vote.voted, createdDates[index])
+    ),
   };
 }
 
@@ -45,12 +47,12 @@ export function insertVotesBulk(
   client: any,
   voteSeeds: VoteSeed[],
   predictionIds: number[],
-  baseDate: Date
+  createdDates: Date[]
 ) {
   const bulkData = createVotesBulkInsertData(
     voteSeeds,
     predictionIds,
-    baseDate
+    createdDates
   );
   return client.query(INSERT_VOTES_BULK_SQL, [
     bulkData.user_ids,

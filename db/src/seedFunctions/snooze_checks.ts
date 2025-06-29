@@ -48,7 +48,7 @@ export interface SnoozeVoteInsertData {
 export function createSnoozeChecksBulkInsertData(
   snoozeCheckSeeds: SnoozeCheckSeed[],
   predictionIds: number[],
-  baseDate: Date
+  createdDates: Date[]
 ): {
   prediction_ids: number[];
   check_dates: Date[];
@@ -59,11 +59,14 @@ export function createSnoozeChecksBulkInsertData(
   const closed: boolean[] = [];
   const closed_ats: (Date | null)[] = [];
 
-  for (const check of snoozeCheckSeeds) {
-    check_dates.push(resolveSeedDate(check.checked, baseDate));
+  for (let i = 0; i < snoozeCheckSeeds.length; i++) {
+    const check = snoozeCheckSeeds[i];
+    const createdDate = createdDates[i];
+
+    check_dates.push(resolveSeedDate(check.checked, createdDate));
     closed.push(!!check.closed);
     closed_ats.push(
-      check.closed ? resolveSeedDate(check.closed, baseDate) : null
+      check.closed ? resolveSeedDate(check.closed, createdDate) : null
     );
   }
 
@@ -78,7 +81,7 @@ export function createSnoozeChecksBulkInsertData(
 export function createSnoozeVotesBulkInsertData(
   snoozeVoteSeeds: SnoozeVoteSeed[],
   snoozeCheckIds: number[],
-  baseDate: Date
+  createdDates: Date[]
 ): {
   snooze_check_ids: number[];
   user_ids: string[];
@@ -91,9 +94,11 @@ export function createSnoozeVotesBulkInsertData(
 
   for (let i = 0; i < snoozeVoteSeeds.length; i++) {
     const vote = snoozeVoteSeeds[i];
+    const createdDate = createdDates[i];
+
     user_ids.push(vote.user_id);
     values.push(vote.value);
-    created_ats.push(resolveSeedDate(vote.created, baseDate));
+    created_ats.push(resolveSeedDate(vote.created, createdDate));
   }
 
   return {
@@ -108,12 +113,12 @@ export function insertSnoozeChecksBulk(
   client: any,
   snoozeCheckSeeds: SnoozeCheckSeed[],
   predictionIds: number[],
-  baseDate: Date
+  createdDates: Date[]
 ) {
   const bulkData = createSnoozeChecksBulkInsertData(
     snoozeCheckSeeds,
     predictionIds,
-    baseDate
+    createdDates
   );
   return client.query(INSERT_SNOOZE_CHECKS_BULK_SQL, [
     bulkData.prediction_ids,
@@ -127,12 +132,12 @@ export function insertSnoozeVotesBulk(
   client: any,
   snoozeVoteSeeds: SnoozeVoteSeed[],
   snoozeCheckIds: number[],
-  baseDate: Date
+  createdDates: Date[]
 ) {
   const bulkData = createSnoozeVotesBulkInsertData(
     snoozeVoteSeeds,
     snoozeCheckIds,
-    baseDate
+    createdDates
   );
   return client.query(INSERT_SNOOZE_VOTES_BULK_SQL, [
     bulkData.snooze_check_ids,
@@ -145,15 +150,19 @@ export function insertSnoozeVotesBulk(
 export function insertSnoozeChecksFromPredictions(
   client: any,
   predictionSeeds: PredictionSeed[],
-  baseDate: Date
+  createdDates: Date[]
 ) {
   // Extract all snooze checks from predictions
   const allSnoozeChecks: SnoozeCheckSeed[] = [];
   const allSnoozeVotes: SnoozeVoteSeed[] = [];
   const snoozeCheckToVotesMap: Map<number, SnoozeVoteSeed[]> = new Map();
   const predictionIds: number[] = [];
+  const checkCreatedDates: Date[] = [];
 
-  for (const prediction of predictionSeeds) {
+  for (let i = 0; i < predictionSeeds.length; i++) {
+    const prediction = predictionSeeds[i];
+    const createdDate = createdDates[i];
+
     if (prediction.checks && Array.isArray(prediction.checks)) {
       for (const check of prediction.checks) {
         // Create snooze check without prediction_id (it will be passed separately)
@@ -165,6 +174,7 @@ export function insertSnoozeChecksFromPredictions(
 
         allSnoozeChecks.push(snoozeCheck);
         predictionIds.push(prediction.id);
+        checkCreatedDates.push(createdDate);
 
         // Store votes for later insertion
         if (check.votes && Array.isArray(check.votes)) {
@@ -183,13 +193,14 @@ export function insertSnoozeChecksFromPredictions(
     client,
     allSnoozeChecks,
     predictionIds,
-    baseDate
+    checkCreatedDates
   ).then((result: any) => {
     const snoozeCheckIds = result.rows.map((row: any) => row.id);
 
     // Prepare votes for bulk insertion
     const votesToInsert: SnoozeVoteSeed[] = [];
     const checkIdsForVotes: number[] = [];
+    const voteCreatedDates: Date[] = [];
 
     for (let i = 0; i < allSnoozeChecks.length; i++) {
       const votes = snoozeCheckToVotesMap.get(i);
@@ -197,6 +208,10 @@ export function insertSnoozeChecksFromPredictions(
         votesToInsert.push(...votes);
         // Repeat the snooze check ID for each vote
         checkIdsForVotes.push(...Array(votes.length).fill(snoozeCheckIds[i]));
+        // Repeat the created date for each vote
+        voteCreatedDates.push(
+          ...Array(votes.length).fill(checkCreatedDates[i])
+        );
       }
     }
 
@@ -205,7 +220,7 @@ export function insertSnoozeChecksFromPredictions(
         client,
         votesToInsert,
         checkIdsForVotes,
-        baseDate
+        voteCreatedDates
       );
     }
 

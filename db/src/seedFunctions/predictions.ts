@@ -20,7 +20,7 @@ export const INSERT_PREDICTIONS_BULK_SQL = `
     $5::timestamp[],
     $6::timestamp[],
     $7::timestamp[]
-  ) RETURNING id
+  ) RETURNING id, created_date
 `;
 
 // Bulk SQL for updating prediction dates during lifecycle
@@ -47,8 +47,8 @@ export const UPDATE_PREDICTIONS_JUDGED_DATE_BULK_SQL = `
 
 export const UPDATE_SNOOZE_CHECKS_CLOSED_DATE_BULK_SQL = `
   UPDATE snooze_checks 
-  SET closed = true, closed_date = data_table.closed_date
-  FROM (SELECT * FROM UNNEST($1::integer[], $2::timestamp[])) AS data_table(id, closed_date)
+  SET closed = true, closed_at = data_table.closed_at
+  FROM (SELECT * FROM UNNEST($1::integer[], $2::timestamp[])) AS data_table(id, closed_at)
   WHERE snooze_checks.id = data_table.id
 `;
 
