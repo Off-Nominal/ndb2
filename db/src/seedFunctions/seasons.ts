@@ -84,3 +84,14 @@ export function insertSeasonsBulk(
     bulkData.payout_formulas,
   ]);
 }
+
+export const CLOSE_PAST_SEASONS_SQL = `
+  UPDATE seasons
+  SET closed = TRUE
+  WHERE "end" < NOW() AND closed IS NOT TRUE
+  RETURNING id, name, "end"
+`;
+
+export function closePastSeasonsBulk(client: any) {
+  return client.query(CLOSE_PAST_SEASONS_SQL);
+}

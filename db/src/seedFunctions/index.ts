@@ -19,7 +19,7 @@ export {
 
 // Export bulk insert functions
 export { insertUsersBulk } from "./users";
-export { insertSeasonsBulk } from "./seasons";
+export { insertSeasonsBulk, closePastSeasonsBulk } from "./seasons";
 export { insertBetsBulk } from "./bets";
 export { insertVotesBulk } from "./votes";
 export { insertPredictionsBulk } from "./predictions";

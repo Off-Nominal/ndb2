@@ -4,6 +4,7 @@
 import { Client } from "pg";
 import { reset } from "@offnominal/ndb2-db";
 import { createLogger } from "../utils/logger";
+import path from "path";
 
 const logger = createLogger("TEST");
 
@@ -48,10 +49,12 @@ export async function resetTestDatabase(
   }
 }
 
-export default async function setup() {
+async function setup() {
   // Check if test database is accessible
   await checkDatabaseConnection();
 
   // Reset the database to ensure clean state
   await resetTestDatabase();
 }
+
+export default setup;

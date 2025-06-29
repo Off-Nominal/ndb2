@@ -10,6 +10,7 @@ import {
   triggerPredictionsBulk,
   judgePredictionsBulk,
   closeSnoozeChecksBulk,
+  closePastSeasonsBulk,
 } from "./seedFunctions";
 import { BetSeed, VoteSeed, SnoozeCheckSeed, SnoozeVoteSeed } from "./types";
 import { createLogger } from "./utils";
@@ -325,6 +326,20 @@ export default async (client: any, options: SeedOptions = {}) => {
     if (predictionsToJudge.length > 0) {
       log(`Judging ${predictionsToJudge.length} predictions...`);
       await judgePredictionsBulk(client, predictionsToJudge, judgedDates);
+    }
+
+    // Step 11: Close all seasons where the end date is in the past
+    log("Step 11: Closing past seasons...");
+    const closedSeasonsResult = await closePastSeasonsBulk(client);
+    if (closedSeasonsResult.rows.length > 0) {
+      log(`Closed ${closedSeasonsResult.rows.length} past seasons`);
+      if (verbose) {
+        closedSeasonsResult.rows.forEach((row: any) => {
+          log(`  - Closed season "${row.name}" (ended: ${row.end})`);
+        });
+      }
+    } else {
+      log("No past seasons to close");
     }
 
     log("Seeding completed successfully!");

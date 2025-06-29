@@ -13,7 +13,6 @@ describe("GET /predictions/:prediction_id", () => {
   let app: express.Application;
 
   beforeAll(async () => {
-    await resetTestDatabase();
     app = express();
     getPredictionById(app);
   });
