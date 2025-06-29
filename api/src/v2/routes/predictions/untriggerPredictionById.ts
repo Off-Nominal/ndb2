@@ -22,38 +22,40 @@ export const untriggerPredictionById: Route = (router: Router) => {
     async (req, res) => {
       const { prediction_id } = req.params;
 
-      predictions
-        .untriggerById(req.dbClient)(prediction_id)
-        .then(() => predictions.getById(req.dbClient)(prediction_id))
-        .then((prediction) => {
-          if (!prediction) {
-            return res.status(404).json(
-              responseUtils.writeErrors([
-                {
-                  code: API.Errors.PREDICTION_NOT_FOUND,
-                  message: `Prediction with id ${prediction_id} does not exist.`,
-                },
-              ])
-            );
-          }
+      responseUtils.writeSuccess(null, "This feature is not yet implemented");
 
-          const response = responseUtils.writeSuccess(
-            prediction,
-            "Prediction untriggered successfully."
-          );
-          res.json(response);
-        })
-        .catch((err) => {
-          console.error(err);
-          return res.status(500).json(
-            responseUtils.writeErrors([
-              {
-                code: API.Errors.SERVER_ERROR,
-                message: "There was an error untriggering this prediction.",
-              },
-            ])
-          );
-        });
+      //   predictions
+      //     .untriggerById(req.dbClient)(prediction_id)
+      //     .then(() => predictions.getById(req.dbClient)(prediction_id))
+      //     .then((prediction) => {
+      //       if (!prediction) {
+      //         return res.status(404).json(
+      //           responseUtils.writeErrors([
+      //             {
+      //               code: API.Errors.PREDICTION_NOT_FOUND,
+      //               message: `Prediction with id ${prediction_id} does not exist.`,
+      //             },
+      //           ])
+      //         );
+      //       }
+
+      //       const response = responseUtils.writeSuccess(
+      //         prediction,
+      //         "Prediction untriggered successfully."
+      //       );
+      //       res.json(response);
+      //     })
+      //     .catch((err) => {
+      //       console.error(err);
+      //       return res.status(500).json(
+      //         responseUtils.writeErrors([
+      //           {
+      //             code: API.Errors.SERVER_ERROR,
+      //             message: "There was an error untriggering this prediction.",
+      //           },
+      //         ])
+      //       );
+      //     });
     }
   );
 };

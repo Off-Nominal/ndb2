@@ -78,6 +78,7 @@ describe("GET /predictions/:prediction_id", () => {
     });
     expect(firstBet.wager).toBe(27);
     expect(firstBet.valid).toBe(true);
+    expect(firstBet.payout).toBe(26);
 
     // Second bet (not endorsed)
     const secondBet = prediction.bets.find(
@@ -90,6 +91,7 @@ describe("GET /predictions/:prediction_id", () => {
     });
     expect(secondBet.wager).toBe(26);
     expect(secondBet.valid).toBe(true);
+    expect(secondBet.payout).toBe(-26);
 
     // Verify votes
     expect(prediction.votes).toHaveLength(3);
