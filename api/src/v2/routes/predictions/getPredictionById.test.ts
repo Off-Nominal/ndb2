@@ -34,6 +34,18 @@ describe("GET /predictions/:prediction_id", () => {
     ).toBeTruthy();
   });
 
+  it("should return 400 if the prediction Id is higher than a Postgres Max Int", async () => {
+    const response = await request(app).get("/2147483648");
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty("errors");
+    expect(
+      response.body.errors.some(
+        (err: API.Utils.ErrorInfo) =>
+          err.code === API.Errors.MALFORMED_URL_PARAMS
+      )
+    ).toBeTruthy();
+  });
+
   it("should return a prediction if it exists", async () => {
     const response = await request(app).get("/1");
     expect(response.status).toBe(200);
