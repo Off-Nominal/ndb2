@@ -212,7 +212,6 @@ export default async (client: any, options: SeedOptions = {}) => {
             checkCount += predChecks.length;
           }
 
-          const prediction = predictions[predictionIndex];
           const predictionCreatedDate = predictionCreatedDates[predictionIndex];
           const closedDate = resolveSeedDate(
             check.closed,

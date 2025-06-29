@@ -4,6 +4,7 @@ import request from "supertest";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { resetTestDatabase } from "../../../test/global-setup";
 import { useDbTransactionMock } from "../../../test/db-transaction-mock";
+import { differenceInDays } from "date-fns";
 
 // Enable transaction wrapping for all tests in this file
 useDbTransactionMock();
@@ -55,6 +56,16 @@ describe("GET /predictions/:prediction_id", () => {
       discord_id: "111111111111111111",
     });
 
+    // Verify season Id and season applicable
+    expect(prediction.season_id).toBe(1);
+    expect(prediction.season_applicable).toBe(true);
+
+    // Verify last_check_date
+    expect(prediction.last_check_date).not.toBeNull();
+
+    // Verify triggerer
+    expect(prediction.triggerer).toBeNull();
+
     // Verify bets
     expect(prediction.bets).toHaveLength(2);
 
@@ -77,7 +88,7 @@ describe("GET /predictions/:prediction_id", () => {
       id: "550e8400-e29b-41d4-a716-446655440002",
       discord_id: "222222222222222222",
     });
-    expect(secondBet.wager).toBe(27);
+    expect(secondBet.wager).toBe(26);
     expect(secondBet.valid).toBe(true);
 
     // Verify votes
@@ -108,8 +119,8 @@ describe("GET /predictions/:prediction_id", () => {
 
     // Verify payouts
     expect(prediction.payouts).toBeDefined();
-    expect(typeof prediction.payouts.endorse).toBe("number");
-    expect(typeof prediction.payouts.undorse).toBe("number");
+    expect(prediction.payouts.endorse).toBe(0.99);
+    expect(prediction.payouts.undorse).toBe(1.01);
 
     // Verify dates are present
     expect(prediction.created_date).toBeDefined();
