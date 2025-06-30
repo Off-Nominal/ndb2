@@ -100,9 +100,9 @@ describe("GET /predictions/:prediction_id", () => {
       id: "550e8400-e29b-41d4-a716-446655440002",
       discord_id: "222222222222222222",
     });
-    expect(secondBet.wager).toBe(26);
+    expect(secondBet.wager).toBe(25);
     expect(secondBet.valid).toBe(true);
-    expect(secondBet.payout).toBe(-26);
+    expect(secondBet.payout).toBe(-25);
 
     // Verify votes
     expect(prediction.votes).toHaveLength(3);
@@ -132,8 +132,8 @@ describe("GET /predictions/:prediction_id", () => {
 
     // Verify payouts
     expect(prediction.payouts).toBeDefined();
-    expect(prediction.payouts.endorse).toBe(0.99);
-    expect(prediction.payouts.undorse).toBe(1.01);
+    expect(prediction.payouts.endorse).toBe(0.97);
+    expect(prediction.payouts.undorse).toBe(1.03);
 
     // Verify dates are present
     expect(prediction.created_date).toBeDefined();

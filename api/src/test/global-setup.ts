@@ -4,13 +4,15 @@
 import { Client } from "pg";
 import { reset } from "@offnominal/ndb2-db";
 import { createLogger } from "../utils/logger";
-import path from "path";
 
 const logger = createLogger("TEST");
 
 // Set the DATABASE_URL to point to the test database
 process.env.DATABASE_URL =
   "postgresql://test_user:test_password@localhost:5433/ndb2_test";
+
+// Set the timezone to UTC
+process.env.TZ = "UTC";
 
 // You can add other test-specific environment variables here if needed
 // For example:

@@ -198,7 +198,7 @@ describe("resolveSeedDate", () => {
       // In test env, future season starts 91 days after current season start
       // Current season starts 2024-01-01, so future season starts 2024-04-01
       // So day 1 should be 2024-04-01T11:00:00.000Z
-      expect(result).toEqual(new Date("2024-04-01T11:00:00.000Z"));
+      expect(result).toEqual(new Date("2024-04-01T12:00:00.000Z"));
     });
 
     it("should resolve past quarter with day offset using getRelativeSeasonDates", () => {
@@ -208,7 +208,7 @@ describe("resolveSeedDate", () => {
       // In test env, past season starts 91 days before current season start
       // Current season starts 2024-01-01, so past season starts 2023-10-02
       // So day 30 should be 2023-10-31T11:00:00.000Z
-      expect(result).toEqual(new Date("2023-10-31T11:00:00.000Z"));
+      expect(result).toEqual(new Date("2023-10-31T12:00:00.000Z"));
     });
 
     it("should handle default values for optional time fields using getRelativeSeasonDates", () => {
@@ -255,7 +255,7 @@ describe("resolveSeedDate", () => {
       const result = resolveSeedDate(seedDate, baseDate);
 
       // 90 days from 2024-01-01 should be 2024-03-30T23:00:00.000Z due to date-fns UTC math
-      expect(result).toEqual(new Date("2024-03-30T23:00:00.000Z"));
+      expect(result).toEqual(new Date("2024-03-31T00:00:00.000Z"));
     });
 
     it("should handle large day offsets in test environment", () => {
@@ -264,7 +264,7 @@ describe("resolveSeedDate", () => {
       const result = resolveSeedDate(seedDate, baseDate);
 
       // 90 days from 2024-01-01 should be 2024-03-30T11:00:00.000Z due to date-fns UTC math
-      expect(result).toEqual(new Date("2024-03-30T11:00:00.000Z"));
+      expect(result).toEqual(new Date("2024-03-30T12:00:00.000Z"));
     });
 
     it("should handle zero values in non-test environment", () => {
@@ -316,7 +316,7 @@ describe("getRelativeSeasonDates", () => {
 
     // Past season should start 91 days before current season start (2024-03-02)
     // and end 91 days after that (2024-06-01)
-    expect(result.start).toEqual(new Date("2024-03-02T01:00:00.000Z"));
+    expect(result.start).toEqual(new Date("2024-03-02T00:00:00.000Z"));
     expect(result.end).toEqual(new Date("2024-06-01T00:00:00.000Z"));
   });
 
@@ -326,7 +326,7 @@ describe("getRelativeSeasonDates", () => {
     // Future season should start 91 days after current season start (2024-08-31)
     // and end 91 days after that (2024-11-30)
     expect(result.start).toEqual(new Date("2024-08-31T00:00:00.000Z"));
-    expect(result.end).toEqual(new Date("2024-11-30T01:00:00.000Z"));
+    expect(result.end).toEqual(new Date("2024-11-30T00:00:00.000Z"));
   });
 
   // Test year boundary crossing
