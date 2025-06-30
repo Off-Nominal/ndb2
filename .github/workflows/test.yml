@@ -27,6 +27,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Build workspace packages
+        run: |
+          pnpm --filter @offnominal/ndb2-api-types build
+          pnpm --filter @offnominal/ndb2-db build
+
       - name: Start test database
         working-directory: ./db/scripts
         run: |
