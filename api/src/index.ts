@@ -1,8 +1,3 @@
-if (process.env.NODE_ENV !== "production") {
-  console.log("Loading .env file");
-  require("dotenv").config();
-}
-
 import express from "express";
 import { authenticateApplication } from "./middleware/authenticateApplication";
 import { validateContentType } from "./middleware/validateContentType";

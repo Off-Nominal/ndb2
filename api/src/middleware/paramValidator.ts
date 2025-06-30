@@ -21,7 +21,7 @@ const createChecker = (
   allowArray: boolean
 ): WeakRequestHandler => {
   return (req, res, next) => {
-    const value = function () {
+    const value = (function () {
       if (type === "body") {
         if (!req.body) {
           return res
@@ -52,7 +52,7 @@ const createChecker = (
       } else {
         return req.query[key as keyof typeof req.query];
       }
-    };
+    })();
 
     if (!allowArray && Array.isArray(value)) {
       return res

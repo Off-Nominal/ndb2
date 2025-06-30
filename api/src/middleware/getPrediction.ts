@@ -29,8 +29,7 @@ export const getPrediction: WeakRequestHandler = async (req, res, next) => {
       );
   }
 
-  const prediction_id = req.params["predicition_id" as keyof typeof req.params];
-
+  const prediction_id = req.params["prediction_id" as keyof typeof req.params];
   // Fetch prediction
   try {
     const response = await predictions.getPredictionById(req.dbClient)(
