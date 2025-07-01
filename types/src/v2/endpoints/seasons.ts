@@ -1,8 +1,8 @@
 import { Entities } from "..";
 import { APIResponse } from "../utils";
 
-// GET /predictions/{prediction_id}/
+// GET /seasons/
 export namespace GET {
-  export type Data = Entities.Seasons.Season;
+  export type Data = Entities.Seasons.Season[];
   export type Response = APIResponse<ThisType<Data>>;
 }
