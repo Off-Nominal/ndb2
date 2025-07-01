@@ -126,7 +126,7 @@
       {
         "user_id": "550e8400-e29b-41d4-a716-446655440001",
         "voted": {
-          "days": 27,
+          "days": 0,
           "minutes": 5
         },
         "vote": true
@@ -134,7 +134,7 @@
       {
         "user_id": "550e8400-e29b-41d4-a716-446655440002",
         "voted": {
-          "days": 27,
+          "days": 0,
           "minutes": 15
         },
         "vote": false
@@ -142,7 +142,7 @@
       {
         "user_id": "550e8400-e29b-41d4-a716-446655440003",
         "voted": {
-          "days": 27,
+          "days": 0,
           "minutes": 25
         },
         "vote": true
@@ -151,10 +151,10 @@
     "checks": [
       {
         "checked": {
-          "days": 20
+          "days": 0
         },
         "closed": {
-          "days": 20,
+          "days": 0,
           "minutes": 30
         },
         "votes": [
@@ -162,7 +162,7 @@
             "user_id": "550e8400-e29b-41d4-a716-446655440001",
             "value": 7,
             "created": {
-              "days": 20,
+              "days": 0,
               "minutes": 5
             }
           },
@@ -170,7 +170,7 @@
             "user_id": "550e8400-e29b-41d4-a716-446655440002",
             "value": 7,
             "created": {
-              "days": 20,
+              "days": 0,
               "minutes": 15
             }
           },
@@ -178,7 +178,7 @@
             "user_id": "550e8400-e29b-41d4-a716-446655440003",
             "value": 7,
             "created": {
-              "days": 20,
+              "days": 0,
               "minutes": 25
             }
           }

@@ -342,6 +342,24 @@ export default async (client: any, options: SeedOptions = {}) => {
       log("No past seasons to close");
     }
 
+    // Step 12: Reset all sequences to the highest ID values
+    log("Step 12: Resetting sequences...");
+    const sequencesToReset = [
+      { table: "bets", sequence: "bets_id_seq" },
+      { table: "predictions", sequence: "predictions_id_seq" },
+      { table: "votes", sequence: "votes_id_seq" },
+      { table: "seasons", sequence: "seasons_id_seq" },
+      { table: "snooze_checks", sequence: "snooze_checks_id_seq" },
+    ];
+
+    for (const { table, sequence } of sequencesToReset) {
+      const result = await client.query(
+        `SELECT setval('${sequence}', COALESCE((SELECT MAX(id) FROM ${table}), 1))`
+      );
+      const nextValue = result.rows[0].setval;
+      log(`  - Reset ${sequence} to ${nextValue}`);
+    }
+
     log("Seeding completed successfully!");
   } catch (error) {
     console.error("Error during seeding:", error);
