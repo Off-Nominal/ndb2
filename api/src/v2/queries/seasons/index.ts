@@ -1,5 +1,5 @@
 import { isBefore } from "date-fns";
-import { getAllSeasons, IGetAllSeasonsResult } from "./seasons.queries";
+import { getAllSeasons } from "./seasons.queries";
 import * as API from "@offnominal/ndb2-api-types/v2";
 
 const getIdentifier = (
@@ -18,19 +18,18 @@ const getIdentifier = (
   return "current";
 };
 
-export type SeasonWithDates = IGetAllSeasonsResult & {
-  identifier: API.Entities.Seasons.Identifier;
-};
-
 export default {
-  getAll: (dbClient: any) => async (): Promise<SeasonWithDates[]> => {
-    const result = await getAllSeasons.run(undefined, dbClient);
+  getAll:
+    (dbClient: any) => async (): Promise<API.Entities.Seasons.Season[]> => {
+      const result = await getAllSeasons.run(undefined, dbClient);
 
-    const seasons = result.map((season) => ({
-      ...season,
-      identifier: getIdentifier(new Date(season.start), new Date(season.end)),
-    }));
+      const seasons = result.map((season) => ({
+        ...season,
+        start: season.start.toISOString(),
+        end: season.end.toISOString(),
+        identifier: getIdentifier(new Date(season.start), new Date(season.end)),
+      }));
 
-    return seasons;
-  },
+      return seasons;
+    },
 };

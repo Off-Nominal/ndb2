@@ -18,23 +18,23 @@ export type Prediction = {
   driver: PredictionDriver;
   season_id: number | null;
   season_applicable: boolean;
-  created_date: Date;
-  due_date: Date | null;
-  check_date: Date | null;
-  last_check_date: Date | null;
-  closed_date: Date | null;
-  triggered_date: Date | null;
+  created_date: string;
+  due_date: string | null;
+  check_date: string | null;
+  last_check_date: string | null;
+  closed_date: string | null;
+  triggered_date: string | null;
   triggerer: {
     id: string;
     discord_id: string;
   } | null;
-  judged_date: Date | null;
-  retired_date: Date | null;
+  judged_date: string | null;
+  retired_date: string | null;
   status: PredictionLifeCycle;
   bets: {
     id: number;
     endorsed: boolean;
-    date: Date;
+    date: string;
     wager: number;
     valid: boolean;
     payout: number | null;
@@ -47,7 +47,7 @@ export type Prediction = {
   votes: {
     id: number;
     vote: boolean;
-    voted_date: Date;
+    voted_date: string;
     voter: {
       id: string;
       discord_id: string;
@@ -55,9 +55,9 @@ export type Prediction = {
   }[];
   checks: {
     id: number;
-    check_date: Date;
+    check_date: string;
     closed: boolean;
-    closed_at: Date | null;
+    closed_at: string | null;
     votes: {
       day: number;
       week: number;

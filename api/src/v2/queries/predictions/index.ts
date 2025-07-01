@@ -46,20 +46,32 @@ export default {
         driver: prediction.driver,
         season_id: prediction.season_id,
         season_applicable: prediction.season_applicable,
-        created_date: prediction.created_date,
-        due_date: prediction.due_date,
-        check_date: prediction.check_date,
-        last_check_date: prediction.last_check_date,
-        closed_date: prediction.closed_date,
-        triggered_date: prediction.triggered_date,
+        created_date: prediction.created_date.toString(),
+        due_date: prediction.due_date ? prediction.due_date.toString() : null,
+        check_date: prediction.check_date
+          ? prediction.check_date.toString()
+          : null,
+        last_check_date: prediction.last_check_date
+          ? prediction.last_check_date.toString()
+          : null,
+        closed_date: prediction.closed_date
+          ? prediction.closed_date.toString()
+          : null,
+        triggered_date: prediction.triggered_date
+          ? prediction.triggered_date.toString()
+          : null,
         triggerer,
-        judged_date: prediction.judged_date,
-        retired_date: prediction.retired_date,
+        judged_date: prediction.judged_date
+          ? prediction.judged_date.toString()
+          : null,
+        retired_date: prediction.retired_date
+          ? prediction.retired_date.toString()
+          : null,
         status: prediction.status,
         bets: betsResult.map((bet) => ({
           id: bet.id,
           endorsed: bet.endorsed,
-          date: bet.date,
+          date: bet.date.toString(),
           wager: bet.wager,
           valid: bet.valid,
           payout: bet.payout,
@@ -72,7 +84,7 @@ export default {
         votes: votesResult.map((vote) => ({
           id: vote.id,
           vote: vote.vote,
-          voted_date: vote.voted_date,
+          voted_date: vote.voted_date.toString(),
           voter: {
             id: vote.voter_id,
             discord_id: vote.voter_discord_id,
@@ -80,9 +92,9 @@ export default {
         })),
         checks: checksResult.map((check) => ({
           id: check.id,
-          check_date: check.check_date,
+          check_date: check.check_date.toString(),
           closed: check.closed,
-          closed_at: check.closed_at,
+          closed_at: check.closed_at ? check.closed_at.toString() : null,
           votes: {
             day: parseInt(check.votes_day),
             week: parseInt(check.votes_week),

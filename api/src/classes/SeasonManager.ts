@@ -4,18 +4,19 @@ import schedule from "node-schedule";
 import webhookManager from "../config/webhook_subscribers";
 import predictions from "../db/queries/predictions";
 import { PredictionLifeCycle } from "../types/predicitions";
-import seasonsV2, { SeasonWithDates } from "../v2/queries/seasons";
+import seasonsV2 from "../v2/queries/seasons";
 import seasons from "../db/queries/seasons";
 import { createLogger } from "../utils/logger";
+import * as API from "@offnominal/ndb2-api-types/v2";
 
 const logger = createLogger("SM");
 
 export class SeasonManager {
-  private seasons: SeasonWithDates[] = [];
+  private seasons: API.Entities.Seasons.Season[] = [];
 
   public getSeasonByIdentifier(
     identifier: "current" | "last"
-  ): SeasonWithDates {
+  ): API.Entities.Seasons.Season {
     if (identifier === "current") {
       const season = this.seasons.find(
         (season) => season.identifier === "current"
@@ -40,7 +41,7 @@ export class SeasonManager {
 
   private async fetchAllSeasons(
     client: PoolClient
-  ): Promise<SeasonWithDates[]> {
+  ): Promise<API.Entities.Seasons.Season[]> {
     return seasonsV2.getAll(client)();
   }
 
@@ -61,11 +62,7 @@ export class SeasonManager {
 
       if (!currentSeason || currentSeason.id === newLastSeason.id) {
         // Season has changed
-        webhookManager.emit("season_start", {
-          ...newCurrentSeason,
-          start: newCurrentSeason.start.toISOString(),
-          end: newCurrentSeason.end.toISOString(),
-        });
+        webhookManager.emit("season_start", newCurrentSeason);
       }
 
       this.seasons = allSeasons;
