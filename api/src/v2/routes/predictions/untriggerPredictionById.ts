@@ -8,54 +8,73 @@ import responseUtils from "../../utils/response";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import validate from "express-zod-safe";
 
-const RequestSchema = {
+const validator = validate({
+  handler: (errors, req, res, next) => {
+    const errorInfos = responseUtils.handleValidationErrors(errors);
+
+    if (errorInfos.length > 0) {
+      // Validation errors - return 400 Bad Request
+      res.status(400).json(responseUtils.writeErrors(errorInfos));
+    } else {
+      // Non-validation errors - return 500 Internal Server Error
+      console.error("Zod Validation Handler run without any errors.");
+      console.error(errors);
+
+      res.status(500).json(
+        responseUtils.writeErrors([
+          {
+            code: API.Errors.SERVER_ERROR,
+            message: "There was an error processing your request.",
+          },
+        ])
+      );
+    }
+  },
   params: z.object({
     prediction_id: predictionIdSchema,
   }),
-};
+});
 
 export const untriggerPredictionById: Route = (router: Router) => {
   router.delete(
     "/:prediction_id/trigger",
-    validate(RequestSchema),
+    validator,
     getDbClient,
     async (req, res) => {
       const { prediction_id } = req.params;
 
-      responseUtils.writeSuccess(null, "This feature is not yet implemented");
+        predictions
+          .untriggerById(req.dbClient)(prediction_id)
+          .then(() => predictions.getById(req.dbClient)(prediction_id))
+          .then((prediction) => {
+            if (!prediction) {
+              return res.status(404).json(
+                responseUtils.writeErrors([
+                  {
+                    code: API.Errors.PREDICTION_NOT_FOUND,
+                    message: `Prediction with id ${prediction_id} does not exist.`,
+                  },
+                ])
+              );
+            }
 
-      //   predictions
-      //     .untriggerById(req.dbClient)(prediction_id)
-      //     .then(() => predictions.getById(req.dbClient)(prediction_id))
-      //     .then((prediction) => {
-      //       if (!prediction) {
-      //         return res.status(404).json(
-      //           responseUtils.writeErrors([
-      //             {
-      //               code: API.Errors.PREDICTION_NOT_FOUND,
-      //               message: `Prediction with id ${prediction_id} does not exist.`,
-      //             },
-      //           ])
-      //         );
-      //       }
-
-      //       const response = responseUtils.writeSuccess(
-      //         prediction,
-      //         "Prediction untriggered successfully."
-      //       );
-      //       res.json(response);
-      //     })
-      //     .catch((err) => {
-      //       console.error(err);
-      //       return res.status(500).json(
-      //         responseUtils.writeErrors([
-      //           {
-      //             code: API.Errors.SERVER_ERROR,
-      //             message: "There was an error untriggering this prediction.",
-      //           },
-      //         ])
-      //       );
-      //     });
+            const response = responseUtils.writeSuccess(
+              prediction,
+              "Prediction untriggered successfully."
+            );
+            res.json(response);
+          })
+          .catch((err) => {
+            console.error(err);
+            return res.status(500).json(
+              responseUtils.writeErrors([
+                {
+                  code: API.Errors.SERVER_ERROR,
+                  message: "There was an error untriggering this prediction.",
+                },
+              ])
+            );
+          });
     }
   );
 };

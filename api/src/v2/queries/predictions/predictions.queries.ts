@@ -104,3 +104,27 @@ const untriggerPredictionByIdIR: any = {"usedParamSet":{"prediction_id":true},"p
 export const untriggerPredictionById = new PreparedQuery<IUntriggerPredictionByIdParams,IUntriggerPredictionByIdResult>(untriggerPredictionByIdIR);
 
 
+/** Query 'PredictionIsOfStatus' is invalid, so its result is assigned type 'never'.
+ *  */
+export type IPredictionIsOfStatusResult = never;
+
+/** Query 'PredictionIsOfStatus' is invalid, so its parameters are assigned type 'never'.
+ *  */
+export type IPredictionIsOfStatusParams = never;
+
+const predictionIsOfStatusIR: any = {"usedParamSet":{"prediction_id":true},"params":[{"name":"prediction_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":67,"b":81}]}],"statement":"SELECT EXISTS\n  (SELECT status\n    FROM predictions\n    WHERE id = :prediction_id!\n      AND status IN (:...allowed_statuses)\n  )"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * SELECT EXISTS
+ *   (SELECT status
+ *     FROM predictions
+ *     WHERE id = :prediction_id!
+ *       AND status IN (:...allowed_statuses)
+ *   )
+ * ```
+ */
+export const predictionIsOfStatus = new PreparedQuery<IPredictionIsOfStatusParams,IPredictionIsOfStatusResult>(predictionIsOfStatusIR);
+
+

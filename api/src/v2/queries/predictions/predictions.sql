@@ -31,3 +31,11 @@ UPDATE predictions SET
   triggered_date = NULL,
   closed_date = NULL
 WHERE id = :prediction_id!;
+
+/* @name predictionIsOfStatus */
+SELECT EXISTS
+  (SELECT status
+    FROM predictions
+    WHERE id = :prediction_id!
+      AND status IN (:allowed_statuses)
+  );
