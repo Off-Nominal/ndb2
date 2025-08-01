@@ -16,32 +16,19 @@ const router = express.Router();
 
 router.post(
   "/:prediction_id/bets",
-  [
-    paramValidator.boolean("endorsed", { type: "body" }),
-    paramValidator.numberParseableString("discord_id", { type: "body" }),
-    paramValidator.integerParseableString("prediction_id", { type: "params" }),
-    paramValidator.isPostgresInt("prediction_id", { type: "params" }),
-    getDbClient,
-    getUserByDiscordId,
-    getPrediction,
-    predictionStatusValidator(PredictionLifeCycle.OPEN),
-  ],
-  async (req: Request, res: Response) => {
-    if (!req.prediction || !req.dbClient || !req.user_id) {
-      return res
-        .status(500)
-        .json(
-          responseUtils_deprecated.writeError(
-            ErrorCode.SERVER_ERROR,
-            "Something went wrong. Please try again.",
-            null
-          )
-        );
-    }
+  paramValidator.boolean("endorsed", { type: "body" }),
+  paramValidator.numberParseableString("discord_id", { type: "body" }),
+  paramValidator.integerParseableString("prediction_id", { type: "params" }),
+  paramValidator.isPostgresInt("prediction_id", { type: "params" }),
+  getDbClient,
+  getUserByDiscordId,
+  getPrediction,
+  predictionStatusValidator(PredictionLifeCycle.OPEN),
+  async (req, res) => {
     const { discord_id, endorsed } = req.body;
 
     // Validate if bet has already been made by the user
-    const bet = req.prediction.bets.find(
+    const bet = res.locals.prediction.bets.find(
       (b) => b.better.discord_id === discord_id
     );
 
@@ -56,7 +43,7 @@ router.post(
               `You have already ${
                 bet.endorsed ? "endorsed" : "undorsed"
               } this prediction. No change necessary.`,
-              req.prediction
+              res.locals.prediction
             )
           );
       }
@@ -81,12 +68,15 @@ router.post(
     }
 
     bets
-      .add(req.dbClient)(req.user_id, req.prediction.id, endorsed)
+      .add(res.locals.dbClient)(
+        res.locals.user_id,
+        res.locals.prediction.id,
+        endorsed
+      )
       .then((b) => {
-        if (!req.prediction || !req.dbClient) {
-          throw new Error("Prediction or DB client is not defined");
-        }
-        return predictions.getPredictionById(req.dbClient)(b.prediction_id);
+        return predictions.getPredictionById(res.locals.dbClient)(
+          b.prediction_id
+        );
       })
       .then((ep) => {
         if (!ep) {

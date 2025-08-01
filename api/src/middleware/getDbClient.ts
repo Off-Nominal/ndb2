@@ -1,21 +1,30 @@
 import pool from "../db";
 import responseUtils_deprecated from "../utils/response";
 import { ErrorCode } from "../types/responses";
-import { type WeakRequestHandler } from "express-zod-safe";
+import { RequestHandler, Response } from "express";
+import { PoolClient } from "pg";
 
-export const getDbClient: WeakRequestHandler = (req, res, next) => {
+interface WithDbClient {
+  dbClient: PoolClient;
+}
+
+export const getDbClient: RequestHandler<any, any, any, any, WithDbClient> = (
+  req,
+  res: Response<any, Record<string, any>>,
+  next
+) => {
   pool
     .connect()
     .then((client) => {
-      req.dbClient = client;
-
-      if (!req.dbClient) {
+      if (!client) {
         throw new Error();
       }
 
+      res.locals.dbClient = client;
+
       // release client when finished
       res.on("finish", () => {
-        req.dbClient && req.dbClient.release();
+        res.locals.dbClient && res.locals.dbClient.release();
       });
 
       next();

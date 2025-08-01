@@ -2,9 +2,21 @@ import predictions from "../db/queries/predictions";
 import { APIPredictions } from "../types/predicitions";
 import responseUtils_deprecated from "../utils/response";
 import { ErrorCode } from "../types/responses";
-import { WeakRequestHandler } from "express-zod-safe";
+import { RequestHandler, Response } from "express";
+import { PoolClient } from "pg";
 
-export const getPrediction: WeakRequestHandler = async (req, res, next) => {
+interface WithPrediction {
+  dbClient: PoolClient;
+  prediction: APIPredictions.EnhancedPrediction;
+}
+
+export const getPrediction: RequestHandler<
+  any,
+  any,
+  any,
+  any,
+  WithPrediction
+> = async (req, res: Response<any, Record<string, any>>, next) => {
   if (!req.params) {
     return res
       .status(400)
@@ -17,22 +29,10 @@ export const getPrediction: WeakRequestHandler = async (req, res, next) => {
       );
   }
 
-  if (!req.dbClient) {
-    return res
-      .status(500)
-      .json(
-        responseUtils_deprecated.writeError(
-          ErrorCode.SERVER_ERROR,
-          "Database client is missing.",
-          null
-        )
-      );
-  }
-
   const prediction_id = req.params["prediction_id" as keyof typeof req.params];
   // Fetch prediction
   try {
-    const response = await predictions.getPredictionById(req.dbClient)(
+    const response = await predictions.getPredictionById(res.locals.dbClient)(
       prediction_id
     );
 
@@ -48,7 +48,7 @@ export const getPrediction: WeakRequestHandler = async (req, res, next) => {
         );
     }
 
-    req.prediction = response;
+    res.locals.prediction = response;
     return next();
   } catch (err) {
     console.error(err);

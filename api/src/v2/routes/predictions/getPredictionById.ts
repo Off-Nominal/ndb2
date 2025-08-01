@@ -39,7 +39,7 @@ export const getPredictionById: Route = (router) => {
     const { prediction_id } = req.params;
 
     predictions
-      .getById(req.dbClient)(prediction_id)
+      .getById(res.locals.dbClient)(prediction_id)
       .then((prediction) => {
         if (!prediction) {
           return res.status(404).json(

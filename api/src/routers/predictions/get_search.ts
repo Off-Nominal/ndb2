@@ -29,44 +29,30 @@ const isSortByOption = (val: any): val is SortByOption => {
 
 router.get(
   "/search",
-  [
-    paramValidator.string("status", {
-      type: "query",
-      optional: true,
-      allowArray: true,
-    }),
-    paramValidator.string("sort_by", {
-      type: "query",
-      optional: true,
-      allowArray: true,
-    }),
-    paramValidator.string("keyword", { type: "query", optional: true }),
-    paramValidator.string("creator", { type: "query", optional: true }),
-    paramValidator.string("unbetter", { type: "query", optional: true }),
-    paramValidator.string("season_id", { type: "query", optional: true }),
-    paramValidator.boolean("include_non_season_applicable", {
-      type: "query",
-      optional: true,
-    }),
-    paramValidator.integerParseableString("page", {
-      type: "query",
-      optional: true,
-    }),
-    getDbClient,
-  ],
-  async (req: Request, res: Response) => {
-    if (!req.dbClient) {
-      return res
-        .status(500)
-        .json(
-          responseUtils_deprecated.writeError(
-            ErrorCode.SERVER_ERROR,
-            "Something went wrong. Please try again.",
-            null
-          )
-        );
-    }
-
+  paramValidator.string("status", {
+    type: "query",
+    optional: true,
+    allowArray: true,
+  }),
+  paramValidator.string("sort_by", {
+    type: "query",
+    optional: true,
+    allowArray: true,
+  }),
+  paramValidator.string("keyword", { type: "query", optional: true }),
+  paramValidator.string("creator", { type: "query", optional: true }),
+  paramValidator.string("unbetter", { type: "query", optional: true }),
+  paramValidator.string("season_id", { type: "query", optional: true }),
+  paramValidator.boolean("include_non_season_applicable", {
+    type: "query",
+    optional: true,
+  }),
+  paramValidator.integerParseableString("page", {
+    type: "query",
+    optional: true,
+  }),
+  getDbClient,
+  async (req, res) => {
     const {
       status,
       sort_by,
@@ -163,7 +149,7 @@ router.get(
 
     if (creator) {
       try {
-        const user = await users.getByDiscordId(req.dbClient)(
+        const user = await users.getByDiscordId(res.locals.dbClient)(
           creator as string
         );
         if (!user) {
@@ -196,7 +182,7 @@ router.get(
 
     if (unbetter) {
       try {
-        const user = await users.getByDiscordId(req.dbClient)(
+        const user = await users.getByDiscordId(res.locals.dbClient)(
           unbetter as string
         );
         if (!user) {
@@ -228,7 +214,7 @@ router.get(
     }
 
     predictions
-      .searchPredictions(req.dbClient)({
+      .searchPredictions(res.locals.dbClient)({
         keyword: keyword as string,
         sort_by: sort_bys as SortByOption[],
         statuses: statuses as PredictionLifeCycle[],
