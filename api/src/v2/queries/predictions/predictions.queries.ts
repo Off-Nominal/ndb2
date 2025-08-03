@@ -106,7 +106,7 @@ export const untriggerPredictionById = new PreparedQuery<IUntriggerPredictionByI
 
 /** 'PredictionIsOfStatus' parameters type */
 export interface IPredictionIsOfStatusParams {
-  allowed_statuses?: string | null | void;
+  allowed_statuses: readonly (string | null | void)[];
   prediction_id: number;
 }
 
@@ -121,7 +121,7 @@ export interface IPredictionIsOfStatusQuery {
   result: IPredictionIsOfStatusResult;
 }
 
-const predictionIsOfStatusIR: any = {"usedParamSet":{"prediction_id":true,"allowed_statuses":true},"params":[{"name":"prediction_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":67,"b":81}]},{"name":"allowed_statuses","required":false,"transform":{"type":"scalar"},"locs":[{"a":104,"b":120}]}],"statement":"SELECT EXISTS\n  (SELECT status\n    FROM predictions\n    WHERE id = :prediction_id!\n      AND status IN (:allowed_statuses)\n  )"};
+const predictionIsOfStatusIR: any = {"usedParamSet":{"prediction_id":true,"allowed_statuses":true},"params":[{"name":"allowed_statuses","required":false,"transform":{"type":"array_spread"},"locs":[{"a":104,"b":120}]},{"name":"prediction_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":67,"b":81}]}],"statement":"SELECT EXISTS\n  (SELECT status\n    FROM predictions\n    WHERE id = :prediction_id!\n      AND status IN (:allowed_statuses)\n  )"};
 
 /**
  * Query generated from SQL:

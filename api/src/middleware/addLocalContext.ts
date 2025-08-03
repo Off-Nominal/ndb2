@@ -53,7 +53,6 @@ export const addLocalContext = <T extends readonly any[]>(
       if (index >= middlewares.length) {
         return next();
       }
-
       const middleware = middlewares[index];
       index++;
 

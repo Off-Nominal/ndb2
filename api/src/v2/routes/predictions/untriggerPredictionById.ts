@@ -8,6 +8,8 @@ import responseUtils from "../../utils/response";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import validate from "express-zod-safe";
 import { addLocalContext } from "../../../middleware/addLocalContext";
+import { getPrediction } from "../../../middleware/getPrediction";
+import predictionStatusValidator from "../../../middleware/predictionStatusValidator";
 
 const validator = validate({
   handler: (errors, req, res, next) => {
@@ -34,13 +36,15 @@ const validator = validate({
   params: z.object({
     prediction_id: predictionIdSchema,
   }),
+  body: z.any(),
+  query: z.any(),
 });
 
 export const untriggerPredictionById: Route = (router: Router) => {
   router.delete(
     "/:prediction_id/trigger",
     validator,
-    addLocalContext([getDbClient]),
+    addLocalContext([getDbClient, predictionStatusValidator(["closed"])]),
     async (req, res) => {
       const { prediction_id } = req.params;
 

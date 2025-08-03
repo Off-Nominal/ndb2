@@ -32,7 +32,10 @@ UPDATE predictions SET
   closed_date = NULL
 WHERE id = :prediction_id!;
 
-/* @name predictionIsOfStatus */
+/* 
+ @name predictionIsOfStatus 
+ @param allowed_statuses -> (...)
+*/
 SELECT EXISTS
   (SELECT status
     FROM predictions

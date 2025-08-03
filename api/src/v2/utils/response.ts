@@ -1,6 +1,6 @@
 import * as API from "@offnominal/ndb2-api-types/v2";
 
-export default {
+const responseUtils = {
   /**
    * Write an error response with one or more errors
    * @param errors - Array of error objects, each containing an error code and message
@@ -104,3 +104,5 @@ export default {
     };
   },
 };
+
+export default responseUtils;

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { predictionIdSchema } from "../../validations";
 import { Route } from "../../utils/routerMap";
-import { getDbClient } from "../../../middleware/deprecated/getDbClient";
+import { getDbClient } from "../../../middleware/getDbClient";
 import validate from "express-zod-safe";
 import responseUtils from "../../utils/response";
 import * as API from "@offnominal/ndb2-api-types/v2";
@@ -33,6 +33,8 @@ const validator = validate({
   params: z.object({
     prediction_id: predictionIdSchema,
   }),
+  body: z.any(),
+  query: z.any(),
 });
 
 export const getPredictionById: Route = (router) => {

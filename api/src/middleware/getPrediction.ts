@@ -6,7 +6,7 @@ import predictions from "../v2/queries/predictions";
 
 export const getPrediction = async (
   req: Request<
-    { prediction_id: string },
+    { prediction_id: number },
     any,
     any,
     any,
@@ -18,7 +18,7 @@ export const getPrediction = async (
   // Fetch prediction
   try {
     const response = await predictions.getById(res.locals.dbClient)(
-      res.locals.prediction_id
+      req.params.prediction_id
     );
 
     if (!response) {
