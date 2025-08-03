@@ -104,15 +104,24 @@ const untriggerPredictionByIdIR: any = {"usedParamSet":{"prediction_id":true},"p
 export const untriggerPredictionById = new PreparedQuery<IUntriggerPredictionByIdParams,IUntriggerPredictionByIdResult>(untriggerPredictionByIdIR);
 
 
-/** Query 'PredictionIsOfStatus' is invalid, so its result is assigned type 'never'.
- *  */
-export type IPredictionIsOfStatusResult = never;
+/** 'PredictionIsOfStatus' parameters type */
+export interface IPredictionIsOfStatusParams {
+  allowed_statuses?: string | null | void;
+  prediction_id: number;
+}
 
-/** Query 'PredictionIsOfStatus' is invalid, so its parameters are assigned type 'never'.
- *  */
-export type IPredictionIsOfStatusParams = never;
+/** 'PredictionIsOfStatus' return type */
+export interface IPredictionIsOfStatusResult {
+  exists: boolean | null;
+}
 
-const predictionIsOfStatusIR: any = {"usedParamSet":{"prediction_id":true},"params":[{"name":"prediction_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":67,"b":81}]}],"statement":"SELECT EXISTS\n  (SELECT status\n    FROM predictions\n    WHERE id = :prediction_id!\n      AND status IN (:...allowed_statuses)\n  )"};
+/** 'PredictionIsOfStatus' query type */
+export interface IPredictionIsOfStatusQuery {
+  params: IPredictionIsOfStatusParams;
+  result: IPredictionIsOfStatusResult;
+}
+
+const predictionIsOfStatusIR: any = {"usedParamSet":{"prediction_id":true,"allowed_statuses":true},"params":[{"name":"prediction_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":67,"b":81}]},{"name":"allowed_statuses","required":false,"transform":{"type":"scalar"},"locs":[{"a":104,"b":120}]}],"statement":"SELECT EXISTS\n  (SELECT status\n    FROM predictions\n    WHERE id = :prediction_id!\n      AND status IN (:allowed_statuses)\n  )"};
 
 /**
  * Query generated from SQL:
@@ -121,7 +130,7 @@ const predictionIsOfStatusIR: any = {"usedParamSet":{"prediction_id":true},"para
  *   (SELECT status
  *     FROM predictions
  *     WHERE id = :prediction_id!
- *       AND status IN (:...allowed_statuses)
+ *       AND status IN (:allowed_statuses)
  *   )
  * ```
  */

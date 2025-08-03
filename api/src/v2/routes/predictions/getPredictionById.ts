@@ -1,12 +1,12 @@
 import { z } from "zod";
 import { predictionIdSchema } from "../../validations";
 import { Route } from "../../utils/routerMap";
-import predictions from "../../queries/predictions";
 import { getDbClient } from "../../../middleware/deprecated/getDbClient";
 import validate from "express-zod-safe";
 import responseUtils from "../../utils/response";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { addLocalContext } from "../../../middleware/addLocalContext";
+import { getPrediction } from "../../../middleware/getPrediction";
 
 const validator = validate({
   handler: (errors, req, res, next) => {
@@ -39,42 +39,11 @@ export const getPredictionById: Route = (router) => {
   router.get(
     "/:prediction_id",
     validator,
-    addLocalContext([getDbClient]),
+    addLocalContext([getDbClient, getPrediction]),
     async (req, res) => {
-      const { prediction_id } = req.params;
-
-      predictions
-        .getById(res.locals.dbClient)(prediction_id)
-        .then((prediction) => {
-          if (!prediction) {
-            return res.status(404).json(
-              responseUtils.writeErrors([
-                {
-                  code: API.Errors.PREDICTION_NOT_FOUND,
-                  message: `Predicton with id ${prediction_id} does not exist.`,
-                },
-              ])
-            );
-          }
-
-          res.json(
-            responseUtils.writeSuccess(
-              prediction,
-              "Prediction fetched successfully."
-            )
-          );
-        })
-        .catch((err) => {
-          console.error(err);
-          return res.status(500).json(
-            responseUtils.writeErrors([
-              {
-                code: API.Errors.SERVER_ERROR,
-                message: "Unable to fetch prediction.",
-              },
-            ])
-          );
-        });
+      return res.json(
+        responseUtils.writeSuccess(res.locals.prediction, "Prediction fetched.")
+      );
     }
   );
 };

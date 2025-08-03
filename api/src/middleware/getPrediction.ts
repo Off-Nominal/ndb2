@@ -1,9 +1,8 @@
-import predictions from "../../db/queries/predictions";
-import responseUtils_deprecated from "../../utils/response";
-import { ErrorCode } from "../../types/responses";
 import type { PoolClient } from "pg";
 import type { Request, Response, NextFunction } from "express";
-import { APIPredictions } from "../../types/predicitions";
+import * as API from "@offnominal/ndb2-api-types/v2";
+import responseUtils from "../v2/utils/response";
+import predictions from "../v2/queries/predictions";
 
 export const getPrediction = async (
   req: Request<
@@ -11,66 +10,39 @@ export const getPrediction = async (
     any,
     any,
     any,
-    { dbClient: PoolClient; prediction: APIPredictions.GetPredictionById }
+    { dbClient: PoolClient; prediction: API.Entities.Predictions.Prediction }
   >,
   res: Response,
   next: NextFunction
 ) => {
-  if (!req.params) {
-    return res
-      .status(400)
-      .json(
-        responseUtils_deprecated.writeError(
-          ErrorCode.MALFORMED_QUERY_PARAMS,
-          "Query params are missing.",
-          null
-        )
-      );
-  }
-
-  if (!res.locals.dbClient) {
-    return res
-      .status(500)
-      .json(
-        responseUtils_deprecated.writeError(
-          ErrorCode.SERVER_ERROR,
-          "Database client is missing.",
-          null
-        )
-      );
-  }
-
-  const prediction_id = req.params["prediction_id" as keyof typeof req.params];
   // Fetch prediction
   try {
-    const response = await predictions.getPredictionById(res.locals.dbClient)(
-      prediction_id
+    const response = await predictions.getById(res.locals.dbClient)(
+      res.locals.prediction_id
     );
 
     if (!response) {
-      return res
-        .status(404)
-        .json(
-          responseUtils_deprecated.writeError(
-            ErrorCode.BAD_REQUEST,
-            `Predicton with id ${prediction_id} does not exist.`,
-            null
-          )
-        );
+      return res.status(404).json(
+        responseUtils.writeErrors([
+          {
+            code: API.Errors.PREDICTION_NOT_FOUND,
+            message: `Predicton with id ${res.locals.prediction_id} does not exist.`,
+          },
+        ])
+      );
     }
 
     res.locals.prediction = response;
     return next();
   } catch (err) {
     console.error(err);
-    return res
-      .status(500)
-      .json(
-        responseUtils_deprecated.writeError(
-          ErrorCode.SERVER_ERROR,
-          "Unable to fetch prediction.",
-          null
-        )
-      );
+    return res.status(500).json(
+      responseUtils.writeErrors([
+        {
+          code: API.Errors.SERVER_ERROR,
+          message: "Unable to fetch prediction.",
+        },
+      ])
+    );
   }
 };

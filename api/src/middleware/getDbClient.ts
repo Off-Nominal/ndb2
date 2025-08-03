@@ -1,8 +1,8 @@
-import pool from "../../db";
-import responseUtils_deprecated from "../../utils/response";
-import { ErrorCode } from "../../types/responses";
+import pool from "../db";
 import type { NextFunction, Request, Response } from "express";
 import type { PoolClient } from "pg";
+import responseUtils from "../v2/utils/response";
+import * as API from "@offnominal/ndb2-api-types/v2";
 
 export const getDbClient = (
   req: Request<any, any, any, any, { dbClient: PoolClient }>,
@@ -22,14 +22,14 @@ export const getDbClient = (
       next();
     })
     .catch((err) => {
-      return res
-        .status(500)
-        .json(
-          responseUtils_deprecated.writeError(
-            ErrorCode.SERVER_ERROR,
-            `Unable to make database connection, request aborted.`,
-            null
-          )
-        );
+      console.error(err);
+      return res.status(500).json(
+        responseUtils.writeErrors([
+          {
+            code: API.Errors.SERVER_ERROR,
+            message: `Unable to make database connection, request aborted.`,
+          },
+        ])
+      );
     });
 };
