@@ -1,9 +1,9 @@
 import express, { Request, Response } from "express";
-import { getDbClient } from "../../middleware/getDbClient";
+import { getDbClient } from "../../middleware/deprecated/getDbClient";
 import scores from "../../db/queries/scores";
 import responseUtils_deprecated from "../../utils/response";
 import { isScoreView, ScoreView } from "./get";
-import paramValidator from "../../middleware/paramValidator";
+import paramValidator from "../../middleware/deprecated/paramValidator";
 import { ErrorCode } from "../../types/responses";
 const router = express.Router();
 

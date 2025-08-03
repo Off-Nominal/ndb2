@@ -1,34 +1,35 @@
 import pool from "../db";
-import responseUtils_deprecated from "../utils/response";
-import { ErrorCode } from "../types/responses";
-import { type WeakRequestHandler } from "express-zod-safe";
+import type { NextFunction, Request, Response } from "express";
+import type { PoolClient } from "pg";
+import responseUtils from "../v2/utils/response";
+import * as API from "@offnominal/ndb2-api-types/v2";
 
-export const getDbClient: WeakRequestHandler = (req, res, next) => {
+export const getDbClient = (
+  req: Request<any, any, any, any, { dbClient: PoolClient }>,
+  res: Response,
+  next: NextFunction
+) => {
   pool
     .connect()
     .then((client) => {
-      req.dbClient = client;
-
-      if (!req.dbClient) {
-        throw new Error();
-      }
+      res.locals.dbClient = client;
 
       // release client when finished
       res.on("finish", () => {
-        req.dbClient && req.dbClient.release();
+        client.release();
       });
 
       next();
     })
     .catch((err) => {
-      return res
-        .status(500)
-        .json(
-          responseUtils_deprecated.writeError(
-            ErrorCode.SERVER_ERROR,
-            `Unable to make database connection, request aborted.`,
-            null
-          )
-        );
+      console.error(err);
+      return res.status(500).json(
+        responseUtils.writeErrors([
+          {
+            code: API.Errors.SERVER_ERROR,
+            message: `Unable to make database connection, request aborted.`,
+          },
+        ])
+      );
     });
 };

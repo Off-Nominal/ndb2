@@ -1,6 +1,6 @@
 import { isFuture, isPast, isValid } from "date-fns";
-import responseUtils_deprecated from "../utils/response";
-import { ErrorCode } from "../types/responses";
+import responseUtils_deprecated from "../../utils/response";
+import { ErrorCode } from "../../types/responses";
 import { WeakRequestHandler } from "express-zod-safe";
 
 const createChecker = (

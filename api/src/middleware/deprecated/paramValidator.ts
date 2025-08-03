@@ -6,9 +6,9 @@ import {
   isNoMoreThan,
   isNumberParseableString,
   isString,
-} from "../helpers/typeguards";
-import responseUtils_deprecated from "../utils/response";
-import { ErrorCode } from "../types/responses";
+} from "../../helpers/typeguards";
+import responseUtils_deprecated from "../../utils/response";
+import { ErrorCode } from "../../types/responses";
 import { WeakRequestHandler } from "express-zod-safe";
 
 const createChecker = (

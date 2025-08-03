@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
-import { getDbClient } from "../../middleware/getDbClient";
-import paramValidator from "../../middleware/paramValidator";
+import { getDbClient } from "../../middleware/deprecated/getDbClient";
+import paramValidator from "../../middleware/deprecated/paramValidator";
 import predictions from "../../db/queries/predictions";
 import { SortByOption } from "../../db/queries/predictions_search";
 import { PredictionLifeCycle } from "../../types/predicitions";

@@ -1,43 +1,45 @@
 import { NextFunction, Request, Response } from "express";
-import { PredictionLifeCycle } from "../types/predicitions";
-import responseUtils_deprecated from "../utils/response";
-import { ErrorCode } from "../types/responses";
-import { WeakRequestHandler } from "express-zod-safe";
+import { PoolClient } from "pg";
+import * as API from "@offnominal/ndb2-api-types/v2";
+import predictions from "../v2/queries/predictions";
+import responseUtils from "../v2/utils/response";
 
 const predictionStatusValidator = (
-  statuses: PredictionLifeCycle[] | PredictionLifeCycle
-): WeakRequestHandler => {
-  return (req, res, next) => {
-    if (!req.prediction) {
-      return res
-        .status(400)
-        .json(
-          responseUtils_deprecated.writeError(
-            ErrorCode.MALFORMED_QUERY_PARAMS,
-            "Prediction is missing.",
-            null
-          )
-        );
-    }
-    const status = req.prediction.status;
-
+  statuses:
+    | API.Entities.Predictions.PredictionLifeCycle[]
+    | API.Entities.Predictions.PredictionLifeCycle
+) => {
+  return (
+    req: Request<any, any, any, any, { dbClient: PoolClient }>,
+    res: Response,
+    next: NextFunction
+  ) => {
     const allowedStatuses = Array.isArray(statuses) ? statuses : [statuses];
 
-    if (!allowedStatuses.includes(status)) {
-      return res
-        .status(400)
-        .json(
-          responseUtils_deprecated.writeError(
-            ErrorCode.INVALID_PREDICTION_STATUS,
-            `The requested change to this prediction is invalid because its status is '${status}'. Allowable statuses are ${allowedStatuses
-              .map((s) => `'${s}'`)
-              .join(", ")}.`,
-            null
-          )
-        );
-    } else {
-      next();
-    }
+    predictions
+      .isOfStatus(res.locals.dbClient)(
+        req.params.prediction_id,
+        allowedStatuses
+      )
+      .then((isAllowed) => {
+        if (!isAllowed) {
+          throw new Error();
+        }
+
+        next();
+      })
+      .catch((err) => {
+        if (err instanceof Error) {
+          return res.status(400).json(
+            responseUtils.writeErrors([
+              {
+                code: API.Errors.INVALID_PREDICTION_STATUS,
+                message: err.message,
+              },
+            ])
+          );
+        }
+      });
   };
 };
 

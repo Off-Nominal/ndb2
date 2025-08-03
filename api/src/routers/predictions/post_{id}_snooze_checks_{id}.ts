@@ -1,10 +1,10 @@
 import express, { Request, Response } from "express";
 import { PredictionLifeCycle } from "../../types/predicitions";
-import predictionStatusValidator from "../../middleware/predictionStatusValidator";
-import paramValidator from "../../middleware/paramValidator";
-import { getDbClient } from "../../middleware/getDbClient";
-import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
-import { getPrediction } from "../../middleware/getPrediction";
+import predictionStatusValidator from "../../middleware/deprecated/predictionStatusValidator";
+import paramValidator from "../../middleware/deprecated/paramValidator";
+import { getDbClient } from "../../middleware/deprecated/getDbClient";
+import { getUserByDiscordId } from "../../middleware/deprecated/getUserByDiscordId";
+import { getPrediction } from "../../middleware/deprecated/getPrediction";
 import { isAllowableSnooze } from "../../types/snoozes";
 import responseUtils_deprecated from "../../utils/response";
 import { ErrorCode } from "../../types/responses";
