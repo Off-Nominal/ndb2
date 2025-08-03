@@ -16,37 +16,23 @@ const router = express.Router();
 
 router.patch(
   "/:prediction_id/snooze",
-  [
-    dateValidator.isValid("check_date"),
-    dateValidator.isFuture("check_date"),
-    paramValidator.numberParseableString("discord_id", { type: "body" }),
-    paramValidator.integerParseableString("prediction_id", { type: "params" }),
-    paramValidator.isPostgresInt("prediction_id", { type: "params" }),
-    getDbClient,
-    getUserByDiscordId,
-    getPrediction,
-    predictionStatusValidator([
-      PredictionLifeCycle.OPEN,
-      PredictionLifeCycle.CHECKING,
-    ]),
-  ],
-  async (req: Request, res: Response) => {
+  dateValidator.isValid("check_date"),
+  dateValidator.isFuture("check_date"),
+  paramValidator.numberParseableString("discord_id", { type: "body" }),
+  paramValidator.integerParseableString("prediction_id", { type: "params" }),
+  paramValidator.isPostgresInt("prediction_id", { type: "params" }),
+  getDbClient,
+  getUserByDiscordId,
+  getPrediction,
+  predictionStatusValidator([
+    PredictionLifeCycle.OPEN,
+    PredictionLifeCycle.CHECKING,
+  ]),
+  async (req, res) => {
     const { check_date } = req.body;
     const checkDate = new Date(check_date);
 
-    if (!req.prediction || !req.dbClient) {
-      return res
-        .status(500)
-        .json(
-          responseUtils_deprecated.writeError(
-            ErrorCode.SERVER_ERROR,
-            "Something went wrong. Please try again.",
-            null
-          )
-        );
-    }
-
-    if (!isAfter(checkDate, req.prediction.created_date)) {
+    if (!isAfter(checkDate, res.locals.prediction.created_date)) {
       return res
         .status(400)
         .json(
@@ -59,21 +45,27 @@ router.patch(
     }
 
     return predictions
-      .setCheckDateByPredictionId(req.dbClient)(req.prediction.id, {
-        date: checkDate,
-      })
-      .then(() => {
-        if (!req.prediction || !req.dbClient) {
-          throw new Error("Prediction or DB client is not defined");
+      .setCheckDateByPredictionId(res.locals.dbClient)(
+        res.locals.prediction.id,
+        {
+          date: checkDate,
         }
-        return predictions.getPredictionById(req.dbClient)(req.prediction.id);
+      )
+      .then(() => {
+        return predictions.getPredictionById(res.locals.dbClient)(
+          res.locals.prediction.id
+        );
       })
       .then((prediction) => {
-        if (!req.prediction || !req.prediction.check_date || !prediction) {
+        if (
+          !res.locals.prediction ||
+          !res.locals.prediction.check_date ||
+          !prediction
+        ) {
           throw new Error("Prediction is not defined");
         }
         // Notify Subscribers
-        const oldCheckDate = new Date(req.prediction.check_date);
+        const oldCheckDate = new Date(res.locals.prediction.check_date);
         webhookManager.emit("prediction_edit", prediction, {
           check_date: { old: oldCheckDate, new: checkDate },
         });

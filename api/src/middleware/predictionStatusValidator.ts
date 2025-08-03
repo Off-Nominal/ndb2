@@ -1,14 +1,17 @@
-import { NextFunction, Request, Response } from "express";
-import { PredictionLifeCycle } from "../types/predicitions";
+import { RequestHandler } from "express";
+import { APIPredictions, PredictionLifeCycle } from "../types/predicitions";
 import responseUtils_deprecated from "../utils/response";
 import { ErrorCode } from "../types/responses";
-import { WeakRequestHandler } from "express-zod-safe";
+
+interface WithPrediction extends Record<string, any> {
+  prediction: APIPredictions.EnhancedPrediction;
+}
 
 const predictionStatusValidator = (
   statuses: PredictionLifeCycle[] | PredictionLifeCycle
-): WeakRequestHandler => {
+): RequestHandler<any, any, any, any, WithPrediction> => {
   return (req, res, next) => {
-    if (!req.prediction) {
+    if (!res.locals.prediction) {
       return res
         .status(400)
         .json(
@@ -19,7 +22,7 @@ const predictionStatusValidator = (
           )
         );
     }
-    const status = req.prediction.status;
+    const status = res.locals.prediction.status;
 
     const allowedStatuses = Array.isArray(statuses) ? statuses : [statuses];
 

@@ -1,14 +1,22 @@
 import users from "../db/queries/users";
 import responseUtils_deprecated from "../utils/response";
 import { ErrorCode } from "../types/responses";
-import { WeakRequestHandler } from "express-zod-safe";
+import { RequestHandler, Response } from "express";
+import { PoolClient } from "pg";
 
-export const getUserByDiscordId: WeakRequestHandler = async (
-  req,
-  res,
-  next
-) => {
-  if (!req.dbClient) {
+interface WithUserId {
+  user_id: string;
+  dbClient: PoolClient;
+}
+
+export const getUserByDiscordId: RequestHandler<
+  any,
+  any,
+  any,
+  any,
+  WithUserId
+> = async (req, res: Response<any, Record<string, any>>, next) => {
+  if (!res.locals.dbClient) {
     return res
       .status(500)
       .json(
@@ -49,12 +57,14 @@ export const getUserByDiscordId: WeakRequestHandler = async (
     req.body["discord_id" as keyof typeof req.body];
 
   try {
-    const fetchedUser = await users.getByDiscordId(req.dbClient)(discord_id);
+    const fetchedUser = await users.getByDiscordId(res.locals.dbClient)(
+      discord_id
+    );
     if (!fetchedUser) {
-      const user = await users.add(req.dbClient)(discord_id);
-      req.user_id = user.id;
+      const user = await users.add(res.locals.dbClient)(discord_id);
+      res.locals.user_id = user.id;
     } else {
-      req.user_id = fetchedUser.id;
+      res.locals.user_id = fetchedUser.id;
     }
   } catch (err) {
     console.error(err);

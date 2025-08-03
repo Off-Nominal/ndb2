@@ -1,3 +1,4 @@
+import { PoolClient } from "pg";
 import { getBetsByPredictionId } from "../bets/bets.queries";
 import { getSnoozeChecksByPredictionId } from "../snooze_checks/snooze_checks.queries";
 import { getVotesByPredictionId } from "../votes/votes.queries";
@@ -9,7 +10,7 @@ import * as API from "@offnominal/ndb2-api-types/v2";
 
 export default {
   getById:
-    (dbClient: any) =>
+    (dbClient: PoolClient) =>
     async (
       prediction_id: number
     ): Promise<API.Endpoints.Predictions.GET_ById.Data | undefined> => {

@@ -15,32 +15,19 @@ const router = express.Router();
 
 router.post(
   "/:prediction_id/snooze_checks/:snooze_check_id",
-  [
-    paramValidator.numberParseableString("discord_id", { type: "body" }),
-    paramValidator.integerParseableString("prediction_id", { type: "params" }),
-    paramValidator.isPostgresInt("prediction_id", { type: "params" }),
-    paramValidator.integerParseableString("snooze_check_id", {
-      type: "params",
-    }),
-    paramValidator.isPostgresInt("snooze_check_id", { type: "params" }),
-    paramValidator.integer("value", { type: "body" }),
-    getDbClient,
-    getUserByDiscordId,
-    getPrediction,
-    predictionStatusValidator(PredictionLifeCycle.CHECKING),
-  ],
-  async (req: Request, res: Response) => {
-    if (!req.prediction || !req.dbClient || !req.user_id) {
-      return res
-        .status(500)
-        .json(
-          responseUtils_deprecated.writeError(
-            ErrorCode.SERVER_ERROR,
-            "Something went wrong. Please try again.",
-            null
-          )
-        );
-    }
+  paramValidator.numberParseableString("discord_id", { type: "body" }),
+  paramValidator.integerParseableString("prediction_id", { type: "params" }),
+  paramValidator.isPostgresInt("prediction_id", { type: "params" }),
+  paramValidator.integerParseableString("snooze_check_id", {
+    type: "params",
+  }),
+  paramValidator.isPostgresInt("snooze_check_id", { type: "params" }),
+  paramValidator.integer("value", { type: "body" }),
+  getDbClient,
+  getUserByDiscordId,
+  getPrediction,
+  predictionStatusValidator(PredictionLifeCycle.CHECKING),
+  async (req, res) => {
     const { value } = req.body;
     const { snooze_check_id } = req.params;
 
