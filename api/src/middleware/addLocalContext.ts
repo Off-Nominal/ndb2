@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 
-// Type to extract the locals type from a middleware function
+// Type to extract the Locals type from a middleware function
 type ExtractLocals<T> = T extends (
   req: Request<any, any, any, any, infer L>,
   res: Response,
@@ -9,7 +9,7 @@ type ExtractLocals<T> = T extends (
   ? L
   : never;
 
-// Type to merge multiple locals types
+// Type to merge multiple Locals types into a single object type
 type MergeLocals<T extends readonly any[]> = T extends readonly [
   infer First,
   ...infer Rest
@@ -21,7 +21,20 @@ type MergeLocals<T extends readonly any[]> = T extends readonly [
     : First
   : {};
 
-export const addLocalContext = <T extends readonly any[]>(middlewares: T) => {
+// Type to ensure all middlewares in the array have the same signature
+type MiddlewareArray<T extends readonly any[]> = {
+  [K in keyof T]: T[K] extends (
+    req: Request<any, any, any, any, any>,
+    res: Response,
+    next: NextFunction
+  ) => any
+    ? T[K]
+    : never;
+};
+
+export const addLocalContext = <T extends readonly any[]>(
+  middlewares: MiddlewareArray<T>
+) => {
   return (
     req: Request<
       any,

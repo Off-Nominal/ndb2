@@ -1,9 +1,9 @@
 import express, { Request, Response } from "express";
 import webhookManager from "../../config/webhook_subscribers";
-import { getDbClient } from "../../middleware/getDbClient";
-import { getPrediction } from "../../middleware/getPrediction";
-import paramValidator from "../../middleware/paramValidator";
-import predictionStatusValidator from "../../middleware/predictionStatusValidator";
+import { getDbClient } from "../../middleware/deprecated/getDbClient";
+import { getPrediction } from "../../middleware/deprecated/getPrediction";
+import paramValidator from "../../middleware/deprecated/paramValidator";
+import predictionStatusValidator from "../../middleware/deprecated/predictionStatusValidator";
 import predictions from "../../db/queries/predictions";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils_deprecated from "../../utils/response";

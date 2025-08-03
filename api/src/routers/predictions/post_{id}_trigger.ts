@@ -1,12 +1,12 @@
 import { isBefore } from "date-fns";
 import express, { Request, Response } from "express";
 import webhookManager from "../../config/webhook_subscribers";
-import dateValidator from "../../middleware/dateValidator";
-import { getDbClient } from "../../middleware/getDbClient";
-import { getPrediction } from "../../middleware/getPrediction";
-import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
-import paramValidator from "../../middleware/paramValidator";
-import predictionStatusValidator from "../../middleware/predictionStatusValidator";
+import dateValidator from "../../middleware/deprecated/dateValidator";
+import { getDbClient } from "../../middleware/deprecated/getDbClient";
+import { getPrediction } from "../../middleware/deprecated/getPrediction";
+import { getUserByDiscordId } from "../../middleware/deprecated/getUserByDiscordId";
+import paramValidator from "../../middleware/deprecated/paramValidator";
+import predictionStatusValidator from "../../middleware/deprecated/predictionStatusValidator";
 import predictions from "../../db/queries/predictions";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils_deprecated from "../../utils/response";

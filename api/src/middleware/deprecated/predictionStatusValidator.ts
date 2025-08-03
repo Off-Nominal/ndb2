@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { PredictionLifeCycle } from "../types/predicitions";
-import responseUtils_deprecated from "../utils/response";
-import { ErrorCode } from "../types/responses";
+import { PredictionLifeCycle } from "../../types/predicitions";
+import responseUtils_deprecated from "../../utils/response";
+import { ErrorCode } from "../../types/responses";
 import { WeakRequestHandler } from "express-zod-safe";
 
 const predictionStatusValidator = (

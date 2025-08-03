@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
-import { getDbClient } from "../../middleware/getDbClient";
-import { getPrediction } from "../../middleware/getPrediction";
-import paramValidator from "../../middleware/paramValidator";
+import { getDbClient } from "../../middleware/deprecated/getDbClient";
+import { getPrediction } from "../../middleware/deprecated/getPrediction";
+import paramValidator from "../../middleware/deprecated/paramValidator";
 import responseUtils_deprecated from "../../utils/response";
 const router = express.Router();
 

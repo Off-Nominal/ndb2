@@ -1,4 +1,4 @@
-import { APIResponse, ErrorCode } from "../types/responses";
+import { APIResponse, ErrorCode } from "../../types/responses";
 import { WeakRequestHandler } from "express-zod-safe";
 
 export const authenticateApplication: WeakRequestHandler = (req, res, next) => {

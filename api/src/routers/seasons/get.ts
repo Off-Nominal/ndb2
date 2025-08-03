@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { getDbClient } from "../../middleware/getDbClient";
+import { getDbClient } from "../../middleware/deprecated/getDbClient";
 import seasons from "../../db/queries/seasons";
 import responseUtils_deprecated from "../../utils/response";
 import { ErrorCode } from "../../types/responses";

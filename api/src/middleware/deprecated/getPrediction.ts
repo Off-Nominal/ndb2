@@ -1,21 +1,9 @@
 import predictions from "../../db/queries/predictions";
 import responseUtils_deprecated from "../../utils/response";
 import { ErrorCode } from "../../types/responses";
-import type { PoolClient } from "pg";
-import type { Request, Response, NextFunction } from "express";
-import { APIPredictions } from "../../types/predicitions";
+import { WeakRequestHandler } from "express-zod-safe";
 
-export const getPrediction = async (
-  req: Request<
-    { prediction_id: string },
-    any,
-    any,
-    any,
-    { dbClient: PoolClient; prediction: APIPredictions.GetPredictionById }
-  >,
-  res: Response,
-  next: NextFunction
-) => {
+export const getPrediction: WeakRequestHandler = async (req, res, next) => {
   if (!req.params) {
     return res
       .status(400)
@@ -28,7 +16,7 @@ export const getPrediction = async (
       );
   }
 
-  if (!res.locals.dbClient) {
+  if (!req.dbClient) {
     return res
       .status(500)
       .json(
@@ -43,7 +31,7 @@ export const getPrediction = async (
   const prediction_id = req.params["prediction_id" as keyof typeof req.params];
   // Fetch prediction
   try {
-    const response = await predictions.getPredictionById(res.locals.dbClient)(
+    const response = await predictions.getPredictionById(req.dbClient)(
       prediction_id
     );
 
@@ -59,7 +47,7 @@ export const getPrediction = async (
         );
     }
 
-    res.locals.prediction = response;
+    req.prediction = response;
     return next();
   } catch (err) {
     console.error(err);

@@ -1,6 +1,6 @@
 import express from "express";
-import { authenticateApplication } from "./middleware/authenticateApplication";
-import { validateContentType } from "./middleware/validateContentType";
+import { authenticateApplication } from "./middleware/deprecated/authenticateApplication";
+import { validateContentType } from "./middleware/deprecated/validateContentType";
 import PredictionMonitor from "./classes/PredictionMonitor";
 import { monitors } from "./config/monitors";
 import { seasonsManager } from "./classes/SeasonManager";

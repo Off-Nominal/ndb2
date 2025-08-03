@@ -1,6 +1,6 @@
-import users from "../db/queries/users";
-import responseUtils_deprecated from "../utils/response";
-import { ErrorCode } from "../types/responses";
+import users from "../../db/queries/users";
+import responseUtils_deprecated from "../../utils/response";
+import { ErrorCode } from "../../types/responses";
 import { WeakRequestHandler } from "express-zod-safe";
 
 export const getUserByDiscordId: WeakRequestHandler = async (

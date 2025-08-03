@@ -1,5 +1,5 @@
-import responseUtils_deprecated from "../utils/response";
-import { ErrorCode } from "../types/responses";
+import responseUtils_deprecated from "../../utils/response";
+import { ErrorCode } from "../../types/responses";
 import { WeakRequestHandler } from "express-zod-safe";
 
 export const validateContentType: WeakRequestHandler = (req, res, next) => {

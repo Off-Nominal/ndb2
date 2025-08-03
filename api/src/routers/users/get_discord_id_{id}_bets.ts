@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
-import { getDbClient } from "../../middleware/getDbClient";
-import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
-import paramValidator from "../../middleware/paramValidator";
+import { getDbClient } from "../../middleware/deprecated/getDbClient";
+import { getUserByDiscordId } from "../../middleware/deprecated/getUserByDiscordId";
+import paramValidator from "../../middleware/deprecated/paramValidator";
 import users from "../../db/queries/users";
 import responseUtils_deprecated from "../../utils/response";
 import { ErrorCode } from "../../types/responses";
