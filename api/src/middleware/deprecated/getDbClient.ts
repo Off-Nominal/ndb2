@@ -1,9 +1,9 @@
 import pool from "../../db";
 import responseUtils_deprecated from "../../utils/response";
 import { ErrorCode } from "../../types/responses";
-import { WeakRequestHandler } from "express-zod-safe";
+import { RequestHandler } from "express";
 
-export const getDbClient: WeakRequestHandler = (req, res, next) => {
+export const getDbClient: RequestHandler = (req, res, next) => {
   pool
     .connect()
     .then((client) => {

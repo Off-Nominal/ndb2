@@ -3,86 +3,80 @@ import { z } from "zod";
 import { predictionIdSchema } from "../../validations";
 import { Route } from "../../utils/routerMap";
 import predictions from "../../queries/predictions";
-import { getDbClient } from "../../../middleware/deprecated/getDbClient";
 import responseUtils from "../../utils/response";
 import * as API from "@offnominal/ndb2-api-types/v2";
-import validate from "express-zod-safe";
-import { addLocalContext } from "../../../middleware/addLocalContext";
-import { getPrediction } from "../../../middleware/getPrediction";
-import predictionStatusValidator from "../../../middleware/predictionStatusValidator";
+import { getDbClient } from "../../../middleware/getDbClient";
+import { validate } from "../../../middleware/validate";
+import { createLogger } from "../../../utils";
 
-const validator = validate({
-  handler: (errors, req, res, next) => {
-    const errorInfos = responseUtils.handleValidationErrors(errors);
-
-    if (errorInfos.length > 0) {
-      // Validation errors - return 400 Bad Request
-      res.status(400).json(responseUtils.writeErrors(errorInfos));
-    } else {
-      // Non-validation errors - return 500 Internal Server Error
-      console.error("Zod Validation Handler run without any errors.");
-      console.error(errors);
-
-      res.status(500).json(
-        responseUtils.writeErrors([
-          {
-            code: API.Errors.SERVER_ERROR,
-            message: "There was an error processing your request.",
-          },
-        ])
-      );
-    }
-  },
-  params: z.object({
-    prediction_id: predictionIdSchema,
-  }),
-  body: z.any(),
-  query: z.any(),
-});
+const logger = createLogger("Route");
 
 export const untriggerPredictionById: Route = (router: Router) => {
   router.delete(
     "/:prediction_id/trigger",
-    validator,
-    addLocalContext([getDbClient, predictionStatusValidator(["closed"])]),
+    validate({
+      params: z.object({
+        prediction_id: predictionIdSchema,
+      }),
+    }),
     async (req, res) => {
-      const { prediction_id } = req.params;
+      try {
+        const { prediction_id } = req.params;
 
-      // Test type inference - these should be properly typed
-      const dbClient = res.locals.dbClient;
+        const dbClient = await getDbClient(res);
 
-      predictions
-        .untriggerById(dbClient)(prediction_id)
-        .then(() => predictions.getById(dbClient)(prediction_id))
-        .then((prediction) => {
-          if (!prediction) {
-            return res.status(404).json(
-              responseUtils.writeErrors([
-                {
-                  code: API.Errors.PREDICTION_NOT_FOUND,
-                  message: `Prediction with id ${prediction_id} does not exist.`,
-                },
-              ])
-            );
-          }
+        // Check if prediction is closed
+        const isAllowedStatus = await predictions.isOfStatus(dbClient)(
+          prediction_id,
+          ["closed"]
+        );
 
-          const response = responseUtils.writeSuccess(
-            prediction,
-            "Prediction untriggered successfully."
-          );
-          res.json(response);
-        })
-        .catch((err) => {
-          console.error(err);
-          return res.status(500).json(
+        if (isAllowedStatus === false) {
+          return res.status(400).json(
             responseUtils.writeErrors([
               {
-                code: API.Errors.SERVER_ERROR,
-                message: "There was an error untriggering this prediction.",
+                code: API.Errors.INVALID_PREDICTION_STATUS,
+                message: "Predictions must be closed to be untriggered.",
               },
             ])
           );
-        });
+        }
+
+        // Untrigger prediction
+        await predictions.untriggerById(dbClient)(prediction_id);
+
+        // Get prediction for response
+        const prediction = await predictions.getById(dbClient)(prediction_id);
+        if (!prediction) {
+          return res.status(404).json(
+            responseUtils.writeErrors([
+              {
+                code: API.Errors.PREDICTION_NOT_FOUND,
+                message: `Prediction with id ${prediction_id} does not exist.`,
+              },
+            ])
+          );
+        }
+
+        // Send response
+        return res.json(
+          responseUtils.writeSuccess(
+            prediction,
+            "Prediction untriggred successfully."
+          )
+        );
+      } catch (err) {
+        logger.error("untriggerPredictionById Server Error: ", err);
+
+        return res.status(500).json(
+          responseUtils.writeErrors([
+            {
+              code: API.Errors.SERVER_ERROR,
+              message: "There was an error processing your request.",
+            },
+          ])
+        );
+      }
     }
   );
 };

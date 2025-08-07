@@ -1,9 +1,9 @@
 import predictions from "../../db/queries/predictions";
 import responseUtils_deprecated from "../../utils/response";
 import { ErrorCode } from "../../types/responses";
-import { WeakRequestHandler } from "express-zod-safe";
+import { RequestHandler } from "express";
 
-export const getPrediction: WeakRequestHandler = async (req, res, next) => {
+export const getPrediction: RequestHandler = async (req, res, next) => {
   if (!req.params) {
     return res
       .status(400)

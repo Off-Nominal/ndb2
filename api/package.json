@@ -20,7 +20,6 @@
     "@pgtyped/runtime": "^2.4.2",
     "date-fns": "^3.6.0",
     "express": "^4.21.2",
-    "express-zod-safe": "^1.5.0",
     "node-schedule": "^2.1.1",
     "pg": "^8.12.0",
     "typed-emitter": "^2.1.0",

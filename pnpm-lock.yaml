@@ -23,9 +23,6 @@ importers:
       express:
         specifier: ^4.21.2
         version: 4.21.2
-      express-zod-safe:
-        specifier: ^1.5.0
-        version: 1.5.3(@types/express@4.17.23)(express@4.21.2)(zod@3.25.67)
       node-schedule:
         specifier: ^2.1.1
         version: 2.1.1
@@ -930,13 +927,6 @@ packages:
   expect-type@1.2.1:
     resolution: {integrity: sha512-/kP8CAwxzLVEeFrMm4kMmy4CCDlpipyA7MYLVrdJIkV0fYF0UaigQHRsxHiuY/GEea+bh4KSv3TIlgr+2UL6bw==}
     engines: {node: '>=12.0.0'}
-
-  express-zod-safe@1.5.3:
-    resolution: {integrity: sha512-b+22ntJq5QvV5KNDsE226Vt/lQ3YCYJz8jQdsY9k4XEEmUShpUjbhdUXiKv4ccChOTfrIq4Of6fNmkvP8jsHdQ==}
-    peerDependencies:
-      '@types/express': ^4.0.0 || ^5.0.0
-      express: ^4.0.0 || ^5.0.0
-      zod: ^3.0.0
 
   express@4.21.2:
     resolution: {integrity: sha512-28HqgMZAmih1Czt9ny7qr6ek2qddF4FclbMzwhCREB6OFfH+rXAnuNCwo1/wFvrtbgsQDb4kSbX9de9lFbrXnA==}
@@ -2430,12 +2420,6 @@ snapshots:
   etag@1.8.1: {}
 
   expect-type@1.2.1: {}
-
-  express-zod-safe@1.5.3(@types/express@4.17.23)(express@4.21.2)(zod@3.25.67):
-    dependencies:
-      '@types/express': 4.17.23
-      express: 4.21.2
-      zod: 3.25.67
 
   express@4.21.2:
     dependencies:
