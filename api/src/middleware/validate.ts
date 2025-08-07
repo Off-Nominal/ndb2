@@ -78,8 +78,9 @@ export const validate = <
       schema.params?.parse(req.params);
     } catch (err) {
       if (err instanceof z.ZodError) {
-        const errors = handleValidationErrors("params", err.issues);
-        errors.push(...errors);
+        const errs = handleValidationErrors("params", err.issues);
+
+        errors.push(...errs);
       }
     }
 
@@ -87,8 +88,8 @@ export const validate = <
       schema.query?.parse(req.query);
     } catch (err) {
       if (err instanceof z.ZodError) {
-        const errors = handleValidationErrors("query", err.issues);
-        errors.push(...errors);
+        const errs = handleValidationErrors("query", err.issues);
+        errors.push(...errs);
       }
     }
 
@@ -96,8 +97,8 @@ export const validate = <
       schema.body?.parse(req.body);
     } catch (err) {
       if (err instanceof z.ZodError) {
-        const errors = handleValidationErrors("body", err.issues);
-        errors.push(...errors);
+        const errs = handleValidationErrors("body", err.issues);
+        errors.push(...errs);
       }
     }
 
