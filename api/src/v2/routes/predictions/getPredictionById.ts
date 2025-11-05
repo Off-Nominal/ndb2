@@ -6,6 +6,7 @@ import responseUtils from "../../utils/response";
 import { validate } from "../../../middleware/validate";
 import predictions from "../../queries/predictions";
 import * as API from "@offnominal/ndb2-api-types/v2";
+import { Request, Response, NextFunction } from "express";
 
 export const getPredictionById: Route = (router) => {
   router.get(
@@ -15,6 +16,9 @@ export const getPredictionById: Route = (router) => {
         prediction_id: predictionIdSchema,
       }),
     }),
+    (req: Request, res: Response, next: NextFunction) => {
+      next();
+    },
     async (req, res) => {
       const { prediction_id } = req.params;
 

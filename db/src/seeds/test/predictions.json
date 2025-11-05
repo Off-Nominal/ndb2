@@ -31,7 +31,7 @@
   {
     "id": 2,
     "user_id": "550e8400-e29b-41d4-a716-446655440001",
-    "text": "A simple closed date-driven prediction",
+    "text": "A simple judged date-driven prediction",
     "driver": "date",
     "baseDate": {
       "quarter": "past",
@@ -87,7 +87,7 @@
   {
     "id": 3,
     "user_id": "550e8400-e29b-41d4-a716-446655440001",
-    "text": "A simple closed event-driven prediction",
+    "text": "A simple judged event-driven prediction",
     "driver": "event",
     "baseDate": {
       "quarter": "past",
@@ -185,5 +185,54 @@
         ]
       }
     ]
+  },
+  {
+    "id": 4,
+    "user_id": "550e8400-e29b-41d4-a716-446655440001",
+    "season_id": 1,
+    "season_applicable": true,
+    "text": "A closed date-driven prediction",
+    "driver": "date",
+    "baseDate": {
+      "quarter": "past",
+      "days": 25
+    },
+    "created": {
+      "days": 0
+    },
+    "due": {
+      "days": 55
+    },
+    "closed": {
+      "days": 25,
+      "minutes": 30
+    },
+    "triggered": {
+      "days": 25,
+      "minutes": 30
+    },
+    "result": true,
+    "bets": [
+      {
+        "user_id": "550e8400-e29b-41d4-a716-446655440001",
+        "wager": 27,
+        "endorsed": true,
+        "created": {
+          "days": 0,
+          "minutes": 5
+        }
+      },
+      {
+        "user_id": "550e8400-e29b-41d4-a716-446655440002",
+        "wager": 25,
+        "endorsed": false,
+        "created": {
+          "days": 0,
+          "minutes": 15
+        }
+      }
+    ],
+    "votes": [],
+    "checks": []
   }
 ]
