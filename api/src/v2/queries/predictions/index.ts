@@ -95,7 +95,7 @@ export default {
           check_date: check.check_date.toString(),
           closed: check.closed,
           closed_at: check.closed_at ? check.closed_at.toString() : null,
-          votes: {
+          values: {
             day: parseInt(check.votes_day),
             week: parseInt(check.votes_week),
             month: parseInt(check.votes_month),

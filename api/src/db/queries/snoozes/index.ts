@@ -35,13 +35,29 @@ const addCheck = (client: PoolClient) =>
       .then((response) => response.rows[0]);
   };
 
-const closeSnoozeCheckById = (client: PoolClient) =>
-  function (snooze_check_id: number | string): Promise<APISnoozes.SnoozeCheck> {
+const deferSnoozeCheckById = (client: PoolClient) =>
+  async function (
+    snooze_check_id: number | string
+  ): Promise<APISnoozes.DeferSnoozeCheckById> {
+    await client.query("BEGIN");
+
     return client
       .query<APISnoozes.SnoozeCheck>(queries.get("CloseSnoozeCheckById"), [
         snooze_check_id,
       ])
-      .then((response) => response.rows[0]);
+      .then((response) => {
+        const check = response.rows[0];
+        return predictions.snoozePredictionById(client)(check.prediction_id, {
+          days: 1,
+        });
+      })
+      .then((response) => {
+        return client.query("COMMIT").then(() => null);
+      })
+      .catch(async (err) => {
+        await client.query("ROLLBACK");
+        throw err;
+      });
   };
 
 const addSnoozeVote = (client: PoolClient) =>
@@ -74,7 +90,11 @@ const addSnoozeVote = (client: PoolClient) =>
         if (!snoozeValue) {
           throw new Error("Snooze value is null");
         }
-        await closeSnoozeCheckById(client)(check_id);
+        await client.query<APISnoozes.SnoozeCheck>(
+          queries.get("CloseSnoozeCheckById"),
+          [check_id]
+        );
+
         await predictions.snoozePredictionById(client)(check.prediction_id, {
           days: snoozeValue,
         });
@@ -104,7 +124,7 @@ const getClosedSnoozeValue = (
 ): APISnoozes.SnoozeOptions | null => {
   let triggerValue: string | undefined = undefined;
 
-  for (const [key, value] of Object.entries(check.votes)) {
+  for (const [key, value] of Object.entries(check.values)) {
     if (value >= 3) triggerValue = key;
   }
 
@@ -134,7 +154,7 @@ const shouldCloseSnoozeCheck = (
 export default {
   getSnoozeCheck,
   getNextUnactionedSnoozeCheck,
-  closeSnoozeCheckById,
+  deferSnoozeCheckById,
   addCheck,
   addSnoozeVote,
 };

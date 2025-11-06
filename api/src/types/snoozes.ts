@@ -8,7 +8,7 @@ export namespace APISnoozes {
   };
 
   export type EnhancedSnoozeCheck = SnoozeCheck & {
-    votes: SnoozeCheckResults;
+    values: SnoozeCheckResults;
   };
 
   export type SnoozeCheck = {
@@ -40,9 +40,11 @@ export namespace APISnoozes {
 
   export type AddSnoozeVote = EnhancedSnoozeCheck;
 
-  export type GetNextUnactionedCheck = { id: number };
+  export type GetNextUnactionedCheck = { id: number; prediction_id: number };
 
   export type CloseSnoozeChecksByPredictionId = null;
+
+  export type DeferSnoozeCheckById = null;
 }
 
 export const isAllowableSnooze = (

@@ -58,7 +58,7 @@ export type Prediction = {
     check_date: string;
     closed: boolean;
     closed_at: string | null;
-    votes: {
+    values: {
       day: number;
       week: number;
       month: number;
