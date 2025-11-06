@@ -124,7 +124,7 @@ const getClosedSnoozeValue = (
 ): APISnoozes.SnoozeOptions | null => {
   let triggerValue: string | undefined = undefined;
 
-  for (const [key, value] of Object.entries(check.votes)) {
+  for (const [key, value] of Object.entries(check.values)) {
     if (value >= 3) triggerValue = key;
   }
 

@@ -8,7 +8,7 @@ export namespace APISnoozes {
   };
 
   export type EnhancedSnoozeCheck = SnoozeCheck & {
-    votes: SnoozeCheckResults;
+    values: SnoozeCheckResults;
   };
 
   export type SnoozeCheck = {
