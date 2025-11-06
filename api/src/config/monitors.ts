@@ -47,7 +47,7 @@ export const monitors: MonitorConfig[] = [
   },
   {
     name: "Snooze Check",
-    schedule: "15/45 12-21 * * *", // every 30 minutes, on the 15 and 45, between 12pm and 9pm UTC
+    schedule: "15,45 12-21 * * *", // every 30 minutes, on the 15 and 45, between 12pm and 9pm UTC
     callback: (log: MonitorLog) => {
       const monitorCallback = (client: PoolClient) => {
         return predictions
@@ -74,7 +74,7 @@ export const monitors: MonitorConfig[] = [
   },
   {
     name: "Unactioned Snooze Check",
-    schedule: "12/50 12-21 * * *", // every 30 minutes, on the 20 and 50, between 12pm and 9pm UTC
+    schedule: "20,50 12-21 * * *", // every 30 minutes, on the 20 and 50, between 12pm and 9pm UTC
     callback: (log: MonitorLog) => {
       const monitorCallback = (client: PoolClient) => {
         return snoozes

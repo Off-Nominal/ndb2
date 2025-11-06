@@ -54,8 +54,8 @@ const deferSnoozeCheckById = (client: PoolClient) =>
       .then((response) => {
         return client.query("COMMIT").then(() => null);
       })
-      .catch((err) => {
-        client.query("ROLLBACK");
+      .catch(async (err) => {
+        await client.query("ROLLBACK");
         throw err;
       });
   };
