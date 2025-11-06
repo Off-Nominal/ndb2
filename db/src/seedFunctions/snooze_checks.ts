@@ -169,7 +169,7 @@ export function insertSnoozeChecksFromPredictions(
         const snoozeCheck: SnoozeCheckSeed = {
           checked: check.checked,
           closed: check.closed,
-          votes: check.votes,
+          values: check.values,
         };
 
         allSnoozeChecks.push(snoozeCheck);
@@ -177,8 +177,8 @@ export function insertSnoozeChecksFromPredictions(
         checkCreatedDates.push(createdDate);
 
         // Store votes for later insertion
-        if (check.votes && Array.isArray(check.votes)) {
-          snoozeCheckToVotesMap.set(allSnoozeChecks.length - 1, check.votes);
+        if (check.values && Array.isArray(check.values)) {
+          snoozeCheckToVotesMap.set(allSnoozeChecks.length - 1, check.values);
         }
       }
     }

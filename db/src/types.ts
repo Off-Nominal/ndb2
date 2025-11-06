@@ -63,7 +63,7 @@ export interface SnoozeVoteSeed {
 export interface SnoozeCheckSeed {
   checked: RelativeSeedDate;
   closed?: RelativeSeedDate;
-  votes?: SnoozeVoteSeed[];
+  values?: SnoozeVoteSeed[];
 }
 
 // Prediction seed data type
