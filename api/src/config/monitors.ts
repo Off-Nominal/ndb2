@@ -16,7 +16,7 @@ const getPoolClient = (
 export const monitors: MonitorConfig[] = [
   {
     name: "Trigger Check",
-    schedule: "0/30 12-21 * * *", // every 30 minutes, on the 0 and 30, between 12pm and 9pm UTC
+    schedule: "0,30 12-21 * * *", // every 30 minutes, on the 0 and 30, between 12pm and 9pm UTC
     callback: (log: MonitorLog) => {
       const monitorCallback = (client: PoolClient) => {
         return predictions
