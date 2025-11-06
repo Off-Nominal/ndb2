@@ -83,13 +83,16 @@ export const monitors: MonitorConfig[] = [
             if (!check) {
               return;
             }
+
             log(
               `Snoozing unactioned Snooze Check with id ${check.id} for 1 day`
             );
 
             return snoozes
               .deferSnoozeCheckById(client)(check.id)
-              .then(() => predictions.getPredictionById(client)(check.id))
+              .then(() =>
+                predictions.getPredictionById(client)(check.prediction_id)
+              )
               .then((prediction) => {
                 if (!prediction) {
                   return;

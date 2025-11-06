@@ -40,7 +40,7 @@ export namespace APISnoozes {
 
   export type AddSnoozeVote = EnhancedSnoozeCheck;
 
-  export type GetNextUnactionedCheck = { id: number };
+  export type GetNextUnactionedCheck = { id: number; prediction_id: number };
 
   export type CloseSnoozeChecksByPredictionId = null;
 
