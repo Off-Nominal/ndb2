@@ -88,12 +88,7 @@ export const monitors: MonitorConfig[] = [
             );
 
             return snoozes
-              .closeSnoozeCheckById(client)(check.id)
-              .then(() => {
-                return predictions.snoozePredictionById(client)(check.id, {
-                  days: 1,
-                });
-              })
+              .deferSnoozeCheckById(client)(check.id)
               .then(() => predictions.getPredictionById(client)(check.id))
               .then((prediction) => {
                 if (!prediction) {

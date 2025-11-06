@@ -43,6 +43,8 @@ export namespace APISnoozes {
   export type GetNextUnactionedCheck = { id: number };
 
   export type CloseSnoozeChecksByPredictionId = null;
+
+  export type DeferSnoozeCheckById = null;
 }
 
 export const isAllowableSnooze = (
