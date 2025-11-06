@@ -15,6 +15,6 @@
         FROM snooze_votes sv
         WHERE sv.snooze_check_id = $1
       ) vals
-    ) as votes
+    ) as values
   FROM snooze_checks
   WHERE id = $1
