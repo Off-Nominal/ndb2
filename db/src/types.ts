@@ -1,4 +1,4 @@
-import * as API from "@offnominal/ndb2-api-types";
+import * as API from "@offnominal/ndb2-api-types/v2";
 
 export type BaseSeedDate = string | RelativeSeedDate;
 

@@ -20,8 +20,10 @@ const app = express();
 // Configuration
 const PORT = process.env.PORT || 80;
 if (process.env.NODE_ENV === "dev") {
-  const morgan = require("morgan");
-  app.use(morgan("dev"));
+  (async () => {
+    const morgan = (await import("morgan")).default;
+    app.use(morgan("dev"));
+  })();
 }
 app.use(express.json());
 

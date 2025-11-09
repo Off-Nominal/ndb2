@@ -11,18 +11,18 @@ import {
   judgePredictionsBulk,
   closeSnoozeChecksBulk,
   closePastSeasonsBulk,
-} from "./seedFunctions";
-import { BetSeed, VoteSeed, SnoozeCheckSeed, SnoozeVoteSeed } from "./types";
-import { resolveSeedDate } from "./utils/dateUtils";
+} from "./seedFunctions/index.js";
+import { BetSeed, VoteSeed, SnoozeCheckSeed, SnoozeVoteSeed } from "./types.js";
+import { resolveSeedDate } from "./utils/dateUtils.js";
 import { createLogger } from "@mendahu/utilities";
 
 // Import seed data
-import devUsers from "./seeds/dev/users.json";
-import devPredictions from "./seeds/dev/predictions.json";
-import devSeasons from "./seeds/dev/seasons.json";
-import testUsers from "./seeds/test/users.json";
-import testPredictions from "./seeds/test/predictions.json";
-import testSeasons from "./seeds/test/seasons.json";
+import devUsers from "./seeds/dev/users.json" with { type: "json" };
+import devPredictions from "./seeds/dev/predictions.json" with { type: "json" };
+import devSeasons from "./seeds/dev/seasons.json" with { type: "json" };
+import testUsers from "./seeds/test/users.json" with { type: "json" };
+import testPredictions from "./seeds/test/predictions.json" with { type: "json" };
+import testSeasons from "./seeds/test/seasons.json" with { type: "json" };
 
 export default async (client: any) => {
   const logger = createLogger({ namespace: "DB", env: ["dev"] });

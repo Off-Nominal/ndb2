@@ -1,5 +1,5 @@
-import { isValidQuarter, SeasonSeed } from "../types";
-import { getQuarterDates, getRelativeSeasonDates } from "../utils/dateUtils";
+import { isValidQuarter, SeasonSeed } from "../types.js";
+import { getQuarterDates, getRelativeSeasonDates } from "../utils/dateUtils.js";
 
 export const INSERT_SEASONS_BULK_SQL = `
   INSERT INTO seasons (

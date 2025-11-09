@@ -1,5 +1,5 @@
-import seed from "./seed";
-import empty from "./empty";
+import seed from "./seed.js";
+import empty from "./empty.js";
 import { Client, PoolClient } from "pg";
 
 export default async (client: Client | PoolClient) => {

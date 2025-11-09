@@ -1,5 +1,5 @@
-import { VoteSeed } from "../types";
-import { resolveSeedDate } from "../utils/dateUtils";
+import { VoteSeed } from "../types.js";
+import { resolveSeedDate } from "../utils/dateUtils.js";
 
 export const INSERT_VOTES_BULK_SQL = `
   INSERT INTO votes (
