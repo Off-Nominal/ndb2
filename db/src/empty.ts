@@ -1,9 +1,5 @@
 import { Client, PoolClient } from "pg";
-import { createLogger } from "./utils";
-
-interface EmptyOptions {
-  verbose?: boolean;
-}
+import { createLogger } from "@mendahu/utilities";
 
 const TRUNCATE_ALL_TABLES = `
   DO $$ 
@@ -43,12 +39,8 @@ const RESET_SEQUENCES = `
   END $$;
 `;
 
-export default async (
-  client: Client | PoolClient,
-  options: EmptyOptions = {}
-) => {
-  const { verbose = false } = options;
-  const log = createLogger(verbose);
+export default async (client: Client | PoolClient) => {
+  const logger = createLogger({ namespace: "DB", env: ["dev"] });
 
   if (process.env.NODE_ENV === "production") {
     return console.error("Cannot run seeding in production.");
@@ -61,7 +53,7 @@ export default async (
     // Reset all sequences
     await client.query(RESET_SEQUENCES);
 
-    log("All tables emptied and sequences reset successfully");
+    logger.log("All tables emptied and sequences reset successfully");
   } catch (error) {
     console.error("Error emptying tables:", error);
     throw error;

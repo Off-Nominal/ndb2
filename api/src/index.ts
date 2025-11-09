@@ -4,7 +4,6 @@ import { validateContentType } from "./middleware/validateContentType";
 import PredictionMonitor from "./classes/PredictionMonitor";
 import { monitors } from "./config/monitors";
 import { seasonsManager } from "./classes/SeasonManager";
-import { createLogger } from "./utils/logger";
 
 // Routers
 import predictionsRouter from "./routers/predictions";
@@ -12,8 +11,9 @@ import usersRouter from "./routers/users";
 import scoresRouter from "./routers/scores";
 import seasonsRouter from "./routers/seasons";
 import { apiV2Router } from "./v2";
+import { createLogger } from "@mendahu/utilities";
 
-const logger = createLogger("NDB2");
+const logger = createLogger({ namespace: "NDB2", env: ["dev", "production"] });
 
 const app = express();
 

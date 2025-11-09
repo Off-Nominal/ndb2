@@ -14,6 +14,9 @@ importers:
 
   api:
     dependencies:
+      '@mendahu/utilities':
+        specifier: ^0.9.0
+        version: 0.9.0
       '@pgtyped/runtime':
         specifier: ^2.4.2
         version: 2.4.2
@@ -84,6 +87,9 @@ importers:
 
   db:
     dependencies:
+      '@mendahu/utilities':
+        specifier: ^0.9.0
+        version: 0.9.0
       '@offnominal/ndb2-api-types':
         specifier: workspace:*
         version: link:../types
@@ -309,6 +315,9 @@ packages:
 
   '@jridgewell/sourcemap-codec@1.5.0':
     resolution: {integrity: sha512-gv3ZRaISU3fjPAgNsriBRqGWQL6quFx04YMPW/zD8XMLsU32mhCCbfbO6KZFLjvYpCZ8zyDEgqsgf+PwPaM7GQ==}
+
+  '@mendahu/utilities@0.9.0':
+    resolution: {integrity: sha512-AnukNbhJ1mvdV8SSvKcZes2t8C7KaMC4wiprGIcDFTAxGxMznAZfEaFYCqYxgeyra1Za9pAsIvnbZc05ZWbwww==}
 
   '@napi-rs/nice-android-arm-eabi@1.0.1':
     resolution: {integrity: sha512-5qpvOu5IGwDo7MEKVqqyAxF90I6aLj4n07OzpARdgDRfz8UbBztTByBp0RC59r3J1Ij8uzYi6jI7r5Lws7nn6w==}
@@ -1806,6 +1815,8 @@ snapshots:
       wrap-ansi-cjs: wrap-ansi@7.0.0
 
   '@jridgewell/sourcemap-codec@1.5.0': {}
+
+  '@mendahu/utilities@0.9.0': {}
 
   '@napi-rs/nice-android-arm-eabi@1.0.1':
     optional: true

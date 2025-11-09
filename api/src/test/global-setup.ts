@@ -3,9 +3,7 @@
 
 import { Client } from "pg";
 import { reset } from "@offnominal/ndb2-db";
-import { createLogger } from "../utils/logger";
-
-const logger = createLogger("TEST");
+import { createLogger } from "@mendahu/utilities";
 
 // Set the DATABASE_URL to point to the test database
 process.env.DATABASE_URL =
@@ -18,6 +16,8 @@ process.env.TZ = "UTC";
 // For example:
 process.env.NODE_ENV = "test";
 // process.env.LOG_LEVEL = "error";
+
+const logger = createLogger({ namespace: "TEST", env: ["test"] });
 
 // Function to check if test database is running
 async function checkDatabaseConnection(): Promise<boolean> {
@@ -44,7 +44,7 @@ export async function resetTestDatabase(
   })
 ): Promise<void> {
   try {
-    await reset(client, { verbose: false });
+    await reset(client);
   } catch (error) {
     logger.error("Failed to reset test database:", error);
     throw error;
