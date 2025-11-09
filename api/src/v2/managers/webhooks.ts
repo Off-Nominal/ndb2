@@ -1,4 +1,5 @@
-import { eventsManager, NDBEvents } from "./events";
+import { eventsManager } from "./events";
+import * as API from "@offnominal/ndb2-api-types/v2";
 
 const discordBot = process.env.WEBHOOK_DISCORD_BOT;
 
@@ -7,16 +8,11 @@ const subscribers: string[] = [];
 if (discordBot) {
   subscribers.push(discordBot);
 }
-
-type WebhookNotification<T> = {
-  event_name: keyof NDBEvents;
-  version: 2;
-  date: Date;
-  data: T;
-};
-
-const generateResponse = <T>(event_name: keyof NDBEvents, data: T) => {
-  const response: WebhookNotification<T> = {
+const generateResponse = <P extends API.Webhooks.Payload>(
+  event_name: P["event_name"],
+  data: P["data"]
+): API.Webhooks.Payload => {
+  const response: API.Webhooks.Payload = {
     event_name,
     version: 2,
     date: new Date(),
@@ -26,7 +22,9 @@ const generateResponse = <T>(event_name: keyof NDBEvents, data: T) => {
   return response;
 };
 
-const notifySubscribers = <K>(data: WebhookNotification<K>) => {
+const notifySubscribers = <E extends API.Webhooks.WebhookEvent, D>(
+  data: API.Webhooks.BasePayload<E, D>
+) => {
   const requests = [];
 
   for (const sub of subscribers) {
@@ -55,5 +53,5 @@ const notifySubscribers = <K>(data: WebhookNotification<K>) => {
 };
 
 eventsManager.on("untriggered_prediction", (prediction) => {
-  notifySubscribers(generateResponse("untriggered_prediction", prediction));
+  notifySubscribers(generateResponse("untriggered_prediction", { prediction }));
 });
