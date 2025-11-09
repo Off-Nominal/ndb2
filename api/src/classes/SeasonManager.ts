@@ -6,10 +6,10 @@ import predictions from "../db/queries/predictions";
 import { PredictionLifeCycle } from "../types/predicitions";
 import seasonsV2 from "../v2/queries/seasons";
 import seasons from "../db/queries/seasons";
-import { createLogger } from "../utils/logger";
 import * as API from "@offnominal/ndb2-api-types/v2";
+import { createLogger } from "@mendahu/utilities";
 
-const logger = createLogger("SM");
+const logger = createLogger({ namespace: "SM", env: ["dev", "production"] });
 
 export class SeasonManager {
   private seasons: API.Entities.Seasons.Season[] = [];

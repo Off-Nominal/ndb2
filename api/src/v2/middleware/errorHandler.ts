@@ -1,9 +1,12 @@
 import { Request, Response, NextFunction } from "express";
-import { createLogger } from "../../utils";
 import responseUtils from "../utils/response";
 import * as API from "@offnominal/ndb2-api-types/v2";
+import { createLogger } from "@mendahu/utilities";
 
-const logger = createLogger("ErrorHandler");
+const logger = createLogger({
+  namespace: "ErrorHandler",
+  env: ["dev", "production"],
+});
 
 /**
  * Express error handling middleware that catches any unhandled errors

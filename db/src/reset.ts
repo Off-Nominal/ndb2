@@ -2,16 +2,7 @@ import seed from "./seed";
 import empty from "./empty";
 import { Client, PoolClient } from "pg";
 
-interface ResetOptions {
-  verbose?: boolean;
-}
-
-export default async (
-  client: Client | PoolClient,
-  options: ResetOptions = {}
-) => {
-  const { verbose = false } = options;
-
+export default async (client: Client | PoolClient) => {
   if (process.env.NODE_ENV === "production") {
     throw new Error("Cannot run db reset in production.");
   }
@@ -19,8 +10,8 @@ export default async (
   await client.connect();
 
   try {
-    await empty(client, { verbose });
-    await seed(client, { verbose });
+    await empty(client);
+    await seed(client);
     await client.end();
   } catch (err) {
     await client.end();

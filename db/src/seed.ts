@@ -13,8 +13,8 @@ import {
   closePastSeasonsBulk,
 } from "./seedFunctions";
 import { BetSeed, VoteSeed, SnoozeCheckSeed, SnoozeVoteSeed } from "./types";
-import { createLogger } from "./utils";
 import { resolveSeedDate } from "./utils/dateUtils";
+import { createLogger } from "@mendahu/utilities";
 
 // Import seed data
 import devUsers from "./seeds/dev/users.json";
@@ -24,13 +24,8 @@ import testUsers from "./seeds/test/users.json";
 import testPredictions from "./seeds/test/predictions.json";
 import testSeasons from "./seeds/test/seasons.json";
 
-interface SeedOptions {
-  verbose?: boolean;
-}
-
-export default async (client: any, options: SeedOptions = {}) => {
-  const { verbose = false } = options;
-  const log = createLogger(verbose);
+export default async (client: any) => {
+  const logger = createLogger({ namespace: "DB", env: ["test", "dev"] });
 
   if (process.env.NODE_ENV === "production") {
     return console.error("Cannot run seeding in production.");
@@ -43,8 +38,8 @@ export default async (client: any, options: SeedOptions = {}) => {
   const predictions = seedEnv === "test" ? testPredictions : devPredictions;
   const seasons = seedEnv === "test" ? testSeasons : devSeasons;
 
-  log(`Loading seeds from ${seedEnv} environment`);
-  log(
+  logger.log(`Loading seeds from ${seedEnv} environment`);
+  logger.log(
     `Found ${users.length} users, ${seasons.length} seasons, ${predictions.length} predictions`
   );
 
@@ -52,15 +47,15 @@ export default async (client: any, options: SeedOptions = {}) => {
 
   try {
     // Step 1: Insert all users in bulk
-    log("Step 1: Inserting users...");
+    logger.log("Step 1: Inserting users...");
     await insertUsersBulk(client, users);
 
     // Step 2: Insert all seasons in bulk
-    log("Step 2: Inserting seasons...");
+    logger.log("Step 2: Inserting seasons...");
     await insertSeasonsBulk(client, seasons, baseDate);
 
     // Step 3: Create the base prediction entities with most properties including created_date, check_date, due_date
-    log("Step 3: Inserting base predictions...");
+    logger.log("Step 3: Inserting base predictions...");
     const predictionsResult = await insertPredictionsBulk(
       client,
       predictions,
@@ -72,7 +67,7 @@ export default async (client: any, options: SeedOptions = {}) => {
     );
 
     // Step 4: Create all the bets entities
-    log("Step 4: Inserting bets...");
+    logger.log("Step 4: Inserting bets...");
     const allBets: BetSeed[] = [];
     const betPredictionIds: number[] = [];
     const betCreatedDates: Date[] = [];
@@ -94,12 +89,12 @@ export default async (client: any, options: SeedOptions = {}) => {
     }
 
     if (allBets.length > 0) {
-      log(`Inserting ${allBets.length} bets...`);
+      logger.log(`Inserting ${allBets.length} bets...`);
       await insertBetsBulk(client, allBets, betPredictionIds, betCreatedDates);
     }
 
     // Step 5: Retire any predictions with retired properties in the seeds
-    log("Step 5: Retiring predictions...");
+    logger.log("Step 5: Retiring predictions...");
     const predictionsToRetire: number[] = [];
     const retiredDates: Date[] = [];
 
@@ -116,12 +111,12 @@ export default async (client: any, options: SeedOptions = {}) => {
     }
 
     if (predictionsToRetire.length > 0) {
-      log(`Retiring ${predictionsToRetire.length} predictions...`);
+      logger.log(`Retiring ${predictionsToRetire.length} predictions...`);
       await retirePredictionsBulk(client, predictionsToRetire, retiredDates);
     }
 
     // Step 6: Create any snooze checks and snooze votes
-    log("Step 6: Inserting snooze checks and votes...");
+    logger.log("Step 6: Inserting snooze checks and votes...");
     const allSnoozeChecks: SnoozeCheckSeed[] = [];
     const snoozeCheckPredictionIds: number[] = [];
     const snoozeCheckCreatedDates: Date[] = [];
@@ -154,7 +149,7 @@ export default async (client: any, options: SeedOptions = {}) => {
     }
 
     if (allSnoozeChecks.length > 0) {
-      log(`Inserting ${allSnoozeChecks.length} snooze checks...`);
+      logger.log(`Inserting ${allSnoozeChecks.length} snooze checks...`);
       const snoozeChecksResult = await insertSnoozeChecksBulk(
         client,
         allSnoozeChecks,
@@ -182,7 +177,7 @@ export default async (client: any, options: SeedOptions = {}) => {
       }
 
       if (votesToInsert.length > 0) {
-        log(`Inserting ${votesToInsert.length} snooze votes...`);
+        logger.log(`Inserting ${votesToInsert.length} snooze votes...`);
         await insertSnoozeVotesBulk(
           client,
           votesToInsert,
@@ -192,7 +187,7 @@ export default async (client: any, options: SeedOptions = {}) => {
       }
 
       // Step 7: Close any snooze checks with closed_at properties set
-      log("Step 7: Closing snooze checks...");
+      logger.log("Step 7: Closing snooze checks...");
       const checksToClose: number[] = [];
       const checkClosedDates: Date[] = [];
 
@@ -224,13 +219,13 @@ export default async (client: any, options: SeedOptions = {}) => {
       }
 
       if (checksToClose.length > 0) {
-        log(`Closing ${checksToClose.length} snooze checks...`);
+        logger.log(`Closing ${checksToClose.length} snooze checks...`);
         await closeSnoozeChecksBulk(client, checksToClose, checkClosedDates);
       }
     }
 
     // Step 8: Trigger any predictions with triggered_date properties and set their closed_date properties
-    log("Step 8: Triggering predictions...");
+    logger.log("Step 8: Triggering predictions...");
     const predictionsToTrigger: number[] = [];
     const triggeredDates: Date[] = [];
     const closedDates: Date[] = [];
@@ -264,7 +259,7 @@ export default async (client: any, options: SeedOptions = {}) => {
     }
 
     if (predictionsToTrigger.length > 0) {
-      log(`Triggering ${predictionsToTrigger.length} predictions...`);
+      logger.log(`Triggering ${predictionsToTrigger.length} predictions...`);
       await triggerPredictionsBulk(
         client,
         predictionsToTrigger,
@@ -275,7 +270,7 @@ export default async (client: any, options: SeedOptions = {}) => {
     }
 
     // Step 9: Create any votes entities
-    log("Step 9: Inserting votes...");
+    logger.log("Step 9: Inserting votes...");
     const allVotes: VoteSeed[] = [];
     const votePredictionIds: number[] = [];
     const voteCreatedDates: Date[] = [];
@@ -297,7 +292,7 @@ export default async (client: any, options: SeedOptions = {}) => {
     }
 
     if (allVotes.length > 0) {
-      log(`Inserting ${allVotes.length} votes...`);
+      logger.log(`Inserting ${allVotes.length} votes...`);
       await insertVotesBulk(
         client,
         allVotes,
@@ -307,7 +302,7 @@ export default async (client: any, options: SeedOptions = {}) => {
     }
 
     // Step 10: Finalize any predictions with judged_date properties
-    log("Step 10: Judging predictions...");
+    logger.log("Step 10: Judging predictions...");
     const predictionsToJudge: number[] = [];
     const judgedDates: Date[] = [];
 
@@ -324,26 +319,25 @@ export default async (client: any, options: SeedOptions = {}) => {
     }
 
     if (predictionsToJudge.length > 0) {
-      log(`Judging ${predictionsToJudge.length} predictions...`);
+      logger.log(`Judging ${predictionsToJudge.length} predictions...`);
       await judgePredictionsBulk(client, predictionsToJudge, judgedDates);
     }
 
     // Step 11: Close all seasons where the end date is in the past
-    log("Step 11: Closing past seasons...");
+    logger.log("Step 11: Closing past seasons...");
     const closedSeasonsResult = await closePastSeasonsBulk(client);
     if (closedSeasonsResult.rows.length > 0) {
-      log(`Closed ${closedSeasonsResult.rows.length} past seasons`);
-      if (verbose) {
-        closedSeasonsResult.rows.forEach((row: any) => {
-          log(`  - Closed season "${row.name}" (ended: ${row.end})`);
-        });
-      }
+      logger.log(`Closed ${closedSeasonsResult.rows.length} past seasons`);
+
+      closedSeasonsResult.rows.forEach((row: any) => {
+        logger.log(`  - Closed season "${row.name}" (ended: ${row.end})`);
+      });
     } else {
-      log("No past seasons to close");
+      logger.log("No past seasons to close");
     }
 
     // Step 12: Reset all sequences to the highest ID values
-    log("Step 12: Resetting sequences...");
+    logger.log("Step 12: Resetting sequences...");
     const sequencesToReset = [
       { table: "bets", sequence: "bets_id_seq" },
       { table: "predictions", sequence: "predictions_id_seq" },
@@ -357,10 +351,10 @@ export default async (client: any, options: SeedOptions = {}) => {
         `SELECT setval('${sequence}', COALESCE((SELECT MAX(id) FROM ${table}), 1))`
       );
       const nextValue = result.rows[0].setval;
-      log(`  - Reset ${sequence} to ${nextValue}`);
+      logger.log(`  - Reset ${sequence} to ${nextValue}`);
     }
 
-    log("Seeding completed successfully!");
+    logger.log("Seeding completed successfully!");
   } catch (error) {
     console.error("Error during seeding:", error);
     throw error;

@@ -3,9 +3,9 @@
 
 import { Client } from "pg";
 import { reset } from "@offnominal/ndb2-db";
-import { createLogger } from "../utils/logger";
+import { createLogger } from "@mendahu/utilities";
 
-const logger = createLogger("TEST");
+const logger = createLogger({ namespace: "TEST", env: ["dev", "production"] });
 
 // Set the DATABASE_URL to point to the test database
 process.env.DATABASE_URL =
@@ -44,7 +44,7 @@ export async function resetTestDatabase(
   })
 ): Promise<void> {
   try {
-    await reset(client, { verbose: false });
+    await reset(client);
   } catch (error) {
     logger.error("Failed to reset test database:", error);
     throw error;

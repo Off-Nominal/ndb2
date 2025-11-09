@@ -1,7 +1,7 @@
 import schedule from "node-schedule";
-import { createLogger } from "../utils/logger";
+import { createLogger } from "@mendahu/utilities";
 
-const logger = createLogger("PM");
+const logger = createLogger({ namespace: "PM", env: ["dev", "production"] });
 
 export type MonitorLog = (message: string) => void;
 

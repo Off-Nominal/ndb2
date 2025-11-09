@@ -1,4 +1,4 @@
-import { TypedEventEmitter } from "../utils/TypedEventEmitter";
+import { TypedEventEmitter } from "@mendahu/utilities";
 import * as API from "@offnominal/ndb2-api-types/v2";
 
 export interface NDBEvents {
