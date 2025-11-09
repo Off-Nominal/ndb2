@@ -2,7 +2,7 @@
   {
     "id": 1,
     "user_id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
-    "text": "A closed prediction",
+    "text": "A successful prediction",
     "driver": "date",
     "baseDate": {
       "quarter": "past",
@@ -22,7 +22,6 @@
       "days": 5,
       "minutes": 0
     },
-
     "bets": [
       {
         "user_id": "d5c87550-0bcf-4213-9ed3-9a716682ef2b",
