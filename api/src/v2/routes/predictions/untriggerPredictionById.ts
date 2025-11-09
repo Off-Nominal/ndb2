@@ -6,7 +6,7 @@ import predictions from "../../queries/predictions";
 import responseUtils from "../../utils/response";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { validate } from "../../middleware/validate";
-import { getDbClient } from "../../middleware/getDbClient";
+import { getDbClient } from "../../utils/getDbClient";
 
 export const untriggerPredictionById: Route = (router: Router) => {
   router.delete(

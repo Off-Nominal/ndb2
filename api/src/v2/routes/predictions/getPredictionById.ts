@@ -5,7 +5,7 @@ import responseUtils from "../../utils/response";
 import { validate } from "../../middleware/validate";
 import predictions from "../../queries/predictions";
 import * as API from "@offnominal/ndb2-api-types/v2";
-import { getDbClient } from "../../middleware/getDbClient";
+import { getDbClient } from "../../utils/getDbClient";
 
 export const getPredictionById: Route = (router) => {
   router.get(
