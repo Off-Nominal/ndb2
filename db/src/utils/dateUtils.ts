@@ -1,6 +1,6 @@
-import { BaseSeedDate, isValidQuarter } from "../types";
+import { BaseSeedDate, isValidQuarter } from "../types.js";
 import { add, sub } from "date-fns";
-import * as API from "@offnominal/ndb2-api-types";
+import * as API from "@offnominal/ndb2-api-types/v2";
 
 export function getQuarterDates(
   baseDate: Date,
@@ -44,6 +44,12 @@ export function getQuarterDates(
   return { start, end };
 }
 
+function isIdentifier(
+  quarter: string
+): quarter is API.Entities.Seasons.Identifier {
+  return ["past", "current", "future"].includes(quarter);
+}
+
 export function resolveSeedDate(seedDate: BaseSeedDate, baseDate: Date): Date {
   // If it's a string, treat it as an ISO timestamp
   if (typeof seedDate === "string") {
@@ -52,6 +58,10 @@ export function resolveSeedDate(seedDate: BaseSeedDate, baseDate: Date): Date {
 
   // If it's a complex object with quarter and offset
   const { quarter, days = 0, hours = 0, minutes = 0, seconds = 0 } = seedDate;
+
+  if (quarter && !isIdentifier(quarter)) {
+    throw new Error(`Invalid quarter: ${quarter}`);
+  }
 
   // If it has a quarter, get the quarter start date
   let result: Date;

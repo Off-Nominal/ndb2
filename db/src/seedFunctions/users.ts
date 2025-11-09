@@ -1,4 +1,4 @@
-import { UserSeed } from "../types";
+import { UserSeed } from "../types.js";
 
 export const INSERT_USERS_BULK_SQL = `
   INSERT INTO users (

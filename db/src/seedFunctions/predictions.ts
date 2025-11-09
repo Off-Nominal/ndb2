@@ -1,6 +1,6 @@
-import { isValidDriver, PredictionSeed } from "../types";
-import { resolveSeedDate } from "../utils/dateUtils";
-import * as API from "@offnominal/ndb2-api-types";
+import { isValidDriver, PredictionSeed } from "../types.js";
+import { resolveSeedDate } from "../utils/dateUtils.js";
+import * as API from "@offnominal/ndb2-api-types/v2";
 
 export const INSERT_PREDICTIONS_BULK_SQL = `
   INSERT INTO predictions (

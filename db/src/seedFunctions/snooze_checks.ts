@@ -1,5 +1,5 @@
-import { PredictionSeed, SnoozeCheckSeed, SnoozeVoteSeed } from "../types";
-import { resolveSeedDate } from "../utils/dateUtils";
+import { PredictionSeed, SnoozeCheckSeed, SnoozeVoteSeed } from "../types.js";
+import { resolveSeedDate } from "../utils/dateUtils.js";
 
 export const INSERT_SNOOZE_CHECKS_BULK_SQL = `
   INSERT INTO snooze_checks (

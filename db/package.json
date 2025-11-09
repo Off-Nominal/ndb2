@@ -2,6 +2,7 @@
   "name": "@offnominal/ndb2-db",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -33,6 +34,6 @@
   "devDependencies": {
     "@types/node": "^22.15.3",
     "typescript": "^5.8.3",
-    "vitest": "^3.1.3"
+    "vitest": "^4.0.8"
   }
 }

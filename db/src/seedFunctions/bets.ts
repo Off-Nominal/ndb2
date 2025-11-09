@@ -1,5 +1,5 @@
-import { BetSeed } from "../types";
-import { resolveSeedDate } from "../utils/dateUtils";
+import { BetSeed } from "../types.js";
+import { resolveSeedDate } from "../utils/dateUtils.js";
 
 export const INSERT_BETS_BULK_SQL = `
   INSERT INTO bets (

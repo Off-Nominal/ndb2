@@ -3,7 +3,7 @@ import {
   getQuarterDates,
   resolveSeedDate,
   getRelativeSeasonDates,
-} from "./dateUtils";
+} from "./dateUtils.js";
 
 describe("getQuarterDates", () => {
   // Test with a date in Q1 2024
