@@ -8,8 +8,11 @@ const subscribers: string[] = [];
 if (discordBot) {
   subscribers.push(discordBot);
 }
-const generateResponse = <T>(event_name: API.Webhooks.Event, data: T) => {
-  const response: API.Webhooks.Notification<T> = {
+const generateResponse = <P extends API.Webhooks.Payload>(
+  event_name: P["event_name"],
+  data: P["data"]
+): API.Webhooks.Payload => {
+  const response: API.Webhooks.Payload = {
     event_name,
     version: 2,
     date: new Date(),
@@ -19,7 +22,9 @@ const generateResponse = <T>(event_name: API.Webhooks.Event, data: T) => {
   return response;
 };
 
-const notifySubscribers = <K>(data: API.Webhooks.Notification<K>) => {
+const notifySubscribers = <E extends API.Webhooks.WebhookEvent, D>(
+  data: API.Webhooks.BasePayload<E, D>
+) => {
   const requests = [];
 
   for (const sub of subscribers) {
@@ -48,5 +53,5 @@ const notifySubscribers = <K>(data: API.Webhooks.Notification<K>) => {
 };
 
 eventsManager.on("untriggered_prediction", (prediction) => {
-  notifySubscribers(generateResponse("untriggered_prediction", prediction));
+  notifySubscribers(generateResponse("untriggered_prediction", { prediction }));
 });
