@@ -21,6 +21,21 @@ export const untriggerPredictionById: Route = (router: Router) => {
 
       const dbClient = await getDbClient(res);
 
+      // Check if prediction exists
+      const predictionExists = await predictions.existsById(dbClient)(
+        prediction_id
+      );
+      if (!predictionExists) {
+        return res.status(404).json(
+          responseUtils.writeErrors([
+            {
+              code: API.Errors.PREDICTION_NOT_FOUND,
+              message: `Prediction with id ${prediction_id} does not exist.`,
+            },
+          ])
+        );
+      }
+
       // Check if prediction is closed
       const isAllowedStatus = await predictions.isOfStatus(dbClient)(
         prediction_id,

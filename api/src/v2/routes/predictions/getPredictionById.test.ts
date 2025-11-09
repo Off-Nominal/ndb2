@@ -120,7 +120,7 @@ describe("GET /predictions/:prediction_id", () => {
     const check = prediction.checks[0];
     expect(check.id).toBe(1);
     expect(check.closed).toBe(true);
-    expect(check.votes).toEqual({
+    expect(check.values).toEqual({
       day: 0,
       week: 3,
       month: 0,

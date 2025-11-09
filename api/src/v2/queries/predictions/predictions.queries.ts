@@ -104,6 +104,37 @@ const untriggerPredictionByIdIR: any = {"usedParamSet":{"prediction_id":true},"p
 export const untriggerPredictionById = new PreparedQuery<IUntriggerPredictionByIdParams,IUntriggerPredictionByIdResult>(untriggerPredictionByIdIR);
 
 
+/** 'PredictionExistsById' parameters type */
+export interface IPredictionExistsByIdParams {
+  prediction_id: number;
+}
+
+/** 'PredictionExistsById' return type */
+export interface IPredictionExistsByIdResult {
+  exists: boolean | null;
+}
+
+/** 'PredictionExistsById' query type */
+export interface IPredictionExistsByIdQuery {
+  params: IPredictionExistsByIdParams;
+  result: IPredictionExistsByIdResult;
+}
+
+const predictionExistsByIdIR: any = {"usedParamSet":{"prediction_id":true},"params":[{"name":"prediction_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":62,"b":76}]}],"statement":"SELECT EXISTS\n  (SELECT 1\n    FROM predictions\n    WHERE id = :prediction_id!\n  )"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * SELECT EXISTS
+ *   (SELECT 1
+ *     FROM predictions
+ *     WHERE id = :prediction_id!
+ *   )
+ * ```
+ */
+export const predictionExistsById = new PreparedQuery<IPredictionExistsByIdParams,IPredictionExistsByIdResult>(predictionExistsByIdIR);
+
+
 /** 'PredictionIsOfStatus' parameters type */
 export interface IPredictionIsOfStatusParams {
   allowed_statuses: readonly (string | null | void)[];

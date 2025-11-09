@@ -3,6 +3,7 @@ import { getSnoozeChecksByPredictionId } from "../snooze_checks/snooze_checks.qu
 import { getVotesByPredictionId } from "../votes/votes.queries";
 import {
   getPredictionsById,
+  predictionExistsById,
   predictionIsOfStatus,
   untriggerPredictionById,
 } from "./predictions.queries";
@@ -119,6 +120,15 @@ export default {
     ): Promise<API.Endpoints.Predictions.DELETE_ById_trigger.Data> => {
       await untriggerPredictionById.run({ prediction_id }, dbClient);
       return null;
+    },
+  existsById:
+    (dbClient: any) =>
+    async (prediction_id: number): Promise<boolean> => {
+      const result = await predictionExistsById.run(
+        { prediction_id },
+        dbClient
+      );
+      return result[0].exists ?? false;
     },
   isOfStatus:
     (dbClient: any) =>
