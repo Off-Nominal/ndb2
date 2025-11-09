@@ -1,4 +1,5 @@
-import { eventsManager, NDBEvents } from "./events";
+import { eventsManager } from "./events";
+import * as API from "@offnominal/ndb2-api-types/v2";
 
 const discordBot = process.env.WEBHOOK_DISCORD_BOT;
 
@@ -7,16 +8,8 @@ const subscribers: string[] = [];
 if (discordBot) {
   subscribers.push(discordBot);
 }
-
-type WebhookNotification<T> = {
-  event_name: keyof NDBEvents;
-  version: 2;
-  date: Date;
-  data: T;
-};
-
-const generateResponse = <T>(event_name: keyof NDBEvents, data: T) => {
-  const response: WebhookNotification<T> = {
+const generateResponse = <T>(event_name: API.Webhooks.Event, data: T) => {
+  const response: API.Webhooks.Notification<T> = {
     event_name,
     version: 2,
     date: new Date(),
@@ -26,7 +19,7 @@ const generateResponse = <T>(event_name: keyof NDBEvents, data: T) => {
   return response;
 };
 
-const notifySubscribers = <K>(data: WebhookNotification<K>) => {
+const notifySubscribers = <K>(data: API.Webhooks.Notification<K>) => {
   const requests = [];
 
   for (const sub of subscribers) {
