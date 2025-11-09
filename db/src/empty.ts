@@ -1,10 +1,6 @@
 import { Client, PoolClient } from "pg";
 import { createLogger } from "@mendahu/utilities";
 
-interface EmptyOptions {
-  verbose?: boolean;
-}
-
 const TRUNCATE_ALL_TABLES = `
   DO $$ 
   DECLARE 
@@ -43,12 +39,8 @@ const RESET_SEQUENCES = `
   END $$;
 `;
 
-export default async (
-  client: Client | PoolClient,
-  options: EmptyOptions = {}
-) => {
-  const { verbose = false } = options;
-  const logger = createLogger({ namespace: "DB", env: ["dev", "production"] });
+export default async (client: Client | PoolClient) => {
+  const logger = createLogger({ namespace: "DB", env: ["dev"] });
 
   if (process.env.NODE_ENV === "production") {
     return console.error("Cannot run seeding in production.");

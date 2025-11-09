@@ -5,8 +5,6 @@ import { Client } from "pg";
 import { reset } from "@offnominal/ndb2-db";
 import { createLogger } from "@mendahu/utilities";
 
-const logger = createLogger({ namespace: "TEST", env: ["dev", "production"] });
-
 // Set the DATABASE_URL to point to the test database
 process.env.DATABASE_URL =
   "postgresql://test_user:test_password@localhost:5433/ndb2_test";
@@ -18,6 +16,8 @@ process.env.TZ = "UTC";
 // For example:
 process.env.NODE_ENV = "test";
 // process.env.LOG_LEVEL = "error";
+
+const logger = createLogger({ namespace: "TEST", env: ["test"] });
 
 // Function to check if test database is running
 async function checkDatabaseConnection(): Promise<boolean> {

@@ -25,10 +25,10 @@ import testPredictions from "./seeds/test/predictions.json";
 import testSeasons from "./seeds/test/seasons.json";
 
 export default async (client: any) => {
-  const logger = createLogger({ namespace: "DB", env: ["test", "dev"] });
+  const logger = createLogger({ namespace: "DB", env: ["dev"] });
 
   if (process.env.NODE_ENV === "production") {
-    return console.error("Cannot run seeding in production.");
+    return logger.error("Cannot run seeding in production.");
   }
 
   // Determine seed data based on NODE_ENV
