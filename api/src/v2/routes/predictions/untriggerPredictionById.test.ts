@@ -6,6 +6,7 @@ import { useDbTransactionMock } from "../../../test/db-transaction-mock";
 import { untriggerPredictionById as untriggerQuery } from "../../queries/predictions/predictions.queries";
 import predictions from "../../queries/predictions";
 import { vi } from "vitest";
+import { eventsManager } from "../../managers/events";
 
 // Enable transaction wrapping for all tests in this file
 useDbTransactionMock();
@@ -119,5 +120,39 @@ describe("DELETE /predictions/:prediction_id/trigger", () => {
         )
       ).toBeTruthy();
     });
+  });
+
+  it("should emit 'untriggered_prediction' event with correct prediction data", async () => {
+    // Spy on the eventsManager.emit method
+    const emitSpy = vi.spyOn(eventsManager, "emit");
+
+    // Use seeded prediction with ID 7 (closed status)
+    const response = await request(app).delete("/7/trigger");
+
+    // Verify the request was successful
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("data");
+    expect(response.body.data).toHaveProperty("id", 7);
+
+    // Verify the event emitter was called with the correct event name
+    expect(emitSpy).toHaveBeenCalledTimes(1);
+    expect(emitSpy).toHaveBeenCalledWith(
+      "untriggered_prediction",
+      expect.objectContaining({
+        id: 7,
+      })
+    );
+
+    // Verify the prediction passed to the event has the expected structure
+    const emitCall = emitSpy.mock.calls[0];
+    expect(emitCall[0]).toBe("untriggered_prediction");
+    const emittedPrediction =
+      emitCall[1] as API.Entities.Predictions.Prediction;
+    expect(emittedPrediction).toHaveProperty("id", 7);
+    expect(emittedPrediction).toHaveProperty("text");
+    expect(emittedPrediction).toHaveProperty("status");
+
+    // Clean up
+    emitSpy.mockRestore();
   });
 });

@@ -7,6 +7,7 @@ import responseUtils from "../../utils/response";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { validate } from "../../middleware/validate";
 import { getDbClient } from "../../utils/getDbClient";
+import { eventsManager } from "../../managers/events";
 
 export const untriggerPredictionById: Route = (router: Router) => {
   router.delete(
@@ -68,6 +69,9 @@ export const untriggerPredictionById: Route = (router: Router) => {
           ])
         );
       }
+
+      // Log event
+      eventsManager.emit("untriggered_prediction", prediction);
 
       // Send response
       return res.json(
