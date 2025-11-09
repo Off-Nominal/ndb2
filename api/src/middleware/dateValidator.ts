@@ -1,7 +1,7 @@
 import { isFuture, isPast, isValid } from "date-fns";
 import responseUtils_deprecated from "../utils/response";
 import { ErrorCode } from "../types/responses";
-import { WeakRequestHandler } from "express-zod-safe";
+import { RequestHandler } from "express";
 
 const createChecker = (
   key: string,
@@ -9,7 +9,7 @@ const createChecker = (
   error: string,
   statusCode: number,
   optional: boolean
-): WeakRequestHandler => {
+): RequestHandler => {
   return (req, res, next) => {
     if (!req.body) {
       return res

@@ -3,59 +3,83 @@ import { z } from "zod";
 import { predictionIdSchema } from "../../validations";
 import { Route } from "../../utils/routerMap";
 import predictions from "../../queries/predictions";
-import { getDbClient } from "../../../middleware/getDbClient";
 import responseUtils from "../../utils/response";
 import * as API from "@offnominal/ndb2-api-types/v2";
-import validate from "express-zod-safe";
-
-const RequestSchema = {
-  params: z.object({
-    prediction_id: predictionIdSchema,
-  }),
-};
+import { validate } from "../../middleware/validate";
+import { getDbClient } from "../../utils/getDbClient";
+import { eventsManager } from "../../managers/events";
 
 export const untriggerPredictionById: Route = (router: Router) => {
   router.delete(
     "/:prediction_id/trigger",
-    validate(RequestSchema),
-    getDbClient,
+    validate({
+      params: z.object({
+        prediction_id: predictionIdSchema,
+      }),
+    }),
     async (req, res) => {
       const { prediction_id } = req.params;
 
-      responseUtils.writeSuccess(null, "This feature is not yet implemented");
+      const dbClient = await getDbClient(res);
 
-      //   predictions
-      //     .untriggerById(req.dbClient)(prediction_id)
-      //     .then(() => predictions.getById(req.dbClient)(prediction_id))
-      //     .then((prediction) => {
-      //       if (!prediction) {
-      //         return res.status(404).json(
-      //           responseUtils.writeErrors([
-      //             {
-      //               code: API.Errors.PREDICTION_NOT_FOUND,
-      //               message: `Prediction with id ${prediction_id} does not exist.`,
-      //             },
-      //           ])
-      //         );
-      //       }
+      // Check if prediction exists
+      const predictionExists = await predictions.existsById(dbClient)(
+        prediction_id
+      );
+      if (!predictionExists) {
+        return res.status(404).json(
+          responseUtils.writeErrors([
+            {
+              code: API.Errors.PREDICTION_NOT_FOUND,
+              message: `Prediction with id ${prediction_id} does not exist.`,
+            },
+          ])
+        );
+      }
 
-      //       const response = responseUtils.writeSuccess(
-      //         prediction,
-      //         "Prediction untriggered successfully."
-      //       );
-      //       res.json(response);
-      //     })
-      //     .catch((err) => {
-      //       console.error(err);
-      //       return res.status(500).json(
-      //         responseUtils.writeErrors([
-      //           {
-      //             code: API.Errors.SERVER_ERROR,
-      //             message: "There was an error untriggering this prediction.",
-      //           },
-      //         ])
-      //       );
-      //     });
+      // Check if prediction is closed
+      const isAllowedStatus = await predictions.isOfStatus(dbClient)(
+        prediction_id,
+        ["closed"]
+      );
+
+      if (isAllowedStatus === false) {
+        return res.status(400).json(
+          responseUtils.writeErrors([
+            {
+              code: API.Errors.INVALID_PREDICTION_STATUS,
+              message: "Predictions must be closed to be untriggered.",
+            },
+          ])
+        );
+      }
+
+      // Untrigger prediction
+      await predictions.untriggerById(dbClient)(prediction_id);
+
+      // Get prediction for response
+      const prediction = await predictions.getById(dbClient)(prediction_id);
+      if (!prediction) {
+        return res.status(404).json(
+          responseUtils.writeErrors([
+            {
+              code: API.Errors.PREDICTION_NOT_FOUND,
+              message: `Prediction with id ${prediction_id} does not exist.`,
+            },
+          ])
+        );
+      }
+
+      // Log event
+      eventsManager.emit("untriggered_prediction", prediction);
+
+      // Send response
+      return res.json(
+        responseUtils.writeSuccess(
+          prediction,
+          "Prediction untriggred successfully."
+        )
+      );
     }
   );
 };

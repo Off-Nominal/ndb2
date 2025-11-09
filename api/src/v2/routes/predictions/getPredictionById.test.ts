@@ -2,9 +2,7 @@ import { getPredictionById } from "./getPredictionById";
 import express from "express";
 import request from "supertest";
 import * as API from "@offnominal/ndb2-api-types/v2";
-import { resetTestDatabase } from "../../../test/global-setup";
 import { useDbTransactionMock } from "../../../test/db-transaction-mock";
-import { differenceInDays } from "date-fns";
 
 // Enable transaction wrapping for all tests in this file
 useDbTransactionMock();
@@ -122,7 +120,7 @@ describe("GET /predictions/:prediction_id", () => {
     const check = prediction.checks[0];
     expect(check.id).toBe(1);
     expect(check.closed).toBe(true);
-    expect(check.votes).toEqual({
+    expect(check.values).toEqual({
       day: 0,
       week: 3,
       month: 0,

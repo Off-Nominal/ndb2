@@ -185,5 +185,169 @@
         ]
       }
     ]
+  },
+  {
+    "id": 4,
+    "user_id": "550e8400-e29b-41d4-a716-446655440001",
+    "text": "Test prediction with open status",
+    "driver": "date",
+    "baseDate": {
+      "quarter": "past",
+      "days": 10
+    },
+    "due": {
+      "days": 20
+    }
+  },
+  {
+    "id": 5,
+    "user_id": "550e8400-e29b-41d4-a716-446655440001",
+    "text": "Test prediction with checking status",
+    "driver": "date",
+    "baseDate": {
+      "quarter": "past",
+      "days": 10
+    },
+    "due": {
+      "days": 20
+    },
+    "checks": [
+      {
+        "checked": {
+          "days": 0
+        }
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "user_id": "550e8400-e29b-41d4-a716-446655440001",
+    "text": "Test prediction with retired status",
+    "driver": "date",
+    "baseDate": {
+      "quarter": "past",
+      "days": 10
+    },
+    "due": {
+      "days": 20
+    },
+    "retired": {
+      "days": 5
+    }
+  },
+  {
+    "id": 7,
+    "user_id": "550e8400-e29b-41d4-a716-446655440001",
+    "text": "Test prediction with closed status",
+    "driver": "date",
+    "baseDate": {
+      "quarter": "past",
+      "days": 25
+    },
+    "due": {
+      "days": 40
+    },
+    "closed": {
+      "days": 40
+    },
+    "triggered": {
+      "days": 40
+    }
+  },
+  {
+    "id": 8,
+    "user_id": "550e8400-e29b-41d4-a716-446655440001",
+    "text": "Test prediction with successful status",
+    "driver": "date",
+    "baseDate": {
+      "quarter": "past",
+      "days": 25
+    },
+    "due": {
+      "days": 40
+    },
+    "closed": {
+      "days": 40
+    },
+    "triggered": {
+      "days": 40
+    },
+    "judged": {
+      "days": 41
+    },
+    "votes": [
+      {
+        "user_id": "550e8400-e29b-41d4-a716-446655440001",
+        "voted": {
+          "days": 40,
+          "minutes": 5
+        },
+        "vote": true
+      },
+      {
+        "user_id": "550e8400-e29b-41d4-a716-446655440002",
+        "voted": {
+          "days": 40,
+          "minutes": 10
+        },
+        "vote": true
+      },
+      {
+        "user_id": "550e8400-e29b-41d4-a716-446655440003",
+        "voted": {
+          "days": 40,
+          "minutes": 15
+        },
+        "vote": false
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "user_id": "550e8400-e29b-41d4-a716-446655440001",
+    "text": "Test prediction with failed status",
+    "driver": "date",
+    "baseDate": {
+      "quarter": "past",
+      "days": 25
+    },
+    "due": {
+      "days": 40
+    },
+    "closed": {
+      "days": 40
+    },
+    "triggered": {
+      "days": 40
+    },
+    "judged": {
+      "days": 41
+    },
+    "votes": [
+      {
+        "user_id": "550e8400-e29b-41d4-a716-446655440001",
+        "voted": {
+          "days": 40,
+          "minutes": 5
+        },
+        "vote": false
+      },
+      {
+        "user_id": "550e8400-e29b-41d4-a716-446655440002",
+        "voted": {
+          "days": 40,
+          "minutes": 10
+        },
+        "vote": false
+      },
+      {
+        "user_id": "550e8400-e29b-41d4-a716-446655440003",
+        "voted": {
+          "days": 40,
+          "minutes": 15
+        },
+        "vote": true
+      }
+    ]
   }
 ]

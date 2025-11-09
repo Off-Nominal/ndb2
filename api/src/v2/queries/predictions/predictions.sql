@@ -25,9 +25,24 @@ SELECT
   LEFT JOIN users t ON t.id = p.triggerer_id
   WHERE p.id = :prediction_id!;
 
-  /* @name untriggerPredictionById */
+/* @name untriggerPredictionById */
 UPDATE predictions SET 
   triggerer_id = NULL,
   triggered_date = NULL,
   closed_date = NULL
 WHERE id = :prediction_id!;
+
+/* @name predictionExistsById */
+SELECT EXISTS
+  (SELECT 1
+    FROM predictions
+    WHERE id = :prediction_id!
+  );
+
+/* @name predictionIsOfStatus @param allowed_statuses -> (...) */
+SELECT EXISTS
+  (SELECT status
+    FROM predictions
+    WHERE id = :prediction_id!
+      AND status IN (:allowed_statuses)
+  );

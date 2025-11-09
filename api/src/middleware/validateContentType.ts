@@ -1,8 +1,8 @@
 import responseUtils_deprecated from "../utils/response";
 import { ErrorCode } from "../types/responses";
-import { WeakRequestHandler } from "express-zod-safe";
+import { RequestHandler } from "express";
 
-export const validateContentType: WeakRequestHandler = (req, res, next) => {
+export const validateContentType: RequestHandler = (req, res, next) => {
   if (
     req.method === "POST" &&
     req.headers["content-type"] !== "application/json"
