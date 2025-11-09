@@ -1,4 +1,3 @@
-import { NextFunction, Request, Response } from "express";
 import {
   isBoolean,
   isInteger,
@@ -8,8 +7,8 @@ import {
   isString,
 } from "../helpers/typeguards";
 import responseUtils_deprecated from "../utils/response";
+import { RequestHandler } from "express";
 import { ErrorCode } from "../types/responses";
-import { WeakRequestHandler } from "express-zod-safe";
 
 const createChecker = (
   key: string,
@@ -19,7 +18,7 @@ const createChecker = (
   optional: boolean,
   type: "body" | "params" | "query",
   allowArray: boolean
-): WeakRequestHandler => {
+): RequestHandler => {
   return (req, res, next) => {
     const value = (function () {
       if (type === "body") {

@@ -104,3 +104,36 @@ const untriggerPredictionByIdIR: any = {"usedParamSet":{"prediction_id":true},"p
 export const untriggerPredictionById = new PreparedQuery<IUntriggerPredictionByIdParams,IUntriggerPredictionByIdResult>(untriggerPredictionByIdIR);
 
 
+/** 'PredictionIsOfStatus' parameters type */
+export interface IPredictionIsOfStatusParams {
+  allowed_statuses: readonly (string | null | void)[];
+  prediction_id: number;
+}
+
+/** 'PredictionIsOfStatus' return type */
+export interface IPredictionIsOfStatusResult {
+  exists: boolean | null;
+}
+
+/** 'PredictionIsOfStatus' query type */
+export interface IPredictionIsOfStatusQuery {
+  params: IPredictionIsOfStatusParams;
+  result: IPredictionIsOfStatusResult;
+}
+
+const predictionIsOfStatusIR: any = {"usedParamSet":{"prediction_id":true,"allowed_statuses":true},"params":[{"name":"allowed_statuses","required":false,"transform":{"type":"array_spread"},"locs":[{"a":104,"b":120}]},{"name":"prediction_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":67,"b":81}]}],"statement":"SELECT EXISTS\n  (SELECT status\n    FROM predictions\n    WHERE id = :prediction_id!\n      AND status IN (:allowed_statuses)\n  )"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * SELECT EXISTS
+ *   (SELECT status
+ *     FROM predictions
+ *     WHERE id = :prediction_id!
+ *       AND status IN (:allowed_statuses)
+ *   )
+ * ```
+ */
+export const predictionIsOfStatus = new PreparedQuery<IPredictionIsOfStatusParams,IPredictionIsOfStatusResult>(predictionIsOfStatusIR);
+
+

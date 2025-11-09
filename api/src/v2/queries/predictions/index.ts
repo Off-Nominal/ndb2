@@ -3,6 +3,7 @@ import { getSnoozeChecksByPredictionId } from "../snooze_checks/snooze_checks.qu
 import { getVotesByPredictionId } from "../votes/votes.queries";
 import {
   getPredictionsById,
+  predictionIsOfStatus,
   untriggerPredictionById,
 } from "./predictions.queries";
 import * as API from "@offnominal/ndb2-api-types/v2";
@@ -118,5 +119,17 @@ export default {
     ): Promise<API.Endpoints.Predictions.DELETE_ById_trigger.Data> => {
       await untriggerPredictionById.run({ prediction_id }, dbClient);
       return null;
+    },
+  isOfStatus:
+    (dbClient: any) =>
+    async (
+      prediction_id: number,
+      allowed_statuses: API.Entities.Predictions.PredictionLifeCycle[]
+    ): Promise<boolean> => {
+      const result = await predictionIsOfStatus.run(
+        { prediction_id, allowed_statuses },
+        dbClient
+      );
+      return result[0].exists ?? false;
     },
 };

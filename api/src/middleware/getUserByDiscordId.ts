@@ -1,13 +1,9 @@
 import users from "../db/queries/users";
 import responseUtils_deprecated from "../utils/response";
 import { ErrorCode } from "../types/responses";
-import { WeakRequestHandler } from "express-zod-safe";
+import { RequestHandler } from "express";
 
-export const getUserByDiscordId: WeakRequestHandler = async (
-  req,
-  res,
-  next
-) => {
+export const getUserByDiscordId: RequestHandler = async (req, res, next) => {
   if (!req.dbClient) {
     return res
       .status(500)

@@ -2,9 +2,7 @@ import { getPredictionById } from "./getPredictionById";
 import express from "express";
 import request from "supertest";
 import * as API from "@offnominal/ndb2-api-types/v2";
-import { resetTestDatabase } from "../../../test/global-setup";
 import { useDbTransactionMock } from "../../../test/db-transaction-mock";
-import { differenceInDays } from "date-fns";
 
 // Enable transaction wrapping for all tests in this file
 useDbTransactionMock();
