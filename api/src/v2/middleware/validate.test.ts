@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { Request, Response, NextFunction } from "express";
+import type { Response, NextFunction } from "express";
 import { z } from "zod";
 import { validate } from "./validate";
 import * as API from "@offnominal/ndb2-api-types/v2";
@@ -36,8 +36,8 @@ describe("validate middleware", () => {
     jsonSpy = vi.fn().mockReturnThis();
 
     mockRes = {
-      status: statusSpy,
-      json: jsonSpy,
+      status: statusSpy as Response["status"],
+      json: jsonSpy as Response["json"],
     };
 
     mockNext = vi.fn();
