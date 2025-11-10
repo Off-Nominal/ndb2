@@ -1,13 +1,14 @@
 import { eventsManager } from "./events";
 import * as API from "@offnominal/ndb2-api-types/v2";
 
-const discordBot = process.env.WEBHOOK_DISCORD_BOT;
+const missionControlWebhookEndpointV2 = process.env.WEBHOOK_DISCORD_BOT + "/v2";
 
 const subscribers: string[] = [];
 
-if (discordBot) {
-  subscribers.push(discordBot);
+if (missionControlWebhookEndpointV2) {
+  subscribers.push(missionControlWebhookEndpointV2);
 }
+
 const generateResponse = <P extends API.Webhooks.Payload>(
   event_name: P["event_name"],
   data: P["data"]
