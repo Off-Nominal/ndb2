@@ -4,6 +4,7 @@ import { getPredictionById } from "./routes/predictions/getPredictionById";
 import { untriggerPredictionById } from "./routes/predictions/untriggerPredictionById";
 import { mapRoutes } from "./utils/routerMap";
 import { errorHandler } from "./middleware/errorHandler";
+import "./managers/webhooks"; // Initialize webhook event listeners
 
 export const apiV2Router = express.Router();
 
