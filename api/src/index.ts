@@ -12,8 +12,24 @@ import scoresRouter from "./routers/scores";
 import seasonsRouter from "./routers/seasons";
 import { apiV2Router } from "./v2";
 import { createLogger } from "@mendahu/utilities";
+import pool from "./db";
 
 const logger = createLogger({ namespace: "NDB2", env: ["dev", "production"] });
+
+// DB Test Connection
+pool
+  .connect()
+  .then((client) => {
+    client.release();
+  })
+  .catch((err) => {
+    if (process.env.NODE_ENV === "dev") {
+      logger.error("Failed to connect to database. Ensure Docker is running.");
+      process.exit(1);
+    }
+    logger.error("Failed to connect to database: ", err);
+    process.exit(1);
+  });
 
 const app = express();
 
