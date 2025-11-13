@@ -112,17 +112,12 @@ export default {
 
       return predictionDTO;
     },
-  untriggerById:
-    (dbClient: any) =>
-    async (
-      prediction_id: number
-    ): Promise<API.Endpoints.Predictions.DELETE_ById_trigger.Data> => {
-      await untriggerPredictionById.run({ prediction_id }, dbClient);
-      return null;
-    },
-  retireById:
-    (dbClient: any) =>
-    async (prediction_id: number): Promise<void> => {
-      await retirePredictionById.run({ prediction_id }, dbClient);
-    },
+  untriggerById: (dbClient: any) => async (prediction_id: number) => {
+    await untriggerPredictionById.run({ prediction_id }, dbClient);
+    return null;
+  },
+  retireById: (dbClient: any) => async (prediction_id: number) => {
+    await retirePredictionById.run({ prediction_id }, dbClient);
+    return null;
+  },
 };
