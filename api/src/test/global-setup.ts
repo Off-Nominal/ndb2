@@ -17,6 +17,9 @@ process.env.TZ = "UTC";
 process.env.NODE_ENV = "test";
 // process.env.LOG_LEVEL = "error";
 
+// Set game mechanics environment variables for tests
+process.env.GM_PREDICTION_UPDATE_WINDOW_HOURS = "24";
+
 const logger = createLogger({ namespace: "TEST", env: ["test"] });
 
 // Function to check if test database is running

@@ -9,6 +9,12 @@ export namespace GET_ById {
 
 // DELETE /predictions/{prediction_id}/trigger
 export namespace DELETE_ById_trigger {
-  export type Data = null;
+  export type Data = Entities.Predictions.Prediction;
+  export type Response = APIResponse<Data>;
+}
+
+// PATCH /predictions/{prediction_id}/retire
+export namespace PATCH_ById_retire {
+  export type Data = Entities.Predictions.Prediction;
   export type Response = APIResponse<Data>;
 }

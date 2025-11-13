@@ -1,4 +1,4 @@
-import { getPredictionById } from "./getPredictionById";
+import { getPredictionById } from "./get_predictions_{predictionId}";
 import express from "express";
 import request from "supertest";
 import * as API from "@offnominal/ndb2-api-types/v2";

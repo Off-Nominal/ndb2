@@ -5,6 +5,9 @@ export interface NDBEvents {
   untriggered_prediction: (
     prediction: API.Entities.Predictions.Prediction
   ) => void;
+  retired_prediction: (
+    prediction: API.Entities.Predictions.Prediction
+  ) => void;
 }
 
 export const eventsManager = new TypedEventEmitter<NDBEvents>();

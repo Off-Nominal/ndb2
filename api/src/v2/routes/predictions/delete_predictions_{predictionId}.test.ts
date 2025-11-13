@@ -1,4 +1,4 @@
-import { untriggerPredictionById } from "./untriggerPredictionById";
+import { untriggerPredictionById } from "./delete_predictions_{predictionId}";
 import express from "express";
 import request from "supertest";
 import * as API from "@offnominal/ndb2-api-types/v2";
