@@ -56,3 +56,7 @@ const notifySubscribers = <E extends API.Webhooks.WebhookEvent, D>(
 eventsManager.on("untriggered_prediction", (prediction) => {
   notifySubscribers(generateResponse("untriggered_prediction", { prediction }));
 });
+
+eventsManager.on("retired_prediction", (prediction) => {
+  notifySubscribers(generateResponse("retired_prediction", { prediction }));
+});

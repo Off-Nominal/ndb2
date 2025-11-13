@@ -4,6 +4,7 @@ import { Prediction } from "./entities/predictions";
 const WEBHOOK_EVENTS = [
   "untriggered_prediction",
   "triggered_prediction",
+  "retired_prediction",
 ] as const;
 
 // Derive the type from the array
@@ -29,9 +30,18 @@ export namespace Events {
       prediction: Prediction;
     }
   >;
+  export type RetiredPrediction = BasePayload<
+    "retired_prediction",
+    {
+      prediction: Prediction;
+    }
+  >;
 }
 
-export type Payload = Events.UntriggeredPrediction | Events.TriggeredPrediction;
+export type Payload =
+  | Events.UntriggeredPrediction
+  | Events.TriggeredPrediction
+  | Events.RetiredPrediction;
 
 export const isWebhookPayloadV2 = (payload: any): payload is Payload => {
   if (!payload || typeof payload !== "object") {

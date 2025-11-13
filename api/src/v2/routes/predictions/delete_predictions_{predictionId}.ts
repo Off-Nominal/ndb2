@@ -22,11 +22,11 @@ export const untriggerPredictionById: Route = (router: Router) => {
 
       const dbClient = await getDbClient(res);
 
+      // Fetch prediction once
+      const prediction = await predictions.getById(dbClient)(prediction_id);
+
       // Check if prediction exists
-      const predictionExists = await predictions.existsById(dbClient)(
-        prediction_id
-      );
-      if (!predictionExists) {
+      if (!prediction) {
         return res.status(404).json(
           responseUtils.writeErrors([
             {
@@ -38,12 +38,7 @@ export const untriggerPredictionById: Route = (router: Router) => {
       }
 
       // Check if prediction is closed
-      const isAllowedStatus = await predictions.isOfStatus(dbClient)(
-        prediction_id,
-        ["closed"]
-      );
-
-      if (isAllowedStatus === false) {
+      if (prediction.status !== "closed") {
         return res.status(400).json(
           responseUtils.writeErrors([
             {
@@ -57,9 +52,11 @@ export const untriggerPredictionById: Route = (router: Router) => {
       // Untrigger prediction
       await predictions.untriggerById(dbClient)(prediction_id);
 
-      // Get prediction for response
-      const prediction = await predictions.getById(dbClient)(prediction_id);
-      if (!prediction) {
+      // Get updated prediction for response
+      const untriggeredPrediction = await predictions.getById(dbClient)(
+        prediction_id
+      );
+      if (!untriggeredPrediction) {
         return res.status(404).json(
           responseUtils.writeErrors([
             {
@@ -70,13 +67,13 @@ export const untriggerPredictionById: Route = (router: Router) => {
         );
       }
 
-      // Log event
-      eventsManager.emit("untriggered_prediction", prediction);
+      // Emit event
+      eventsManager.emit("untriggered_prediction", untriggeredPrediction);
 
       // Send response
       return res.json(
         responseUtils.writeSuccess(
-          prediction,
+          untriggeredPrediction,
           "Prediction untriggred successfully."
         )
       );

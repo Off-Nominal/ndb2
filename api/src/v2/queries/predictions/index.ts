@@ -3,8 +3,7 @@ import { getSnoozeChecksByPredictionId } from "../snooze_checks/snooze_checks.qu
 import { getVotesByPredictionId } from "../votes/votes.queries";
 import {
   getPredictionsById,
-  predictionExistsById,
-  predictionIsOfStatus,
+  retirePredictionById,
   untriggerPredictionById,
 } from "./predictions.queries";
 import * as API from "@offnominal/ndb2-api-types/v2";
@@ -121,25 +120,9 @@ export default {
       await untriggerPredictionById.run({ prediction_id }, dbClient);
       return null;
     },
-  existsById:
+  retireById:
     (dbClient: any) =>
-    async (prediction_id: number): Promise<boolean> => {
-      const result = await predictionExistsById.run(
-        { prediction_id },
-        dbClient
-      );
-      return result[0].exists ?? false;
-    },
-  isOfStatus:
-    (dbClient: any) =>
-    async (
-      prediction_id: number,
-      allowed_statuses: API.Entities.Predictions.PredictionLifeCycle[]
-    ): Promise<boolean> => {
-      const result = await predictionIsOfStatus.run(
-        { prediction_id, allowed_statuses },
-        dbClient
-      );
-      return result[0].exists ?? false;
+    async (prediction_id: number): Promise<void> => {
+      await retirePredictionById.run({ prediction_id }, dbClient);
     },
 };

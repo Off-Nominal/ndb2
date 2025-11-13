@@ -32,17 +32,7 @@ UPDATE predictions SET
   closed_date = NULL
 WHERE id = :prediction_id!;
 
-/* @name predictionExistsById */
-SELECT EXISTS
-  (SELECT 1
-    FROM predictions
-    WHERE id = :prediction_id!
-  );
-
-/* @name predictionIsOfStatus @param allowed_statuses -> (...) */
-SELECT EXISTS
-  (SELECT status
-    FROM predictions
-    WHERE id = :prediction_id!
-      AND status IN (:allowed_statuses)
-  );
+/* @name retirePredictionById */
+UPDATE predictions 
+  SET retired_date = NOW() 
+  WHERE predictions.id = :prediction_id!;

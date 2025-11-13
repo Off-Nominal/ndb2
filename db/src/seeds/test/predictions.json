@@ -192,11 +192,10 @@
     "text": "Test prediction with open status",
     "driver": "date",
     "baseDate": {
-      "quarter": "past",
-      "days": 10
+      "days": 0
     },
     "due": {
-      "days": 20
+      "days": 25
     }
   },
   {
