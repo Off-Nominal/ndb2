@@ -34,8 +34,6 @@ export const Errors = {
   // 04 Seasons
 
   // 05 Bets
-  BETS_NO_CHANGE: 90501,
-  BETS_UNCHANGEABLE: 90502,
 
   // 06 Votes
 } as const;
