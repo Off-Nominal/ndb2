@@ -10,18 +10,11 @@ export const predictionDriverSchema = z.enum(["event", "date"], {
  * Validates that a value is a non-empty string that is at least 17 characters long and a numeric string.
  */
 export const discordIdSchema = z
-  .any()
-  .refine((val) => val !== undefined && val !== null && val !== "", {
-    message: "Property 'discord_id' is required",
+  .string({
+    message: "Property 'discord_id' must be a string",
   })
-  .pipe(
-    z
-      .string({
-        message: "Property 'discord_id' must be a string",
-      })
-      .min(17, "Property 'discord_id' must be at least 17 characters")
-      .regex(/^[0-9]+$/, "Property 'discord_id' must be a numeric string")
-  );
+  .min(17, "Property 'discord_id' must be at least 17 characters")
+  .regex(/^[0-9]+$/, "Property 'discord_id' must be a numeric string");
 
 /**
  * Schema for validating future dates.

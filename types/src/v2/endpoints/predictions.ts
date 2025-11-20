@@ -1,4 +1,5 @@
 import { Entities } from "..";
+import { PredictionDriver } from "../entities/predictions";
 import { APIResponse } from "../utils";
 
 // GET /predictions/{prediction_id}/
@@ -24,19 +25,13 @@ export namespace PATCH_ById_retire {
 
 // POST /predictions - Add New Prediction
 export namespace POST_Predictions {
-  export type Body =
-    | {
-        text: string;
-        discord_id: string;
-        check_date: string;
-        driver: "event";
-      }
-    | {
-        text: string;
-        discord_id: string;
-        due_date: string;
-        driver: "date";
-      };
+  export type Body = {
+    text: string;
+    discord_id: string;
+    date: string | Date;
+    driver: PredictionDriver;
+  };
+
   export type Data = Entities.Predictions.Prediction;
   export type Response = APIResponse<Data>;
 }
