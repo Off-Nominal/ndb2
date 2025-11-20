@@ -8,7 +8,11 @@ import predictions from "../../queries/predictions";
 import users from "../../queries/users";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { eventsManager } from "../../managers/events";
-import { createFutureDateSchema, discordIdSchema } from "../../validations";
+import {
+  createFutureDateSchema,
+  discordIdSchema,
+  predictionDriverSchema,
+} from "../../validations";
 
 export const createPrediction: Route = (router: Router) => {
   router.post(
@@ -28,25 +32,13 @@ export const createPrediction: Route = (router: Router) => {
           throw new Error("Unable to resolve user from discord_id");
         }
 
-        let prediction_id: number;
-
-        if ("check_date" in body) {
-          prediction_id = await predictions.create(dbClient)({
-            user_id: user.id,
-            text: body.text,
-            created_date: now,
-            driver: "event",
-            check_date: body.check_date,
-          });
-        } else {
-          prediction_id = await predictions.create(dbClient)({
-            user_id: user.id,
-            text: body.text,
-            created_date: now,
-            driver: "date",
-            due_date: body.due_date,
-          });
-        }
+        const prediction_id = await predictions.create(dbClient)({
+          user_id: user.id,
+          text: body.text,
+          created_date: now,
+          driver: body.driver,
+          date: body.date,
+        });
 
         const prediction = await predictions.getById(dbClient)(prediction_id);
         if (!prediction) {
@@ -86,20 +78,9 @@ const predictionTextSchema = z
   })
   .min(1, "Prediction text must not be empty");
 
-const createPredictionBodySchema = z
-  .object({
-    text: predictionTextSchema,
-    discord_id: discordIdSchema,
-    check_date: createFutureDateSchema({ fieldName: "check_date" }).optional(),
-    due_date: createFutureDateSchema({ fieldName: "due_date" }).optional(),
-  })
-  .refine(
-    (data) => {
-      const hasCheckDate = data.check_date !== undefined;
-      const hasDueDate = data.due_date !== undefined;
-      return hasCheckDate !== hasDueDate;
-    },
-    {
-      message: "Must have either a check_date or a due_date",
-    }
-  );
+const createPredictionBodySchema = z.looseObject({
+  text: predictionTextSchema,
+  discord_id: discordIdSchema,
+  driver: predictionDriverSchema,
+  date: createFutureDateSchema({ fieldName: "date" }),
+});

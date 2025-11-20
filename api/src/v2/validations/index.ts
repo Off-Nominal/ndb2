@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { POSTGRES_MAX_INT } from "./constants";
 
+export const predictionDriverSchema = z.enum(["event", "date"], {
+  message: "Property 'driver' must be either 'event' or 'date'",
+});
+
 /**
  * Schema for validating Discord IDs.
  * Validates that a value is a non-empty string that is at least 17 characters long and a numeric string.
@@ -8,15 +12,15 @@ import { POSTGRES_MAX_INT } from "./constants";
 export const discordIdSchema = z
   .any()
   .refine((val) => val !== undefined && val !== null && val !== "", {
-    message: "discord_id is required",
+    message: "Property 'discord_id' is required",
   })
   .pipe(
     z
       .string({
-        message: "discord_id must be a string",
+        message: "Property 'discord_id' must be a string",
       })
-      .min(17, "discord_id must be at least 17 characters")
-      .regex(/^[0-9]+$/, "discord_id must be a numeric string")
+      .min(17, "Property 'discord_id' must be at least 17 characters")
+      .regex(/^[0-9]+$/, "Property 'discord_id' must be a numeric string")
   );
 
 /**
@@ -32,11 +36,11 @@ export const createFutureDateSchema = ({ fieldName }: { fieldName: string }) =>
     .pipe(
       z.iso
         .datetime({
-          message: `${fieldName} must be a valid ISO 8601 datetime string`,
+          message: `Property '${fieldName}' must be a valid ISO 8601 datetime string`,
         })
         .transform((s) => new Date(s))
         .refine((d: Date) => d.getTime() > Date.now(), {
-          message: `${fieldName} must be in the future`,
+          message: `Property '${fieldName}' must be in the future`,
         })
     );
 
@@ -54,7 +58,7 @@ function createPostgresIntSchema(fieldName: string) {
       if (value === undefined || value === null || value === "") {
         ctx.addIssue({
           code: "custom",
-          message: `${fieldName} is required`,
+          message: `Property '${fieldName}' is required`,
         });
         return z.NEVER;
       }
@@ -64,16 +68,16 @@ function createPostgresIntSchema(fieldName: string) {
     .pipe(
       z.coerce
         .number({
-          message: `${fieldName} must be a number`,
+          message: `Property '${fieldName}' must be a number`,
         })
         .positive({
-          message: `${fieldName} must be a positive number`,
+          message: `Property '${fieldName}' must be a positive number`,
         })
         .int({
-          message: `${fieldName} must be an integer`,
+          message: `Property '${fieldName}' must be an integer`,
         })
         .lte(POSTGRES_MAX_INT, {
-          message: `${fieldName} must be less than or equal to ${POSTGRES_MAX_INT}`,
+          message: `Property '${fieldName}' must be less than or equal to ${POSTGRES_MAX_INT}`,
         })
     );
 }
@@ -82,4 +86,4 @@ function createPostgresIntSchema(fieldName: string) {
  * Schema for validating prediction IDs.
  * Extends the base Postgres INT schema with prediction-specific error messages.
  */
-export const predictionIdSchema = createPostgresIntSchema("Prediction ID");
+export const predictionIdSchema = createPostgresIntSchema("prediction_id");

@@ -6,6 +6,7 @@ import {
   getPredictionsById,
   insertDateDrivenPrediction,
   insertEventDrivenPrediction,
+  prediction_driver,
   retirePredictionById,
   untriggerPredictionById,
 } from "./predictions.queries";
@@ -130,46 +131,36 @@ export default {
     },
   create:
     (dbClient: PoolClient) =>
-    async (
-      params:
-        | {
-            user_id: string;
-            text: string;
-            created_date: Date;
-            driver: "date";
-            due_date: Date;
-          }
-        | {
-            user_id: string;
-            text: string;
-            created_date: Date;
-            driver: "event";
-            check_date: Date;
-          }
-    ): Promise<number> => {
+    async (params: {
+      user_id: string;
+      text: string;
+      created_date: Date;
+      driver: prediction_driver;
+      date: Date;
+    }): Promise<number> => {
       await dbClient.query("BEGIN");
+
+      const { user_id, text, created_date, date } = params;
 
       let prediction_id: number;
       if (params.driver === "event") {
-        const { user_id, text, created_date, check_date } = params;
         const [insertResult] = await insertEventDrivenPrediction.run(
           {
             user_id,
             text,
             created_date,
-            check_date,
+            check_date: date,
           },
           dbClient
         );
         prediction_id = insertResult.id;
       } else {
-        const { user_id, text, created_date, due_date } = params;
         const [insertResult] = await insertDateDrivenPrediction.run(
           {
             user_id,
             text,
             created_date,
-            due_date,
+            due_date: date,
           },
           dbClient
         );

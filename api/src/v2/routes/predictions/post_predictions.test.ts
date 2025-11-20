@@ -21,6 +21,7 @@ describe("POST /predictions", () => {
     const response = await request(app).post("/").send({
       text: "Missing check date",
       discord_id: "111111111111111111",
+      driver: "event",
     });
 
     expect(response.status).toBe(400);
@@ -29,7 +30,7 @@ describe("POST /predictions", () => {
       response.body.errors.some(
         (err: API.Utils.ErrorInfo) =>
           err.code === API.Errors.MALFORMED_BODY_DATA &&
-          err.message.includes("check_date")
+          err.message.includes("date")
       )
     ).toBeTruthy();
   });
@@ -40,7 +41,8 @@ describe("POST /predictions", () => {
       .send({
         text: "Past due date prediction",
         discord_id: "111111111111111111",
-        due_date: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+        date: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+        driver: "date",
       });
 
     expect(response.status).toBe(400);
@@ -59,7 +61,8 @@ describe("POST /predictions", () => {
     const response = await request(app).post("/").send({
       text: "V2 Date Prediction",
       discord_id: "111111111111111111",
-      due_date: futureDate,
+      date: futureDate,
+      driver: "date",
     });
 
     expect(response.status).toBe(200);
@@ -83,7 +86,8 @@ describe("POST /predictions", () => {
     const response = await request(app).post("/").send({
       text: "V2 Event Prediction",
       discord_id: discordId,
-      check_date: futureCheckDate,
+      date: futureCheckDate,
+      driver: "event",
     });
 
     expect(response.status).toBe(200);
