@@ -54,21 +54,21 @@ function handleValidationErrors(
 export const validate = <
   SParams extends z.ZodObject<z.ZodRawShape> | undefined,
   SQuery extends z.ZodObject<z.ZodRawShape> | undefined,
-  SBody extends z.ZodObject<z.ZodRawShape> | undefined,
+  SBody extends z.ZodTypeAny | undefined,
   TParams extends z.infer<
     SParams extends z.ZodObject<z.ZodRawShape> ? SParams : any
   >,
   TQuery extends z.infer<
     SQuery extends z.ZodObject<z.ZodRawShape> ? SQuery : any
   >,
-  TBody extends z.infer<SBody extends z.ZodObject<z.ZodRawShape> ? SBody : any>
+  TBody extends z.infer<SBody extends z.ZodTypeAny ? SBody : any>
 >(schema: {
   params?: SParams;
   query?: SQuery;
   body?: SBody;
 }) => {
   return (
-    req: Request<TParams, any, TQuery, TBody, any>,
+    req: Request<TParams, any, TBody, TQuery, any>,
     res: Response,
     next: NextFunction
   ) => {

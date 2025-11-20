@@ -1141,4 +1141,5 @@ ALTER TABLE ONLY public.votes
 
 INSERT INTO public.schema_migrations (version) VALUES
     ('20250507173754'),
-    ('20250507191843');
+    ('20250507191843'),
+    ('20251120094857');

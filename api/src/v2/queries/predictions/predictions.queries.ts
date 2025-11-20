@@ -5,6 +5,8 @@ export type prediction_driver = 'date' | 'event';
 
 export type prediction_status = 'checking' | 'closed' | 'failed' | 'open' | 'retired' | 'successful';
 
+export type DateOrString = Date | string;
+
 /** 'GetPredictionsById' parameters type */
 export interface IGetPredictionsByIdParams {
   prediction_id: number;
@@ -129,5 +131,89 @@ const retirePredictionByIdIR: any = {"usedParamSet":{"prediction_id":true},"para
  * ```
  */
 export const retirePredictionById = new PreparedQuery<IRetirePredictionByIdParams,IRetirePredictionByIdResult>(retirePredictionByIdIR);
+
+
+/** 'InsertEventDrivenPrediction' parameters type */
+export interface IInsertEventDrivenPredictionParams {
+  check_date: DateOrString;
+  created_date: DateOrString;
+  text: string;
+  user_id: string;
+}
+
+/** 'InsertEventDrivenPrediction' return type */
+export interface IInsertEventDrivenPredictionResult {
+  id: number;
+}
+
+/** 'InsertEventDrivenPrediction' query type */
+export interface IInsertEventDrivenPredictionQuery {
+  params: IInsertEventDrivenPredictionParams;
+  result: IInsertEventDrivenPredictionResult;
+}
+
+const insertEventDrivenPredictionIR: any = {"usedParamSet":{"user_id":true,"text":true,"created_date":true,"check_date":true},"params":[{"name":"user_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":97,"b":105}]},{"name":"text","required":true,"transform":{"type":"scalar"},"locs":[{"a":110,"b":115}]},{"name":"created_date","required":true,"transform":{"type":"scalar"},"locs":[{"a":120,"b":133}]},{"name":"check_date","required":true,"transform":{"type":"scalar"},"locs":[{"a":149,"b":160}]}],"statement":"INSERT INTO predictions (\n  user_id,\n  text,\n  created_date,\n  driver,\n  check_date\n) VALUES (\n  :user_id!,\n  :text!,\n  :created_date!,\n  'event',\n  :check_date!\n) RETURNING id"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * INSERT INTO predictions (
+ *   user_id,
+ *   text,
+ *   created_date,
+ *   driver,
+ *   check_date
+ * ) VALUES (
+ *   :user_id!,
+ *   :text!,
+ *   :created_date!,
+ *   'event',
+ *   :check_date!
+ * ) RETURNING id
+ * ```
+ */
+export const insertEventDrivenPrediction = new PreparedQuery<IInsertEventDrivenPredictionParams,IInsertEventDrivenPredictionResult>(insertEventDrivenPredictionIR);
+
+
+/** 'InsertDateDrivenPrediction' parameters type */
+export interface IInsertDateDrivenPredictionParams {
+  created_date: DateOrString;
+  due_date: DateOrString;
+  text: string;
+  user_id: string;
+}
+
+/** 'InsertDateDrivenPrediction' return type */
+export interface IInsertDateDrivenPredictionResult {
+  id: number;
+}
+
+/** 'InsertDateDrivenPrediction' query type */
+export interface IInsertDateDrivenPredictionQuery {
+  params: IInsertDateDrivenPredictionParams;
+  result: IInsertDateDrivenPredictionResult;
+}
+
+const insertDateDrivenPredictionIR: any = {"usedParamSet":{"user_id":true,"text":true,"created_date":true,"due_date":true},"params":[{"name":"user_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":95,"b":103}]},{"name":"text","required":true,"transform":{"type":"scalar"},"locs":[{"a":108,"b":113}]},{"name":"created_date","required":true,"transform":{"type":"scalar"},"locs":[{"a":118,"b":131}]},{"name":"due_date","required":true,"transform":{"type":"scalar"},"locs":[{"a":146,"b":155}]}],"statement":"INSERT INTO predictions (\n  user_id,\n  text,\n  created_date,\n  driver,\n  due_date\n) VALUES (\n  :user_id!,\n  :text!,\n  :created_date!,\n  'date',\n  :due_date!\n) RETURNING id"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * INSERT INTO predictions (
+ *   user_id,
+ *   text,
+ *   created_date,
+ *   driver,
+ *   due_date
+ * ) VALUES (
+ *   :user_id!,
+ *   :text!,
+ *   :created_date!,
+ *   'date',
+ *   :due_date!
+ * ) RETURNING id
+ * ```
+ */
+export const insertDateDrivenPrediction = new PreparedQuery<IInsertDateDrivenPredictionParams,IInsertDateDrivenPredictionResult>(insertDateDrivenPredictionIR);
 
 

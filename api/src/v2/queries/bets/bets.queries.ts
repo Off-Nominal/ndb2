@@ -1,6 +1,8 @@
 /** Types generated for queries found in "src/v2/queries/bets/bets.sql" */
 import { PreparedQuery } from '@pgtyped/runtime';
 
+export type DateOrString = Date | string;
+
 /** 'GetBetsByPredictionId' parameters type */
 export interface IGetBetsByPredictionIdParams {
   prediction_id: number;
@@ -49,5 +51,54 @@ const getBetsByPredictionIdIR: any = {"usedParamSet":{"prediction_id":true},"par
  * ```
  */
 export const getBetsByPredictionId = new PreparedQuery<IGetBetsByPredictionIdParams,IGetBetsByPredictionIdResult>(getBetsByPredictionIdIR);
+
+
+/** 'AddBet' parameters type */
+export interface IAddBetParams {
+  date: DateOrString;
+  endorsed: boolean;
+  prediction_id: number;
+  user_id: string;
+}
+
+/** 'AddBet' return type */
+export interface IAddBetResult {
+  date: Date;
+  endorsed: boolean;
+  id: number;
+  payout: number | null;
+  prediction_id: number;
+  user_id: string;
+  valid: boolean;
+}
+
+/** 'AddBet' query type */
+export interface IAddBetQuery {
+  params: IAddBetParams;
+  result: IAddBetResult;
+}
+
+const addBetIR: any = {"usedParamSet":{"user_id":true,"prediction_id":true,"endorsed":true,"date":true},"params":[{"name":"user_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":91,"b":99}]},{"name":"prediction_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":106,"b":120}]},{"name":"endorsed","required":true,"transform":{"type":"scalar"},"locs":[{"a":127,"b":136},{"a":222,"b":231}]},{"name":"date","required":true,"transform":{"type":"scalar"},"locs":[{"a":143,"b":148}]}],"statement":"INSERT INTO bets (\n    user_id,\n    prediction_id,\n    endorsed,\n    date\n  ) VALUES (\n    :user_id!,\n    :prediction_id!,\n    :endorsed!,\n    :date!\n  ) \n  ON CONFLICT (user_id, prediction_id) \n  DO UPDATE SET endorsed = :endorsed!\n  RETURNING id, user_id, prediction_id, date, endorsed, valid, payout"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * INSERT INTO bets (
+ *     user_id,
+ *     prediction_id,
+ *     endorsed,
+ *     date
+ *   ) VALUES (
+ *     :user_id!,
+ *     :prediction_id!,
+ *     :endorsed!,
+ *     :date!
+ *   ) 
+ *   ON CONFLICT (user_id, prediction_id) 
+ *   DO UPDATE SET endorsed = :endorsed!
+ *   RETURNING id, user_id, prediction_id, date, endorsed, valid, payout
+ * ```
+ */
+export const addBet = new PreparedQuery<IAddBetParams,IAddBetResult>(addBetIR);
 
 

@@ -103,7 +103,7 @@ describe("validate middleware", () => {
   describe("query validation", () => {
     it("should pass validation when query matches schema", () => {
       const validator = validate({
-        query: z.object({ limit: z.coerce.number().optional() }),
+        query: z.object({ limit: z.string().optional() }),
       });
 
       const mockReq = createMockRequest(validator);
@@ -122,7 +122,7 @@ describe("validate middleware", () => {
       });
 
       const mockReq = createMockRequest(validator);
-      mockReq.query = { limit: "not-a-number" };
+      mockReq.query = { limit: "not-a-number" as unknown as number };
 
       validator(mockReq, mockRes as Response, mockNext);
 
@@ -188,11 +188,14 @@ describe("validate middleware", () => {
 
     it("should return 400 when required body fields are missing", () => {
       const validator = validate({
-        body: z.object({ name: z.string(), email: z.string().email() }),
+        body: z.object({ name: z.string(), email: z.email() }),
       });
 
       const mockReq = createMockRequest(validator);
-      mockReq.body = { name: "John Doe" }; // Missing email
+      mockReq.body = { name: "John Doe" } as unknown as {
+        name: string;
+        email: string;
+      }; // Missing email
 
       validator(mockReq, mockRes as Response, mockNext);
 
