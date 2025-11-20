@@ -30,12 +30,12 @@ export const createPrediction: Route = (router: Router) => {
 
         let prediction_id: number;
 
-        if (body.driver === "event") {
+        if ("check_date" in body) {
           prediction_id = await predictions.create(dbClient)({
             user_id: user.id,
             text: body.text,
             created_date: now,
-            driver: body.driver,
+            driver: "event",
             check_date: body.check_date,
           });
         } else {
@@ -43,7 +43,7 @@ export const createPrediction: Route = (router: Router) => {
             user_id: user.id,
             text: body.text,
             created_date: now,
-            driver: body.driver,
+            driver: "date",
             due_date: body.due_date,
           });
         }
@@ -86,17 +86,20 @@ const predictionTextSchema = z
   })
   .min(1, "Prediction text must not be empty");
 
-const createPredictionBodySchema = z.discriminatedUnion("driver", [
-  z.object({
+const createPredictionBodySchema = z
+  .object({
     text: predictionTextSchema,
     discord_id: discordIdSchema,
-    driver: z.literal("event"),
-    check_date: createFutureDateSchema({ fieldName: "check_date" }),
-  }),
-  z.object({
-    text: predictionTextSchema,
-    discord_id: discordIdSchema,
-    driver: z.literal("date"),
-    due_date: createFutureDateSchema({ fieldName: "due_date" }),
-  }),
-]);
+    check_date: createFutureDateSchema({ fieldName: "check_date" }).optional(),
+    due_date: createFutureDateSchema({ fieldName: "due_date" }).optional(),
+  })
+  .refine(
+    (data) => {
+      const hasCheckDate = data.check_date !== undefined;
+      const hasDueDate = data.due_date !== undefined;
+      return hasCheckDate !== hasDueDate;
+    },
+    {
+      message: "Must have either a check_date or a due_date",
+    }
+  );

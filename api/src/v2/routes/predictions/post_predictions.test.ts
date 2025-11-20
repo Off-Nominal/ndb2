@@ -19,7 +19,6 @@ describe("POST /predictions", () => {
 
   it("should return 400 when required fields are missing", async () => {
     const response = await request(app).post("/").send({
-      driver: "event",
       text: "Missing check date",
       discord_id: "111111111111111111",
     });
@@ -39,7 +38,6 @@ describe("POST /predictions", () => {
     const response = await request(app)
       .post("/")
       .send({
-        driver: "date",
         text: "Past due date prediction",
         discord_id: "111111111111111111",
         due_date: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
@@ -59,7 +57,6 @@ describe("POST /predictions", () => {
   it("should create a date-driven prediction", async () => {
     const futureDate = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
     const response = await request(app).post("/").send({
-      driver: "date",
       text: "V2 Date Prediction",
       discord_id: "111111111111111111",
       due_date: futureDate,
@@ -84,7 +81,6 @@ describe("POST /predictions", () => {
     const discordId = "111111111111111111";
 
     const response = await request(app).post("/").send({
-      driver: "event",
       text: "V2 Event Prediction",
       discord_id: discordId,
       check_date: futureCheckDate,

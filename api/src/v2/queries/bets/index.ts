@@ -10,7 +10,7 @@ export default {
       endorsed: boolean;
       date: Date;
     }) => {
-      const [bet] = await addBet.run(params, dbClient);
-      return bet;
+      const [result] = await addBet.run(params, dbClient);
+      return result;
     },
 };
