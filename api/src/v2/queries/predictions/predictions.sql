@@ -36,3 +36,33 @@ WHERE id = :prediction_id!;
 UPDATE predictions 
   SET retired_date = NOW() 
   WHERE predictions.id = :prediction_id!;
+
+/* @name insertEventDrivenPrediction */
+INSERT INTO predictions (
+  user_id,
+  text,
+  created_date,
+  driver,
+  check_date
+) VALUES (
+  :user_id!,
+  :text!,
+  :created_date!,
+  'event',
+  :check_date!
+) RETURNING id;
+
+/* @name insertDateDrivenPrediction */
+INSERT INTO predictions (
+  user_id,
+  text,
+  created_date,
+  driver,
+  due_date
+) VALUES (
+  :user_id!,
+  :text!,
+  :created_date!,
+  'date',
+  :due_date!
+) RETURNING id;

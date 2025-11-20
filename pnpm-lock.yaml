@@ -109,6 +109,9 @@ importers:
       '@types/node':
         specifier: ^22.15.3
         version: 22.16.4
+      dotenv-cli:
+        specifier: ^8.0.0
+        version: 8.0.0
       typescript:
         specifier: ^5.8.3
         version: 5.8.3

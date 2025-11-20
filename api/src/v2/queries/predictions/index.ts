@@ -1,16 +1,20 @@
-import { getBetsByPredictionId } from "../bets/bets.queries";
+import { PoolClient } from "pg";
+import { addBet, getBetsByPredictionId } from "../bets/bets.queries";
 import { getSnoozeChecksByPredictionId } from "../snooze_checks/snooze_checks.queries";
 import { getVotesByPredictionId } from "../votes/votes.queries";
 import {
   getPredictionsById,
+  insertDateDrivenPrediction,
+  insertEventDrivenPrediction,
   retirePredictionById,
   untriggerPredictionById,
+  prediction_driver,
 } from "./predictions.queries";
 import * as API from "@offnominal/ndb2-api-types/v2";
 
 export default {
   getById:
-    (dbClient: any) =>
+    (dbClient: PoolClient) =>
     async (
       prediction_id: number
     ): Promise<API.Endpoints.Predictions.GET_ById.Data | undefined> => {
@@ -112,12 +116,79 @@ export default {
 
       return predictionDTO;
     },
-  untriggerById: (dbClient: any) => async (prediction_id: number) => {
+  untriggerById: (dbClient: PoolClient) => async (prediction_id: number) => {
     await untriggerPredictionById.run({ prediction_id }, dbClient);
     return null;
   },
-  retireById: (dbClient: any) => async (prediction_id: number) => {
+  retireById: (dbClient: PoolClient) => async (prediction_id: number) => {
     await retirePredictionById.run({ prediction_id }, dbClient);
     return null;
   },
+  create:
+    (dbClient: PoolClient) =>
+    async (
+      params:
+        | {
+            user_id: string;
+            text: string;
+            created_date: Date;
+            driver: "date";
+            due_date: Date;
+          }
+        | {
+            user_id: string;
+            text: string;
+            created_date: Date;
+            driver: "event";
+            check_date: Date;
+          }
+    ) => {
+      await dbClient.query("BEGIN");
+
+      let result;
+      if (params.driver === "event") {
+        const { user_id, text, created_date, check_date } = params;
+        const [insertResult] = await insertEventDrivenPrediction.run(
+          {
+            user_id,
+            text,
+            created_date,
+            check_date,
+          },
+          dbClient
+        );
+        result = insertResult;
+      } else {
+        const { user_id, text, created_date, due_date } = params;
+        const [insertResult] = await insertDateDrivenPrediction.run(
+          {
+            user_id,
+            text,
+            created_date,
+            due_date,
+          },
+          dbClient
+        );
+        result = insertResult;
+      }
+
+      if (!result) {
+        throw new Error(`Failed to insert ${params.driver}-driven prediction`);
+      }
+
+      // Automatically endorse own prediction
+      await addBet.run(
+        {
+          user_id: params.user_id,
+          prediction_id: result.id,
+          endorsed: true,
+          date: params.created_date,
+        },
+        dbClient
+      );
+
+      await dbClient.query("COMMIT");
+
+      return result.id;
+    },
 };

@@ -2,13 +2,52 @@ import { z } from "zod";
 import { POSTGRES_MAX_INT } from "./constants";
 
 /**
+ * Schema for validating Discord IDs.
+ * Validates that a value is a non-empty string that is at least 17 characters long and a numeric string.
+ */
+export const discordIdSchema = z
+  .any()
+  .refine((val) => val !== undefined && val !== null && val !== "", {
+    message: "discord_id is required",
+  })
+  .pipe(
+    z
+      .string({
+        message: "discord_id must be a string",
+      })
+      .min(17, "discord_id must be at least 17 characters")
+      .regex(/^[0-9]+$/, "discord_id must be a numeric string")
+  );
+
+/**
+ * Schema for validating future dates.
+ * Validates that a value is a non-empty date that is in the future.
+ */
+export const createFutureDateSchema = ({ fieldName }: { fieldName: string }) =>
+  z
+    .any()
+    .refine((val) => val !== undefined && val !== null && val !== "", {
+      message: `${fieldName} is required`,
+    })
+    .pipe(
+      z.iso
+        .datetime({
+          message: `${fieldName} must be a valid ISO 8601 datetime string`,
+        })
+        .transform((s) => new Date(s))
+        .refine((d: Date) => d.getTime() > Date.now(), {
+          message: `${fieldName} must be in the future`,
+        })
+    );
+
+/**
  * Creates a schema for validating Postgres INT type values with custom field name.
  * Validates that a value is a positive integer within Postgres INT range.
  *
  * @param fieldName - The name of the field being validated (used in error messages)
  * @returns A Zod schema for Postgres INT validation
  */
-function createPostgresIntSchema(fieldName: string = "Value") {
+function createPostgresIntSchema(fieldName: string) {
   return z
     .any()
     .transform((value, ctx) => {

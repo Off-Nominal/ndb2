@@ -12,7 +12,8 @@
     "test:watch": "vitest --watch",
     "test:run": "vitest --run",
     "db:create": "dbmate new",
-    "db:migrate": "dbmate up",
+    "db:migrate": "dotenv -e .env.dev -- dbmate up",
+    "db:dump": "dotenv -e .env.dev -- dbmate dump",
     "test:db:seed": "pnpm run clear && pnpm run build && node --env-file=.env.test ./dist/reset-db.js",
     "test:db:start": "./scripts/start-db.sh test",
     "test:db:stop": "./scripts/stop-db.sh test",
@@ -33,6 +34,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.15.3",
+    "dotenv-cli": "^8.0.0",
     "typescript": "^5.8.3",
     "vitest": "^4.0.8"
   }

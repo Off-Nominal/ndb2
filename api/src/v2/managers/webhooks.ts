@@ -60,3 +60,7 @@ eventsManager.on("untriggered_prediction", (prediction) => {
 eventsManager.on("retired_prediction", (prediction) => {
   notifySubscribers(generateResponse("retired_prediction", { prediction }));
 });
+
+eventsManager.on("new_prediction", (prediction) => {
+  notifySubscribers(generateResponse("new_prediction", { prediction }));
+});
