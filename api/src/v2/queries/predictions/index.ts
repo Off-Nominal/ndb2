@@ -138,48 +138,56 @@ export default {
       driver: prediction_driver;
       date: Date;
     }): Promise<number> => {
-      await dbClient.query("BEGIN");
+      let prediction_id: number | undefined;
 
-      const { user_id, text, created_date, date } = params;
+      try {
+        await dbClient.query("BEGIN");
 
-      let prediction_id: number;
-      if (params.driver === "event") {
-        const [insertResult] = await insertEventDrivenPrediction.run(
-          {
-            user_id,
-            text,
-            created_date,
-            check_date: date,
-          },
-          dbClient
-        );
-        prediction_id = insertResult.id;
-      } else {
-        const [insertResult] = await insertDateDrivenPrediction.run(
-          {
-            user_id,
-            text,
-            created_date,
-            due_date: date,
-          },
-          dbClient
-        );
-        prediction_id = insertResult.id;
+        const { user_id, text, created_date, date } = params;
+
+        if (params.driver === "event") {
+          const [insertResult] = await insertEventDrivenPrediction.run(
+            {
+              user_id,
+              text,
+              created_date,
+              check_date: date,
+            },
+            dbClient
+          );
+          prediction_id = insertResult.id;
+        } else {
+          const [insertResult] = await insertDateDrivenPrediction.run(
+            {
+              user_id,
+              text,
+              created_date,
+              due_date: date,
+            },
+            dbClient
+          );
+          prediction_id = insertResult.id;
+        }
+
+        if (!prediction_id) {
+          throw new Error(
+            `Failed to insert ${params.driver}-driven prediction`
+          );
+        }
+
+        // Automatically endorse own prediction
+        await betsQueries.add(dbClient)({
+          user_id: params.user_id,
+          prediction_id: prediction_id,
+          endorsed: true,
+          date: params.created_date,
+        });
+
+        await dbClient.query("COMMIT");
+      } catch (error) {
+        await dbClient.query("ROLLBACK");
+        throw error;
       }
-
-      if (!prediction_id) {
-        throw new Error(`Failed to insert ${params.driver}-driven prediction`);
-      }
-
-      // Automatically endorse own prediction
-      await betsQueries.add(dbClient)({
-        user_id: params.user_id,
-        prediction_id: prediction_id,
-        endorsed: true,
-        date: params.created_date,
-      });
-
-      await dbClient.query("COMMIT");
 
       return prediction_id;
     },
