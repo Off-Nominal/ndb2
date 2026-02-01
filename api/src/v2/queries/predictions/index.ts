@@ -4,6 +4,7 @@ import { getVotesByPredictionId } from "../votes/votes.queries";
 import {
   getPredictionsById,
   retirePredictionById,
+  unjudgePredictionById,
   untriggerPredictionById,
 } from "./predictions.queries";
 import * as API from "@offnominal/ndb2-api-types/v2";
@@ -114,6 +115,10 @@ export default {
     },
   untriggerById: (dbClient: any) => async (prediction_id: number) => {
     await untriggerPredictionById.run({ prediction_id }, dbClient);
+    return null;
+  },
+  unjudgeById: (dbClient: any) => async (prediction_id: number) => {
+    await unjudgePredictionById.run({ prediction_id }, dbClient);
     return null;
   },
   retireById: (dbClient: any) => async (prediction_id: number) => {
