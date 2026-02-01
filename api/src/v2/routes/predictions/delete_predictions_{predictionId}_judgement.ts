@@ -39,7 +39,10 @@ export const unjudgePredictionById: Route = (router: Router) => {
       }
 
       // Check if prediction is judged
-      if (prediction.status !== "successful" && prediction.status !== "failed") {
+      if (
+        prediction.status !== "successful" &&
+        prediction.status !== "failed"
+      ) {
         return res.status(400).json(
           responseUtils.writeErrors([
             {
@@ -51,11 +54,8 @@ export const unjudgePredictionById: Route = (router: Router) => {
       }
 
       if (prediction.season_id !== null) {
-        const allSeasons = await seasons.getAll(dbClient)();
-        const predictionSeason = allSeasons.find(
-          (season) => season.id === prediction.season_id
-        );
-        if (predictionSeason?.closed) {
+        const season = await seasons.getById(dbClient)(prediction.season_id);
+        if (season.closed) {
           return res.status(400).json(
             responseUtils.writeErrors([
               {
