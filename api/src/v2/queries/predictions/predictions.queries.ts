@@ -104,6 +104,40 @@ const untriggerPredictionByIdIR: any = {"usedParamSet":{"prediction_id":true},"p
 export const untriggerPredictionById = new PreparedQuery<IUntriggerPredictionByIdParams,IUntriggerPredictionByIdResult>(untriggerPredictionByIdIR);
 
 
+/** 'UnjudgePredictionById' parameters type */
+export interface IUnjudgePredictionByIdParams {
+  prediction_id: number;
+}
+
+/** 'UnjudgePredictionById' return type */
+export type IUnjudgePredictionByIdResult = void;
+
+/** 'UnjudgePredictionById' query type */
+export interface IUnjudgePredictionByIdQuery {
+  params: IUnjudgePredictionByIdParams;
+  result: IUnjudgePredictionByIdResult;
+}
+
+const unjudgePredictionByIdIR: any = {"usedParamSet":{"prediction_id":true},"params":[{"name":"prediction_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":66,"b":80},{"a":209,"b":223}]}],"statement":"WITH deleted_votes AS (\n  DELETE FROM votes WHERE prediction_id = :prediction_id!\n)\nUPDATE predictions\nSET\n  judged_date = NULL,\n  closed_date = NULL,\n  triggered_date = NULL,\n  triggerer_id = NULL\nWHERE id = :prediction_id!"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * WITH deleted_votes AS (
+ *   DELETE FROM votes WHERE prediction_id = :prediction_id!
+ * )
+ * UPDATE predictions
+ * SET
+ *   judged_date = NULL,
+ *   closed_date = NULL,
+ *   triggered_date = NULL,
+ *   triggerer_id = NULL
+ * WHERE id = :prediction_id!
+ * ```
+ */
+export const unjudgePredictionById = new PreparedQuery<IUnjudgePredictionByIdParams,IUnjudgePredictionByIdResult>(unjudgePredictionByIdIR);
+
+
 /** 'RetirePredictionById' parameters type */
 export interface IRetirePredictionByIdParams {
   prediction_id: number;
