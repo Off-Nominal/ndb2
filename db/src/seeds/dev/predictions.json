@@ -58,5 +58,65 @@
       }
     ],
     "checks": []
+  },
+  {
+    "id": 2,
+    "user_id": "d851996f-ffa3-425e-bcbd-b1efd6c5b7c8",
+    "text": "A successful prediction in the current season",
+    "driver": "date",
+    "baseDate": {
+      "quarter": "current",
+      "days": 10
+    },
+    "due": {
+      "days": 4
+    },
+    "closed": {
+      "days": 4
+    },
+    "triggered": {
+      "days": 4,
+      "minutes": 30
+    },
+    "judged": {
+      "days": 5,
+      "minutes": 0
+    },
+    "bets": [
+      {
+        "user_id": "d5c87550-0bcf-4213-9ed3-9a716682ef2b",
+        "created": {
+          "days": 0
+        },
+        "endorsed": true
+      },
+      {
+        "user_id": "28ac07b4-3238-4f60-958c-fce7284e931b",
+        "created": {
+          "days": 0,
+          "minutes": 10
+        },
+        "endorsed": true
+      }
+    ],
+    "votes": [
+      {
+        "user_id": "d5c87550-0bcf-4213-9ed3-9a716682ef2b",
+        "voted": {
+          "days": 0,
+          "minutes": 25
+        },
+        "vote": true
+      },
+      {
+        "user_id": "28ac07b4-3238-4f60-958c-fce7284e931b",
+        "voted": {
+          "days": 0,
+          "minutes": 30
+        },
+        "vote": true
+      }
+    ],
+    "checks": []
   }
 ]
