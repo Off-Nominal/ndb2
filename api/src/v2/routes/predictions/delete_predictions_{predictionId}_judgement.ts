@@ -3,6 +3,7 @@ import { z } from "zod";
 import { predictionIdSchema } from "../../validations";
 import { Route } from "../../utils/routerMap";
 import predictions from "../../queries/predictions";
+import seasons from "../../queries/seasons";
 import responseUtils from "../../utils/response";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { validate } from "../../middleware/validate";
@@ -47,6 +48,23 @@ export const unjudgePredictionById: Route = (router: Router) => {
             },
           ])
         );
+      }
+
+      if (prediction.season_id !== null) {
+        const allSeasons = await seasons.getAll(dbClient)();
+        const predictionSeason = allSeasons.find(
+          (season) => season.id === prediction.season_id
+        );
+        if (predictionSeason?.closed) {
+          return res.status(400).json(
+            responseUtils.writeErrors([
+              {
+                code: API.Errors.INVALID_PREDICTION_STATUS,
+                message: "Predictions in closed seasons cannot be unjudged.",
+              },
+            ])
+          );
+        }
       }
 
       // Unjudge prediction
