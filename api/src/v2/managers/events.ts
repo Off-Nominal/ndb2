@@ -2,6 +2,9 @@ import { TypedEventEmitter } from "@mendahu/utilities";
 import * as API from "@offnominal/ndb2-api-types/v2";
 
 export interface NDBEvents {
+  unjudged_prediction: (
+    prediction: API.Entities.Predictions.Prediction
+  ) => void;
   untriggered_prediction: (
     prediction: API.Entities.Predictions.Prediction
   ) => void;

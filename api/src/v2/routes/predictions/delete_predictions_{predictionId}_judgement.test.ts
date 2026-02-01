@@ -3,6 +3,8 @@ import express from "express";
 import request from "supertest";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { useDbTransactionMock } from "../../../test/db-transaction-mock";
+import { vi } from "vitest";
+import { eventsManager } from "../../managers/events";
 
 // Enable transaction wrapping for all tests in this file
 useDbTransactionMock();
@@ -118,5 +120,39 @@ describe("DELETE /predictions/:prediction_id/judgement", () => {
     expect(response.body.data.triggered_date).toBeNull();
     expect(response.body.data.triggerer).toBeNull();
     expect(response.body.data.votes).toHaveLength(0);
+  });
+
+  it("should emit 'unjudged_prediction' event with correct prediction data", async () => {
+    // Spy on the eventsManager.emit method
+    const emitSpy = vi.spyOn(eventsManager, "emit");
+
+    // Use seeded prediction with ID 9 (failed status)
+    const response = await request(app).delete("/9/judgement");
+
+    // Verify the request was successful
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("data");
+    expect(response.body.data).toHaveProperty("id", 9);
+
+    // Verify the event emitter was called with the correct event name
+    expect(emitSpy).toHaveBeenCalledTimes(1);
+    expect(emitSpy).toHaveBeenCalledWith(
+      "unjudged_prediction",
+      expect.objectContaining({
+        id: 9,
+      })
+    );
+
+    // Verify the prediction passed to the event has the expected structure
+    const emitCall = emitSpy.mock.calls[0];
+    expect(emitCall[0]).toBe("unjudged_prediction");
+    const emittedPrediction =
+      emitCall[1] as API.Entities.Predictions.Prediction;
+    expect(emittedPrediction).toHaveProperty("id", 9);
+    expect(emittedPrediction).toHaveProperty("text");
+    expect(emittedPrediction).toHaveProperty("status");
+
+    // Clean up
+    emitSpy.mockRestore();
   });
 });
