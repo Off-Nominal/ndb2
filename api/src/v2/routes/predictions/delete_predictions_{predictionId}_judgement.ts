@@ -55,6 +55,11 @@ export const unjudgePredictionById: Route = (router: Router) => {
 
       if (prediction.season_id !== null) {
         const season = await seasons.getById(dbClient)(prediction.season_id);
+
+        if (!season) {
+          throw new Error("Season not found");
+        }
+
         if (season.closed) {
           return res.status(400).json(
             responseUtils.writeErrors([
