@@ -15,7 +15,8 @@
     "test:db:seed": "NODE_ENV=test pnpm --filter ndb2-db test:db:seed",
     "dev:db:start": "pnpm --filter db dev:db:start",
     "dev:db:stop": "pnpm --filter db dev:db:stop",
-    "dev:db:seed": "NODE_ENV=dev pnpm --filter ndb2-db dev:db:seed"
+    "dev:db:seed": "NODE_ENV=dev pnpm --filter ndb2-db dev:db:seed",
+    "db:migrate": "pnpm --filter ndb2-db db:migrate"
   },
   "bugs": {
     "url": "https://github.com/mendahu/ndb2/issues"

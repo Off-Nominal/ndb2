@@ -9,9 +9,9 @@ if (missionControlWebhookEndpointV2) {
   subscribers.push(missionControlWebhookEndpointV2);
 }
 
-const generateResponse = <P extends API.Webhooks.Payload>(
+export const generateResponse = <P extends API.Webhooks.Payload>(
   event_name: P["event_name"],
-  data: P["data"]
+  data: P["data"],
 ): API.Webhooks.Payload => {
   const response: API.Webhooks.Payload = {
     event_name,
@@ -23,12 +23,13 @@ const generateResponse = <P extends API.Webhooks.Payload>(
   return response;
 };
 
-const notifySubscribers = <E extends API.Webhooks.WebhookEvent, D>(
-  data: API.Webhooks.BasePayload<E, D>
+export const notifySubscribers = <E extends API.Webhooks.WebhookEvent, D>(
+  subscriberUrls: readonly string[],
+  data: API.Webhooks.BasePayload<E, D>,
 ) => {
   const requests = [];
 
-  for (const sub of subscribers) {
+  for (const sub of subscriberUrls) {
     const request: RequestInit = {
       method: "POST",
       body: JSON.stringify(data),
@@ -54,13 +55,26 @@ const notifySubscribers = <E extends API.Webhooks.WebhookEvent, D>(
 };
 
 eventsManager.on("untriggered_prediction", (prediction) => {
-  notifySubscribers(generateResponse("untriggered_prediction", { prediction }));
+  notifySubscribers(
+    subscribers,
+    generateResponse("untriggered_prediction", { prediction }),
+  );
 });
 
 eventsManager.on("unjudged_prediction", (prediction) => {
-  notifySubscribers(generateResponse("unjudged_prediction", { prediction }));
+  notifySubscribers(
+    subscribers,
+    generateResponse("unjudged_prediction", { prediction }),
+  );
 });
 
 eventsManager.on("retired_prediction", (prediction) => {
-  notifySubscribers(generateResponse("retired_prediction", { prediction }));
+  notifySubscribers(
+    subscribers,
+    generateResponse("retired_prediction", { prediction }),
+  );
+});
+
+eventsManager.on("new_prediction", (prediction) => {
+  notifySubscribers(subscribers, generateResponse("new_prediction", { prediction }));
 });

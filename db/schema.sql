@@ -844,6 +844,13 @@ ALTER TABLE ONLY public.snooze_checks ALTER COLUMN id SET DEFAULT nextval('publi
 
 
 --
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT gen_random_uuid();
+
+
+--
 -- Name: votes id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1141,4 +1148,5 @@ ALTER TABLE ONLY public.votes
 
 INSERT INTO public.schema_migrations (version) VALUES
     ('20250507173754'),
-    ('20250507191843');
+    ('20250507191843'),
+    ('20251120094857');

@@ -5,9 +5,7 @@ import { MonitorConfig, MonitorLog } from "../classes/PredictionMonitor";
 import snoozes from "../db/queries/snoozes";
 import pool from "../db/index";
 
-const getPoolClient = (
-  callback: (client: PoolClient) => Promise<any>
-): Promise<void> => {
+const getPoolClient = (callback: (client: PoolClient) => Promise<void>) => {
   return pool
     .connect()
     .then((client) => callback(client).finally(() => client.release()));
@@ -30,7 +28,7 @@ export const monitors: MonitorConfig[] = [
               .closePredictionById(client)(
                 pred.id,
                 null,
-                new Date(pred.due_date)
+                new Date(pred.due_date),
               )
               .then(() => predictions.getPredictionById(client)(pred.id))
               .then((prediction) => {
@@ -85,13 +83,13 @@ export const monitors: MonitorConfig[] = [
             }
 
             log(
-              `Snoozing unactioned Snooze Check with id ${check.id} for 1 day`
+              `Snoozing unactioned Snooze Check with id ${check.id} for 1 day`,
             );
 
             return snoozes
               .deferSnoozeCheckById(client)(check.id)
               .then(() =>
-                predictions.getPredictionById(client)(check.prediction_id)
+                predictions.getPredictionById(client)(check.prediction_id),
               )
               .then((prediction) => {
                 if (!prediction) {

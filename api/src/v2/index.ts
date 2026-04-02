@@ -4,6 +4,7 @@ import { getPredictionById } from "./routes/predictions/get_predictions_{predict
 import { untriggerPredictionById } from "./routes/predictions/delete_predictions_{predictionId}_trigger";
 import { unjudgePredictionById } from "./routes/predictions/delete_predictions_{predictionId}_judgement";
 import { retirePredictionById } from "./routes/predictions/patch_predictions_{predictionId}_retire";
+import { createPrediction } from "./routes/predictions/post_predictions";
 import { mapRoutes } from "./utils/routerMap";
 import { errorHandler } from "./middleware/errorHandler";
 import "./managers/webhooks"; // Initialize webhook event listeners
@@ -14,11 +15,12 @@ apiV2Router.use("/seasons", mapRoutes([getAllSeasons]));
 apiV2Router.use(
   "/predictions",
   mapRoutes([
+    createPrediction,
     getPredictionById,
     untriggerPredictionById,
     unjudgePredictionById,
     retirePredictionById,
-  ])
+  ]),
 );
 
 // Error handling middleware - must be last

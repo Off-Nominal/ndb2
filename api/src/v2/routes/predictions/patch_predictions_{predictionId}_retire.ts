@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { add, isAfter } from "date-fns";
-import { predictionIdSchema } from "../../validations";
+import { discordIdSchema, predictionIdSchema } from "../../validations";
 import { Route } from "../../utils/routerMap";
 import predictions from "../../queries/predictions";
 import responseUtils from "../../utils/response";
@@ -19,7 +19,7 @@ export const retirePredictionById: Route = (router: Router) => {
         prediction_id: predictionIdSchema,
       }),
       body: z.object({
-        discord_id: z.string(),
+        discord_id: discordIdSchema,
       }),
     }),
     async (req, res) => {

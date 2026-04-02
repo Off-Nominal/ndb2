@@ -8,14 +8,14 @@ import * as API from "@offnominal/ndb2-api-types/v2";
 type ValidatorRequest<T> = T extends (
   req: infer R,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => void
   ? R
   : never;
 
 // Helper function to create a properly typed mock request
 function createMockRequest<
-  T extends (req: any, res: Response, next: NextFunction) => void
+  T extends (req: any, res: Response, next: NextFunction) => void,
 >(validator: T): ValidatorRequest<T> {
   return {
     params: {},
@@ -103,7 +103,7 @@ describe("validate middleware", () => {
   describe("query validation", () => {
     it("should pass validation when query matches schema", () => {
       const validator = validate({
-        query: z.object({ limit: z.coerce.number().optional() }),
+        query: z.object({ limit: z.string().optional() }),
       });
 
       const mockReq = createMockRequest(validator);
@@ -122,7 +122,7 @@ describe("validate middleware", () => {
       });
 
       const mockReq = createMockRequest(validator);
-      mockReq.query = { limit: "not-a-number" };
+      mockReq.query = { limit: "not-a-number" as unknown as number };
 
       validator(mockReq, mockRes as Response, mockNext);
 
@@ -132,7 +132,7 @@ describe("validate middleware", () => {
 
       const responseBody = jsonSpy.mock.calls[0][0];
       expect(responseBody.errors[0].code).toBe(
-        API.Errors.MALFORMED_QUERY_PARAMS
+        API.Errors.MALFORMED_QUERY_PARAMS,
       );
     });
 
@@ -188,11 +188,14 @@ describe("validate middleware", () => {
 
     it("should return 400 when required body fields are missing", () => {
       const validator = validate({
-        body: z.object({ name: z.string(), email: z.string().email() }),
+        body: z.object({ name: z.string(), email: z.email() }),
       });
 
       const mockReq = createMockRequest(validator);
-      mockReq.body = { name: "John Doe" }; // Missing email
+      mockReq.body = { name: "John Doe" } as unknown as {
+        name: string;
+        email: string;
+      }; // Missing email
 
       validator(mockReq, mockRes as Response, mockNext);
 
@@ -248,7 +251,7 @@ describe("validate middleware", () => {
 
       // Check that all three error types are present
       const errorCodes = responseBody.errors.map(
-        (err: API.Utils.ErrorInfo) => err.code
+        (err: API.Utils.ErrorInfo) => err.code,
       );
       expect(errorCodes).toContain(API.Errors.MALFORMED_URL_PARAMS);
       expect(errorCodes).toContain(API.Errors.MALFORMED_QUERY_PARAMS);
@@ -299,7 +302,7 @@ describe("validate middleware", () => {
       const responseBody = jsonSpy.mock.calls[0][0];
       expect(responseBody.errors).toHaveLength(1);
       expect(responseBody.errors[0].code).toBe(
-        API.Errors.MALFORMED_QUERY_PARAMS
+        API.Errors.MALFORMED_QUERY_PARAMS,
       );
     });
 
@@ -351,7 +354,7 @@ describe("validate middleware", () => {
       expect(responseBody.errors).toHaveLength(2);
 
       const errorCodes = responseBody.errors.map(
-        (err: API.Utils.ErrorInfo) => err.code
+        (err: API.Utils.ErrorInfo) => err.code,
       );
       expect(errorCodes).toContain(API.Errors.MALFORMED_URL_PARAMS);
       expect(errorCodes).toContain(API.Errors.MALFORMED_QUERY_PARAMS);
@@ -380,7 +383,7 @@ describe("validate middleware", () => {
       expect(responseBody.errors).toHaveLength(2);
 
       const errorCodes = responseBody.errors.map(
-        (err: API.Utils.ErrorInfo) => err.code
+        (err: API.Utils.ErrorInfo) => err.code,
       );
       expect(errorCodes).toContain(API.Errors.MALFORMED_QUERY_PARAMS);
       expect(errorCodes).toContain(API.Errors.MALFORMED_BODY_DATA);
@@ -409,11 +412,64 @@ describe("validate middleware", () => {
       expect(responseBody.errors).toHaveLength(2);
 
       const errorCodes = responseBody.errors.map(
-        (err: API.Utils.ErrorInfo) => err.code
+        (err: API.Utils.ErrorInfo) => err.code,
       );
       expect(errorCodes).toContain(API.Errors.MALFORMED_URL_PARAMS);
       expect(errorCodes).toContain(API.Errors.MALFORMED_BODY_DATA);
       expect(errorCodes).not.toContain(API.Errors.MALFORMED_QUERY_PARAMS);
+    });
+  });
+
+  describe("schema output (transforms and coercion)", () => {
+    it("should assign parsed body so transforms apply", () => {
+      const validator = validate({
+        body: z.object({
+          at: z.iso.datetime().pipe(z.coerce.date()),
+        }),
+      });
+
+      const mockReq = createMockRequest(validator);
+      (mockReq.body as Record<string, unknown>) = {
+        at: "2024-06-01T12:00:00.000Z",
+      };
+
+      validator(mockReq, mockRes as Response, mockNext);
+
+      expect(mockNext).toHaveBeenCalledTimes(1);
+      expect(mockReq.body.at).toBeInstanceOf(Date);
+      expect((mockReq.body.at as Date).toISOString()).toBe(
+        "2024-06-01T12:00:00.000Z",
+      );
+    });
+
+    it("should assign parsed query so coercion applies", () => {
+      const validator = validate({
+        query: z.object({ limit: z.coerce.number() }),
+      });
+
+      const mockReq = createMockRequest(validator);
+      mockReq.query = { limit: "25" as unknown as number };
+
+      validator(mockReq, mockRes as Response, mockNext);
+
+      expect(mockNext).toHaveBeenCalledTimes(1);
+      expect(mockReq.query.limit).toBe(25);
+    });
+
+    it("should assign parsed params so transforms apply", () => {
+      const validator = validate({
+        params: z.object({
+          id: z.string().transform((s) => s.trim()),
+        }),
+      });
+
+      const mockReq = createMockRequest(validator);
+      mockReq.params = { id: "  abc  " };
+
+      validator(mockReq, mockRes as Response, mockNext);
+
+      expect(mockNext).toHaveBeenCalledTimes(1);
+      expect(mockReq.params.id).toBe("abc");
     });
   });
 });
