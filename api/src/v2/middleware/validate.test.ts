@@ -8,14 +8,14 @@ import * as API from "@offnominal/ndb2-api-types/v2";
 type ValidatorRequest<T> = T extends (
   req: infer R,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => void
   ? R
   : never;
 
 // Helper function to create a properly typed mock request
 function createMockRequest<
-  T extends (req: any, res: Response, next: NextFunction) => void
+  T extends (req: any, res: Response, next: NextFunction) => void,
 >(validator: T): ValidatorRequest<T> {
   return {
     params: {},
@@ -132,7 +132,7 @@ describe("validate middleware", () => {
 
       const responseBody = jsonSpy.mock.calls[0][0];
       expect(responseBody.errors[0].code).toBe(
-        API.Errors.MALFORMED_QUERY_PARAMS
+        API.Errors.MALFORMED_QUERY_PARAMS,
       );
     });
 
@@ -251,7 +251,7 @@ describe("validate middleware", () => {
 
       // Check that all three error types are present
       const errorCodes = responseBody.errors.map(
-        (err: API.Utils.ErrorInfo) => err.code
+        (err: API.Utils.ErrorInfo) => err.code,
       );
       expect(errorCodes).toContain(API.Errors.MALFORMED_URL_PARAMS);
       expect(errorCodes).toContain(API.Errors.MALFORMED_QUERY_PARAMS);
@@ -302,7 +302,7 @@ describe("validate middleware", () => {
       const responseBody = jsonSpy.mock.calls[0][0];
       expect(responseBody.errors).toHaveLength(1);
       expect(responseBody.errors[0].code).toBe(
-        API.Errors.MALFORMED_QUERY_PARAMS
+        API.Errors.MALFORMED_QUERY_PARAMS,
       );
     });
 
@@ -354,7 +354,7 @@ describe("validate middleware", () => {
       expect(responseBody.errors).toHaveLength(2);
 
       const errorCodes = responseBody.errors.map(
-        (err: API.Utils.ErrorInfo) => err.code
+        (err: API.Utils.ErrorInfo) => err.code,
       );
       expect(errorCodes).toContain(API.Errors.MALFORMED_URL_PARAMS);
       expect(errorCodes).toContain(API.Errors.MALFORMED_QUERY_PARAMS);
@@ -383,7 +383,7 @@ describe("validate middleware", () => {
       expect(responseBody.errors).toHaveLength(2);
 
       const errorCodes = responseBody.errors.map(
-        (err: API.Utils.ErrorInfo) => err.code
+        (err: API.Utils.ErrorInfo) => err.code,
       );
       expect(errorCodes).toContain(API.Errors.MALFORMED_QUERY_PARAMS);
       expect(errorCodes).toContain(API.Errors.MALFORMED_BODY_DATA);
@@ -412,7 +412,7 @@ describe("validate middleware", () => {
       expect(responseBody.errors).toHaveLength(2);
 
       const errorCodes = responseBody.errors.map(
-        (err: API.Utils.ErrorInfo) => err.code
+        (err: API.Utils.ErrorInfo) => err.code,
       );
       expect(errorCodes).toContain(API.Errors.MALFORMED_URL_PARAMS);
       expect(errorCodes).toContain(API.Errors.MALFORMED_BODY_DATA);

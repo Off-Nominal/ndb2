@@ -122,7 +122,7 @@ export default {
     await retirePredictionById.run({ prediction_id }, dbClient);
     return null;
   },
-  unjudgeById: (dbClient: any) => async (prediction_id: number) => {
+  unjudgeById: (dbClient: PoolClient) => async (prediction_id: number) => {
     await unjudgePredictionById.run({ prediction_id }, dbClient);
     return null;
   },

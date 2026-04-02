@@ -1,7 +1,8 @@
+import { PoolClient } from "pg";
 import { addUser, getUserByDiscordId } from "./users.queries";
 
 export default {
-  getByDiscordId: (dbClient: any) => async (discord_id: string) => {
+  getByDiscordId: (dbClient: PoolClient) => async (discord_id: string) => {
     const [existingUser] = await getUserByDiscordId.run(
       { discord_id },
       dbClient,

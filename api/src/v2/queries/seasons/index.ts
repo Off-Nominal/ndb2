@@ -1,6 +1,7 @@
 import { isBefore } from "date-fns";
 import { getAllSeasons, getSeasonById } from "./seasons.queries";
 import * as API from "@offnominal/ndb2-api-types/v2";
+import { PoolClient } from "pg";
 
 const getIdentifier = (
   start: Date,
@@ -19,7 +20,7 @@ const getIdentifier = (
 };
 
 export default {
-  getAll: (dbClient: any) => async () => {
+  getAll: (dbClient: PoolClient) => async () => {
     const result = await getAllSeasons.run(undefined, dbClient);
 
     const seasons = result.map((season) => ({
@@ -31,7 +32,7 @@ export default {
 
     return seasons;
   },
-  getById: (dbClient: any) => async (id: number) => {
+  getById: (dbClient: PoolClient) => async (id: number) => {
     const result = await getSeasonById.run({ id }, dbClient);
     const season = result[0];
 

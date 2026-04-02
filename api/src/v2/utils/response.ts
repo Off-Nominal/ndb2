@@ -7,7 +7,7 @@ export default {
    * @returns ErrorResponse object
    */
   writeErrors: function (
-    errors: API.Utils.ErrorInfo[]
+    errors: API.Utils.ErrorInfo[],
   ): API.Utils.ErrorResponse {
     return {
       success: false,
@@ -22,9 +22,9 @@ export default {
    * @param message - Optional success message
    * @returns SuccessResponse object
    */
-  writeSuccess: function <T extends any>(
-    data: any,
-    message?: string
+  writeSuccess: function <T extends unknown>(
+    data: T,
+    message?: string,
   ): API.Utils.SuccessResponse<T> {
     return {
       success: true,
