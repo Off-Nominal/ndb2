@@ -11,6 +11,7 @@ import {
   discordIdSchema,
   queryParamMulti,
   queryParamScalar,
+  optionalTrimmedStringSchema,
   seasonIdSchema,
 } from "../../validations";
 
@@ -27,7 +28,7 @@ import {
  * |-------|------|
  * | `status` | Optional. One or more lifecycle values; repeat the key or pass one value. Drives SQL `statuses` filter when non-empty. |
  * | `sort_by` | Optional. Single sort key; if the key is repeated, only the **first** value is used. |
- * | `keyword` | Optional. Substring / trigram search term. |
+ * | `keyword` | Optional. Full-text + trigram search: lexical match (`tsvector`) or similarity (`%`), ranked by `ts_rank_cd` then trigram distance. |
  * | `creator` | Optional. Predictor filter: Discord snowflake (`discordIdSchema`). Resolved to internal user id; unknown id → 404 `USER_NOT_FOUND`. |
  * | `unbetter` | Optional. Exclude predictions where this Discord user has a bet (`discordIdSchema`). Same lookup rules as `creator`. |
  * | `season_id` | Optional. Coerced to a Postgres INT (positive, in range). |
@@ -48,7 +49,7 @@ const searchQuerySchema = z
     sort_by: queryParamScalar(
       z.enum(API.Endpoints.Predictions.GET_Search.SORT_BY_VALUES).optional(),
     ),
-    keyword: queryParamScalar(z.string().optional()),
+    keyword: queryParamScalar(optionalTrimmedStringSchema),
     creator: queryParamScalar(discordIdSchema.optional()),
     unbetter: queryParamScalar(discordIdSchema.optional()),
     season_id: queryParamScalar(seasonIdSchema.optional()),

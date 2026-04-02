@@ -39,6 +39,19 @@ export function queryParamMulti<Schema extends z.ZodTypeAny>(schema: Schema) {
 }
 
 /**
+ * Optional string that trims; `undefined`, `""`, or whitespace-only after trim becomes `undefined`.
+ * Use with {@link queryParamScalar} so blank query params behave as omitted.
+ */
+export const optionalTrimmedStringSchema = z
+  .string()
+  .optional()
+  .transform((s) => {
+    if (s === undefined) return undefined;
+    const t = s.trim();
+    return t === "" ? undefined : t;
+  });
+
+/**
  * Interprets query-string booleans: `"true"` → `true`, `"false"` → `false`.
  * Pair with {@link queryParamScalar} for Express `req.query`, and `.optional()` when the param may be omitted.
  */

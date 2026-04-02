@@ -26,10 +26,11 @@ export type PredictionSearchInput = Omit<
 
 export default {
   search: (dbClient: PoolClient) => async (options: PredictionSearchInput) => {
-    const { page, ...params } = options;
+    const { page, keyword, ...params } = options;
     return searchPredictions.run(
       {
         ...params,
+        keyword,
         row_offset: Math.max(0, (page ?? 1) - 1) * 10,
       },
       dbClient,

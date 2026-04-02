@@ -1,6 +1,12 @@
+\restrict dbmate
+
+-- Dumped from database version 16.9
+-- Dumped by pg_dump version 18.3
+
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -8,6 +14,20 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
+
+--
+-- Name: public; Type: SCHEMA; Schema: -; Owner: -
+--
+
+-- *not* creating schema, since initdb creates it
+
+
+--
+-- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON SCHEMA public IS '';
+
 
 --
 -- Name: pg_trgm; Type: EXTENSION; Schema: -; Owner: -
@@ -598,6 +618,7 @@ CREATE TABLE public.predictions (
     driver public.prediction_driver DEFAULT 'date'::public.prediction_driver NOT NULL,
     check_date timestamp with time zone,
     last_check_date timestamp with time zone,
+    search_vector tsvector GENERATED ALWAYS AS (to_tsvector('english'::regconfig, text)) STORED,
     CONSTRAINT predictions_driver_check CHECK (((driver)::text = ANY (ARRAY['event'::text, 'date'::text])))
 );
 
@@ -783,7 +804,7 @@ CREATE TABLE public.snooze_votes (
 --
 
 CREATE TABLE public.users (
-    id uuid NOT NULL,
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
     discord_id character varying NOT NULL
 );
 
@@ -841,13 +862,6 @@ ALTER TABLE ONLY public.seasons ALTER COLUMN id SET DEFAULT nextval('public.seas
 --
 
 ALTER TABLE ONLY public.snooze_checks ALTER COLUMN id SET DEFAULT nextval('public.snooze_checks_id_seq'::regclass);
-
-
---
--- Name: users id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT gen_random_uuid();
 
 
 --
@@ -958,6 +972,27 @@ ALTER TABLE ONLY public.votes
 --
 
 CREATE INDEX bets_prediction_id_idx ON public.bets USING btree (prediction_id);
+
+
+--
+-- Name: predictions_search_vector_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX predictions_search_vector_idx ON public.predictions USING gin (search_vector);
+
+
+--
+-- Name: predictions_text_gist_trgm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX predictions_text_gist_trgm_idx ON public.predictions USING gist (text public.gist_trgm_ops);
+
+
+--
+-- Name: predictions_text_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX predictions_text_idx ON public.predictions USING gist (text public.gist_trgm_ops);
 
 
 --
@@ -1141,6 +1176,8 @@ ALTER TABLE ONLY public.votes
 -- PostgreSQL database dump complete
 --
 
+\unrestrict dbmate
+
 
 --
 -- Dbmate schema migrations
@@ -1149,4 +1186,5 @@ ALTER TABLE ONLY public.votes
 INSERT INTO public.schema_migrations (version) VALUES
     ('20250507173754'),
     ('20250507191843'),
-    ('20251120094857');
+    ('20251120094857'),
+    ('20260402120000');

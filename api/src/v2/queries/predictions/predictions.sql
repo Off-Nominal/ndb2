@@ -82,8 +82,10 @@ INSERT INTO predictions (
 /*
   Dynamic search: optional filters use "param IS NULL OR …" / empty-array checks
   (see https://pgtyped.dev/docs/dynamic-queries). Single nullable sort_by string
-  (first sort only) via CASE expressions; keyword uses optional pg_trgm distance;
-  row_offset is (page - 1) * 10 from the API layer.
+  (first sort only) via CASE expressions. due_date-asc/desc use COALESCE(due_date, check_date)
+  (date-driven vs event-driven rows). When keyword is set: WHERE combines
+  FTS (search_vector @@ plainto_tsquery) OR pg_trgm similarity (%); ORDER BY
+  ts_rank_cd then trigram distance (<->). row_offset is (page - 1) * 10 from the API layer.
 */
 /* @name searchPredictions */
 SELECT
@@ -165,12 +167,18 @@ AND (
     )
   )
 )
+AND (
+  :keyword::text IS NULL
+  OR p.search_vector @@ plainto_tsquery('english', :keyword::text)
+  OR p.text % :keyword::text
+)
 ORDER BY
+  (CASE WHEN :keyword::text IS NULL THEN NULL ELSE ts_rank_cd(p.search_vector, plainto_tsquery('english', :keyword::text)) END) DESC NULLS LAST,
   (CASE WHEN :keyword::text IS NULL THEN NULL ELSE (p.text <-> :keyword::text) END) ASC NULLS LAST,
   ( CASE WHEN :sort_by::text = 'created_date-asc' THEN p.created_date END ) ASC NULLS LAST,
   ( CASE WHEN :sort_by::text = 'created_date-desc' THEN p.created_date END ) DESC NULLS LAST,
-  ( CASE WHEN :sort_by::text = 'due_date-asc' THEN p.due_date END ) ASC NULLS LAST,
-  ( CASE WHEN :sort_by::text = 'due_date-desc' THEN p.due_date END ) DESC NULLS LAST,
+  ( CASE WHEN :sort_by::text = 'due_date-asc' THEN COALESCE(p.due_date, p.check_date) END ) ASC NULLS LAST,
+  ( CASE WHEN :sort_by::text = 'due_date-desc' THEN COALESCE(p.due_date, p.check_date) END ) DESC NULLS LAST,
   ( CASE WHEN :sort_by::text = 'check_date-asc' THEN p.check_date END ) ASC NULLS LAST,
   ( CASE WHEN :sort_by::text = 'check_date-desc' THEN p.check_date END ) DESC NULLS LAST,
   ( CASE WHEN :sort_by::text = 'retired_date-asc' THEN p.retired_date END ) ASC NULLS LAST,

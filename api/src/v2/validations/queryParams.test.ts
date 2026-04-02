@@ -6,6 +6,7 @@ import {
   preprocessQueryStringScalar,
   queryParamMulti,
   queryParamScalar,
+  optionalTrimmedStringSchema,
   seasonIdSchema,
 } from "./index";
 
@@ -66,5 +67,13 @@ describe("queryParamScalar / queryParamMulti", () => {
     expect(s.parse("")).toBeUndefined();
     expect(s.parse("true")).toBe(true);
     expect(s.parse("false")).toBe(false);
+  });
+
+  it("optionalTrimmedStringSchema trims and drops whitespace-only", () => {
+    const s = queryParamScalar(optionalTrimmedStringSchema);
+    expect(s.parse(undefined)).toBeUndefined();
+    expect(s.parse("")).toBeUndefined();
+    expect(s.parse("  mars  ")).toBe("mars");
+    expect(s.parse("   ")).toBeUndefined();
   });
 });
