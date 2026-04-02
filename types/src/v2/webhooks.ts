@@ -58,3 +58,38 @@ export type Payload =
   | Events.TriggeredPrediction
   | Events.RetiredPrediction
   | Events.NewPrediction;
+
+export const isWebhookPayloadV2 = (payload: any): payload is Payload => {
+  if (!payload || typeof payload !== "object") {
+    return false;
+  }
+
+  // Validate event_name against WebhookEvent type
+  if (
+    typeof payload.event_name !== "string" ||
+    !WEBHOOK_EVENTS.includes(payload.event_name as WebhookEvent)
+  ) {
+    return false;
+  }
+
+  // Validate version
+  if (payload.version !== 2) {
+    return false;
+  }
+
+  // Validate date (can be Date object or string that parses to valid date)
+  if (!payload.date) {
+    return false;
+  }
+  const date =
+    payload.date instanceof Date ? payload.date : new Date(payload.date);
+  if (isNaN(date.getTime())) {
+    return false;
+  }
+
+  if (payload.data === undefined) {
+    return false;
+  }
+
+  return true;
+};
