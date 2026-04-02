@@ -4,7 +4,7 @@ import * as API from "@offnominal/ndb2-api-types/v2";
 
 const getIdentifier = (
   start: Date,
-  end: Date
+  end: Date,
 ): API.Entities.Seasons.Identifier => {
   const now = new Date();
   if (isBefore(end, now)) {
@@ -19,34 +19,31 @@ const getIdentifier = (
 };
 
 export default {
-  getAll:
-    (dbClient: any) => async (): Promise<API.Entities.Seasons.Season[]> => {
-      const result = await getAllSeasons.run(undefined, dbClient);
+  getAll: (dbClient: any) => async () => {
+    const result = await getAllSeasons.run(undefined, dbClient);
 
-      const seasons = result.map((season) => ({
-        ...season,
-        start: season.start.toISOString(),
-        end: season.end.toISOString(),
-        identifier: getIdentifier(new Date(season.start), new Date(season.end)),
-      }));
+    const seasons = result.map((season) => ({
+      ...season,
+      start: season.start.toISOString(),
+      end: season.end.toISOString(),
+      identifier: getIdentifier(new Date(season.start), new Date(season.end)),
+    }));
 
-      return seasons;
-    },
-  getById:
-    (dbClient: any) =>
-    async (id: number): Promise<API.Entities.Seasons.Season | null> => {
-      const result = await getSeasonById.run({ id }, dbClient);
-      const season = result[0];
+    return seasons;
+  },
+  getById: (dbClient: any) => async (id: number) => {
+    const result = await getSeasonById.run({ id }, dbClient);
+    const season = result[0];
 
-      if (!season) {
-        return null;
-      }
+    if (!season) {
+      return null;
+    }
 
-      return {
-        ...season,
-        start: season.start.toISOString(),
-        end: season.end.toISOString(),
-        identifier: getIdentifier(new Date(season.start), new Date(season.end)),
-      };
-    },
+    return {
+      ...season,
+      start: season.start.toISOString(),
+      end: season.end.toISOString(),
+      identifier: getIdentifier(new Date(season.start), new Date(season.end)),
+    };
+  },
 };
