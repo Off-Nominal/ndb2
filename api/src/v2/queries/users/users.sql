@@ -4,6 +4,6 @@ SELECT id, discord_id
   WHERE discord_id = :discord_id!;
 
 /* @name addUser */
-INSERT INTO users (discord_id) 
-  VALUES (:discord_id!) 
+INSERT INTO users (discord_id)
+  VALUES (:discord_id!)
   RETURNING id, discord_id;

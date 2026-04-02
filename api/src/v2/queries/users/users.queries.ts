@@ -48,13 +48,13 @@ export interface IAddUserQuery {
   result: IAddUserResult;
 }
 
-const addUserIR: any = {"usedParamSet":{"discord_id":true},"params":[{"name":"discord_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":42,"b":53}]}],"statement":"INSERT INTO users (discord_id) \n  VALUES (:discord_id!) \n  RETURNING id, discord_id"};
+const addUserIR: any = {"usedParamSet":{"discord_id":true},"params":[{"name":"discord_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":41,"b":52}]}],"statement":"INSERT INTO users (discord_id)\n  VALUES (:discord_id!)\n  RETURNING id, discord_id"};
 
 /**
  * Query generated from SQL:
  * ```
- * INSERT INTO users (discord_id) 
- *   VALUES (:discord_id!) 
+ * INSERT INTO users (discord_id)
+ *   VALUES (:discord_id!)
  *   RETURNING id, discord_id
  * ```
  */
