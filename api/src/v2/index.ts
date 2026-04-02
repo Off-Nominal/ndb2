@@ -1,5 +1,6 @@
 import express from "express";
 import { getAllSeasons } from "./routes/seasons/getAll";
+import { getPredictionsSearch } from "./routes/predictions/get_predictions_search";
 import { getPredictionById } from "./routes/predictions/get_predictions_{predictionId}";
 import { untriggerPredictionById } from "./routes/predictions/delete_predictions_{predictionId}_trigger";
 import { unjudgePredictionById } from "./routes/predictions/delete_predictions_{predictionId}_judgement";
@@ -16,6 +17,7 @@ apiV2Router.use(
   "/predictions",
   mapRoutes([
     createPrediction,
+    getPredictionsSearch,
     getPredictionById,
     untriggerPredictionById,
     unjudgePredictionById,

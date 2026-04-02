@@ -21,6 +21,7 @@ export const Errors = {
   MALFORMED_URL_PARAMS: 90003,
 
   // 01 Users
+  USER_NOT_FOUND: 90100,
 
   // 02 Predictions
   PREDICTION_NOT_FOUND: 90200,

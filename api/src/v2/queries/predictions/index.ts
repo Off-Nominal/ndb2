@@ -8,13 +8,33 @@ import {
   insertEventDrivenPrediction,
   prediction_driver,
   retirePredictionById,
+  searchPredictions,
+  type ISearchPredictionsParams,
   unjudgePredictionById,
   untriggerPredictionById,
 } from "./predictions.queries";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import betsQueries from "../bets";
 
+/** Params for {@link searchPredictions}; `page` is turned into `row_offset` here. */
+export type PredictionSearchInput = Omit<
+  ISearchPredictionsParams,
+  "row_offset"
+> & {
+  page?: number;
+};
+
 export default {
+  search: (dbClient: PoolClient) => async (options: PredictionSearchInput) => {
+    const { page, ...params } = options;
+    return searchPredictions.run(
+      {
+        ...params,
+        row_offset: Math.max(0, (page ?? 1) - 1) * 10,
+      },
+      dbClient,
+    );
+  },
   getById: (dbClient: PoolClient) => async (prediction_id: number) => {
     // Queries
     const [predictionResult, betsResult, votesResult, checksResult] =
