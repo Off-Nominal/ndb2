@@ -1,12 +1,59 @@
 export type PredictionDriver = "event" | "date";
 
+export const PREDICTION_LIFECYCLE_VALUES = [
+  "checking",
+  "closed",
+  "failed",
+  "open",
+  "retired",
+  "successful",
+] as const;
+
 export type PredictionLifeCycle =
-  | "checking"
-  | "closed"
-  | "failed"
-  | "open"
-  | "retired"
-  | "successful";
+  (typeof PREDICTION_LIFECYCLE_VALUES)[number];
+
+export type PredictionSearchBetTallies = {
+  endorsements: number;
+  undorsements: number;
+  invalid: number;
+};
+
+export type PredictionSearchVoteTallies = {
+  yes: number;
+  no: number;
+};
+
+/** Prediction row returned by GET /predictions/search (aggregated bets/votes). */
+export type PredictionSearchResult = {
+  id: number;
+  predictor: {
+    id: string;
+    discord_id: string;
+  };
+  text: string;
+  driver: PredictionDriver;
+  season_id: number | null;
+  season_applicable: boolean;
+  created_date: string;
+  due_date: string | null;
+  check_date: string | null;
+  last_check_date: string | null;
+  closed_date: string | null;
+  triggered_date: string | null;
+  triggerer: {
+    id: string;
+    discord_id: string;
+  } | null;
+  judged_date: string | null;
+  retired_date: string | null;
+  status: PredictionLifeCycle;
+  bets: PredictionSearchBetTallies;
+  votes: PredictionSearchVoteTallies;
+  payouts: {
+    endorse: number;
+    undorse: number;
+  };
+};
 
 export type Prediction = {
   id: number;
