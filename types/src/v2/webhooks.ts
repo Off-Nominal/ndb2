@@ -2,6 +2,7 @@ import { Prediction } from "./entities/predictions";
 
 // Single source of truth for webhook events
 const WEBHOOK_EVENTS = [
+  "unjudged_prediction",
   "untriggered_prediction",
   "triggered_prediction",
   "retired_prediction",
@@ -19,6 +20,12 @@ export type BasePayload<E extends WebhookEvent, D> = {
 };
 
 export namespace Events {
+  export type UnjudgedPrediction = BasePayload<
+    "unjudged_prediction",
+    {
+      prediction: Prediction;
+    }
+  >;
   export type UntriggeredPrediction = BasePayload<
     "untriggered_prediction",
     {
@@ -46,6 +53,7 @@ export namespace Events {
 }
 
 export type Payload =
+  | Events.UnjudgedPrediction
   | Events.UntriggeredPrediction
   | Events.TriggeredPrediction
   | Events.RetiredPrediction

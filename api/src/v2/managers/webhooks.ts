@@ -57,6 +57,10 @@ eventsManager.on("untriggered_prediction", (prediction) => {
   notifySubscribers(generateResponse("untriggered_prediction", { prediction }));
 });
 
+eventsManager.on("unjudged_prediction", (prediction) => {
+  notifySubscribers(generateResponse("unjudged_prediction", { prediction }));
+});
+
 eventsManager.on("retired_prediction", (prediction) => {
   notifySubscribers(generateResponse("retired_prediction", { prediction }));
 });

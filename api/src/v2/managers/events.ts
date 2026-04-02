@@ -14,8 +14,11 @@ import * as API from "@offnominal/ndb2-api-types/v2";
  */
 export interface NDBEvents {
   new_prediction: (prediction: API.Entities.Predictions.Prediction) => void;
+  unjudged_prediction: (
+    prediction: API.Entities.Predictions.Prediction,
+  ) => void;
   untriggered_prediction: (
-    prediction: API.Entities.Predictions.Prediction
+    prediction: API.Entities.Predictions.Prediction,
   ) => void;
   retired_prediction: (prediction: API.Entities.Predictions.Prediction) => void;
 }

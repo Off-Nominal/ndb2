@@ -8,6 +8,7 @@ import {
   insertEventDrivenPrediction,
   prediction_driver,
   retirePredictionById,
+  unjudgePredictionById,
   untriggerPredictionById,
 } from "./predictions.queries";
 import * as API from "@offnominal/ndb2-api-types/v2";
@@ -17,7 +18,7 @@ export default {
   getById:
     (dbClient: PoolClient) =>
     async (
-      prediction_id: number
+      prediction_id: number,
     ): Promise<API.Entities.Predictions.Prediction | undefined> => {
       // Queries
       const [predictionResult, betsResult, votesResult, checksResult] =
@@ -129,6 +130,10 @@ export default {
       await retirePredictionById.run({ prediction_id }, dbClient);
       return null;
     },
+  unjudgeById: (dbClient: any) => async (prediction_id: number) => {
+    await unjudgePredictionById.run({ prediction_id }, dbClient);
+    return null;
+  },
   create:
     (dbClient: PoolClient) =>
     async (params: {
@@ -153,7 +158,7 @@ export default {
               created_date,
               check_date: date,
             },
-            dbClient
+            dbClient,
           );
           prediction_id = insertResult.id;
         } else {
@@ -164,14 +169,14 @@ export default {
               created_date,
               due_date: date,
             },
-            dbClient
+            dbClient,
           );
           prediction_id = insertResult.id;
         }
 
         if (!prediction_id) {
           throw new Error(
-            `Failed to insert ${params.driver}-driven prediction`
+            `Failed to insert ${params.driver}-driven prediction`,
           );
         }
 

@@ -1,7 +1,8 @@
 import express from "express";
 import { getAllSeasons } from "./routes/seasons/getAll";
 import { getPredictionById } from "./routes/predictions/get_predictions_{predictionId}";
-import { untriggerPredictionById } from "./routes/predictions/delete_predictions_{predictionId}";
+import { untriggerPredictionById } from "./routes/predictions/delete_predictions_{predictionId}_trigger";
+import { unjudgePredictionById } from "./routes/predictions/delete_predictions_{predictionId}_judgement";
 import { retirePredictionById } from "./routes/predictions/patch_predictions_{predictionId}_retire";
 import { createPrediction } from "./routes/predictions/post_predictions";
 import { mapRoutes } from "./utils/routerMap";
@@ -17,8 +18,9 @@ apiV2Router.use(
     createPrediction,
     getPredictionById,
     untriggerPredictionById,
+    unjudgePredictionById,
     retirePredictionById,
-  ])
+  ]),
 );
 
 // Error handling middleware - must be last
