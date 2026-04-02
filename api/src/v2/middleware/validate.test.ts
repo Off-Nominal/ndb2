@@ -419,4 +419,57 @@ describe("validate middleware", () => {
       expect(errorCodes).not.toContain(API.Errors.MALFORMED_QUERY_PARAMS);
     });
   });
+
+  describe("schema output (transforms and coercion)", () => {
+    it("should assign parsed body so transforms apply", () => {
+      const validator = validate({
+        body: z.object({
+          at: z.iso.datetime().pipe(z.coerce.date()),
+        }),
+      });
+
+      const mockReq = createMockRequest(validator);
+      (mockReq.body as Record<string, unknown>) = {
+        at: "2024-06-01T12:00:00.000Z",
+      };
+
+      validator(mockReq, mockRes as Response, mockNext);
+
+      expect(mockNext).toHaveBeenCalledTimes(1);
+      expect(mockReq.body.at).toBeInstanceOf(Date);
+      expect((mockReq.body.at as Date).toISOString()).toBe(
+        "2024-06-01T12:00:00.000Z",
+      );
+    });
+
+    it("should assign parsed query so coercion applies", () => {
+      const validator = validate({
+        query: z.object({ limit: z.coerce.number() }),
+      });
+
+      const mockReq = createMockRequest(validator);
+      mockReq.query = { limit: "25" as unknown as number };
+
+      validator(mockReq, mockRes as Response, mockNext);
+
+      expect(mockNext).toHaveBeenCalledTimes(1);
+      expect(mockReq.query.limit).toBe(25);
+    });
+
+    it("should assign parsed params so transforms apply", () => {
+      const validator = validate({
+        params: z.object({
+          id: z.string().transform((s) => s.trim()),
+        }),
+      });
+
+      const mockReq = createMockRequest(validator);
+      mockReq.params = { id: "  abc  " };
+
+      validator(mockReq, mockRes as Response, mockNext);
+
+      expect(mockNext).toHaveBeenCalledTimes(1);
+      expect(mockReq.params.id).toBe("abc");
+    });
+  });
 });

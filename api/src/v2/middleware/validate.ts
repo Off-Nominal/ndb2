@@ -74,36 +74,62 @@ export const validate = <
   ) => {
     const errors: API.Utils.ErrorInfo[] = [];
 
-    try {
-      schema.params?.parse(req.params);
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        const errs = handleValidationErrors("params", err.issues);
+    let parsedParams: TParams | undefined;
+    let parsedQuery: TQuery | undefined;
+    let parsedBody: TBody | undefined;
 
-        errors.push(...errs);
+    if (schema.params) {
+      try {
+        parsedParams = schema.params.parse(req.params) as TParams;
+      } catch (err) {
+        if (err instanceof z.ZodError) {
+          const errs = handleValidationErrors("params", err.issues);
+
+          errors.push(...errs);
+        } else {
+          throw err;
+        }
       }
     }
 
-    try {
-      schema.query?.parse(req.query);
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        const errs = handleValidationErrors("query", err.issues);
-        errors.push(...errs);
+    if (schema.query) {
+      try {
+        parsedQuery = schema.query.parse(req.query) as TQuery;
+      } catch (err) {
+        if (err instanceof z.ZodError) {
+          const errs = handleValidationErrors("query", err.issues);
+          errors.push(...errs);
+        } else {
+          throw err;
+        }
       }
     }
 
-    try {
-      schema.body?.parse(req.body);
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        const errs = handleValidationErrors("body", err.issues);
-        errors.push(...errs);
+    if (schema.body) {
+      try {
+        parsedBody = schema.body.parse(req.body) as TBody;
+      } catch (err) {
+        if (err instanceof z.ZodError) {
+          const errs = handleValidationErrors("body", err.issues);
+          errors.push(...errs);
+        } else {
+          throw err;
+        }
       }
     }
 
     if (errors.length > 0) {
       return res.status(400).json(responseUtils.writeErrors(errors));
+    }
+
+    if (schema.params && parsedParams !== undefined) {
+      (req as Request<TParams, any, TBody, TQuery>).params = parsedParams;
+    }
+    if (schema.query && parsedQuery !== undefined) {
+      (req as Request<TParams, any, TBody, TQuery>).query = parsedQuery;
+    }
+    if (schema.body && parsedBody !== undefined) {
+      (req as Request<TParams, any, TBody, TQuery>).body = parsedBody;
     }
 
     next();
