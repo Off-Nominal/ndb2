@@ -60,7 +60,7 @@ export default {
             discord_id: prediction.trigerer_discord_id,
           };
 
-    const predictionDTO: API.Endpoints.Predictions.GET_ById.Data = {
+    const basePrediction = {
       id: prediction.id,
       predictor: {
         id: prediction.predictor_id,
@@ -132,6 +132,21 @@ export default {
         undorse: parseFloat(prediction.undorse),
       },
     };
+
+    const predictionDTO: API.Endpoints.Predictions.GET_ById.Data =
+      basePrediction.driver === "event"
+        ? {
+            ...basePrediction,
+            driver: "event",
+            due_date: null,
+            check_date: basePrediction.check_date!,
+          }
+        : {
+            ...basePrediction,
+            driver: "date",
+            check_date: null,
+            due_date: basePrediction.due_date!,
+          };
 
     return predictionDTO;
   },
