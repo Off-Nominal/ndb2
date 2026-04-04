@@ -63,6 +63,19 @@ describe("GET /predictions/search", () => {
     ).toBe(true);
   });
 
+  it("returns 400 when keyword exceeds 500 characters", async () => {
+    const response = await request(app).get(
+      `/search?keyword=${"a".repeat(501)}`,
+    );
+    expect(response.status).toBe(400);
+    expect(
+      response.body.errors.some(
+        (e: API.Utils.ErrorInfo) =>
+          e.code === API.Errors.MALFORMED_QUERY_PARAMS,
+      ),
+    ).toBe(true);
+  });
+
   it("returns 404 when creator Discord user does not exist", async () => {
     const response = await request(app).get(
       "/search?creator=987654321098765432",

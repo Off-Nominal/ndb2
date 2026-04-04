@@ -28,7 +28,7 @@ import {
  * |-------|------|
  * | `status` | Optional. One or more lifecycle values; repeat the key or pass one value. Drives SQL `statuses` filter when non-empty. |
  * | `sort_by` | Optional. Single sort key; if the key is repeated, only the **first** value is used. |
- * | `keyword` | Optional. Full-text + trigram search: lexical match (`tsvector`) or similarity (`%`), ranked by `ts_rank_cd` then trigram distance. |
+ * | `keyword` | Optional. Max 500 chars. See keyword tuning and matching rules in `api/src/v2/queries/predictions/predictions.sql` (`searchPredictions` comment block). |
  * | `creator` | Optional. Predictor filter: Discord snowflake (`discordIdSchema`). Resolved to internal user id; unknown id → 404 `USER_NOT_FOUND`. |
  * | `unbetter` | Optional. Exclude predictions where this Discord user has a bet (`discordIdSchema`). Same lookup rules as `creator`. |
  * | `season_id` | Optional. Coerced to a Postgres INT (positive, in range). |
@@ -49,7 +49,12 @@ const searchQuerySchema = z
     sort_by: queryParamScalar(
       z.enum(API.Endpoints.Predictions.GET_Search.SORT_BY_VALUES).optional(),
     ),
-    keyword: queryParamScalar(optionalTrimmedStringSchema),
+    keyword: queryParamScalar(
+      optionalTrimmedStringSchema.refine(
+        (s) => s === undefined || s.length <= 500,
+        { message: "keyword must be at most 500 characters" },
+      ),
+    ),
     creator: queryParamScalar(discordIdSchema.optional()),
     unbetter: queryParamScalar(discordIdSchema.optional()),
     season_id: queryParamScalar(seasonIdSchema.optional()),
@@ -138,13 +143,13 @@ export const getPredictionsSearch: Route = (router) => {
       }
 
       const rows = await predictions.search(dbClient)({
-        keyword: q.keyword,
-        sort_by: q.sort_by,
+        keyword: q.keyword ?? null,
+        sort_by: q.sort_by ?? null,
         statuses:
           q.status !== undefined && q.status.length > 0 ? q.status : null,
-        page: q.page,
-        predictor_id: q.creator ? creator_id : undefined,
-        non_better_id: q.unbetter ? unbetter_id : undefined,
+        page: q.page ?? null,
+        predictor_id: q.creator ? creator_id! : null,
+        non_better_id: q.unbetter ? unbetter_id! : null,
         season_id: q.season_id ?? null,
         include_non_applicable: q.include_non_season_applicable ?? false,
       });
