@@ -10,32 +10,107 @@ import {
   retirePredictionById,
   searchPredictions,
   type ISearchPredictionsParams,
+  type ISearchPredictionsResult,
   unjudgePredictionById,
   untriggerPredictionById,
 } from "./predictions.queries";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import betsQueries from "../bets";
 
+/** Must match `LIMIT` in `searchPredictions` in predictions.sql. */
+export const PREDICTION_SEARCH_PAGE_SIZE = 10;
+
 /** Params for {@link searchPredictions}; `page` is turned into `row_offset` here. */
 export type PredictionSearchInput = Omit<
   ISearchPredictionsParams,
   "row_offset"
 > & {
-  page?: number;
+  page?: number | null;
 };
 
+function mapSearchRowToDTO(
+  row: ISearchPredictionsResult,
+): API.Endpoints.Predictions.GET_Search.Data[number] {
+  const triggerer =
+    row.triggerer_id === null
+      ? null
+      : {
+          id: row.triggerer_id,
+          discord_id: row.triggerer_discord_id,
+        };
+
+  const base = {
+    id: row.id,
+    predictor: {
+      id: row.predictor_id,
+      discord_id: row.predictor_discord_id,
+    },
+    text: row.text,
+    driver: row.driver,
+    season_id: row.season_id,
+    season_applicable: row.season_applicable,
+    created_date: row.created_date.toString(),
+    due_date: row.due_date ? row.due_date.toString() : null,
+    check_date: row.check_date ? row.check_date.toString() : null,
+    last_check_date: row.last_check_date
+      ? row.last_check_date.toString()
+      : null,
+    closed_date: row.closed_date ? row.closed_date.toString() : null,
+    triggered_date: row.triggered_date
+      ? row.triggered_date.toString()
+      : null,
+    triggerer,
+    judged_date: row.judged_date ? row.judged_date.toString() : null,
+    retired_date: row.retired_date ? row.retired_date.toString() : null,
+    status: row.status,
+    bets: {
+      endorsements: Number(row.bets_endorsements ?? 0),
+      undorsements: Number(row.bets_undorsements ?? 0),
+      invalid: Number(row.bets_invalid ?? 0),
+    },
+    votes: {
+      yes: Number(row.votes_yes ?? 0),
+      no: Number(row.votes_no ?? 0),
+    },
+    payouts: {
+      endorse: parseFloat(row.endorse),
+      undorse: parseFloat(row.undorse),
+    },
+  };
+
+  return row.driver === "event"
+    ? {
+        ...base,
+        driver: "event",
+        due_date: null,
+        check_date: base.check_date!,
+      }
+    : {
+        ...base,
+        driver: "date",
+        check_date: null,
+        due_date: base.due_date!,
+      };
+}
+
 export default {
-  search: (dbClient: PoolClient) => async (options: PredictionSearchInput) => {
-    const { page, keyword, ...params } = options;
-    return searchPredictions.run(
-      {
-        ...params,
-        keyword,
-        row_offset: Math.max(0, (page ?? 1) - 1) * 10,
-      },
-      dbClient,
-    );
-  },
+  search:
+    (dbClient: PoolClient) =>
+    async (
+      options: PredictionSearchInput,
+    ): Promise<API.Endpoints.Predictions.GET_Search.Data> => {
+      const { page, keyword, ...params } = options;
+      const rows = await searchPredictions.run(
+        {
+          ...params,
+          keyword,
+          row_offset:
+            Math.max(0, (page ?? 1) - 1) * PREDICTION_SEARCH_PAGE_SIZE,
+        },
+        dbClient,
+      );
+      return rows.map(mapSearchRowToDTO);
+    },
   getById: (dbClient: PoolClient) => async (prediction_id: number) => {
     // Queries
     const [predictionResult, betsResult, votesResult, checksResult] =
@@ -60,7 +135,7 @@ export default {
             discord_id: prediction.trigerer_discord_id,
           };
 
-    const predictionDTO: API.Endpoints.Predictions.GET_ById.Data = {
+    const basePrediction = {
       id: prediction.id,
       predictor: {
         id: prediction.predictor_id,
@@ -132,6 +207,21 @@ export default {
         undorse: parseFloat(prediction.undorse),
       },
     };
+
+    const predictionDTO: API.Endpoints.Predictions.GET_ById.Data =
+      basePrediction.driver === "event"
+        ? {
+            ...basePrediction,
+            driver: "event",
+            due_date: null,
+            check_date: basePrediction.check_date!,
+          }
+        : {
+            ...basePrediction,
+            driver: "date",
+            check_date: null,
+            due_date: basePrediction.due_date!,
+          };
 
     return predictionDTO;
   },

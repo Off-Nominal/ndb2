@@ -7,8 +7,6 @@ export type prediction_status = 'checking' | 'closed' | 'failed' | 'open' | 'ret
 
 export type DateOrString = Date | string;
 
-export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
-
 export type NumberOrString = number | string;
 
 export type stringArray = (string)[];
@@ -234,7 +232,7 @@ export interface IInsertDateDrivenPredictionQuery {
   result: IInsertDateDrivenPredictionResult;
 }
 
-const insertDateDrivenPredictionIR: any = {"usedParamSet":{"user_id":true,"text":true,"created_date":true,"due_date":true},"params":[{"name":"user_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":95,"b":103}]},{"name":"text","required":true,"transform":{"type":"scalar"},"locs":[{"a":108,"b":113}]},{"name":"created_date","required":true,"transform":{"type":"scalar"},"locs":[{"a":118,"b":131}]},{"name":"due_date","required":true,"transform":{"type":"scalar"},"locs":[{"a":146,"b":155}]}],"statement":"INSERT INTO predictions (\n  user_id,\n  text,\n  created_date,\n  driver,\n  due_date\n) VALUES (\n  :user_id!,\n  :text!,\n  :created_date!,\n  'date',\n  :due_date!\n) RETURNING id                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         "};
+const insertDateDrivenPredictionIR: any = {"usedParamSet":{"user_id":true,"text":true,"created_date":true,"due_date":true},"params":[{"name":"user_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":95,"b":103}]},{"name":"text","required":true,"transform":{"type":"scalar"},"locs":[{"a":108,"b":113}]},{"name":"created_date","required":true,"transform":{"type":"scalar"},"locs":[{"a":118,"b":131}]},{"name":"due_date","required":true,"transform":{"type":"scalar"},"locs":[{"a":146,"b":155}]}],"statement":"INSERT INTO predictions (\n  user_id,\n  text,\n  created_date,\n  driver,\n  due_date\n) VALUES (\n  :user_id!,\n  :text!,\n  :created_date!,\n  'date',\n  :due_date!\n) RETURNING id                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            "};
 
 /**
  * Query generated from SQL:
@@ -251,7 +249,7 @@ const insertDateDrivenPredictionIR: any = {"usedParamSet":{"user_id":true,"text"
  *   :created_date!,
  *   'date',
  *   :due_date!
- * ) RETURNING id                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+ * ) RETURNING id                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
  * ```
  */
 export const insertDateDrivenPrediction = new PreparedQuery<IInsertDateDrivenPredictionParams,IInsertDateDrivenPredictionResult>(insertDateDrivenPredictionIR);
@@ -271,25 +269,31 @@ export interface ISearchPredictionsParams {
 
 /** 'SearchPredictions' return type */
 export interface ISearchPredictionsResult {
-  bets: Json | null;
+  bets_endorsements: string | null;
+  bets_invalid: string | null;
+  bets_undorsements: string | null;
   check_date: Date | null;
   closed_date: Date | null;
   created_date: Date;
   driver: prediction_driver;
   due_date: Date | null;
+  endorse: string;
   id: number;
   judged_date: Date | null;
   last_check_date: Date | null;
-  payouts: Json | null;
-  predictor: Json | null;
+  predictor_discord_id: string;
+  predictor_id: string;
   retired_date: Date | null;
   season_applicable: boolean;
   season_id: number | null;
   status: prediction_status;
   text: string;
   triggered_date: Date | null;
-  triggerer: Json | null;
-  votes: Json | null;
+  triggerer_discord_id: string;
+  triggerer_id: string | null;
+  undorse: string;
+  votes_no: string | null;
+  votes_yes: string | null;
 }
 
 /** 'SearchPredictions' query type */
@@ -298,21 +302,21 @@ export interface ISearchPredictionsQuery {
   result: ISearchPredictionsResult;
 }
 
-const searchPredictionsIR: any = {"usedParamSet":{"statuses":true,"predictor_id":true,"non_better_id":true,"season_id":true,"include_non_applicable":true,"keyword":true,"sort_by":true,"row_offset":true},"params":[{"name":"statuses","required":false,"transform":{"type":"scalar"},"locs":[{"a":1399,"b":1407},{"a":1452,"b":1460}]},{"name":"predictor_id","required":false,"transform":{"type":"scalar"},"locs":[{"a":1473,"b":1485},{"a":1518,"b":1530}]},{"name":"non_better_id","required":false,"transform":{"type":"scalar"},"locs":[{"a":1542,"b":1555},{"a":1663,"b":1676}]},{"name":"season_id","required":false,"transform":{"type":"scalar"},"locs":[{"a":1692,"b":1701},{"a":1745,"b":1754}]},{"name":"include_non_applicable","required":false,"transform":{"type":"scalar"},"locs":[{"a":1772,"b":1794}]},{"name":"keyword","required":false,"transform":{"type":"scalar"},"locs":[{"a":1853,"b":1860},{"a":1927,"b":1934},{"a":1957,"b":1964},{"a":1996,"b":2003},{"a":2089,"b":2096},{"a":2141,"b":2148},{"a":2191,"b":2198}]},{"name":"sort_by","required":false,"transform":{"type":"scalar"},"locs":[{"a":2242,"b":2249},{"a":2334,"b":2341},{"a":2428,"b":2435},{"a":2536,"b":2543},{"a":2646,"b":2653},{"a":2734,"b":2741},{"a":2824,"b":2831},{"a":2916,"b":2923},{"a":3010,"b":3017},{"a":3106,"b":3113},{"a":3204,"b":3211},{"a":3294,"b":3301},{"a":3386,"b":3393},{"a":3476,"b":3483}]},{"name":"row_offset","required":true,"transform":{"type":"scalar"},"locs":[{"a":3581,"b":3592}]}],"statement":"SELECT\n  p.id,\n  (SELECT row_to_json(pred) FROM\n      (SELECT\n          p.user_id as id,\n          u.discord_id\n        FROM users u\n        WHERE u.id = p.user_id)\n    pred)\n  as predictor,\n  p.text,\n  p.driver,\n  p.season_id,\n  p.season_applicable,\n  p.created_date,\n  p.due_date,\n  p.check_date,\n  p.last_check_date,\n  p.closed_date,\n  p.triggered_date,\n  (SELECT row_to_json(trig) FROM\n      (SELECT\n          p.triggerer_id as id,\n          u.discord_id\n        FROM users u\n        WHERE u.id = p.triggerer_id)\n    trig)\n  as triggerer,\n  p.judged_date,\n  p.retired_date,\n  p.status,\n  (SELECT row_to_json(bs) FROM\n      (SELECT\n        COUNT(b.id) FILTER (WHERE b.endorsed IS TRUE AND b.valid IS TRUE) as endorsements,\n        COUNT(b.id) FILTER (WHERE b.endorsed IS FALSE AND b.valid IS TRUE) as undorsements,\n        COUNT(b.id) FILTER (WHERE b.valid IS FALSE) as invalid\n        FROM bets b\n        WHERE b.prediction_id = p.id\n      ) bs\n  ) as bets,\n  (SELECT row_to_json(vs) FROM\n      (SELECT\n        COUNT(v.id) FILTER (WHERE v.vote IS TRUE) as yes,\n        COUNT(v.id) FILTER (WHERE v.vote IS FALSE) as no\n        FROM votes v\n        WHERE v.prediction_id = p.id\n      ) vs\n  ) as votes,\n  (SELECT row_to_json(payout_sum)\n    FROM(\n      SELECT p.endorse_ratio as endorse, p.undorse_ratio as undorse\n    ) payout_sum\n  ) as payouts\nFROM predictions p\nWHERE (\n  COALESCE(cardinality(:statuses::text[]), 0) = 0\n  OR p.status::text = ANY(:statuses)\n)\nAND (\n  :predictor_id::uuid IS NULL\n  OR p.user_id = :predictor_id\n)\nAND (\n  :non_better_id::uuid IS NULL\n  OR NOT EXISTS (\n    SELECT 1 FROM bets b\n    WHERE b.prediction_id = p.id AND b.user_id = :non_better_id\n  )\n)\nAND (\n  :season_id::integer IS NULL\n  OR (\n    p.season_id = :season_id\n    AND (\n      :include_non_applicable\n      OR p.season_applicable IS TRUE\n    )\n  )\n)\nAND (\n  :keyword::text IS NULL\n  OR p.search_vector @@ plainto_tsquery('english', :keyword::text)\n  OR p.text % :keyword::text\n)\nORDER BY\n  (CASE WHEN :keyword::text IS NULL THEN NULL ELSE ts_rank_cd(p.search_vector, plainto_tsquery('english', :keyword::text)) END) DESC NULLS LAST,\n  (CASE WHEN :keyword::text IS NULL THEN NULL ELSE (p.text <-> :keyword::text) END) ASC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'created_date-asc' THEN p.created_date END ) ASC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'created_date-desc' THEN p.created_date END ) DESC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'due_date-asc' THEN COALESCE(p.due_date, p.check_date) END ) ASC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'due_date-desc' THEN COALESCE(p.due_date, p.check_date) END ) DESC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'check_date-asc' THEN p.check_date END ) ASC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'check_date-desc' THEN p.check_date END ) DESC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'retired_date-asc' THEN p.retired_date END ) ASC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'retired_date-desc' THEN p.retired_date END ) DESC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'triggered_date-asc' THEN p.triggered_date END ) ASC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'triggered_date-desc' THEN p.triggered_date END ) DESC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'closed_date-asc' THEN p.closed_date END ) ASC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'closed_date-desc' THEN p.closed_date END ) DESC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'judged_date-asc' THEN p.judged_date END ) ASC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'judged_date-desc' THEN p.judged_date END ) DESC NULLS LAST,\n  p.id ASC\nLIMIT 10\nOFFSET :row_offset!"};
+const searchPredictionsIR: any = {"usedParamSet":{"keyword":true,"statuses":true,"predictor_id":true,"non_better_id":true,"season_id":true,"include_non_applicable":true,"sort_by":true,"row_offset":true},"params":[{"name":"keyword","required":false,"transform":{"type":"scalar"},"locs":[{"a":1241,"b":1248},{"a":2318,"b":2325}]},{"name":"statuses","required":false,"transform":{"type":"scalar"},"locs":[{"a":1864,"b":1872},{"a":1917,"b":1925}]},{"name":"predictor_id","required":false,"transform":{"type":"scalar"},"locs":[{"a":1938,"b":1950},{"a":1983,"b":1995}]},{"name":"non_better_id","required":false,"transform":{"type":"scalar"},"locs":[{"a":2007,"b":2020},{"a":2128,"b":2141}]},{"name":"season_id","required":false,"transform":{"type":"scalar"},"locs":[{"a":2157,"b":2166},{"a":2210,"b":2219}]},{"name":"include_non_applicable","required":false,"transform":{"type":"scalar"},"locs":[{"a":2237,"b":2259}]},{"name":"sort_by","required":false,"transform":{"type":"scalar"},"locs":[{"a":2762,"b":2769},{"a":2854,"b":2861},{"a":2948,"b":2955},{"a":3056,"b":3063},{"a":3166,"b":3173},{"a":3254,"b":3261},{"a":3344,"b":3351},{"a":3436,"b":3443},{"a":3530,"b":3537},{"a":3626,"b":3633},{"a":3724,"b":3731},{"a":3814,"b":3821},{"a":3906,"b":3913},{"a":3996,"b":4003}]},{"name":"row_offset","required":true,"transform":{"type":"scalar"},"locs":[{"a":4138,"b":4149}]}],"statement":"WITH search_defaults AS (\n  SELECT\n    0.38::double precision AS word_sim_threshold,\n    5::integer AS keyword_prefix_min_len,\n    10::integer AS page_size\n)\nSELECT\n  p.id,\n  p.user_id AS predictor_id,\n  pred_u.discord_id AS predictor_discord_id,\n  p.text,\n  p.driver,\n  p.season_id,\n  p.season_applicable,\n  p.created_date,\n  p.due_date,\n  p.check_date,\n  p.last_check_date,\n  p.closed_date,\n  p.triggered_date,\n  p.triggerer_id,\n  trig_u.discord_id AS triggerer_discord_id,\n  p.judged_date,\n  p.retired_date,\n  p.status,\n  bet_totals.bets_endorsements,\n  bet_totals.bets_undorsements,\n  bet_totals.bets_invalid,\n  vote_totals.votes_yes,\n  vote_totals.votes_no,\n  p.endorse_ratio AS endorse,\n  p.undorse_ratio AS undorse\nFROM search_defaults sd\nCROSS JOIN predictions p\nJOIN users pred_u ON pred_u.id = p.user_id\nLEFT JOIN users trig_u ON trig_u.id = p.triggerer_id\nCROSS JOIN LATERAL (\n  SELECT\n    t.kw,\n    CASE\n      WHEN t.kw IS NULL OR char_length(t.kw) < sd.keyword_prefix_min_len OR t.kw ~ '\\s' THEN NULL\n      ELSE NULLIF(\n        regexp_replace(\n          lower(left(t.kw, char_length(t.kw) - 1)),\n          '[^a-z0-9]+',\n          '',\n          'g'\n        ),\n        ''\n      )\n    END AS prefix_stem\n  FROM (SELECT NULLIF(trim(:keyword::text), '') AS kw) AS t\n) AS k\nCROSS JOIN LATERAL (\n  SELECT\n    COUNT(b.id) FILTER (WHERE b.endorsed IS TRUE AND b.valid IS TRUE) AS bets_endorsements,\n    COUNT(b.id) FILTER (WHERE b.endorsed IS FALSE AND b.valid IS TRUE) AS bets_undorsements,\n    COUNT(b.id) FILTER (WHERE b.valid IS FALSE) AS bets_invalid\n  FROM bets b\n  WHERE b.prediction_id = p.id\n) AS bet_totals\nCROSS JOIN LATERAL (\n  SELECT\n    COUNT(v.id) FILTER (WHERE v.vote IS TRUE) AS votes_yes,\n    COUNT(v.id) FILTER (WHERE v.vote IS FALSE) AS votes_no\n  FROM votes v\n  WHERE v.prediction_id = p.id\n) AS vote_totals\nWHERE (\n  COALESCE(cardinality(:statuses::text[]), 0) = 0\n  OR p.status::text = ANY(:statuses)\n)\nAND (\n  :predictor_id::uuid IS NULL\n  OR p.user_id = :predictor_id\n)\nAND (\n  :non_better_id::uuid IS NULL\n  OR NOT EXISTS (\n    SELECT 1 FROM bets b\n    WHERE b.prediction_id = p.id AND b.user_id = :non_better_id\n  )\n)\nAND (\n  :season_id::integer IS NULL\n  OR (\n    p.season_id = :season_id\n    AND (\n      :include_non_applicable\n      OR p.season_applicable IS TRUE\n    )\n  )\n)\nAND (\n  :keyword::text IS NULL\n  OR k.kw IS NULL\n  OR p.search_vector @@ plainto_tsquery('english', k.kw)\n  OR similarity(p.text, k.kw) >= sd.word_sim_threshold\n  OR word_similarity(k.kw, p.text) >= sd.word_sim_threshold\n  OR (\n    k.prefix_stem IS NOT NULL\n    AND p.search_vector @@ to_tsquery('english', k.prefix_stem || ':*')\n  )\n)\nORDER BY\n  (CASE WHEN k.kw IS NULL THEN NULL ELSE word_similarity(k.kw, p.text) END) DESC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'created_date-asc' THEN p.created_date END ) ASC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'created_date-desc' THEN p.created_date END ) DESC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'due_date-asc' THEN COALESCE(p.due_date, p.check_date) END ) ASC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'due_date-desc' THEN COALESCE(p.due_date, p.check_date) END ) DESC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'check_date-asc' THEN p.check_date END ) ASC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'check_date-desc' THEN p.check_date END ) DESC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'retired_date-asc' THEN p.retired_date END ) ASC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'retired_date-desc' THEN p.retired_date END ) DESC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'triggered_date-asc' THEN p.triggered_date END ) ASC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'triggered_date-desc' THEN p.triggered_date END ) DESC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'closed_date-asc' THEN p.closed_date END ) ASC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'closed_date-desc' THEN p.closed_date END ) DESC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'judged_date-asc' THEN p.judged_date END ) ASC NULLS LAST,\n  ( CASE WHEN :sort_by::text = 'judged_date-desc' THEN p.judged_date END ) DESC NULLS LAST,\n  p.id ASC\nLIMIT (SELECT page_size FROM search_defaults)\nOFFSET :row_offset!"};
 
 /**
  * Query generated from SQL:
  * ```
+ * WITH search_defaults AS (
+ *   SELECT
+ *     0.38::double precision AS word_sim_threshold,
+ *     5::integer AS keyword_prefix_min_len,
+ *     10::integer AS page_size
+ * )
  * SELECT
  *   p.id,
- *   (SELECT row_to_json(pred) FROM
- *       (SELECT
- *           p.user_id as id,
- *           u.discord_id
- *         FROM users u
- *         WHERE u.id = p.user_id)
- *     pred)
- *   as predictor,
+ *   p.user_id AS predictor_id,
+ *   pred_u.discord_id AS predictor_discord_id,
  *   p.text,
  *   p.driver,
  *   p.season_id,
@@ -323,40 +327,54 @@ const searchPredictionsIR: any = {"usedParamSet":{"statuses":true,"predictor_id"
  *   p.last_check_date,
  *   p.closed_date,
  *   p.triggered_date,
- *   (SELECT row_to_json(trig) FROM
- *       (SELECT
- *           p.triggerer_id as id,
- *           u.discord_id
- *         FROM users u
- *         WHERE u.id = p.triggerer_id)
- *     trig)
- *   as triggerer,
+ *   p.triggerer_id,
+ *   trig_u.discord_id AS triggerer_discord_id,
  *   p.judged_date,
  *   p.retired_date,
  *   p.status,
- *   (SELECT row_to_json(bs) FROM
- *       (SELECT
- *         COUNT(b.id) FILTER (WHERE b.endorsed IS TRUE AND b.valid IS TRUE) as endorsements,
- *         COUNT(b.id) FILTER (WHERE b.endorsed IS FALSE AND b.valid IS TRUE) as undorsements,
- *         COUNT(b.id) FILTER (WHERE b.valid IS FALSE) as invalid
- *         FROM bets b
- *         WHERE b.prediction_id = p.id
- *       ) bs
- *   ) as bets,
- *   (SELECT row_to_json(vs) FROM
- *       (SELECT
- *         COUNT(v.id) FILTER (WHERE v.vote IS TRUE) as yes,
- *         COUNT(v.id) FILTER (WHERE v.vote IS FALSE) as no
- *         FROM votes v
- *         WHERE v.prediction_id = p.id
- *       ) vs
- *   ) as votes,
- *   (SELECT row_to_json(payout_sum)
- *     FROM(
- *       SELECT p.endorse_ratio as endorse, p.undorse_ratio as undorse
- *     ) payout_sum
- *   ) as payouts
- * FROM predictions p
+ *   bet_totals.bets_endorsements,
+ *   bet_totals.bets_undorsements,
+ *   bet_totals.bets_invalid,
+ *   vote_totals.votes_yes,
+ *   vote_totals.votes_no,
+ *   p.endorse_ratio AS endorse,
+ *   p.undorse_ratio AS undorse
+ * FROM search_defaults sd
+ * CROSS JOIN predictions p
+ * JOIN users pred_u ON pred_u.id = p.user_id
+ * LEFT JOIN users trig_u ON trig_u.id = p.triggerer_id
+ * CROSS JOIN LATERAL (
+ *   SELECT
+ *     t.kw,
+ *     CASE
+ *       WHEN t.kw IS NULL OR char_length(t.kw) < sd.keyword_prefix_min_len OR t.kw ~ '\s' THEN NULL
+ *       ELSE NULLIF(
+ *         regexp_replace(
+ *           lower(left(t.kw, char_length(t.kw) - 1)),
+ *           '[^a-z0-9]+',
+ *           '',
+ *           'g'
+ *         ),
+ *         ''
+ *       )
+ *     END AS prefix_stem
+ *   FROM (SELECT NULLIF(trim(:keyword::text), '') AS kw) AS t
+ * ) AS k
+ * CROSS JOIN LATERAL (
+ *   SELECT
+ *     COUNT(b.id) FILTER (WHERE b.endorsed IS TRUE AND b.valid IS TRUE) AS bets_endorsements,
+ *     COUNT(b.id) FILTER (WHERE b.endorsed IS FALSE AND b.valid IS TRUE) AS bets_undorsements,
+ *     COUNT(b.id) FILTER (WHERE b.valid IS FALSE) AS bets_invalid
+ *   FROM bets b
+ *   WHERE b.prediction_id = p.id
+ * ) AS bet_totals
+ * CROSS JOIN LATERAL (
+ *   SELECT
+ *     COUNT(v.id) FILTER (WHERE v.vote IS TRUE) AS votes_yes,
+ *     COUNT(v.id) FILTER (WHERE v.vote IS FALSE) AS votes_no
+ *   FROM votes v
+ *   WHERE v.prediction_id = p.id
+ * ) AS vote_totals
  * WHERE (
  *   COALESCE(cardinality(:statuses::text[]), 0) = 0
  *   OR p.status::text = ANY(:statuses)
@@ -384,12 +402,17 @@ const searchPredictionsIR: any = {"usedParamSet":{"statuses":true,"predictor_id"
  * )
  * AND (
  *   :keyword::text IS NULL
- *   OR p.search_vector @@ plainto_tsquery('english', :keyword::text)
- *   OR p.text % :keyword::text
+ *   OR k.kw IS NULL
+ *   OR p.search_vector @@ plainto_tsquery('english', k.kw)
+ *   OR similarity(p.text, k.kw) >= sd.word_sim_threshold
+ *   OR word_similarity(k.kw, p.text) >= sd.word_sim_threshold
+ *   OR (
+ *     k.prefix_stem IS NOT NULL
+ *     AND p.search_vector @@ to_tsquery('english', k.prefix_stem || ':*')
+ *   )
  * )
  * ORDER BY
- *   (CASE WHEN :keyword::text IS NULL THEN NULL ELSE ts_rank_cd(p.search_vector, plainto_tsquery('english', :keyword::text)) END) DESC NULLS LAST,
- *   (CASE WHEN :keyword::text IS NULL THEN NULL ELSE (p.text <-> :keyword::text) END) ASC NULLS LAST,
+ *   (CASE WHEN k.kw IS NULL THEN NULL ELSE word_similarity(k.kw, p.text) END) DESC NULLS LAST,
  *   ( CASE WHEN :sort_by::text = 'created_date-asc' THEN p.created_date END ) ASC NULLS LAST,
  *   ( CASE WHEN :sort_by::text = 'created_date-desc' THEN p.created_date END ) DESC NULLS LAST,
  *   ( CASE WHEN :sort_by::text = 'due_date-asc' THEN COALESCE(p.due_date, p.check_date) END ) ASC NULLS LAST,
@@ -405,7 +428,7 @@ const searchPredictionsIR: any = {"usedParamSet":{"statuses":true,"predictor_id"
  *   ( CASE WHEN :sort_by::text = 'judged_date-asc' THEN p.judged_date END ) ASC NULLS LAST,
  *   ( CASE WHEN :sort_by::text = 'judged_date-desc' THEN p.judged_date END ) DESC NULLS LAST,
  *   p.id ASC
- * LIMIT 10
+ * LIMIT (SELECT page_size FROM search_defaults)
  * OFFSET :row_offset!
  * ```
  */

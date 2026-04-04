@@ -51,6 +51,7 @@ export namespace GET_Search {
       | Entities.Predictions.PredictionLifeCycle
       | Entities.Predictions.PredictionLifeCycle[];
     sort_by: SortByOption;
+    /** Free-text search; API enforces max length 500. */
     keyword: string;
     creator: string;
     unbetter: string;

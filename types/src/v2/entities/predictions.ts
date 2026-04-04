@@ -9,8 +9,7 @@ export const PREDICTION_LIFECYCLE_VALUES = [
   "successful",
 ] as const;
 
-export type PredictionLifeCycle =
-  (typeof PREDICTION_LIFECYCLE_VALUES)[number];
+export type PredictionLifeCycle = (typeof PREDICTION_LIFECYCLE_VALUES)[number];
 
 export type PredictionSearchBetTallies = {
   endorsements: number;
@@ -23,20 +22,31 @@ export type PredictionSearchVoteTallies = {
   no: number;
 };
 
+type EventDrivenPrediction = {
+  driver: Extract<PredictionDriver, "event">;
+  check_date: string;
+  due_date: null;
+};
+
+type DateDrivenPrediction = {
+  driver: Extract<PredictionDriver, "date">;
+  due_date: string;
+  check_date: null;
+};
+
+type PredictionDriverData = EventDrivenPrediction | DateDrivenPrediction;
+
 /** Prediction row returned by GET /predictions/search (aggregated bets/votes). */
-export type PredictionSearchResult = {
+export type PredictionSearchResult = PredictionDriverData & {
   id: number;
   predictor: {
     id: string;
     discord_id: string;
   };
   text: string;
-  driver: PredictionDriver;
   season_id: number | null;
   season_applicable: boolean;
   created_date: string;
-  due_date: string | null;
-  check_date: string | null;
   last_check_date: string | null;
   closed_date: string | null;
   triggered_date: string | null;
@@ -55,19 +65,16 @@ export type PredictionSearchResult = {
   };
 };
 
-export type Prediction = {
+export type Prediction = PredictionDriverData & {
   id: number;
   predictor: {
     id: string;
     discord_id: string;
   };
   text: string;
-  driver: PredictionDriver;
   season_id: number | null;
   season_applicable: boolean;
   created_date: string;
-  due_date: string | null;
-  check_date: string | null;
   last_check_date: string | null;
   closed_date: string | null;
   triggered_date: string | null;

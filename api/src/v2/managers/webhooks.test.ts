@@ -10,7 +10,7 @@ const mockPrediction: API.Entities.Predictions.Prediction = {
   season_id: null,
   season_applicable: false,
   created_date: "2026-01-01T00:00:00.000Z",
-  due_date: null,
+  due_date: "2026-04-01T00:00:00.000Z",
   check_date: null,
   last_check_date: null,
   closed_date: null,
@@ -57,13 +57,18 @@ describe("notifySubscribers", () => {
       prediction: mockPrediction,
     });
 
-    notifySubscribers(["https://a.example/hook", "https://b.example/hook"], payload);
+    notifySubscribers(
+      ["https://a.example/hook", "https://b.example/hook"],
+      payload,
+    );
 
     await vi.waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2));
 
     for (const call of mockFetch.mock.calls) {
       const [url, init] = call as [string, RequestInit];
-      expect(["https://a.example/hook", "https://b.example/hook"]).toContain(url);
+      expect(["https://a.example/hook", "https://b.example/hook"]).toContain(
+        url,
+      );
       expect(init.method).toBe("POST");
       expect(init.headers).toMatchObject({
         "Content-Type": "application/json",
@@ -90,7 +95,9 @@ describe("notifySubscribers", () => {
   });
 
   it("logs and swallows non-ok responses", async () => {
-    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     mockFetch.mockResolvedValue({ ok: false, statusText: "Bad Gateway" });
 
     const payload = generateResponse("new_prediction", {
@@ -104,7 +111,9 @@ describe("notifySubscribers", () => {
   });
 
   it("logs and swallows fetch rejections", async () => {
-    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     mockFetch.mockRejectedValue(new Error("network"));
 
     const payload = generateResponse("new_prediction", {
