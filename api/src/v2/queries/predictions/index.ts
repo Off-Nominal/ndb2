@@ -3,12 +3,14 @@ import { getBetsByPredictionId } from "../bets/bets.queries";
 import { getSnoozeChecksByPredictionId } from "../snooze_checks/snooze_checks.queries";
 import { getVotesByPredictionId } from "../votes/votes.queries";
 import {
+  closeSnoozeChecksByPredictionId,
   getPredictionsById,
   insertDateDrivenPrediction,
   insertEventDrivenPrediction,
   prediction_driver,
   retirePredictionById,
   searchPredictions,
+  setCheckDateByPredictionId as setCheckDateByPredictionIdQuery,
   type ISearchPredictionsParams,
   type ISearchPredictionsResult,
   unjudgePredictionById,
@@ -237,6 +239,25 @@ export default {
     await unjudgePredictionById.run({ prediction_id }, dbClient);
     return null;
   },
+  setCheckDateByPredictionId:
+    (dbClient: PoolClient) =>
+    async (prediction_id: number, check_date: Date) => {
+      try {
+        await dbClient.query("BEGIN");
+        await closeSnoozeChecksByPredictionId.run(
+          { prediction_id },
+          dbClient,
+        );
+        await setCheckDateByPredictionIdQuery.run(
+          { prediction_id, check_date },
+          dbClient,
+        );
+        await dbClient.query("COMMIT");
+      } catch (error) {
+        await dbClient.query("ROLLBACK");
+        throw error;
+      }
+    },
   create:
     (dbClient: PoolClient) =>
     async (params: {

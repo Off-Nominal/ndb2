@@ -11,7 +11,13 @@ SELECT
   COUNT(sv.*) FILTER (WHERE sv.value = 90) as "votes_quarter!",
   COUNT(sv.*) FILTER (WHERE sv.value = 365) as "votes_year!"
 FROM snooze_checks sc
-JOIN snooze_votes sv ON sv.snooze_check_id = sc.id
+LEFT JOIN snooze_votes sv ON sv.snooze_check_id = sc.id
 WHERE sc.prediction_id = :prediction_id!
 GROUP BY sc.id
 ORDER BY sc.check_date DESC;
+
+/* @name closeSnoozeCheckById */
+UPDATE snooze_checks
+  SET closed = true, closed_at = NOW()
+  WHERE id = :snooze_check_id!
+  RETURNING id, prediction_id, check_date, closed, closed_at;
