@@ -78,3 +78,11 @@ eventsManager.on("retired_prediction", (prediction) => {
 eventsManager.on("new_prediction", (prediction) => {
   notifySubscribers(subscribers, generateResponse("new_prediction", { prediction }));
 });
+
+eventsManager.on("new_bet", (prediction) => {
+  notifySubscribers(subscribers, generateResponse("new_bet", { prediction }));
+});
+
+eventsManager.on("new_vote", (prediction) => {
+  notifySubscribers(subscribers, generateResponse("new_vote", { prediction }));
+});

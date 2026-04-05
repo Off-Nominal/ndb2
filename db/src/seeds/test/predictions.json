@@ -251,7 +251,17 @@
     },
     "triggered": {
       "days": 40
-    }
+    },
+    "votes": [
+      {
+        "user_id": "550e8400-e29b-41d4-a716-446655440001",
+        "voted": {
+          "days": 40,
+          "minutes": 5
+        },
+        "vote": true
+      }
+    ]
   },
   {
     "id": 8,

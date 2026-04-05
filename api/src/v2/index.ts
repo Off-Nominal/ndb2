@@ -6,6 +6,8 @@ import { untriggerPredictionById } from "./routes/predictions/delete_predictions
 import { unjudgePredictionById } from "./routes/predictions/delete_predictions_{predictionId}_judgement";
 import { retirePredictionById } from "./routes/predictions/patch_predictions_{predictionId}_retire";
 import { createPrediction } from "./routes/predictions/post_predictions";
+import { postPredictionBet } from "./routes/predictions/post_predictions_{predictionId}_bets";
+import { postPredictionVote } from "./routes/predictions/post_predictions_{predictionId}_votes";
 import { mapRoutes } from "./utils/routerMap";
 import { errorHandler } from "./middleware/errorHandler";
 import "./managers/webhooks"; // Initialize webhook event listeners
@@ -17,6 +19,8 @@ apiV2Router.use(
   "/predictions",
   mapRoutes([
     createPrediction,
+    postPredictionBet,
+    postPredictionVote,
     getPredictionsSearch,
     getPredictionById,
     untriggerPredictionById,

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import {
-  booleanStringSchema,
+  createBooleanStringSchema,
   preprocessQueryStringMulti,
   preprocessQueryStringScalar,
   queryParamMulti,
@@ -62,7 +62,9 @@ describe("queryParamScalar / queryParamMulti", () => {
   });
 
   it("interprets optional boolean query strings", () => {
-    const s = queryParamScalar(booleanStringSchema.optional());
+    const s = queryParamScalar(
+      createBooleanStringSchema({ propName: "flag" }).optional(),
+    );
     expect(s.parse(undefined)).toBeUndefined();
     expect(s.parse("")).toBeUndefined();
     expect(s.parse("true")).toBe(true);

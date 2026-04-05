@@ -7,13 +7,14 @@ import predictions from "../../queries/predictions";
 import { getUserByDiscordId } from "../../queries/users/users.queries";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import {
-  booleanStringSchema,
+  createBooleanStringSchema,
   discordIdSchema,
   queryParamMulti,
   queryParamScalar,
   optionalTrimmedStringSchema,
   seasonIdSchema,
 } from "../../validations";
+import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
 
 /**
  * Zod schema for `GET /predictions/search` query string validation.
@@ -59,7 +60,9 @@ const searchQuerySchema = z
     unbetter: queryParamScalar(discordIdSchema.optional()),
     season_id: queryParamScalar(seasonIdSchema.optional()),
     include_non_season_applicable: queryParamScalar(
-      booleanStringSchema.optional(),
+      createBooleanStringSchema({
+        propName: "include_non_season_applicable",
+      }).optional(),
     ),
     page: queryParamScalar(z.coerce.number().int().positive().optional()),
   })
@@ -96,7 +99,7 @@ export const getPredictionsSearch: Route = (router) => {
     validate({
       query: searchQuerySchema,
     }),
-    async (req, res) => {
+    wrapRouteWithErrorBoundary(async (req, res) => {
       const q = req.query;
 
       const dbClient = await getDbClient(res);
@@ -157,6 +160,6 @@ export const getPredictionsSearch: Route = (router) => {
       return res.json(
         responseUtils.writeSuccess(rows, "Predictions fetched successfully."),
       );
-    },
+    }),
   );
 };

@@ -10,6 +10,7 @@ import { validate } from "../../middleware/validate";
 import { getDbClient } from "../../utils/getDbClient";
 import { eventsManager } from "../../managers/events";
 import GAME_MECHANICS from "../../../config/game_mechanics";
+import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
 
 export const retirePredictionById: Route = (router: Router) => {
   router.patch(
@@ -22,7 +23,7 @@ export const retirePredictionById: Route = (router: Router) => {
         discord_id: discordIdSchema,
       }),
     }),
-    async (req, res) => {
+    wrapRouteWithErrorBoundary(async (req, res) => {
       const { prediction_id } = req.params;
       const { discord_id } = req.body;
 
@@ -39,7 +40,7 @@ export const retirePredictionById: Route = (router: Router) => {
               code: API.Errors.PREDICTION_NOT_FOUND,
               message: `Prediction with id ${prediction_id} does not exist.`,
             },
-          ])
+          ]),
         );
       }
 
@@ -51,7 +52,7 @@ export const retirePredictionById: Route = (router: Router) => {
               code: API.Errors.INVALID_PREDICTION_STATUS,
               message: "Predictions must be open to be retired.",
             },
-          ])
+          ]),
         );
       }
 
@@ -63,7 +64,7 @@ export const retirePredictionById: Route = (router: Router) => {
               code: API.Errors.INVALID_PREDICTION_OWNERSHIP,
               message: "This prediction does not belong to you.",
             },
-          ])
+          ]),
         );
       }
 
@@ -76,7 +77,7 @@ export const retirePredictionById: Route = (router: Router) => {
       });
 
       const dueDate = new Date(
-        prediction.due_date ?? prediction.check_date ?? ""
+        prediction.due_date ?? prediction.check_date ?? "",
       );
       const effectiveExpiryWindow = isAfter(expiryWindow, dueDate)
         ? dueDate
@@ -90,7 +91,7 @@ export const retirePredictionById: Route = (router: Router) => {
               message:
                 "This prediction is past the retirement window. It is locked and cannot be retired.",
             },
-          ])
+          ]),
         );
       }
 
@@ -98,9 +99,8 @@ export const retirePredictionById: Route = (router: Router) => {
       await predictions.retireById(dbClient)(prediction_id);
 
       // Get updated prediction for response
-      const retiredPrediction = await predictions.getById(dbClient)(
-        prediction_id
-      );
+      const retiredPrediction =
+        await predictions.getById(dbClient)(prediction_id);
       if (!retiredPrediction) {
         return res.status(404).json(
           responseUtils.writeErrors([
@@ -108,7 +108,7 @@ export const retirePredictionById: Route = (router: Router) => {
               code: API.Errors.PREDICTION_NOT_FOUND,
               message: `Prediction with id ${prediction_id} does not exist.`,
             },
-          ])
+          ]),
         );
       }
 
@@ -119,9 +119,9 @@ export const retirePredictionById: Route = (router: Router) => {
       return res.json(
         responseUtils.writeSuccess(
           retiredPrediction,
-          "Prediction retired successfully."
-        )
+          "Prediction retired successfully.",
+        ),
       );
-    }
+    }),
   );
 };

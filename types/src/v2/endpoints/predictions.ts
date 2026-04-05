@@ -129,3 +129,23 @@ export namespace POST_Predictions {
   export type Data = Entities.Predictions.Prediction;
   export type Response = APIResponse<Data>;
 }
+
+// POST /predictions/{prediction_id}/bets
+export namespace POST_ById_bets {
+  export type Body = {
+    discord_id: string;
+    endorsed: boolean;
+  };
+  export type Data = Entities.Predictions.Prediction;
+  export type Response = APIResponse<Data>;
+}
+
+// POST /predictions/{prediction_id}/votes
+export namespace POST_ById_votes {
+  export type Body = {
+    discord_id: string;
+    vote: boolean;
+  };
+  export type Data = Entities.Predictions.Prediction;
+  export type Response = APIResponse<Data>;
+}

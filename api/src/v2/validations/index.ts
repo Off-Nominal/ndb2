@@ -51,15 +51,27 @@ export const optionalTrimmedStringSchema = z
     return t === "" ? undefined : t;
   });
 
+export type BooleanStringSchemaOptions = {
+  /** Property name in validation messages (`Property '…'`). */
+  propName: string;
+  /**
+   * When set, native JSON booleans are accepted in addition to `"true"` / `"false"` strings.
+   * Use for `express.json()` bodies; omit for query params (strings only).
+   */
+  allowJsonBoolean?: boolean;
+};
+
 /**
- * Interprets query-string booleans: `"true"` → `true`, `"false"` → `false`.
- * Pair with {@link queryParamScalar} for Express `req.query`, and `.optional()` when the param may be omitted.
+ * Creates a Zod schema for booleans from `"true"` / `"false"` strings (e.g. query params).
+ * Pair with {@link queryParamScalar} for Express `req.query`, and `.optional()` on the returned schema when the param may be omitted.
  */
-export const booleanStringSchema = z
-  .enum(["true", "false"], {
-    message: "Value must be 'true' or 'false'",
-  })
-  .transform((v): boolean => v === "true");
+export function createBooleanStringSchema(options: BooleanStringSchemaOptions) {
+  return z
+    .enum(["true", "false"], {
+      message: `Property '${options.propName}' must be 'true' or 'false'`,
+    })
+    .transform((v): boolean => v === "true");
+}
 
 export const predictionDriverSchema = z.enum(["event", "date"], {
   message: "Property 'driver' must be either 'event' or 'date'",
@@ -97,20 +109,24 @@ export const createFutureDateSchema = ({ fieldName }: { fieldName: string }) =>
         }),
     );
 
+export type PostgresIntSchemaOptions = {
+  /** Property name in validation messages (`Property '…'`). */
+  propName: string;
+};
+
 /**
  * Creates a Zod schema for Postgres INT values: positive integer ≤ {@link POSTGRES_MAX_INT}.
  * Use `.optional()` on the returned schema when the param may be omitted.
- *
- * @param fieldName - Used in validation messages
  */
-export function createPostgresIntSchema(fieldName: string) {
+export function createPostgresIntSchema(options: PostgresIntSchemaOptions) {
+  const { propName } = options;
   return z
     .any()
     .transform((value, ctx) => {
       if (value === undefined || value === null || value === "") {
         ctx.addIssue({
           code: "custom",
-          message: `Property '${fieldName}' is required`,
+          message: `Property '${propName}' is required`,
         });
         return z.NEVER;
       }
@@ -119,16 +135,16 @@ export function createPostgresIntSchema(fieldName: string) {
     .pipe(
       z.coerce
         .number({
-          message: `Property '${fieldName}' must be a number`,
+          message: `Property '${propName}' must be a number`,
         })
         .positive({
-          message: `Property '${fieldName}' must be a positive number`,
+          message: `Property '${propName}' must be a positive number`,
         })
         .int({
-          message: `Property '${fieldName}' must be an integer`,
+          message: `Property '${propName}' must be an integer`,
         })
         .lte(POSTGRES_MAX_INT, {
-          message: `Property '${fieldName}' must be less than or equal to ${POSTGRES_MAX_INT}`,
+          message: `Property '${propName}' must be less than or equal to ${POSTGRES_MAX_INT}`,
         }),
     );
 }
@@ -137,7 +153,11 @@ export function createPostgresIntSchema(fieldName: string) {
  * Schema for validating prediction IDs.
  * Extends the base Postgres INT schema with prediction-specific error messages.
  */
-export const predictionIdSchema = createPostgresIntSchema("prediction_id");
+export const predictionIdSchema = createPostgresIntSchema({
+  propName: "prediction_id",
+});
 
 /** Postgres INT for season ids; pair with `.optional()` when the query param is not required. */
-export const seasonIdSchema = createPostgresIntSchema("season_id");
+export const seasonIdSchema = createPostgresIntSchema({
+  propName: "season_id",
+});

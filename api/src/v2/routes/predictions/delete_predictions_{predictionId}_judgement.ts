@@ -9,6 +9,7 @@ import * as API from "@offnominal/ndb2-api-types/v2";
 import { validate } from "../../middleware/validate";
 import { getDbClient } from "../../utils/getDbClient";
 import { eventsManager } from "../../managers/events";
+import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
 
 export const unjudgePredictionById: Route = (router: Router) => {
   router.delete(
@@ -18,7 +19,7 @@ export const unjudgePredictionById: Route = (router: Router) => {
         prediction_id: predictionIdSchema,
       }),
     }),
-    async (req, res) => {
+    wrapRouteWithErrorBoundary(async (req, res) => {
       const { prediction_id } = req.params;
 
       const dbClient = await getDbClient(res);
@@ -34,7 +35,7 @@ export const unjudgePredictionById: Route = (router: Router) => {
               code: API.Errors.PREDICTION_NOT_FOUND,
               message: `Prediction with id ${prediction_id} does not exist.`,
             },
-          ])
+          ]),
         );
       }
 
@@ -49,7 +50,7 @@ export const unjudgePredictionById: Route = (router: Router) => {
               code: API.Errors.INVALID_PREDICTION_STATUS,
               message: "Predictions must be judged to be unjudged.",
             },
-          ])
+          ]),
         );
       }
 
@@ -67,7 +68,7 @@ export const unjudgePredictionById: Route = (router: Router) => {
                 code: API.Errors.INVALID_PREDICTION_STATUS,
                 message: "Predictions in closed seasons cannot be unjudged.",
               },
-            ])
+            ]),
           );
         }
       }
@@ -76,9 +77,8 @@ export const unjudgePredictionById: Route = (router: Router) => {
       await predictions.unjudgeById(dbClient)(prediction_id);
 
       // Get updated prediction for response
-      const unjudgedPrediction = await predictions.getById(dbClient)(
-        prediction_id
-      );
+      const unjudgedPrediction =
+        await predictions.getById(dbClient)(prediction_id);
       if (!unjudgedPrediction) {
         return res.status(404).json(
           responseUtils.writeErrors([
@@ -86,7 +86,7 @@ export const unjudgePredictionById: Route = (router: Router) => {
               code: API.Errors.PREDICTION_NOT_FOUND,
               message: `Prediction with id ${prediction_id} does not exist.`,
             },
-          ])
+          ]),
         );
       }
 
@@ -97,9 +97,9 @@ export const unjudgePredictionById: Route = (router: Router) => {
       return res.json(
         responseUtils.writeSuccess(
           unjudgedPrediction,
-          "Prediction judgement removed successfully."
-        )
+          "Prediction judgement removed successfully.",
+        ),
       );
-    }
+    }),
   );
 };
