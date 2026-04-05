@@ -52,6 +52,34 @@ const getSnoozeChecksByPredictionIdIR: any = {"usedParamSet":{"prediction_id":tr
 export const getSnoozeChecksByPredictionId = new PreparedQuery<IGetSnoozeChecksByPredictionIdParams,IGetSnoozeChecksByPredictionIdResult>(getSnoozeChecksByPredictionIdIR);
 
 
+/** 'CloseSnoozeChecksByPredictionId' parameters type */
+export interface ICloseSnoozeChecksByPredictionIdParams {
+  prediction_id: number;
+}
+
+/** 'CloseSnoozeChecksByPredictionId' return type */
+export type ICloseSnoozeChecksByPredictionIdResult = void;
+
+/** 'CloseSnoozeChecksByPredictionId' query type */
+export interface ICloseSnoozeChecksByPredictionIdQuery {
+  params: ICloseSnoozeChecksByPredictionIdParams;
+  result: ICloseSnoozeChecksByPredictionIdResult;
+}
+
+const closeSnoozeChecksByPredictionIdIR: any = {"usedParamSet":{"prediction_id":true},"params":[{"name":"prediction_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":90,"b":104}]}],"statement":"UPDATE snooze_checks\n  SET closed = true,\n      closed_at = NOW()\n  WHERE prediction_id = :prediction_id!"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * UPDATE snooze_checks
+ *   SET closed = true,
+ *       closed_at = NOW()
+ *   WHERE prediction_id = :prediction_id!
+ * ```
+ */
+export const closeSnoozeChecksByPredictionId = new PreparedQuery<ICloseSnoozeChecksByPredictionIdParams,ICloseSnoozeChecksByPredictionIdResult>(closeSnoozeChecksByPredictionIdIR);
+
+
 /** 'CloseSnoozeCheckById' parameters type */
 export interface ICloseSnoozeCheckByIdParams {
   snooze_check_id: number;

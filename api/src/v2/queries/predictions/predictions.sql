@@ -49,12 +49,6 @@ UPDATE predictions
   SET retired_date = NOW() 
   WHERE predictions.id = :prediction_id!;
 
-/* @name closeSnoozeChecksByPredictionId */
-UPDATE snooze_checks
-  SET closed = true,
-      closed_at = NOW()
-  WHERE prediction_id = :prediction_id!;
-
 /* @name setCheckDateByPredictionId */
 UPDATE predictions
 SET check_date = :check_date!

@@ -16,6 +16,12 @@ WHERE sc.prediction_id = :prediction_id!
 GROUP BY sc.id
 ORDER BY sc.check_date DESC;
 
+/* @name closeSnoozeChecksByPredictionId */
+UPDATE snooze_checks
+  SET closed = true,
+      closed_at = NOW()
+  WHERE prediction_id = :prediction_id!;
+
 /* @name closeSnoozeCheckById */
 UPDATE snooze_checks
   SET closed = true, closed_at = NOW()

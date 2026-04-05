@@ -1,9 +1,11 @@
 import { PoolClient } from "pg";
 import { getBetsByPredictionId } from "../bets/bets.queries";
-import { getSnoozeChecksByPredictionId } from "../snooze_checks/snooze_checks.queries";
-import { getVotesByPredictionId } from "../votes/votes.queries";
 import {
   closeSnoozeChecksByPredictionId,
+  getSnoozeChecksByPredictionId,
+} from "../snooze_checks/snooze_checks.queries";
+import { getVotesByPredictionId } from "../votes/votes.queries";
+import {
   getPredictionsById,
   insertDateDrivenPrediction,
   insertEventDrivenPrediction,
