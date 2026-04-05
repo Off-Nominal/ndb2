@@ -14,6 +14,7 @@ import {
   optionalTrimmedStringSchema,
   seasonIdSchema,
 } from "../../validations";
+import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
 
 /**
  * Zod schema for `GET /predictions/search` query string validation.
@@ -96,7 +97,7 @@ export const getPredictionsSearch: Route = (router) => {
     validate({
       query: searchQuerySchema,
     }),
-    async (req, res) => {
+    wrapRouteWithErrorBoundary(async (req, res) => {
       const q = req.query;
 
       const dbClient = await getDbClient(res);
@@ -157,6 +158,6 @@ export const getPredictionsSearch: Route = (router) => {
       return res.json(
         responseUtils.writeSuccess(rows, "Predictions fetched successfully."),
       );
-    },
+    }),
   );
 };

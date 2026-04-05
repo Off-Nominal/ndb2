@@ -6,6 +6,7 @@ import { validate } from "../../middleware/validate";
 import predictions from "../../queries/predictions";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { getDbClient } from "../../utils/getDbClient";
+import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
 
 export const getPredictionById: Route = (router) => {
   router.get(
@@ -15,7 +16,7 @@ export const getPredictionById: Route = (router) => {
         prediction_id: predictionIdSchema,
       }),
     }),
-    async (req, res) => {
+    wrapRouteWithErrorBoundary(async (req, res) => {
       const { prediction_id } = req.params;
 
       const dbClient = await getDbClient(res);
@@ -29,14 +30,14 @@ export const getPredictionById: Route = (router) => {
               code: API.Errors.PREDICTION_NOT_FOUND,
               message: `Prediction with id ${prediction_id} does not exist.`,
             },
-          ])
+          ]),
         );
       }
 
       // Send response
       return res.json(
-        responseUtils.writeSuccess(prediction, "Prediction fetched.")
+        responseUtils.writeSuccess(prediction, "Prediction fetched."),
       );
-    }
+    }),
   );
 };

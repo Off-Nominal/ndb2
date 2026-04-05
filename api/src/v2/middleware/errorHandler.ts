@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, RequestHandler } from "express";
 import responseUtils from "../utils/response";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { createLogger } from "@mendahu/utilities";
@@ -18,7 +18,7 @@ export const errorHandler = (
   err: Error,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   // Log error with metadata
   logger.error("Unhandled Server Error", {
@@ -38,6 +38,26 @@ export const errorHandler = (
         code: API.Errors.SERVER_ERROR,
         message: "There was an error processing your request.",
       },
-    ])
+    ]),
   );
+};
+
+// Wraps a route with a try/catch block and calls next(error) if an error is thrown
+// Useful for async routes that throw errors
+export const wrapRouteWithErrorBoundary = <
+  TParams,
+  T extends any,
+  TBody,
+  TQuery,
+  R extends Record<string, any>,
+>(
+  handler: RequestHandler<TParams, T, TBody, TQuery, R>,
+): RequestHandler<TParams, T, TBody, TQuery, R> => {
+  return async (req, res, next) => {
+    try {
+      return await handler(req, res, next);
+    } catch (error) {
+      next(error instanceof Error ? error : new Error(String(error)));
+    }
+  };
 };

@@ -8,6 +8,7 @@ import * as API from "@offnominal/ndb2-api-types/v2";
 import { validate } from "../../middleware/validate";
 import { getDbClient } from "../../utils/getDbClient";
 import { eventsManager } from "../../managers/events";
+import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
 
 export const untriggerPredictionById: Route = (router: Router) => {
   router.delete(
@@ -17,7 +18,7 @@ export const untriggerPredictionById: Route = (router: Router) => {
         prediction_id: predictionIdSchema,
       }),
     }),
-    async (req, res) => {
+    wrapRouteWithErrorBoundary(async (req, res) => {
       const { prediction_id } = req.params;
 
       const dbClient = await getDbClient(res);
@@ -33,7 +34,7 @@ export const untriggerPredictionById: Route = (router: Router) => {
               code: API.Errors.PREDICTION_NOT_FOUND,
               message: `Prediction with id ${prediction_id} does not exist.`,
             },
-          ])
+          ]),
         );
       }
 
@@ -45,7 +46,7 @@ export const untriggerPredictionById: Route = (router: Router) => {
               code: API.Errors.INVALID_PREDICTION_STATUS,
               message: "Predictions must be closed to be untriggered.",
             },
-          ])
+          ]),
         );
       }
 
@@ -53,9 +54,8 @@ export const untriggerPredictionById: Route = (router: Router) => {
       await predictions.untriggerById(dbClient)(prediction_id);
 
       // Get updated prediction for response
-      const untriggeredPrediction = await predictions.getById(dbClient)(
-        prediction_id
-      );
+      const untriggeredPrediction =
+        await predictions.getById(dbClient)(prediction_id);
       if (!untriggeredPrediction) {
         return res.status(404).json(
           responseUtils.writeErrors([
@@ -63,7 +63,7 @@ export const untriggerPredictionById: Route = (router: Router) => {
               code: API.Errors.PREDICTION_NOT_FOUND,
               message: `Prediction with id ${prediction_id} does not exist.`,
             },
-          ])
+          ]),
         );
       }
 
@@ -74,9 +74,9 @@ export const untriggerPredictionById: Route = (router: Router) => {
       return res.json(
         responseUtils.writeSuccess(
           untriggeredPrediction,
-          "Prediction untriggred successfully."
-        )
+          "Prediction untriggred successfully.",
+        ),
       );
-    }
+    }),
   );
 };
