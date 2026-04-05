@@ -13,14 +13,12 @@ export const generateResponse = <P extends API.Webhooks.Payload>(
   event_name: P["event_name"],
   data: P["data"],
 ): API.Webhooks.Payload => {
-  const response: API.Webhooks.Payload = {
+  return {
     event_name,
     version: 2,
     date: new Date(),
     data,
-  };
-
-  return response;
+  } as API.Webhooks.Payload;
 };
 
 export const notifySubscribers = <E extends API.Webhooks.WebhookEvent, D>(
@@ -85,4 +83,25 @@ eventsManager.on("new_bet", (prediction) => {
 
 eventsManager.on("new_vote", (prediction) => {
   notifySubscribers(subscribers, generateResponse("new_vote", { prediction }));
+});
+
+eventsManager.on("prediction_edit", (prediction, edited_fields) => {
+  notifySubscribers(
+    subscribers,
+    generateResponse("prediction_edit", { prediction, edited_fields }),
+  );
+});
+
+eventsManager.on("new_snooze_vote", (prediction) => {
+  notifySubscribers(
+    subscribers,
+    generateResponse("new_snooze_vote", { prediction }),
+  );
+});
+
+eventsManager.on("snoozed_prediction", (prediction) => {
+  notifySubscribers(
+    subscribers,
+    generateResponse("snoozed_prediction", { prediction }),
+  );
 });

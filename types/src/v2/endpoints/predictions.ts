@@ -149,3 +149,25 @@ export namespace POST_ById_votes {
   export type Data = Entities.Predictions.Prediction;
   export type Response = APIResponse<Data>;
 }
+
+// PATCH /predictions/{prediction_id}/snooze
+export namespace PATCH_ById_snooze {
+  export type Body = {
+    discord_id: string;
+    /** ISO 8601 datetime; must be in the future and after the prediction’s `created_date`. */
+    check_date: string;
+  };
+  export type Data = Entities.Predictions.Prediction;
+  export type Response = APIResponse<Data>;
+}
+
+// POST /predictions/{prediction_id}/snooze_checks/{snooze_check_id}
+export namespace POST_ById_snooze_checks {
+  export type Body = {
+    discord_id: string;
+    /** Snooze duration in days; see {@link Entities.SnoozeVotes.SnoozeVoteValue}. */
+    value: Entities.SnoozeVotes.SnoozeVoteValue;
+  };
+  export type Data = Entities.Predictions.Prediction;
+  export type Response = APIResponse<Data>;
+}

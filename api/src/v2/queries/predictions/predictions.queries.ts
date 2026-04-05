@@ -171,6 +171,63 @@ const retirePredictionByIdIR: any = {"usedParamSet":{"prediction_id":true},"para
 export const retirePredictionById = new PreparedQuery<IRetirePredictionByIdParams,IRetirePredictionByIdResult>(retirePredictionByIdIR);
 
 
+/** 'SetCheckDateByPredictionId' parameters type */
+export interface ISetCheckDateByPredictionIdParams {
+  check_date: DateOrString;
+  prediction_id: number;
+}
+
+/** 'SetCheckDateByPredictionId' return type */
+export type ISetCheckDateByPredictionIdResult = void;
+
+/** 'SetCheckDateByPredictionId' query type */
+export interface ISetCheckDateByPredictionIdQuery {
+  params: ISetCheckDateByPredictionIdParams;
+  result: ISetCheckDateByPredictionIdResult;
+}
+
+const setCheckDateByPredictionIdIR: any = {"usedParamSet":{"check_date":true,"prediction_id":true},"params":[{"name":"check_date","required":true,"transform":{"type":"scalar"},"locs":[{"a":36,"b":47}]},{"name":"prediction_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":72,"b":86}]}],"statement":"UPDATE predictions\nSET check_date = :check_date!\nWHERE predictions.id = :prediction_id!"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * UPDATE predictions
+ * SET check_date = :check_date!
+ * WHERE predictions.id = :prediction_id!
+ * ```
+ */
+export const setCheckDateByPredictionId = new PreparedQuery<ISetCheckDateByPredictionIdParams,ISetCheckDateByPredictionIdResult>(setCheckDateByPredictionIdIR);
+
+
+/** 'ExtendPredictionCheckDateBySnoozeDays' parameters type */
+export interface IExtendPredictionCheckDateBySnoozeDaysParams {
+  days: number;
+  prediction_id: number;
+}
+
+/** 'ExtendPredictionCheckDateBySnoozeDays' return type */
+export type IExtendPredictionCheckDateBySnoozeDaysResult = void;
+
+/** 'ExtendPredictionCheckDateBySnoozeDays' query type */
+export interface IExtendPredictionCheckDateBySnoozeDaysQuery {
+  params: IExtendPredictionCheckDateBySnoozeDaysParams;
+  result: IExtendPredictionCheckDateBySnoozeDaysResult;
+}
+
+const extendPredictionCheckDateBySnoozeDaysIR: any = {"usedParamSet":{"days":true,"prediction_id":true},"params":[{"name":"days","required":true,"transform":{"type":"scalar"},"locs":[{"a":83,"b":88}]},{"name":"prediction_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":113,"b":127}]}],"statement":"UPDATE predictions\nSET\n  check_date = predictions.check_date + '1 day'::INTERVAL * :days!\nWHERE predictions.id = :prediction_id!"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * UPDATE predictions
+ * SET
+ *   check_date = predictions.check_date + '1 day'::INTERVAL * :days!
+ * WHERE predictions.id = :prediction_id!
+ * ```
+ */
+export const extendPredictionCheckDateBySnoozeDays = new PreparedQuery<IExtendPredictionCheckDateBySnoozeDaysParams,IExtendPredictionCheckDateBySnoozeDaysResult>(extendPredictionCheckDateBySnoozeDaysIR);
+
+
 /** 'InsertEventDrivenPrediction' parameters type */
 export interface IInsertEventDrivenPredictionParams {
   check_date: DateOrString;

@@ -23,6 +23,16 @@ export interface NDBEvents {
     prediction: API.Entities.Predictions.Prediction,
   ) => void;
   retired_prediction: (prediction: API.Entities.Predictions.Prediction) => void;
+  prediction_edit: (
+    prediction: API.Entities.Predictions.Prediction,
+    edited_fields: API.Webhooks.PredictionEditChangedFields,
+  ) => void;
+  new_snooze_vote: (
+    prediction: API.Entities.Predictions.Prediction,
+  ) => void;
+  snoozed_prediction: (
+    prediction: API.Entities.Predictions.Prediction,
+  ) => void;
 }
 
 /**

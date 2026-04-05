@@ -9,10 +9,20 @@ const WEBHOOK_EVENTS = [
   "new_prediction",
   "new_bet",
   "new_vote",
+  "prediction_edit",
+  "new_snooze_vote",
+  "snoozed_prediction",
 ] as const;
 
 // Derive the type from the array
 export type WebhookEvent = (typeof WEBHOOK_EVENTS)[number];
+
+export type PredictionEditChangedFields = {
+  check_date?: {
+    old: string | null;
+    new: string;
+  };
+};
 
 export type BasePayload<E extends WebhookEvent, D> = {
   event_name: E;
@@ -64,6 +74,25 @@ export namespace Events {
       prediction: Prediction;
     }
   >;
+  export type PredictionEdit = BasePayload<
+    "prediction_edit",
+    {
+      prediction: Prediction;
+      edited_fields: PredictionEditChangedFields;
+    }
+  >;
+  export type NewSnoozeVote = BasePayload<
+    "new_snooze_vote",
+    {
+      prediction: Prediction;
+    }
+  >;
+  export type SnoozedPrediction = BasePayload<
+    "snoozed_prediction",
+    {
+      prediction: Prediction;
+    }
+  >;
 }
 
 export type Payload =
@@ -73,7 +102,10 @@ export type Payload =
   | Events.RetiredPrediction
   | Events.NewPrediction
   | Events.NewBet
-  | Events.NewVote;
+  | Events.NewVote
+  | Events.PredictionEdit
+  | Events.NewSnoozeVote
+  | Events.SnoozedPrediction;
 
 export const isWebhookPayloadV2 = (payload: any): payload is Payload => {
   if (!payload || typeof payload !== "object") {
