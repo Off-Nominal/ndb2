@@ -69,8 +69,7 @@ export const postPredictionSnoozeCheckVote: Route = (router: Router) => {
           responseUtils.writeErrors([
             {
               code: API.Errors.SNOOZE_CHECK_NOT_FOUND,
-              message:
-                "Snooze check is not associated with this prediction.",
+              message: "Snooze check is not associated with this prediction.",
             },
           ]),
         );
@@ -87,11 +86,7 @@ export const postPredictionSnoozeCheckVote: Route = (router: Router) => {
         );
       }
 
-      await snoozeVotes.addVote(dbClient)(
-        snooze_check_id,
-        user.id,
-        value as API.Entities.SnoozeVotes.SnoozeVoteValue,
-      );
+      await snoozeVotes.addVote(dbClient)(snooze_check_id, user.id, value);
 
       const updated = await predictions.getById(dbClient)(prediction_id);
       if (!updated) {

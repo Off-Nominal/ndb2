@@ -1,18 +1,37 @@
 import { z } from "zod";
-import * as NDBTypes from "@offnominal/ndb2-api-types/v2";
+import { Entities } from "@offnominal/ndb2-api-types/v2";
 import { POSTGRES_MAX_INT } from "./constants";
 
+const [
+  snoozeVoteDay,
+  snoozeVoteWeek,
+  snoozeVoteMonth,
+  snoozeVoteQuarter,
+  snoozeVoteYear,
+] = Entities.SnoozeVotes.SNOOZE_VOTE_VALUES;
+
 /**
- * POST body `value` for snooze votes.
+ * POST body `value` for snooze votes. Infers as {@link Entities.SnoozeVotes.SnoozeVoteValue}.
  */
 export const snoozeVoteValueSchema = z.coerce
   .number({
     message: "Property 'value' must be a number",
   })
-  .refine((n) => NDBTypes.Entities.SnoozeVotes.isSnoozeVoteValue(n), {
-    message:
-      "Property 'value' must be one of: 1, 7, 30, 90, 365 (snooze duration in days).",
-  });
+  .pipe(
+    z.union(
+      [
+        z.literal(snoozeVoteDay),
+        z.literal(snoozeVoteWeek),
+        z.literal(snoozeVoteMonth),
+        z.literal(snoozeVoteQuarter),
+        z.literal(snoozeVoteYear),
+      ],
+      {
+        message:
+          "Property 'value' must be one of: 1, 7, 30, 90, 365 (snooze duration in days).",
+      },
+    ),
+  );
 
 /**
  * Normalizes raw Express `req.query` values for a single logical parameter:
