@@ -7,7 +7,7 @@ import predictions from "../../queries/predictions";
 import { getUserByDiscordId } from "../../queries/users/users.queries";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import {
-  booleanStringSchema,
+  createBooleanStringSchema,
   discordIdSchema,
   queryParamMulti,
   queryParamScalar,
@@ -60,7 +60,9 @@ const searchQuerySchema = z
     unbetter: queryParamScalar(discordIdSchema.optional()),
     season_id: queryParamScalar(seasonIdSchema.optional()),
     include_non_season_applicable: queryParamScalar(
-      booleanStringSchema.optional(),
+      createBooleanStringSchema({
+        propName: "include_non_season_applicable",
+      }).optional(),
     ),
     page: queryParamScalar(z.coerce.number().int().positive().optional()),
   })

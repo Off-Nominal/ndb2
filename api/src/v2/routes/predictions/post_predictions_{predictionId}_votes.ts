@@ -12,13 +12,6 @@ import { getDbClient } from "../../utils/getDbClient";
 import { eventsManager } from "../../managers/events";
 import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
 
-const postVoteBodySchema = z.object({
-  discord_id: discordIdSchema,
-  vote: z.boolean({
-    message: "Property 'vote' must be a boolean",
-  }),
-});
-
 export const postPredictionVote: Route = (router: Router) => {
   router.post(
     "/:prediction_id/votes",
@@ -26,7 +19,12 @@ export const postPredictionVote: Route = (router: Router) => {
       params: z.object({
         prediction_id: predictionIdSchema,
       }),
-      body: postVoteBodySchema,
+      body: z.object({
+        discord_id: discordIdSchema,
+        vote: z.boolean({
+          message: "Property 'vote' must be a boolean",
+        }),
+      }),
     }),
     wrapRouteWithErrorBoundary(async (req, res) => {
       const { prediction_id } = req.params;

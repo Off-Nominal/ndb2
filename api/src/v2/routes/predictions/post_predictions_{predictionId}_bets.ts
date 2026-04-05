@@ -14,13 +14,6 @@ import { eventsManager } from "../../managers/events";
 import GAME_MECHANICS from "../../../config/game_mechanics";
 import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
 
-const postBetBodySchema = z.object({
-  discord_id: discordIdSchema,
-  endorsed: z.boolean({
-    message: "Property 'endorsed' must be a boolean",
-  }),
-});
-
 export const postPredictionBet: Route = (router: Router) => {
   router.post(
     "/:prediction_id/bets",
@@ -28,7 +21,12 @@ export const postPredictionBet: Route = (router: Router) => {
       params: z.object({
         prediction_id: predictionIdSchema,
       }),
-      body: postBetBodySchema,
+      body: z.object({
+        discord_id: discordIdSchema,
+        endorsed: z.boolean({
+          message: "Property 'endorsed' must be a boolean",
+        }),
+      }),
     }),
     wrapRouteWithErrorBoundary(async (req, res) => {
       const { prediction_id } = req.params;
