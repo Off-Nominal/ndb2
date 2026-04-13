@@ -126,7 +126,7 @@ export interface IClosePredictionByIdQuery {
   result: IClosePredictionByIdResult;
 }
 
-const closePredictionByIdIR: any = {"usedParamSet":{"closed_date":true,"prediction_id":true,"triggerer_id":true},"params":[{"name":"closed_date","required":true,"transform":{"type":"scalar"},"locs":[{"a":0,"b":0}]},{"name":"prediction_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":0,"b":0}]},{"name":"triggerer_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":0,"b":0}]}],"statement":"UPDATE predictions\nSET\n  triggerer_id = :triggerer_id!,\n  closed_date = :closed_date!,\n  triggered_date = NOW()\nWHERE predictions.id = :prediction_id!"};
+const closePredictionByIdIR: any = {"usedParamSet":{"triggerer_id":true,"closed_date":true,"prediction_id":true},"params":[{"name":"triggerer_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":40,"b":53}]},{"name":"closed_date","required":true,"transform":{"type":"scalar"},"locs":[{"a":72,"b":84}]},{"name":"prediction_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":135,"b":149}]}],"statement":"UPDATE predictions\nSET\n  triggerer_id = :triggerer_id!,\n  closed_date = :closed_date!,\n  triggered_date = NOW()\nWHERE predictions.id = :prediction_id!"};
 
 /**
  * Query generated from SQL:
