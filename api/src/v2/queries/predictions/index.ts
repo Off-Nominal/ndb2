@@ -116,14 +116,24 @@ export default {
       return rows.map(mapSearchRowToDTO);
     },
   getById: (dbClient: PoolClient) => async (prediction_id: number) => {
-    // Queries
-    const [predictionResult, betsResult, votesResult, checksResult] =
-      await Promise.all([
-        getPredictionsById.run({ prediction_id }, dbClient),
-        getBetsByPredictionId.run({ prediction_id }, dbClient),
-        getVotesByPredictionId.run({ prediction_id }, dbClient),
-        getSnoozeChecksByPredictionId.run({ prediction_id }, dbClient),
-      ]);
+    // Run sequentially: a single PoolClient must not execute overlapping
+    // queries (pg deprecates concurrent client.query() on one client).
+    const predictionResult = await getPredictionsById.run(
+      { prediction_id },
+      dbClient,
+    );
+    const betsResult = await getBetsByPredictionId.run(
+      { prediction_id },
+      dbClient,
+    );
+    const votesResult = await getVotesByPredictionId.run(
+      { prediction_id },
+      dbClient,
+    );
+    const checksResult = await getSnoozeChecksByPredictionId.run(
+      { prediction_id },
+      dbClient,
+    );
 
     if (predictionResult.length === 0) {
       return undefined;
