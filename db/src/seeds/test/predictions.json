@@ -358,5 +358,33 @@
         "vote": true
       }
     ]
+  },
+  {
+    "id": 10,
+    "user_id": "550e8400-e29b-41d4-a716-446655440001",
+    "text": "Test event-driven prediction with open status (PATCH snooze tests)",
+    "driver": "event",
+    "baseDate": {
+      "days": 0
+    },
+    "check_date": {
+      "days": 25
+    }
+  },
+  {
+    "id": 11,
+    "user_id": "550e8400-e29b-41d4-a716-446655440001",
+    "text": "Test event-driven prediction with retired status (PATCH snooze tests)",
+    "driver": "event",
+    "baseDate": {
+      "quarter": "past",
+      "days": 10
+    },
+    "check_date": {
+      "days": 20
+    },
+    "retired": {
+      "days": 5
+    }
   }
 ]
