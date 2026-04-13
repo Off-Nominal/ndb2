@@ -67,7 +67,7 @@ describe("PATCH /predictions/:prediction_id/snooze", () => {
 
   it("should reject retired predictions", async () => {
     const response = await request(app)
-      .patch("/6/snooze")
+      .patch("/11/snooze")
       .send({
         discord_id: "111111111111111111",
         check_date: futureIso(),
@@ -85,7 +85,7 @@ describe("PATCH /predictions/:prediction_id/snooze", () => {
     const emitSpy = vi.spyOn(eventsManager, "emit");
 
     const response = await request(app)
-      .patch("/4/snooze")
+      .patch("/10/snooze")
       .send({
         discord_id: "111111111111111111",
         check_date: futureIso(),
@@ -93,7 +93,7 @@ describe("PATCH /predictions/:prediction_id/snooze", () => {
 
     expect(response.status).toBe(200);
     expect(response.body.data).toBeDefined();
-    expect(response.body.data.id).toBe(4);
+    expect(response.body.data.id).toBe(10);
     expect(emitSpy).toHaveBeenCalledWith(
       "prediction_edit",
       expect.any(Object),
