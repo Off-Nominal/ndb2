@@ -10,6 +10,7 @@ import { postPredictionBet } from "./routes/predictions/post_predictions_{predic
 import { postPredictionVote } from "./routes/predictions/post_predictions_{predictionId}_votes";
 import { patchPredictionSnooze } from "./routes/predictions/patch_predictions_{predictionId}_snooze";
 import { postPredictionSnoozeCheckVote } from "./routes/predictions/post_predictions_{predictionId}_snooze_checks_{snoozeCheckId}";
+import { triggerPredictionById } from "./routes/predictions/post_predictions_{predictionId}_trigger";
 import { mapRoutes } from "./utils/routerMap";
 import { errorHandler } from "./middleware/errorHandler";
 import "./managers/webhooks"; // Initialize webhook event listeners
@@ -27,6 +28,7 @@ apiV2Router.use(
     patchPredictionSnooze,
     getPredictionsSearch,
     getPredictionById,
+    triggerPredictionById,
     untriggerPredictionById,
     unjudgePredictionById,
     retirePredictionById,

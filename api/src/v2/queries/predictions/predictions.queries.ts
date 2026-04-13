@@ -110,6 +110,38 @@ const untriggerPredictionByIdIR: any = {"usedParamSet":{"prediction_id":true},"p
 export const untriggerPredictionById = new PreparedQuery<IUntriggerPredictionByIdParams,IUntriggerPredictionByIdResult>(untriggerPredictionByIdIR);
 
 
+/** 'ClosePredictionById' parameters type */
+export interface IClosePredictionByIdParams {
+  closed_date: DateOrString;
+  prediction_id: number;
+  triggerer_id: string;
+}
+
+/** 'ClosePredictionById' return type */
+export type IClosePredictionByIdResult = void;
+
+/** 'ClosePredictionById' query type */
+export interface IClosePredictionByIdQuery {
+  params: IClosePredictionByIdParams;
+  result: IClosePredictionByIdResult;
+}
+
+const closePredictionByIdIR: any = {"usedParamSet":{"closed_date":true,"prediction_id":true,"triggerer_id":true},"params":[{"name":"closed_date","required":true,"transform":{"type":"scalar"},"locs":[{"a":0,"b":0}]},{"name":"prediction_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":0,"b":0}]},{"name":"triggerer_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":0,"b":0}]}],"statement":"UPDATE predictions\nSET\n  triggerer_id = :triggerer_id!,\n  closed_date = :closed_date!,\n  triggered_date = NOW()\nWHERE predictions.id = :prediction_id!"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * UPDATE predictions
+ * SET
+ *   triggerer_id = :triggerer_id!,
+ *   closed_date = :closed_date!,
+ *   triggered_date = NOW()
+ * WHERE predictions.id = :prediction_id!
+ * ```
+ */
+export const closePredictionById = new PreparedQuery<IClosePredictionByIdParams,IClosePredictionByIdResult>(closePredictionByIdIR);
+
+
 /** 'UnjudgePredictionById' parameters type */
 export interface IUnjudgePredictionByIdParams {
   prediction_id: number;

@@ -5,6 +5,7 @@ const WEBHOOK_EVENTS = [
   "unjudged_prediction",
   "untriggered_prediction",
   "triggered_prediction",
+  "triggered_snooze_check",
   "retired_prediction",
   "new_prediction",
   "new_bet",
@@ -46,6 +47,12 @@ export namespace Events {
   >;
   export type TriggeredPrediction = BasePayload<
     "triggered_prediction",
+    {
+      prediction: Prediction;
+    }
+  >;
+  export type TriggeredSnoozeCheck = BasePayload<
+    "triggered_snooze_check",
     {
       prediction: Prediction;
     }
@@ -99,6 +106,7 @@ export type Payload =
   | Events.UnjudgedPrediction
   | Events.UntriggeredPrediction
   | Events.TriggeredPrediction
+  | Events.TriggeredSnoozeCheck
   | Events.RetiredPrediction
   | Events.NewPrediction
   | Events.NewBet
