@@ -60,7 +60,7 @@ const closePredictionById = (client: PoolClient) =>
     triggerer_id: number | string | null,
     closed_date: Date
   ): Promise<APIPredictions.ClosePredictionById> {
-    client.query("BEGIN");
+    await client.query("BEGIN");
 
     try {
       // Ensure any open checks are closed
