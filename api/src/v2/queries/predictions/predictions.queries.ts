@@ -1,5 +1,8 @@
 /** Types generated for queries found in "src/v2/queries/predictions/predictions.sql" */
 import { PreparedQuery } from '@pgtyped/runtime';
+import type { IGetBetsByPredictionIdResult } from '../bets/bets.queries';
+import type { IGetSnoozeChecksByPredictionIdResult } from '../snooze_checks/snooze_checks.queries';
+import type { IGetVotesByPredictionIdResult } from '../votes/votes.queries';
 
 export type prediction_driver = 'date' | 'event';
 
@@ -79,6 +82,35 @@ const getPredictionsByIdIR: any = {"usedParamSet":{"prediction_id":true},"params
  * ```
  */
 export const getPredictionsById = new PreparedQuery<IGetPredictionsByIdParams,IGetPredictionsByIdResult>(getPredictionsByIdIR);
+
+
+/** 'GetPredictionDetailById' parameters type */
+export interface IGetPredictionDetailByIdParams {
+  prediction_id: number;
+}
+
+/** 'GetPredictionDetailById' return type */
+export interface IGetPredictionDetailByIdResult extends IGetPredictionsByIdResult {
+  bets_json: IGetBetsByPredictionIdResult[];
+  checks_json: IGetSnoozeChecksByPredictionIdResult[];
+  votes_json: IGetVotesByPredictionIdResult[];
+}
+
+/** 'GetPredictionDetailById' query type */
+export interface IGetPredictionDetailByIdQuery {
+  params: IGetPredictionDetailByIdParams;
+  result: IGetPredictionDetailByIdResult;
+}
+
+const getPredictionDetailByIdIR: any = {"usedParamSet":{"prediction_id":true},"params":[{"name":"prediction_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":638,"b":653},{"a":1276,"b":1291},{"a":1780,"b":1795},{"a":2969,"b":2984}]}],"statement":"WITH\n  pred AS (\n    SELECT\n      p.id,\n      p.user_id AS predictor_id,\n      u.discord_id AS predictor_discord_id,\n      p.text,\n      p.driver,\n      p.season_id,\n      p.season_applicable,\n      p.created_date,\n      p.due_date,\n      p.check_date,\n      p.last_check_date,\n      p.closed_date,\n      p.triggered_date,\n      p.triggerer_id,\n      t.discord_id AS trigerer_discord_id,\n      p.judged_date,\n      p.retired_date,\n      p.status,\n      p.endorse_ratio AS endorse,\n      p.undorse_ratio AS undorse\n    FROM predictions p\n    JOIN users u ON u.id = p.user_id\n    LEFT JOIN users t ON t.id = p.triggerer_id\n    WHERE p.id = :prediction_id!\n  ),\n  bets AS (\n    SELECT\n      COALESCE(\n        json_agg(\n          json_build_object(\n            'id', b.id,\n            'prediction_id', b.prediction_id,\n            'better_id', b.user_id,\n            'better_discord_id', bu.discord_id,\n            'date', b.date,\n            'endorsed', b.endorsed,\n            'wager', b.wager,\n            'valid', b.valid,\n            'payout', b.payout,\n            'season_payout', b.season_payout\n          )\n          ORDER BY b.date ASC\n        ),\n        '[]'::json\n      ) AS bets_json\n    FROM bets b\n    JOIN users bu ON bu.id = b.user_id\n    WHERE b.prediction_id = :prediction_id!\n  ),\n  votes AS (\n    SELECT\n      COALESCE(\n        json_agg(\n          json_build_object(\n            'id', v.id,\n            'prediction_id', v.prediction_id,\n            'voter_id', u.id,\n            'voter_discord_id', u.discord_id,\n            'voted_date', v.voted_date,\n            'vote', v.vote\n          )\n          ORDER BY v.voted_date DESC\n        ),\n        '[]'::json\n      ) AS votes_json\n    FROM votes v\n    JOIN users u ON u.id = v.user_id\n    WHERE v.prediction_id = :prediction_id!\n  ),\n  checks AS (\n    SELECT\n      COALESCE(\n        json_agg(\n          json_build_object(\n            'id', chk.id,\n            'prediction_id', chk.prediction_id,\n            'check_date', chk.check_date,\n            'closed', chk.closed,\n            'closed_at', chk.closed_at,\n            'votes_day', chk.votes_day,\n            'votes_week', chk.votes_week,\n            'votes_month', chk.votes_month,\n            'votes_quarter', chk.votes_quarter,\n            'votes_year', chk.votes_year\n          )\n          ORDER BY chk.check_date DESC\n        ),\n        '[]'::json\n      ) AS checks_json\n    FROM (\n      SELECT\n        sc.id,\n        sc.prediction_id,\n        sc.check_date,\n        sc.closed,\n        sc.closed_at,\n        COUNT(sv.*) FILTER (WHERE sv.value = 1) AS votes_day,\n        COUNT(sv.*) FILTER (WHERE sv.value = 7) AS votes_week,\n        COUNT(sv.*) FILTER (WHERE sv.value = 30) AS votes_month,\n        COUNT(sv.*) FILTER (WHERE sv.value = 90) AS votes_quarter,\n        COUNT(sv.*) FILTER (WHERE sv.value = 365) AS votes_year\n      FROM snooze_checks sc\n      LEFT JOIN snooze_votes sv ON sv.snooze_check_id = sc.id\n      WHERE sc.prediction_id = :prediction_id!\n      GROUP BY sc.id\n    ) chk\n  )\nSELECT\n  pred.*,\n  bets.bets_json,\n  votes.votes_json,\n  checks.checks_json\nFROM pred\nCROSS JOIN bets\nCROSS JOIN votes\nCROSS JOIN checks;"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * (see getPredictionDetailById in predictions.sql)
+ * ```
+ */
+export const getPredictionDetailById = new PreparedQuery<IGetPredictionDetailByIdParams,IGetPredictionDetailByIdResult>(getPredictionDetailByIdIR);
 
 
 /** 'UntriggerPredictionById' parameters type */
