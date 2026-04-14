@@ -3,11 +3,12 @@ import { getPredictionById } from "./get_predictions_{predictionId}";
 import express from "express";
 import request from "supertest";
 import * as API from "@offnominal/ndb2-api-types/v2";
-import { useDbTransactionMock } from "../../../test/db-transaction-mock";
 import { vi } from "vitest";
 import { eventsManager } from "../../managers/events";
+import { useEphemeralDb } from "../../../test/with-ephemeral-db";
+import { integrationSeed } from "../../../test/integration-seed";
 
-useDbTransactionMock();
+useEphemeralDb(integrationSeed);
 
 describe("POST /predictions/:prediction_id/snooze_checks/:snooze_check_id", () => {
   let app: express.Application;

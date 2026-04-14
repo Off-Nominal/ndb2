@@ -1,13 +1,15 @@
 import { defineConfig } from "vitest/config";
-import path from "path";
 
+/**
+ * Default `pnpm test` runs unit + integration (integration needs Postgres).
+ * Use `vitest.unit.config.ts` / `vitest.integration.config.ts` to run one suite.
+ */
 export default defineConfig({
   test: {
-    include: ["src/**/*.test.ts"],
+    include: ["src/**/*.test.ts", "src/**/*.integration.test.ts"],
     globals: true,
-    globalSetup: "./src/test/global-setup.ts",
     environment: "node",
-    testTimeout: 30000, // 30 seconds for database operations
-    hookTimeout: 30000, // 30 seconds for setup/teardown
+    testTimeout: 30000,
+    hookTimeout: 30000,
   },
 });

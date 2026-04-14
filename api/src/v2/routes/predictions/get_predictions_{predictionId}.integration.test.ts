@@ -2,10 +2,10 @@ import { getPredictionById } from "./get_predictions_{predictionId}";
 import express from "express";
 import request from "supertest";
 import * as API from "@offnominal/ndb2-api-types/v2";
-import { useDbTransactionMock } from "../../../test/db-transaction-mock";
+import { useEphemeralDb } from "../../../test/with-ephemeral-db";
+import { integrationSeed } from "../../../test/integration-seed";
 
-// Enable transaction wrapping for all tests in this file
-useDbTransactionMock();
+useEphemeralDb(integrationSeed);
 
 describe("GET /predictions/:prediction_id", () => {
   let app: express.Application;
