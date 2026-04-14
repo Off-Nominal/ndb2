@@ -1,12 +1,13 @@
 import { PoolClient } from "pg";
+import { getBetsByPredictionId } from "../bets/bets.queries";
 import {
   closeSnoozeCheckById,
   closeSnoozeChecksByPredictionId,
   getSnoozeChecksByPredictionId,
 } from "../snooze_checks/snooze_checks.queries";
+import { getVotesByPredictionId } from "../votes/votes.queries";
 import {
-  closePredictionById as closePredictionByIdQuery,
-  getPredictionDetailById,
+  getPredictionsById,
   insertDateDrivenPrediction,
   insertEventDrivenPrediction,
   prediction_driver,
@@ -17,6 +18,7 @@ import {
   type ISearchPredictionsResult,
   unjudgePredictionById,
   untriggerPredictionById,
+  closePredictionById as closePredictionByIdQuery,
 } from "./predictions.queries";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import betsQueries from "../bets";
@@ -128,20 +130,29 @@ export default {
       return rows.map(mapSearchRowToDTO);
     },
   getById: (dbClient: PoolClient) => async (prediction_id: number) => {
-    const detailRows = await getPredictionDetailById.run(
+    // One query at a time per PoolClient (pg disallows overlapping client.query).
+    const predictionResult = await getPredictionsById.run(
+      { prediction_id },
+      dbClient,
+    );
+    const betsResult = await getBetsByPredictionId.run(
+      { prediction_id },
+      dbClient,
+    );
+    const votesResult = await getVotesByPredictionId.run(
+      { prediction_id },
+      dbClient,
+    );
+    const checksResult = await getSnoozeChecksByPredictionId.run(
       { prediction_id },
       dbClient,
     );
 
-    if (detailRows.length === 0) {
+    if (predictionResult.length === 0) {
       return undefined;
     }
 
-    const row = detailRows[0];
-    const prediction = row;
-    const betsResult = row.bets_json;
-    const votesResult = row.votes_json;
-    const checksResult = row.checks_json;
+    const prediction = predictionResult[0];
 
     const triggerer =
       prediction.triggerer_id === null
