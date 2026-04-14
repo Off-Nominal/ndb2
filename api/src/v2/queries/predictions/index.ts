@@ -7,6 +7,7 @@ import {
 } from "../snooze_checks/snooze_checks.queries";
 import { getVotesByPredictionId } from "../votes/votes.queries";
 import {
+  closePredictionById as closePredictionByIdQuery,
   getPredictionsById,
   insertDateDrivenPrediction,
   insertEventDrivenPrediction,
@@ -18,24 +19,9 @@ import {
   type ISearchPredictionsResult,
   unjudgePredictionById,
   untriggerPredictionById,
-  closePredictionById as closePredictionByIdQuery,
 } from "./predictions.queries";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import betsQueries from "../bets";
-
-/**
- * True when the session already has an open transaction (e.g. nested under
- * `useDbTransactionMock` in tests). Avoid issuing BEGIN/COMMIT in that case so
- * the outer transaction can roll back and not pollute shared seed data.
- */
-async function sessionHasOpenTransaction(
-  dbClient: PoolClient,
-): Promise<boolean> {
-  const { rows } = await dbClient.query<{ in_tx: boolean }>(
-    "SELECT (txid_current_if_assigned() IS NOT NULL) AS in_tx",
-  );
-  return rows[0]?.in_tx === true;
-}
 
 /** Must match `LIMIT` in `searchPredictions` in predictions.sql. */
 export const PREDICTION_SEARCH_PAGE_SIZE = 10;
@@ -267,11 +253,8 @@ export default {
       triggerer_id: string,
       closed_date: Date,
     ): Promise<void> => {
-      const outerTx = await sessionHasOpenTransaction(dbClient);
       try {
-        if (!outerTx) {
-          await dbClient.query("BEGIN");
-        }
+        await dbClient.query("BEGIN");
         const checks = await getSnoozeChecksByPredictionId.run(
           { prediction_id },
           dbClient,
@@ -287,13 +270,9 @@ export default {
           { prediction_id, triggerer_id, closed_date },
           dbClient,
         );
-        if (!outerTx) {
-          await dbClient.query("COMMIT");
-        }
+        await dbClient.query("COMMIT");
       } catch (error) {
-        if (!outerTx) {
-          await dbClient.query("ROLLBACK");
-        }
+        await dbClient.query("ROLLBACK");
         throw error;
       }
     },
