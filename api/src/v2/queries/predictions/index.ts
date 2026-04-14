@@ -1,14 +1,12 @@
 import { PoolClient } from "pg";
-import { getBetsByPredictionId } from "../bets/bets.queries";
 import {
   closeSnoozeCheckById,
   closeSnoozeChecksByPredictionId,
   getSnoozeChecksByPredictionId,
 } from "../snooze_checks/snooze_checks.queries";
-import { getVotesByPredictionId } from "../votes/votes.queries";
 import {
   closePredictionById as closePredictionByIdQuery,
-  getPredictionsById,
+  getPredictionDetailById,
   insertDateDrivenPrediction,
   insertEventDrivenPrediction,
   prediction_driver,
@@ -76,9 +74,7 @@ function mapSearchRowToDTO(
       ? row.last_check_date.toString()
       : null,
     closed_date: row.closed_date ? row.closed_date.toString() : null,
-    triggered_date: row.triggered_date
-      ? row.triggered_date.toString()
-      : null,
+    triggered_date: row.triggered_date ? row.triggered_date.toString() : null,
     triggerer,
     judged_date: row.judged_date ? row.judged_date.toString() : null,
     retired_date: row.retired_date ? row.retired_date.toString() : null,
@@ -132,30 +128,20 @@ export default {
       return rows.map(mapSearchRowToDTO);
     },
   getById: (dbClient: PoolClient) => async (prediction_id: number) => {
-    // Run sequentially: a single PoolClient must not execute overlapping
-    // queries (pg deprecates concurrent client.query() on one client).
-    const predictionResult = await getPredictionsById.run(
-      { prediction_id },
-      dbClient,
-    );
-    const betsResult = await getBetsByPredictionId.run(
-      { prediction_id },
-      dbClient,
-    );
-    const votesResult = await getVotesByPredictionId.run(
-      { prediction_id },
-      dbClient,
-    );
-    const checksResult = await getSnoozeChecksByPredictionId.run(
+    const detailRows = await getPredictionDetailById.run(
       { prediction_id },
       dbClient,
     );
 
-    if (predictionResult.length === 0) {
+    if (detailRows.length === 0) {
       return undefined;
     }
 
-    const prediction = predictionResult[0];
+    const row = detailRows[0];
+    const prediction = row;
+    const betsResult = row.bets_json;
+    const votesResult = row.votes_json;
+    const checksResult = row.checks_json;
 
     const triggerer =
       prediction.triggerer_id === null
@@ -313,10 +299,7 @@ export default {
     async (prediction_id: number, check_date: Date) => {
       try {
         await dbClient.query("BEGIN");
-        await closeSnoozeChecksByPredictionId.run(
-          { prediction_id },
-          dbClient,
-        );
+        await closeSnoozeChecksByPredictionId.run({ prediction_id }, dbClient);
         await setCheckDateByPredictionIdQuery.run(
           { prediction_id, check_date },
           dbClient,
