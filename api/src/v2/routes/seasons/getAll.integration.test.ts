@@ -1,6 +1,10 @@
 import { getAllSeasons } from "./getAll";
 import express from "express";
 import request from "supertest";
+import { useEphemeralDb } from "../../../test/with-ephemeral-db";
+import { integrationSeed } from "../../../test/integration-seed";
+
+useEphemeralDb(integrationSeed);
 
 describe("GET /seasons", () => {
   let app: express.Application;

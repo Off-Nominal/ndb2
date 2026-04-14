@@ -2,11 +2,12 @@ import { patchPredictionSnooze } from "./patch_predictions_{predictionId}_snooze
 import express from "express";
 import request from "supertest";
 import * as API from "@offnominal/ndb2-api-types/v2";
-import { useDbTransactionMock } from "../../../test/db-transaction-mock";
 import { vi } from "vitest";
 import { eventsManager } from "../../managers/events";
+import { useEphemeralDb } from "../../../test/with-ephemeral-db";
+import { integrationSeed } from "../../../test/integration-seed";
 
-useDbTransactionMock();
+useEphemeralDb(integrationSeed);
 
 const futureIso = () =>
   new Date(Date.now() + 86400000 * 365).toISOString();

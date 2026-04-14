@@ -1,65 +1,38 @@
-// Vitest global setup file
-// This file runs once before all tests and configures the environment for testing
+// Vitest global setup: verify Postgres, build schema template for ephemeral DB tests
 
 import { Client } from "pg";
-import { reset } from "@offnominal/ndb2-db";
 import { createLogger } from "@mendahu/utilities";
+import { rebuildSchemaTemplate } from "./ephemeral-db";
 
-// Set the DATABASE_URL to point to the test database
 process.env.DATABASE_URL =
+  process.env.TEST_POSTGRES_BASE_URL ??
   "postgresql://test_user:test_password@localhost:5433/ndb2_test";
 
-// Set the timezone to UTC
 process.env.TZ = "UTC";
-
-// You can add other test-specific environment variables here if needed
-// For example:
 process.env.NODE_ENV = "test";
-// process.env.LOG_LEVEL = "error";
-
-// Set game mechanics environment variables for tests
 process.env.GM_PREDICTION_UPDATE_WINDOW_HOURS = "24";
 
 const logger = createLogger({ namespace: "TEST", env: ["test"] });
 
-// Function to check if test database is running
-async function checkDatabaseConnection(): Promise<boolean> {
+async function checkDatabaseConnection(): Promise<void> {
+  const client = new Client({
+    connectionString: process.env.DATABASE_URL,
+  });
   try {
-    // Try to connect to the test database
-    const client = new Client({
-      connectionString: process.env.DATABASE_URL,
-    });
-
     await client.connect();
     await client.query("SELECT 1");
-    await client.end();
-    return true;
   } catch (error) {
     logger.error("Failed to connect to test database:", error);
     throw new Error("Test database not accessible");
-  }
-}
-
-// Function to reset the test database
-export async function resetTestDatabase(
-  client: Client = new Client({
-    connectionString: process.env.DATABASE_URL,
-  })
-): Promise<void> {
-  try {
-    await reset(client);
-  } catch (error) {
-    logger.error("Failed to reset test database:", error);
-    throw error;
+  } finally {
+    await client.end();
   }
 }
 
 async function setup() {
-  // Check if test database is accessible
   await checkDatabaseConnection();
-
-  // Reset the database to ensure clean state
-  await resetTestDatabase();
+  logger.log("Building schema template database for integration tests...");
+  await rebuildSchemaTemplate(process.env.DATABASE_URL!);
 }
 
 export default setup;

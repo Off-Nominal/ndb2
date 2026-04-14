@@ -12,7 +12,15 @@ import {
   closeSnoozeChecksBulk,
   closePastSeasonsBulk,
 } from "./seedFunctions/index.js";
-import { BetSeed, VoteSeed, SnoozeCheckSeed, SnoozeVoteSeed } from "./types.js";
+import {
+  BetSeed,
+  VoteSeed,
+  SnoozeCheckSeed,
+  SnoozeVoteSeed,
+  PredictionSeed,
+  SeasonSeed,
+  UserSeed,
+} from "./types.js";
 import { resolveSeedDate } from "./utils/dateUtils.js";
 import { createLogger } from "@mendahu/utilities";
 
@@ -20,30 +28,23 @@ import { createLogger } from "@mendahu/utilities";
 import devUsers from "./seeds/dev/users.json" with { type: "json" };
 import devPredictions from "./seeds/dev/predictions.json" with { type: "json" };
 import devSeasons from "./seeds/dev/seasons.json" with { type: "json" };
-import testUsers from "./seeds/test/users.json" with { type: "json" };
-import testPredictions from "./seeds/test/predictions.json" with { type: "json" };
-import testSeasons from "./seeds/test/seasons.json" with { type: "json" };
 
-export default async (client: any) => {
+/**
+ * Runs the full seed pipeline for arbitrary user/season/prediction arrays.
+ * Used by the default CLI seed and by API integration tests that load fixture data.
+ */
+export async function seedFromData(
+  client: any,
+  users: UserSeed[],
+  seasons: SeasonSeed[],
+  predictions: PredictionSeed[],
+  baseDate: Date = new Date()
+): Promise<void> {
   const logger = createLogger({ namespace: "DB", env: ["dev"] });
 
-  if (process.env.NODE_ENV === "production") {
-    return logger.error("Cannot run seeding in production.");
-  }
-
-  // Determine seed data based on NODE_ENV
-  const seedEnv = process.env.NODE_ENV === "test" ? "test" : "dev";
-
-  const users = seedEnv === "test" ? testUsers : devUsers;
-  const predictions = seedEnv === "test" ? testPredictions : devPredictions;
-  const seasons = seedEnv === "test" ? testSeasons : devSeasons;
-
-  logger.log(`Loading seeds from ${seedEnv} environment`);
   logger.log(
-    `Found ${users.length} users, ${seasons.length} seasons, ${predictions.length} predictions`
+    `Seeding: ${users.length} users, ${seasons.length} seasons, ${predictions.length} predictions`
   );
-
-  const baseDate = new Date();
 
   try {
     // Step 1: Insert all users in bulk
@@ -139,10 +140,11 @@ export default async (client: any) => {
         // Store snooze votes for later insertion
         for (let j = 0; j < prediction.checks.length; j++) {
           const check = prediction.checks[j];
-          if (check.votes && check.votes.length > 0) {
+          const snoozeVotes = check.votes ?? check.values;
+          if (snoozeVotes && snoozeVotes.length > 0) {
             const checkIndex =
               allSnoozeChecks.length - prediction.checks.length + j;
-            snoozeCheckToVotesMap.set(checkIndex, check.votes);
+            snoozeCheckToVotesMap.set(checkIndex, snoozeVotes);
           }
         }
       }
@@ -359,4 +361,23 @@ export default async (client: any) => {
     console.error("Error during seeding:", error);
     throw error;
   }
+}
+
+export default async (client: any) => {
+  const logger = createLogger({ namespace: "DB", env: ["dev"] });
+
+  if (process.env.NODE_ENV === "production") {
+    return logger.error("Cannot run seeding in production.");
+  }
+
+  const users = devUsers;
+  const predictions = devPredictions;
+  const seasons = devSeasons;
+
+  logger.log(`Loading seeds from dev environment`);
+  logger.log(
+    `Found ${users.length} users, ${seasons.length} seasons, ${predictions.length} predictions`
+  );
+
+  await seedFromData(client, users, seasons, predictions, new Date());
 };

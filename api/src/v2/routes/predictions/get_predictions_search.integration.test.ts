@@ -2,11 +2,10 @@ import express from "express";
 import request from "supertest";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { getPredictionsSearch } from "./get_predictions_search";
-import { useDbTransactionMock } from "../../../test/db-transaction-mock";
-import pool from "../../../db";
-import { vi } from "vitest";
+import { useEphemeralDb } from "../../../test/with-ephemeral-db";
+import { integrationSeed } from "../../../test/integration-seed";
 
-useDbTransactionMock();
+useEphemeralDb(integrationSeed);
 
 describe("GET /predictions/search", () => {
   let app: express.Application;

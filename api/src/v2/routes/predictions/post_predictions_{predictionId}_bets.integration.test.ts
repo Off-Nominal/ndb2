@@ -3,12 +3,13 @@ import request from "supertest";
 import { describe, beforeAll, it, expect, vi } from "vitest";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { postPredictionBet } from "./post_predictions_{predictionId}_bets";
-import { useDbTransactionMock } from "../../../test/db-transaction-mock";
 import { eventsManager } from "../../managers/events";
 import { errorHandler } from "../../middleware/errorHandler";
 import betsQueries from "../../queries/bets";
+import { useEphemeralDb } from "../../../test/with-ephemeral-db";
+import { integrationSeed } from "../../../test/integration-seed";
 
-useDbTransactionMock();
+useEphemeralDb(integrationSeed);
 
 describe("POST /predictions/:prediction_id/bets", () => {
   let app: express.Application;

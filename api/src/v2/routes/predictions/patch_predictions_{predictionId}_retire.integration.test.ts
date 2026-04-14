@@ -2,12 +2,12 @@ import { retirePredictionById } from "./patch_predictions_{predictionId}_retire"
 import express from "express";
 import request from "supertest";
 import * as API from "@offnominal/ndb2-api-types/v2";
-import { useDbTransactionMock } from "../../../test/db-transaction-mock";
 import { vi } from "vitest";
 import { eventsManager } from "../../managers/events";
+import { useEphemeralDb } from "../../../test/with-ephemeral-db";
+import { integrationSeed } from "../../../test/integration-seed";
 
-// Enable transaction wrapping for all tests in this file
-useDbTransactionMock();
+useEphemeralDb(integrationSeed);
 
 describe("PATCH /predictions/:prediction_id/retire", () => {
   let app: express.Application;
