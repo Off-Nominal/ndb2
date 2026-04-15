@@ -11,7 +11,7 @@ function createPool(): pg.Pool {
 
 /** Lazily created so integration tests can set DATABASE_URL before first use. */
 export default new Proxy({} as pg.Pool, {
-  get(_target, prop, receiver) {
+  get(_target, prop) {
     if (!pool) {
       pool = createPool();
     }
@@ -20,6 +20,18 @@ export default new Proxy({} as pg.Pool, {
       return value.bind(pool);
     }
     return value;
+  },
+  has(_target, prop) {
+    if (!pool) {
+      pool = createPool();
+    }
+    return prop in pool;
+  },
+  getOwnPropertyDescriptor(_target, prop) {
+    if (!pool) {
+      pool = createPool();
+    }
+    return Object.getOwnPropertyDescriptor(pool, prop);
   },
 }) as pg.Pool;
 
