@@ -26,10 +26,17 @@ function loadFilteredSchemaSql(): string {
   const raw = readFileSync(schemaSqlPath(), "utf8");
   return raw
     .split(/\r?\n/)
-    .filter(
-      (line) =>
-        !line.startsWith("\\restrict") && !line.startsWith("\\unrestrict")
-    )
+    .filter((line) => {
+      const t = line.trim();
+      if (t.startsWith("\\restrict") || t.startsWith("\\unrestrict")) {
+        return false;
+      }
+      // pg_dump 18+ may emit this; Postgres 16 (e.g. CI Docker image) has no such GUC
+      if (/^SET\s+transaction_timeout\s*=/i.test(t)) {
+        return false;
+      }
+      return true;
+    })
     .join("\n");
 }
 
