@@ -85,12 +85,17 @@ export async function dropDatabaseIfExists(
 export async function applySchemaSql(databaseUrl: string): Promise<void> {
   const sql = loadFilteredSchemaSql();
   try {
-    execFileSync("psql", [databaseUrl, "-v", "ON_ERROR_STOP=1"], {
-      input: sql,
-      stdio: ["pipe", "inherit", "inherit"],
-      env: process.env,
-      maxBuffer: 64 * 1024 * 1024,
-    });
+    execFileSync(
+      "psql",
+      ["-q", "-X", databaseUrl, "-v", "ON_ERROR_STOP=1"],
+      {
+        input: sql,
+        // Quiet: no SET/CREATE TABLE command-tag spam; stderr still shows errors
+        stdio: ["pipe", "ignore", "inherit"],
+        env: process.env,
+        maxBuffer: 64 * 1024 * 1024,
+      }
+    );
   } catch (err: unknown) {
     const code = err as { code?: string };
     if (code?.code !== "ENOENT") {
