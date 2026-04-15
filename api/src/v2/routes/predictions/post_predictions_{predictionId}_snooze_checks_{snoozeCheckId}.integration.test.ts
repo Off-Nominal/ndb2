@@ -6,14 +6,26 @@ import * as API from "@offnominal/ndb2-api-types/v2";
 import { vi } from "vitest";
 import { eventsManager } from "../../managers/events";
 import { useEphemeralDb } from "../../../test/with-ephemeral-db";
-import { testUsersThree } from "../../../test/factories/users";
-import { standardSeasonsTriple } from "../../../test/factories/seasons";
-import { seedForSnoozeCheckVote } from "../../../test/factories/predictions";
+import { defaultUsers } from "../../../test/factories/users";
+import { defaultPastCurrentFutureSeasons } from "../../../test/factories/seasons";
+import { prediction } from "../../../test/factories/predictions";
 
 useEphemeralDb({
-  users: testUsersThree(),
-  seasons: standardSeasonsTriple(),
-  predictions: seedForSnoozeCheckVote(),
+  users: defaultUsers(),
+  seasons: defaultPastCurrentFutureSeasons(),
+  predictions: [
+    prediction(1, {
+      text: "checking",
+      baseDate: { quarter: "past", days: 10 },
+      due: { days: 20 },
+      checks: [{ checked: { days: 0 } }],
+    }),
+    prediction(2, {
+      text: "open",
+      baseDate: { days: 0 },
+      due: { days: 25 },
+    }),
+  ],
 });
 
 describe("POST /predictions/:prediction_id/snooze_checks/:snooze_check_id", () => {

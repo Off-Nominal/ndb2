@@ -7,14 +7,93 @@ import predictions from "../../queries/predictions";
 import { vi } from "vitest";
 import { eventsManager } from "../../managers/events";
 import { useEphemeralDb } from "../../../test/with-ephemeral-db";
-import { testUsersThree } from "../../../test/factories/users";
-import { standardSeasonsTriple } from "../../../test/factories/seasons";
-import { seedForDeleteTrigger } from "../../../test/factories/predictions";
+import { defaultUsers } from "../../../test/factories/users";
+import { defaultPastCurrentFutureSeasons } from "../../../test/factories/seasons";
+import { prediction } from "../../../test/factories/predictions";
+import * as C from "../../../test/factories/constants";
 
 useEphemeralDb({
-  users: testUsersThree(),
-  seasons: standardSeasonsTriple(),
-  predictions: seedForDeleteTrigger(),
+  users: defaultUsers(),
+  seasons: defaultPastCurrentFutureSeasons(),
+  predictions: [
+    prediction(1, { text: "open", baseDate: { days: 0 }, due: { days: 25 } }),
+    prediction(2, {
+      text: "checking",
+      baseDate: { quarter: "past", days: 10 },
+      due: { days: 20 },
+      checks: [{ checked: { days: 0 } }],
+    }),
+    prediction(3, {
+      text: "retired",
+      baseDate: { quarter: "past", days: 10 },
+      due: { days: 20 },
+      retired: { days: 5 },
+    }),
+    prediction(4, {
+      text: "closed",
+      baseDate: { quarter: "past", days: 25 },
+      due: { days: 40 },
+      closed: { days: 40 },
+      triggered: { days: 40 },
+      votes: [
+        {
+          user_id: C.USER_1_ID,
+          voted: { days: 40, minutes: 5 },
+          vote: true,
+        },
+      ],
+    }),
+    prediction(5, {
+      text: "successful",
+      baseDate: { quarter: "past", days: 25 },
+      due: { days: 40 },
+      closed: { days: 40 },
+      triggered: { days: 40 },
+      judged: { days: 41 },
+      votes: [
+        {
+          user_id: C.USER_1_ID,
+          voted: { days: 40, minutes: 5 },
+          vote: true,
+        },
+        {
+          user_id: C.USER_2_ID,
+          voted: { days: 40, minutes: 10 },
+          vote: true,
+        },
+        {
+          user_id: C.USER_3_ID,
+          voted: { days: 40, minutes: 15 },
+          vote: false,
+        },
+      ],
+    }),
+    prediction(6, {
+      text: "failed",
+      baseDate: { quarter: "past", days: 25 },
+      due: { days: 40 },
+      closed: { days: 40 },
+      triggered: { days: 40 },
+      judged: { days: 41 },
+      votes: [
+        {
+          user_id: C.USER_1_ID,
+          voted: { days: 40, minutes: 5 },
+          vote: false,
+        },
+        {
+          user_id: C.USER_2_ID,
+          voted: { days: 40, minutes: 10 },
+          vote: false,
+        },
+        {
+          user_id: C.USER_3_ID,
+          voted: { days: 40, minutes: 15 },
+          vote: true,
+        },
+      ],
+    }),
+  ],
 });
 
 describe("DELETE /predictions/:prediction_id/trigger", () => {

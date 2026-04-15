@@ -5,14 +5,28 @@ import * as API from "@offnominal/ndb2-api-types/v2";
 import { vi } from "vitest";
 import { eventsManager } from "../../managers/events";
 import { useEphemeralDb } from "../../../test/with-ephemeral-db";
-import { testUsersThree } from "../../../test/factories/users";
-import { standardSeasonsTriple } from "../../../test/factories/seasons";
-import { seedForPatchSnooze } from "../../../test/factories/predictions";
+import { defaultUsers } from "../../../test/factories/users";
+import { defaultPastCurrentFutureSeasons } from "../../../test/factories/seasons";
+import { prediction } from "../../../test/factories/predictions";
 
 useEphemeralDb({
-  users: testUsersThree(),
-  seasons: standardSeasonsTriple(),
-  predictions: seedForPatchSnooze(),
+  users: defaultUsers(),
+  seasons: defaultPastCurrentFutureSeasons(),
+  predictions: [
+    prediction(1, {
+      text: "open event",
+      driver: "event",
+      baseDate: { days: 0 },
+      check_date: { days: 25 },
+    }),
+    prediction(2, {
+      text: "retired event",
+      driver: "event",
+      baseDate: { quarter: "past", days: 10 },
+      check_date: { days: 20 },
+      retired: { days: 5 },
+    }),
+  ],
 });
 
 const futureIso = () =>

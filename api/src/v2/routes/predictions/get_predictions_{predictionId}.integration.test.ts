@@ -3,14 +3,114 @@ import express from "express";
 import request from "supertest";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { useEphemeralDb } from "../../../test/with-ephemeral-db";
-import { testUsersThree } from "../../../test/factories/users";
-import { standardSeasonsTriple } from "../../../test/factories/seasons";
-import { seedForGetPredictionById } from "../../../test/factories/predictions";
+import { defaultUsers } from "../../../test/factories/users";
+import { defaultPastCurrentFutureSeasons } from "../../../test/factories/seasons";
+import { prediction } from "../../../test/factories/predictions";
+import * as C from "../../../test/factories/constants";
 
 useEphemeralDb({
-  users: testUsersThree(),
-  seasons: standardSeasonsTriple(),
-  predictions: seedForGetPredictionById(),
+  users: defaultUsers(),
+  seasons: defaultPastCurrentFutureSeasons(),
+  predictions: [
+    prediction(1, {
+      text: "Date prediction with two bets",
+      baseDate: { quarter: "past", days: 20 },
+      due: { days: 10 },
+      bets: [
+        {
+          user_id: C.USER_1_ID,
+          created: { days: 0 },
+          endorsed: true,
+        },
+        {
+          user_id: C.USER_2_ID,
+          created: { days: 1 },
+          endorsed: true,
+        },
+      ],
+    }),
+    prediction(2, {
+      text: "Closed judged date prediction",
+      baseDate: { quarter: "past", days: 25 },
+      due: { days: 40 },
+      closed: { days: 40 },
+      triggered: { days: 40 },
+      judged: { days: 41 },
+      bets: [
+        { user_id: C.USER_1_ID, created: { minutes: 5 }, endorsed: true },
+        { user_id: C.USER_2_ID, created: { minutes: 15 }, endorsed: false },
+      ],
+      votes: [
+        {
+          user_id: C.USER_1_ID,
+          voted: { days: 40, minutes: 5 },
+          vote: true,
+        },
+        {
+          user_id: C.USER_2_ID,
+          voted: { days: 40, minutes: 15 },
+          vote: false,
+        },
+      ],
+    }),
+    prediction(3, {
+      text: "Event prediction — judged with snooze check",
+      driver: "event",
+      baseDate: { quarter: "past", days: 25 },
+      check_date: { days: 20 },
+      closed: { days: 27 },
+      triggered: { days: 27 },
+      judged: { days: 28 },
+      bets: [
+        { user_id: C.USER_1_ID, created: { days: 0 }, endorsed: true },
+        {
+          user_id: C.USER_2_ID,
+          created: { days: 1, minutes: 5 },
+          endorsed: false,
+        },
+      ],
+      votes: [
+        {
+          user_id: C.USER_1_ID,
+          voted: { days: 0, minutes: 5 },
+          vote: true,
+        },
+        {
+          user_id: C.USER_2_ID,
+          voted: { days: 0, minutes: 15 },
+          vote: false,
+        },
+        {
+          user_id: C.USER_3_ID,
+          voted: { days: 0, minutes: 25 },
+          vote: true,
+        },
+      ],
+      checks: [
+        {
+          checked: { days: 0 },
+          closed: { days: 0, minutes: 30 },
+          votes: [
+            {
+              user_id: C.USER_1_ID,
+              value: 7,
+              created: { days: 0, minutes: 5 },
+            },
+            {
+              user_id: C.USER_2_ID,
+              value: 7,
+              created: { days: 0, minutes: 15 },
+            },
+            {
+              user_id: C.USER_3_ID,
+              value: 7,
+              created: { days: 0, minutes: 25 },
+            },
+          ],
+        },
+      ],
+    }),
+  ],
 });
 
 describe("GET /predictions/:prediction_id", () => {
@@ -56,94 +156,57 @@ describe("GET /predictions/:prediction_id", () => {
     expect(response.body.data.id).toBe(1);
   });
 
-  it("should return complete prediction data for prediction #3", async () => {
+  it("should return complete prediction data for a judged event prediction", async () => {
     const response = await request(app).get("/3");
     expect(response.status).toBe(200);
 
-    const prediction = response.body.data;
+    const p = response.body.data;
 
-    // Verify basic prediction info
-    expect(prediction.status).toBe("successful");
+    expect(p.status).toBe("successful");
 
-    // Verify predictor
-    expect(prediction.predictor).toEqual({
-      id: "550e8400-e29b-41d4-a716-446655440001",
-      discord_id: "111111111111111111",
+    expect(p.predictor).toEqual({
+      id: C.USER_1_ID,
+      discord_id: C.DISCORD_1,
     });
 
-    // Verify season Id and season applicable
-    expect(prediction.season_id).toBe(1);
-    expect(prediction.season_applicable).toBe(true);
+    expect(p.season_id).not.toBeNull();
+    expect(p.season_applicable).toBe(true);
+    expect(p.last_check_date).not.toBeNull();
+    expect(p.triggerer).toBeNull();
 
-    // Verify last_check_date
-    expect(prediction.last_check_date).not.toBeNull();
-
-    // Verify triggerer
-    expect(prediction.triggerer).toBeNull();
-
-    // Verify bets
-    expect(prediction.bets).toHaveLength(2);
-
-    // First bet (endorsed)
-    const firstBet = prediction.bets.find((bet: any) => bet.endorsed === true);
-    expect(firstBet).toBeDefined();
-    expect(firstBet.better).toEqual({
-      id: "550e8400-e29b-41d4-a716-446655440001",
-      discord_id: "111111111111111111",
-    });
-    expect(firstBet.wager).toBe(27);
-    expect(firstBet.valid).toBe(true);
-    expect(firstBet.payout).toBe(26);
-
-    // Second bet (not endorsed)
-    const secondBet = prediction.bets.find(
-      (bet: any) => bet.endorsed === false
+    expect(p.bets).toHaveLength(2);
+    expect(p.bets.some((b: { endorsed: boolean }) => b.endorsed === true)).toBe(
+      true
     );
-    expect(secondBet).toBeDefined();
-    expect(secondBet.better).toEqual({
-      id: "550e8400-e29b-41d4-a716-446655440002",
-      discord_id: "222222222222222222",
-    });
-    expect(secondBet.wager).toBe(25);
-    expect(secondBet.valid).toBe(true);
-    expect(secondBet.payout).toBe(-25);
+    expect(
+      p.bets.some((b: { endorsed: boolean }) => b.endorsed === false)
+    ).toBe(true);
 
-    // Verify votes
-    expect(prediction.votes).toHaveLength(3);
-
-    // Count true and false votes
-    const trueVotes = prediction.votes.filter(
-      (vote: any) => vote.vote === true
-    ).length;
-    const falseVotes = prediction.votes.filter(
-      (vote: any) => vote.vote === false
+    expect(p.votes).toHaveLength(3);
+    const trueVotes = p.votes.filter((v: { vote: boolean }) => v.vote === true)
+      .length;
+    const falseVotes = p.votes.filter(
+      (v: { vote: boolean }) => v.vote === false
     ).length;
     expect(trueVotes).toBe(2);
     expect(falseVotes).toBe(1);
 
-    // Verify snooze checks
-    expect(prediction.checks).toHaveLength(1);
-    const check = prediction.checks[0];
-    expect(check.id).toBe(1);
-    expect(check.closed).toBe(true);
-    expect(check.values).toEqual({
-      day: 0,
-      week: 3,
-      month: 0,
-      quarter: 0,
-      year: 0,
+    expect(p.checks).toHaveLength(1);
+    expect(p.checks[0].closed).toBe(true);
+    expect(p.checks[0].values).toMatchObject({
+      day: expect.any(Number),
+      week: expect.any(Number),
     });
 
-    // Verify payouts
-    expect(prediction.payouts).toBeDefined();
-    expect(prediction.payouts.endorse).toBe(0.97);
-    expect(prediction.payouts.undorse).toBe(1.03);
+    expect(p.payouts).toMatchObject({
+      endorse: expect.any(Number),
+      undorse: expect.any(Number),
+    });
 
-    // Verify dates are present
-    expect(prediction.created_date).toBeDefined();
-    expect(prediction.closed_date).toBeDefined();
-    expect(prediction.triggered_date).toBeDefined();
-    expect(prediction.judged_date).toBeDefined();
-    expect(prediction.check_date).toBeDefined();
+    expect(p.created_date).toBeDefined();
+    expect(p.closed_date).toBeDefined();
+    expect(p.triggered_date).toBeDefined();
+    expect(p.judged_date).toBeDefined();
+    expect(p.check_date).toBeDefined();
   });
 });

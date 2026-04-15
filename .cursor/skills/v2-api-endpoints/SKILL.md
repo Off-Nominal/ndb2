@@ -75,7 +75,7 @@ Add a **colocated** **`*.integration.test.ts`** next to the route module when th
 
 - Build a minimal **`express()`** app in `beforeAll`, register **only** the route under test by passing the app into your exported `Route` (same pattern as `get_predictions_{predictionId}.integration.test.ts` / `post_predictions.integration.test.ts`).
 - For handlers that read JSON bodies, use **`app.use(express.json())`** before registering the route.
-- When the route uses **`getDbClient`** / the real pool, call **`useEphemeralDb({ users, seasons, predictions })`** once at the top of the file (from **`../../../test/with-ephemeral-db`**) and compose **`users` / `seasons` / `predictions`** from **`../../../test/factories/*`** (`testUsersThree`, `standardSeasonsTriple`, and small **`PredictionSeed`** builders in **`predictions.ts`**) so each file seeds only what it needs. Production code may use nested transactions without conflicting with tests.
+- When the route uses **`getDbClient`** / the real pool, call **`useEphemeralDb({ users, seasons, predictions })`** once at the top of the file (from **`../../../test/with-ephemeral-db`**) and compose data with **`defaultUsers()`**, **`defaultPastCurrentFutureSeasons()`**, and **`prediction(id, { ... })`** from **`../../../test/factories/{users,seasons,predictions}`** — defaults cover common cases; override fields on `prediction()` for the shape you need. Each file should inline only the rows that suite requires.
 
 **Assertions:**
 

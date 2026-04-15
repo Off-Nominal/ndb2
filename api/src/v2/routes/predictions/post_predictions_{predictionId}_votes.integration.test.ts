@@ -5,14 +5,31 @@ import * as API from "@offnominal/ndb2-api-types/v2";
 import { postPredictionVote } from "./post_predictions_{predictionId}_votes";
 import { eventsManager } from "../../managers/events";
 import { useEphemeralDb } from "../../../test/with-ephemeral-db";
-import { testUsersThree } from "../../../test/factories/users";
-import { standardSeasonsTriple } from "../../../test/factories/seasons";
-import { seedForPostVotes } from "../../../test/factories/predictions";
+import { defaultUsers } from "../../../test/factories/users";
+import { defaultPastCurrentFutureSeasons } from "../../../test/factories/seasons";
+import { prediction } from "../../../test/factories/predictions";
+import * as C from "../../../test/factories/constants";
 
 useEphemeralDb({
-  users: testUsersThree(),
-  seasons: standardSeasonsTriple(),
-  predictions: seedForPostVotes(),
+  users: defaultUsers(),
+  seasons: defaultPastCurrentFutureSeasons(),
+  predictions: [
+    prediction(1, { text: "open", baseDate: { days: 0 }, due: { days: 25 } }),
+    prediction(2, {
+      text: "closed with vote",
+      baseDate: { quarter: "past", days: 25 },
+      due: { days: 40 },
+      closed: { days: 40 },
+      triggered: { days: 40 },
+      votes: [
+        {
+          user_id: C.USER_1_ID,
+          voted: { days: 40, minutes: 5 },
+          vote: true,
+        },
+      ],
+    }),
+  ],
 });
 
 describe("POST /predictions/:prediction_id/votes", () => {
