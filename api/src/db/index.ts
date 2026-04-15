@@ -2,8 +2,14 @@ import pg from "pg";
 
 let pool: pg.Pool | null = null;
 
-/** Stable per-method bindings so `vi.spyOn(pool, "connect")` wraps the same fn `getDbClient` calls */
+/** Stable per-method bindings so repeated reads return the same function reference */
 const boundMethodCache = new Map<string | symbol, unknown>();
+
+/**
+ * Proxy target: `vi.spyOn(pool, "connect")` defines `connect` here. The `get` trap
+ * must read from this object first or the spy is never invoked.
+ */
+const poolProxyTarget = {} as pg.Pool;
 
 function createPool(): pg.Pool {
   return new pg.Pool({
@@ -13,8 +19,11 @@ function createPool(): pg.Pool {
 }
 
 /** Lazily created so integration tests can set DATABASE_URL before first use. */
-export default new Proxy({} as pg.Pool, {
-  get(_target, prop) {
+export default new Proxy(poolProxyTarget, {
+  get(target, prop, receiver) {
+    if (Reflect.getOwnPropertyDescriptor(target, prop) !== undefined) {
+      return Reflect.get(target, prop, receiver);
+    }
     if (!pool) {
       pool = createPool();
     }
@@ -27,17 +36,27 @@ export default new Proxy({} as pg.Pool, {
     }
     return value;
   },
-  has(_target, prop) {
+  has(target, prop) {
+    if (Reflect.has(target, prop)) {
+      return true;
+    }
     if (!pool) {
       pool = createPool();
     }
     return prop in pool;
   },
-  getOwnPropertyDescriptor(_target, prop) {
+  getOwnPropertyDescriptor(target, prop) {
+    const own = Reflect.getOwnPropertyDescriptor(target, prop);
+    if (own) {
+      return own;
+    }
     if (!pool) {
       pool = createPool();
     }
     return Object.getOwnPropertyDescriptor(pool, prop);
+  },
+  defineProperty(target, prop, attributes) {
+    return Reflect.defineProperty(target, prop, attributes);
   },
 }) as pg.Pool;
 
