@@ -1,5 +1,6 @@
 import { Client } from "pg";
 import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHash, randomBytes } from "node:crypto";
@@ -13,8 +14,23 @@ const apiRoot = path.resolve(
 /** Schema-only template cloned for each integration test file. */
 export const TEST_TEMPLATE_DB = "ndb2_test_schema_template";
 
-function migrationsDir(): string {
-  return path.resolve(apiRoot, "../db/migrations");
+export function schemaSqlPath(): string {
+  return path.resolve(apiRoot, "../db/schema.sql");
+}
+
+/**
+ * Full baseline schema (dbmate dump). Migrations alone are not sufficient: early
+ * migrations are empty and later ones ALTER existing tables.
+ */
+function loadFilteredSchemaSql(): string {
+  const raw = readFileSync(schemaSqlPath(), "utf8");
+  return raw
+    .split(/\r?\n/)
+    .filter(
+      (line) =>
+        !line.startsWith("\\restrict") && !line.startsWith("\\unrestrict")
+    )
+    .join("\n");
 }
 
 export function getPostgresInstanceUrl(databaseUrl: string): string {
@@ -55,25 +71,36 @@ export async function dropDatabaseIfExists(
 }
 
 /**
- * Runs dbmate migrations against the given database URL (Node pg driver, no Docker).
+ * Applies `db/schema.sql` to an empty database (same source as dev `start-db.sh`).
+ * Prefer `psql` when available (CI); fall back to a single pg query for environments
+ * without the client binary.
  */
-export function runDbmateUp(databaseUrl: string): void {
-  execFileSync(
-    "npx",
-    ["dbmate", "--migrations-dir", migrationsDir(), "up"],
-    {
-      cwd: apiRoot,
-      stdio: "inherit",
-      env: {
-        ...process.env,
-        DATABASE_URL: databaseUrl,
-      },
+export async function applySchemaSql(databaseUrl: string): Promise<void> {
+  const sql = loadFilteredSchemaSql();
+  try {
+    execFileSync("psql", [databaseUrl, "-v", "ON_ERROR_STOP=1"], {
+      input: sql,
+      stdio: ["pipe", "inherit", "inherit"],
+      env: process.env,
+      maxBuffer: 64 * 1024 * 1024,
+    });
+  } catch (err: unknown) {
+    const code = err as { code?: string };
+    if (code?.code !== "ENOENT") {
+      throw err;
     }
-  );
+    const client = new Client({ connectionString: databaseUrl });
+    await client.connect();
+    try {
+      await client.query(sql);
+    } finally {
+      await client.end();
+    }
+  }
 }
 
 /**
- * Creates an empty database, applies migrations, and replaces any existing template of the same name.
+ * Creates an empty database, loads schema.sql, and replaces any existing template of the same name.
  */
 export async function rebuildSchemaTemplate(
   baseDatabaseUrl: string
@@ -91,7 +118,7 @@ export async function rebuildSchemaTemplate(
   }
 
   const templateUrl = databaseUrlWithName(baseDatabaseUrl, TEST_TEMPLATE_DB);
-  runDbmateUp(templateUrl);
+  await applySchemaSql(templateUrl);
 }
 
 export function makeEphemeralDatabaseName(): string {
