@@ -10,7 +10,6 @@
     "strict": true,
     "module": "NodeNext",
     "moduleResolution": "nodenext",
-    "resolveJsonModule": true,
     "types": ["node", "vitest/globals"]
   },
   "include": ["src/**/*"],

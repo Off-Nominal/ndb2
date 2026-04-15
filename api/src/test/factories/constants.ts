@@ -1,0 +1,10 @@
+/** Stable UUIDs for seed users (match prior integration fixtures). */
+export const USER_1_ID = "550e8400-e29b-41d4-a716-446655440001";
+export const USER_2_ID = "550e8400-e29b-41d4-a716-446655440002";
+export const USER_3_ID = "550e8400-e29b-41d4-a716-446655440003";
+
+export const DISCORD_1 = "111111111111111111";
+export const DISCORD_2 = "222222222222222222";
+export const DISCORD_3 = "333333333333333333";
+
+export const DEFAULT_PAYOUT_FORMULA = "(ln($1/$2/2.0)/1.3)+1";

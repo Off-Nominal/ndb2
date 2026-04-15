@@ -75,7 +75,7 @@ Add a **colocated** **`*.integration.test.ts`** next to the route module when th
 
 - Build a minimal **`express()`** app in `beforeAll`, register **only** the route under test by passing the app into your exported `Route` (same pattern as `get_predictions_{predictionId}.integration.test.ts` / `post_predictions.integration.test.ts`).
 - For handlers that read JSON bodies, use **`app.use(express.json())`** before registering the route.
-- When the route uses **`getDbClient`** / the real pool, call **`useEphemeralDb(integrationSeed)`** once at the top of the file (from **`../../../test/with-ephemeral-db`** and **`../../../test/integration-seed`**) so each test file gets a **cloned database** from the schema template plus the shared fixture seed. Production code may use nested transactions without conflicting with tests.
+- When the route uses **`getDbClient`** / the real pool, call **`useEphemeralDb({ users, seasons, predictions })`** once at the top of the file (from **`../../../test/with-ephemeral-db`**) and compose **`users` / `seasons` / `predictions`** from **`../../../test/factories/*`** (`testUsersThree`, `standardSeasonsTriple`, and small **`PredictionSeed`** builders in **`predictions.ts`**) so each file seeds only what it needs. Production code may use nested transactions without conflicting with tests.
 
 **Assertions:**
 
@@ -94,4 +94,4 @@ Add a **colocated** **`*.integration.test.ts`** next to the route module when th
 5. Forward **5xx** to `errorHandler` (throw `Error` / `next(err)` with a loggable message, not user-facing copy).
 6. Register the route in `api/src/v2/index.ts` inside `mapRoutes`.
 7. Update `types/src/v2/endpoints/` (and `entities/` if needed); export new area modules from `endpoints/index.ts`.
-8. Add `*.test.ts` beside the route: supertest, `useEphemeralDb(integrationSeed)` when using the DB (or a custom seed object), and cases for validation / domain errors / success (see **Tests** above).
+8. Add `*.integration.test.ts` beside the route: supertest, `useEphemeralDb({ ... })` with factory-composed seed when using the DB, and cases for validation / domain errors / success (see **Tests** above).

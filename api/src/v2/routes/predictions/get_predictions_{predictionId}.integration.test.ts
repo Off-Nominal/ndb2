@@ -3,9 +3,15 @@ import express from "express";
 import request from "supertest";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { useEphemeralDb } from "../../../test/with-ephemeral-db";
-import { integrationSeed } from "../../../test/integration-seed";
+import { testUsersThree } from "../../../test/factories/users";
+import { standardSeasonsTriple } from "../../../test/factories/seasons";
+import { seedForGetPredictionById } from "../../../test/factories/predictions";
 
-useEphemeralDb(integrationSeed);
+useEphemeralDb({
+  users: testUsersThree(),
+  seasons: standardSeasonsTriple(),
+  predictions: seedForGetPredictionById(),
+});
 
 describe("GET /predictions/:prediction_id", () => {
   let app: express.Application;
