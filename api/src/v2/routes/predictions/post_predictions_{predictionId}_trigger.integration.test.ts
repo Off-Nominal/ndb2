@@ -1,12 +1,53 @@
+import { triggerPredictionById } from "./post_predictions_{predictionId}_trigger";
 import express from "express";
 import request from "supertest";
-import { describe, beforeAll, it, expect, vi } from "vitest";
 import * as API from "@offnominal/ndb2-api-types/v2";
-import { triggerPredictionById } from "./post_predictions_{predictionId}_trigger";
-import { useDbTransactionMock } from "../../../test/db-transaction-mock";
+import { vi } from "vitest";
 import { eventsManager } from "../../managers/events";
+import { errorHandler } from "../../middleware/errorHandler";
+import { useEphemeralDb } from "../../../test/with-ephemeral-db";
+import { defaultUsers } from "../../../test/factories/users";
+import { defaultPastCurrentFutureSeasons } from "../../../test/factories/seasons";
+import { prediction } from "../../../test/factories/predictions";
+import * as C from "../../../test/factories/constants";
 
-useDbTransactionMock();
+useEphemeralDb({
+  users: defaultUsers(),
+  seasons: defaultPastCurrentFutureSeasons(),
+  predictions: [
+    prediction(1, {
+      text: "open",
+      baseDate: { days: 0 },
+      due: { days: 25 },
+    }),
+    prediction(2, {
+      text: "checking",
+      baseDate: { quarter: "past", days: 10 },
+      due: { days: 20 },
+      checks: [{ checked: { days: 0 } }],
+    }),
+    prediction(3, {
+      text: "retired",
+      baseDate: { quarter: "past", days: 10 },
+      due: { days: 20 },
+      retired: { days: 5 },
+    }),
+    prediction(4, {
+      text: "closed",
+      baseDate: { quarter: "past", days: 25 },
+      due: { days: 40 },
+      closed: { days: 40 },
+      triggered: { days: 40 },
+      votes: [
+        {
+          user_id: C.USER_1_ID,
+          voted: { days: 40, minutes: 5 },
+          vote: true,
+        },
+      ],
+    }),
+  ],
+});
 
 describe("POST /predictions/:prediction_id/trigger", () => {
   let app: express.Application;
@@ -15,12 +56,13 @@ describe("POST /predictions/:prediction_id/trigger", () => {
     app = express();
     app.use(express.json());
     triggerPredictionById(app);
+    app.use(errorHandler);
   });
 
   it("should reject a non-numeric prediction_id", async () => {
     const response = await request(app)
       .post("/abc/trigger")
-      .send({ discord_id: "111111111111111111" });
+      .send({ discord_id: C.DISCORD_1 });
     expect(response.status).toBe(400);
     expect(
       response.body.errors.some(
@@ -33,7 +75,7 @@ describe("POST /predictions/:prediction_id/trigger", () => {
   it("should reject prediction_id above Postgres max int", async () => {
     const response = await request(app)
       .post("/2147483648/trigger")
-      .send({ discord_id: "111111111111111111" });
+      .send({ discord_id: C.DISCORD_1 });
     expect(response.status).toBe(400);
     expect(
       response.body.errors.some(
@@ -44,7 +86,7 @@ describe("POST /predictions/:prediction_id/trigger", () => {
   });
 
   it("should return 400 when discord_id is missing", async () => {
-    const response = await request(app).post("/4/trigger").send({});
+    const response = await request(app).post("/1/trigger").send({});
     expect(response.status).toBe(400);
     expect(
       response.body.errors.some(
@@ -57,7 +99,7 @@ describe("POST /predictions/:prediction_id/trigger", () => {
   it("should return 404 for a non-existent prediction", async () => {
     const response = await request(app)
       .post("/999999/trigger")
-      .send({ discord_id: "111111111111111111" });
+      .send({ discord_id: C.DISCORD_1 });
     expect(response.status).toBe(404);
     expect(
       response.body.errors.some(
@@ -69,8 +111,8 @@ describe("POST /predictions/:prediction_id/trigger", () => {
 
   it("should reject closed predictions", async () => {
     const response = await request(app)
-      .post("/7/trigger")
-      .send({ discord_id: "222222222222222222" });
+      .post("/4/trigger")
+      .send({ discord_id: C.DISCORD_2 });
     expect(response.status).toBe(400);
     expect(
       response.body.errors.some(
@@ -82,8 +124,8 @@ describe("POST /predictions/:prediction_id/trigger", () => {
 
   it("should reject retired predictions", async () => {
     const response = await request(app)
-      .post("/6/trigger")
-      .send({ discord_id: "111111111111111111" });
+      .post("/3/trigger")
+      .send({ discord_id: C.DISCORD_1 });
     expect(response.status).toBe(400);
     expect(
       response.body.errors.some(
@@ -95,9 +137,9 @@ describe("POST /predictions/:prediction_id/trigger", () => {
 
   it("should reject closed_date in the future", async () => {
     const response = await request(app)
-      .post("/4/trigger")
+      .post("/1/trigger")
       .send({
-        discord_id: "222222222222222222",
+        discord_id: C.DISCORD_2,
         closed_date: "2099-01-01T00:00:00.000Z",
       });
     expect(response.status).toBe(400);
@@ -111,9 +153,9 @@ describe("POST /predictions/:prediction_id/trigger", () => {
 
   it("should reject closed_date before the prediction was created", async () => {
     const response = await request(app)
-      .post("/4/trigger")
+      .post("/1/trigger")
       .send({
-        discord_id: "222222222222222222",
+        discord_id: C.DISCORD_2,
         closed_date: "1970-01-01T00:00:00.000Z",
       });
     expect(response.status).toBe(400);
@@ -129,14 +171,14 @@ describe("POST /predictions/:prediction_id/trigger", () => {
     const emitSpy = vi.spyOn(eventsManager, "emit");
 
     const response = await request(app)
-      .post("/4/trigger")
-      .send({ discord_id: "222222222222222222" });
+      .post("/1/trigger")
+      .send({ discord_id: C.DISCORD_2 });
 
     expect(response.status).toBe(200);
-    expect(response.body.data).toMatchObject({ id: 4, status: "closed" });
+    expect(response.body.data).toMatchObject({ id: 1, status: "closed" });
     expect(emitSpy).toHaveBeenCalledWith(
       "triggered_prediction",
-      expect.objectContaining({ id: 4 }),
+      expect.objectContaining({ id: 1 }),
     );
 
     emitSpy.mockRestore();
@@ -146,14 +188,14 @@ describe("POST /predictions/:prediction_id/trigger", () => {
     const emitSpy = vi.spyOn(eventsManager, "emit");
 
     const response = await request(app)
-      .post("/5/trigger")
-      .send({ discord_id: "222222222222222222" });
+      .post("/2/trigger")
+      .send({ discord_id: C.DISCORD_2 });
 
     expect(response.status).toBe(200);
-    expect(response.body.data).toMatchObject({ id: 5, status: "closed" });
+    expect(response.body.data).toMatchObject({ id: 2, status: "closed" });
     expect(emitSpy).toHaveBeenCalledWith(
       "triggered_snooze_check",
-      expect.objectContaining({ id: 5 }),
+      expect.objectContaining({ id: 2 }),
     );
 
     emitSpy.mockRestore();
