@@ -2,6 +2,9 @@ import pg from "pg";
 
 let pool: pg.Pool | null = null;
 
+/** Stable per-method bindings so `vi.spyOn(pool, "connect")` wraps the same fn `getDbClient` calls */
+const boundMethodCache = new Map<string | symbol, unknown>();
+
 function createPool(): pg.Pool {
   return new pg.Pool({
     connectionString: process.env.DATABASE_URL,
@@ -17,7 +20,10 @@ export default new Proxy({} as pg.Pool, {
     }
     const value = Reflect.get(pool, prop, pool);
     if (typeof value === "function") {
-      return value.bind(pool);
+      if (!boundMethodCache.has(prop)) {
+        boundMethodCache.set(prop, value.bind(pool));
+      }
+      return boundMethodCache.get(prop);
     }
     return value;
   },
@@ -44,4 +50,5 @@ export async function resetPoolForTests(): Promise<void> {
     await pool.end();
     pool = null;
   }
+  boundMethodCache.clear();
 }
