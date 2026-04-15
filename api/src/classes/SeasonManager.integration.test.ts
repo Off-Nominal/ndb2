@@ -3,9 +3,14 @@ import { SeasonManager } from "./SeasonManager";
 import schedule from "node-schedule";
 import predictions from "../db/queries/predictions";
 import { useEphemeralDb } from "../test/with-ephemeral-db";
-import { integrationSeed } from "../test/integration-seed";
+import { testUsersThree } from "../test/factories/users";
+import { standardSeasonsTriple } from "../test/factories/seasons";
 
-useEphemeralDb(integrationSeed);
+useEphemeralDb({
+  users: testUsersThree(),
+  seasons: standardSeasonsTriple(),
+  predictions: [],
+});
 
 vi.mock("../db/queries/predictions", () => ({
   default: {

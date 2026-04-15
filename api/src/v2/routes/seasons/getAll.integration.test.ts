@@ -2,9 +2,14 @@ import { getAllSeasons } from "./getAll";
 import express from "express";
 import request from "supertest";
 import { useEphemeralDb } from "../../../test/with-ephemeral-db";
-import { integrationSeed } from "../../../test/integration-seed";
+import { testUsersThree } from "../../../test/factories/users";
+import { standardSeasonsTriple } from "../../../test/factories/seasons";
 
-useEphemeralDb(integrationSeed);
+useEphemeralDb({
+  users: testUsersThree(),
+  seasons: standardSeasonsTriple(),
+  predictions: [],
+});
 
 describe("GET /seasons", () => {
   let app: express.Application;

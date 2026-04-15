@@ -7,9 +7,15 @@ import { eventsManager } from "../../managers/events";
 import { errorHandler } from "../../middleware/errorHandler";
 import betsQueries from "../../queries/bets";
 import { useEphemeralDb } from "../../../test/with-ephemeral-db";
-import { integrationSeed } from "../../../test/integration-seed";
+import { testUsersThree } from "../../../test/factories/users";
+import { standardSeasonsTriple } from "../../../test/factories/seasons";
+import { seedForPostBets } from "../../../test/factories/predictions";
 
-useEphemeralDb(integrationSeed);
+useEphemeralDb({
+  users: testUsersThree(),
+  seasons: standardSeasonsTriple(),
+  predictions: seedForPostBets(),
+});
 
 describe("POST /predictions/:prediction_id/bets", () => {
   let app: express.Application;
@@ -36,7 +42,7 @@ describe("POST /predictions/:prediction_id/bets", () => {
 
   it("returns 400 when endorsed is missing", async () => {
     const response = await request(app)
-      .post("/4/bets")
+      .post("/3/bets")
       .send({ discord_id: "111111111111111111" });
     expect(response.status).toBe(400);
     expect(
@@ -89,11 +95,11 @@ describe("POST /predictions/:prediction_id/bets", () => {
     const emitSpy = vi.spyOn(eventsManager, "emit");
 
     const response = await request(app)
-      .post("/4/bets")
+      .post("/3/bets")
       .send({ discord_id: "111111111111111111", endorsed: true });
 
     expect(response.status).toBe(200);
-    expect(response.body.data.id).toBe(4);
+    expect(response.body.data.id).toBe(3);
     expect(
       response.body.data.bets.some(
         (b: { better: { discord_id: string } }) =>
@@ -102,7 +108,7 @@ describe("POST /predictions/:prediction_id/bets", () => {
     ).toBe(true);
     expect(emitSpy).toHaveBeenCalledWith(
       "new_bet",
-      expect.objectContaining({ id: 4 }),
+      expect.objectContaining({ id: 3 }),
     );
 
     emitSpy.mockRestore();

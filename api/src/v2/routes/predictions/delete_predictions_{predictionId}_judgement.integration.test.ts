@@ -6,9 +6,15 @@ import { vi } from "vitest";
 import { eventsManager } from "../../managers/events";
 import pool from "../../../db";
 import { useEphemeralDb } from "../../../test/with-ephemeral-db";
-import { integrationSeed } from "../../../test/integration-seed";
+import { testUsersThree } from "../../../test/factories/users";
+import { standardSeasonsTriple } from "../../../test/factories/seasons";
+import { seedForDeleteJudgementRejects } from "../../../test/factories/predictions";
 
-useEphemeralDb(integrationSeed);
+useEphemeralDb({
+  users: testUsersThree(),
+  seasons: standardSeasonsTriple(),
+  predictions: seedForDeleteJudgementRejects(),
+});
 
 const defaultUserId = "550e8400-e29b-41d4-a716-446655440001";
 
@@ -91,8 +97,7 @@ describe("DELETE /predictions/:prediction_id/judgement", () => {
 
   describe("should reject predictions with incorrect status", () => {
     it("should reject prediction with 'open' status", async () => {
-      // Use seeded prediction with ID 4 (open status)
-      const response = await request(app).delete("/4/judgement");
+      const response = await request(app).delete("/1/judgement");
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("errors");
       expect(
@@ -104,8 +109,7 @@ describe("DELETE /predictions/:prediction_id/judgement", () => {
     });
 
     it("should reject prediction with 'checking' status", async () => {
-      // Use seeded prediction with ID 5 (checking status)
-      const response = await request(app).delete("/5/judgement");
+      const response = await request(app).delete("/2/judgement");
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("errors");
       expect(
@@ -117,8 +121,7 @@ describe("DELETE /predictions/:prediction_id/judgement", () => {
     });
 
     it("should reject prediction with 'retired' status", async () => {
-      // Use seeded prediction with ID 6 (retired status)
-      const response = await request(app).delete("/6/judgement");
+      const response = await request(app).delete("/3/judgement");
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("errors");
       expect(
@@ -130,8 +133,7 @@ describe("DELETE /predictions/:prediction_id/judgement", () => {
     });
 
     it("should reject prediction with 'closed' status", async () => {
-      // Use seeded prediction with ID 7 (closed status)
-      const response = await request(app).delete("/7/judgement");
+      const response = await request(app).delete("/4/judgement");
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("errors");
       expect(
@@ -144,8 +146,7 @@ describe("DELETE /predictions/:prediction_id/judgement", () => {
   });
 
   it("should reject unjudgement if the prediction season is closed", async () => {
-    // Use seeded prediction with ID 8 (successful status, past season)
-    const response = await request(app).delete("/8/judgement");
+    const response = await request(app).delete("/5/judgement");
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("errors");
     expect(

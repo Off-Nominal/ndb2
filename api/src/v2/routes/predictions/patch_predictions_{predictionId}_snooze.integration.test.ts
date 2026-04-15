@@ -5,9 +5,15 @@ import * as API from "@offnominal/ndb2-api-types/v2";
 import { vi } from "vitest";
 import { eventsManager } from "../../managers/events";
 import { useEphemeralDb } from "../../../test/with-ephemeral-db";
-import { integrationSeed } from "../../../test/integration-seed";
+import { testUsersThree } from "../../../test/factories/users";
+import { standardSeasonsTriple } from "../../../test/factories/seasons";
+import { seedForPatchSnooze } from "../../../test/factories/predictions";
 
-useEphemeralDb(integrationSeed);
+useEphemeralDb({
+  users: testUsersThree(),
+  seasons: standardSeasonsTriple(),
+  predictions: seedForPatchSnooze(),
+});
 
 const futureIso = () =>
   new Date(Date.now() + 86400000 * 365).toISOString();
@@ -39,7 +45,7 @@ describe("PATCH /predictions/:prediction_id/snooze", () => {
 
   it("should return 400 if check_date is missing", async () => {
     const response = await request(app)
-      .patch("/4/snooze")
+      .patch("/1/snooze")
       .send({ discord_id: "111111111111111111" });
     expect(response.status).toBe(400);
     expect(
@@ -68,7 +74,7 @@ describe("PATCH /predictions/:prediction_id/snooze", () => {
 
   it("should reject retired predictions", async () => {
     const response = await request(app)
-      .patch("/11/snooze")
+      .patch("/2/snooze")
       .send({
         discord_id: "111111111111111111",
         check_date: futureIso(),
@@ -86,7 +92,7 @@ describe("PATCH /predictions/:prediction_id/snooze", () => {
     const emitSpy = vi.spyOn(eventsManager, "emit");
 
     const response = await request(app)
-      .patch("/10/snooze")
+      .patch("/1/snooze")
       .send({
         discord_id: "111111111111111111",
         check_date: futureIso(),
@@ -94,7 +100,7 @@ describe("PATCH /predictions/:prediction_id/snooze", () => {
 
     expect(response.status).toBe(200);
     expect(response.body.data).toBeDefined();
-    expect(response.body.data.id).toBe(10);
+    expect(response.body.data.id).toBe(1);
     expect(emitSpy).toHaveBeenCalledWith(
       "prediction_edit",
       expect.any(Object),
