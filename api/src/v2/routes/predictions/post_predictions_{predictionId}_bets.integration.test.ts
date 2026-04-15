@@ -7,14 +7,62 @@ import { eventsManager } from "../../managers/events";
 import { errorHandler } from "../../middleware/errorHandler";
 import betsQueries from "../../queries/bets";
 import { useEphemeralDb } from "../../../test/with-ephemeral-db";
-import { testUsersThree } from "../../../test/factories/users";
-import { standardSeasonsTriple } from "../../../test/factories/seasons";
-import { seedForPostBets } from "../../../test/factories/predictions";
+import { defaultUsers } from "../../../test/factories/users";
+import { defaultPastCurrentFutureSeasons } from "../../../test/factories/seasons";
+import { prediction } from "../../../test/factories/predictions";
+import * as C from "../../../test/factories/constants";
 
 useEphemeralDb({
-  users: testUsersThree(),
-  seasons: standardSeasonsTriple(),
-  predictions: seedForPostBets(),
+  users: defaultUsers(),
+  seasons: defaultPastCurrentFutureSeasons(),
+  predictions: [
+    prediction(1, {
+      text: "open with bets",
+      baseDate: { quarter: "past", days: 20 },
+      due: { days: 10 },
+      bets: [
+        {
+          user_id: C.USER_1_ID,
+          created: { days: 0 },
+          endorsed: true,
+        },
+        {
+          user_id: C.USER_2_ID,
+          created: { days: 1 },
+          endorsed: true,
+        },
+      ],
+    }),
+    prediction(2, {
+      text: "closed judged",
+      baseDate: { quarter: "past", days: 25 },
+      due: { days: 40 },
+      closed: { days: 40 },
+      triggered: { days: 40 },
+      judged: { days: 41 },
+      bets: [
+        { user_id: C.USER_1_ID, created: { minutes: 5 }, endorsed: true },
+        { user_id: C.USER_2_ID, created: { minutes: 15 }, endorsed: false },
+      ],
+      votes: [
+        {
+          user_id: C.USER_1_ID,
+          voted: { days: 40, minutes: 5 },
+          vote: true,
+        },
+        {
+          user_id: C.USER_2_ID,
+          voted: { days: 40, minutes: 15 },
+          vote: false,
+        },
+      ],
+    }),
+    prediction(3, {
+      text: "open no dup bet",
+      baseDate: { days: 0 },
+      due: { days: 25 },
+    }),
+  ],
 });
 
 describe("POST /predictions/:prediction_id/bets", () => {

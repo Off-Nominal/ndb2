@@ -5,11 +5,12 @@ import * as API from "@offnominal/ndb2-api-types/v2";
 import { createPrediction } from "./post_predictions";
 import { eventsManager } from "../../managers/events";
 import { useEphemeralDb } from "../../../test/with-ephemeral-db";
-import { testUsersThree } from "../../../test/factories/users";
-import { standardSeasonsTriple } from "../../../test/factories/seasons";
+import { defaultUsers } from "../../../test/factories/users";
+import { defaultPastCurrentFutureSeasons } from "../../../test/factories/seasons";
+
 useEphemeralDb({
-  users: testUsersThree(),
-  seasons: standardSeasonsTriple(),
+  users: defaultUsers(),
+  seasons: defaultPastCurrentFutureSeasons(),
   predictions: [],
 });
 

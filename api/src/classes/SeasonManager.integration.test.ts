@@ -3,12 +3,12 @@ import { SeasonManager } from "./SeasonManager";
 import schedule from "node-schedule";
 import predictions from "../db/queries/predictions";
 import { useEphemeralDb } from "../test/with-ephemeral-db";
-import { testUsersThree } from "../test/factories/users";
-import { standardSeasonsTriple } from "../test/factories/seasons";
+import { defaultUsers } from "../test/factories/users";
+import { defaultPastCurrentFutureSeasons } from "../test/factories/seasons";
 
 useEphemeralDb({
-  users: testUsersThree(),
-  seasons: standardSeasonsTriple(),
+  users: defaultUsers(),
+  seasons: defaultPastCurrentFutureSeasons(),
   predictions: [],
 });
 

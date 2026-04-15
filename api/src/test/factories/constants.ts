@@ -1,4 +1,3 @@
-/** Stable UUIDs for seed users (match prior integration fixtures). */
 export const USER_1_ID = "550e8400-e29b-41d4-a716-446655440001";
 export const USER_2_ID = "550e8400-e29b-41d4-a716-446655440002";
 export const USER_3_ID = "550e8400-e29b-41d4-a716-446655440003";
