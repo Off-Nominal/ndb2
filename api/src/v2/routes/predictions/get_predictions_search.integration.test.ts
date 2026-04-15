@@ -2,11 +2,43 @@ import express from "express";
 import request from "supertest";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { getPredictionsSearch } from "./get_predictions_search";
-import { useDbTransactionMock } from "../../../test/db-transaction-mock";
-import pool from "../../../db";
-import { vi } from "vitest";
+import { useEphemeralDb } from "../../../test/with-ephemeral-db";
+import { defaultUsers } from "../../../test/factories/users";
+import { defaultPastCurrentFutureSeasons } from "../../../test/factories/seasons";
+import { prediction } from "../../../test/factories/predictions";
+import * as C from "../../../test/factories/constants";
 
-useDbTransactionMock();
+useEphemeralDb({
+  users: defaultUsers(),
+  seasons: defaultPastCurrentFutureSeasons(),
+  predictions: [
+    prediction(1, {
+      text: "Successful prediction for search",
+      baseDate: { quarter: "past", days: 25 },
+      due: { days: 40 },
+      closed: { days: 40 },
+      triggered: { days: 40 },
+      judged: { days: 41 },
+      votes: [
+        {
+          user_id: C.USER_1_ID,
+          voted: { days: 40, minutes: 5 },
+          vote: true,
+        },
+        {
+          user_id: C.USER_2_ID,
+          voted: { days: 40, minutes: 10 },
+          vote: true,
+        },
+        {
+          user_id: C.USER_3_ID,
+          voted: { days: 40, minutes: 15 },
+          vote: false,
+        },
+      ],
+    }),
+  ],
+});
 
 describe("GET /predictions/search", () => {
   let app: express.Application;

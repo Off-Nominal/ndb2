@@ -2,14 +2,99 @@ import { untriggerPredictionById } from "./delete_predictions_{predictionId}_tri
 import express from "express";
 import request from "supertest";
 import * as API from "@offnominal/ndb2-api-types/v2";
-import { useDbTransactionMock } from "../../../test/db-transaction-mock";
 import { untriggerPredictionById as untriggerQuery } from "../../queries/predictions/predictions.queries";
 import predictions from "../../queries/predictions";
 import { vi } from "vitest";
 import { eventsManager } from "../../managers/events";
+import { useEphemeralDb } from "../../../test/with-ephemeral-db";
+import { defaultUsers } from "../../../test/factories/users";
+import { defaultPastCurrentFutureSeasons } from "../../../test/factories/seasons";
+import { prediction } from "../../../test/factories/predictions";
+import * as C from "../../../test/factories/constants";
 
-// Enable transaction wrapping for all tests in this file
-useDbTransactionMock();
+useEphemeralDb({
+  users: defaultUsers(),
+  seasons: defaultPastCurrentFutureSeasons(),
+  predictions: [
+    prediction(1, { text: "open", baseDate: { days: 0 }, due: { days: 25 } }),
+    prediction(2, {
+      text: "checking",
+      baseDate: { quarter: "past", days: 10 },
+      due: { days: 20 },
+      checks: [{ checked: { days: 0 } }],
+    }),
+    prediction(3, {
+      text: "retired",
+      baseDate: { quarter: "past", days: 10 },
+      due: { days: 20 },
+      retired: { days: 5 },
+    }),
+    prediction(4, {
+      text: "closed",
+      baseDate: { quarter: "past", days: 25 },
+      due: { days: 40 },
+      closed: { days: 40 },
+      triggered: { days: 40 },
+      votes: [
+        {
+          user_id: C.USER_1_ID,
+          voted: { days: 40, minutes: 5 },
+          vote: true,
+        },
+      ],
+    }),
+    prediction(5, {
+      text: "successful",
+      baseDate: { quarter: "past", days: 25 },
+      due: { days: 40 },
+      closed: { days: 40 },
+      triggered: { days: 40 },
+      judged: { days: 41 },
+      votes: [
+        {
+          user_id: C.USER_1_ID,
+          voted: { days: 40, minutes: 5 },
+          vote: true,
+        },
+        {
+          user_id: C.USER_2_ID,
+          voted: { days: 40, minutes: 10 },
+          vote: true,
+        },
+        {
+          user_id: C.USER_3_ID,
+          voted: { days: 40, minutes: 15 },
+          vote: false,
+        },
+      ],
+    }),
+    prediction(6, {
+      text: "failed",
+      baseDate: { quarter: "past", days: 25 },
+      due: { days: 40 },
+      closed: { days: 40 },
+      triggered: { days: 40 },
+      judged: { days: 41 },
+      votes: [
+        {
+          user_id: C.USER_1_ID,
+          voted: { days: 40, minutes: 5 },
+          vote: false,
+        },
+        {
+          user_id: C.USER_2_ID,
+          voted: { days: 40, minutes: 10 },
+          vote: false,
+        },
+        {
+          user_id: C.USER_3_ID,
+          voted: { days: 40, minutes: 15 },
+          vote: true,
+        },
+      ],
+    }),
+  ],
+});
 
 describe("DELETE /predictions/:prediction_id/trigger", () => {
   let app: express.Application;
@@ -57,8 +142,7 @@ describe("DELETE /predictions/:prediction_id/trigger", () => {
 
   describe("should reject predictions with incorrect status", () => {
     it("should reject prediction with 'open' status", async () => {
-      // Use seeded prediction with ID 4 (open status)
-      const response = await request(app).delete("/4/trigger");
+      const response = await request(app).delete("/1/trigger");
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("errors");
       expect(
@@ -70,8 +154,7 @@ describe("DELETE /predictions/:prediction_id/trigger", () => {
     });
 
     it("should reject prediction with 'checking' status", async () => {
-      // Use seeded prediction with ID 5 (checking status)
-      const response = await request(app).delete("/5/trigger");
+      const response = await request(app).delete("/2/trigger");
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("errors");
       expect(
@@ -83,8 +166,7 @@ describe("DELETE /predictions/:prediction_id/trigger", () => {
     });
 
     it("should reject prediction with 'retired' status", async () => {
-      // Use seeded prediction with ID 6 (retired status)
-      const response = await request(app).delete("/6/trigger");
+      const response = await request(app).delete("/3/trigger");
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("errors");
       expect(
@@ -96,8 +178,7 @@ describe("DELETE /predictions/:prediction_id/trigger", () => {
     });
 
     it("should reject prediction with 'successful' status", async () => {
-      // Use seeded prediction with ID 8 (successful status)
-      const response = await request(app).delete("/8/trigger");
+      const response = await request(app).delete("/5/trigger");
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("errors");
       expect(
@@ -109,8 +190,7 @@ describe("DELETE /predictions/:prediction_id/trigger", () => {
     });
 
     it("should reject prediction with 'failed' status", async () => {
-      // Use seeded prediction with ID 9 (failed status)
-      const response = await request(app).delete("/9/trigger");
+      const response = await request(app).delete("/6/trigger");
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("errors");
       expect(
@@ -126,20 +206,18 @@ describe("DELETE /predictions/:prediction_id/trigger", () => {
     // Spy on the eventsManager.emit method
     const emitSpy = vi.spyOn(eventsManager, "emit");
 
-    // Use seeded prediction with ID 7 (closed status)
-    const response = await request(app).delete("/7/trigger");
+    const response = await request(app).delete("/4/trigger");
 
-    // Verify the request was successful
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("data");
-    expect(response.body.data).toHaveProperty("id", 7);
+    expect(response.body.data).toHaveProperty("id", 4);
 
     // Verify the event emitter was called with the correct event name
     expect(emitSpy).toHaveBeenCalledTimes(1);
     expect(emitSpy).toHaveBeenCalledWith(
       "untriggered_prediction",
       expect.objectContaining({
-        id: 7,
+        id: 4,
       })
     );
 
@@ -148,7 +226,7 @@ describe("DELETE /predictions/:prediction_id/trigger", () => {
     expect(emitCall[0]).toBe("untriggered_prediction");
     const emittedPrediction =
       emitCall[1] as API.Entities.Predictions.Prediction;
-    expect(emittedPrediction).toHaveProperty("id", 7);
+    expect(emittedPrediction).toHaveProperty("id", 4);
     expect(emittedPrediction).toHaveProperty("text");
     expect(emittedPrediction).toHaveProperty("status");
 

@@ -17,6 +17,9 @@ importers:
       '@mendahu/utilities':
         specifier: ^0.9.0
         version: 0.9.0
+      '@offnominal/ndb2-db':
+        specifier: workspace:*
+        version: link:../db
       '@pgtyped/runtime':
         specifier: ^2.4.2
         version: 2.4.2
@@ -45,9 +48,6 @@ importers:
       '@offnominal/ndb2-api-types':
         specifier: workspace:*
         version: link:../types
-      '@offnominal/ndb2-db':
-        specifier: workspace:*
-        version: link:../db
       '@pgtyped/cli':
         specifier: ^2.4.3
         version: 2.4.3(typescript@5.9.3)

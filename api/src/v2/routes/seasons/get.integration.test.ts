@@ -1,6 +1,15 @@
-import { getAllSeasons } from "./getAll";
+import { getAllSeasons } from "./get";
 import express from "express";
 import request from "supertest";
+import { useEphemeralDb } from "../../../test/with-ephemeral-db";
+import { defaultUsers } from "../../../test/factories/users";
+import { defaultPastCurrentFutureSeasons } from "../../../test/factories/seasons";
+
+useEphemeralDb({
+  users: defaultUsers(),
+  seasons: defaultPastCurrentFutureSeasons(),
+  predictions: [],
+});
 
 describe("GET /seasons", () => {
   let app: express.Application;

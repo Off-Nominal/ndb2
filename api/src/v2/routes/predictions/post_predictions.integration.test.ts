@@ -3,10 +3,16 @@ import request from "supertest";
 import { describe, beforeAll, it, expect, vi } from "vitest";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { createPrediction } from "./post_predictions";
-import { useDbTransactionMock } from "../../../test/db-transaction-mock";
 import { eventsManager } from "../../managers/events";
+import { useEphemeralDb } from "../../../test/with-ephemeral-db";
+import { defaultUsers } from "../../../test/factories/users";
+import { defaultPastCurrentFutureSeasons } from "../../../test/factories/seasons";
 
-useDbTransactionMock();
+useEphemeralDb({
+  users: defaultUsers(),
+  seasons: defaultPastCurrentFutureSeasons(),
+  predictions: [],
+});
 
 describe("POST /predictions", () => {
   let app: express.Application;

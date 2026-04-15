@@ -64,6 +64,8 @@ export interface SnoozeCheckSeed {
   checked: RelativeSeedDate;
   closed?: RelativeSeedDate;
   values?: SnoozeVoteSeed[];
+  /** Fixture JSON uses `votes` for snooze votes on a check */
+  votes?: SnoozeVoteSeed[];
 }
 
 // Prediction seed data type

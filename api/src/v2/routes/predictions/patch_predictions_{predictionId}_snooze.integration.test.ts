@@ -2,11 +2,32 @@ import { patchPredictionSnooze } from "./patch_predictions_{predictionId}_snooze
 import express from "express";
 import request from "supertest";
 import * as API from "@offnominal/ndb2-api-types/v2";
-import { useDbTransactionMock } from "../../../test/db-transaction-mock";
 import { vi } from "vitest";
 import { eventsManager } from "../../managers/events";
+import { useEphemeralDb } from "../../../test/with-ephemeral-db";
+import { defaultUsers } from "../../../test/factories/users";
+import { defaultPastCurrentFutureSeasons } from "../../../test/factories/seasons";
+import { prediction } from "../../../test/factories/predictions";
 
-useDbTransactionMock();
+useEphemeralDb({
+  users: defaultUsers(),
+  seasons: defaultPastCurrentFutureSeasons(),
+  predictions: [
+    prediction(1, {
+      text: "open event",
+      driver: "event",
+      baseDate: { days: 0 },
+      check_date: { days: 25 },
+    }),
+    prediction(2, {
+      text: "retired event",
+      driver: "event",
+      baseDate: { quarter: "past", days: 10 },
+      check_date: { days: 20 },
+      retired: { days: 5 },
+    }),
+  ],
+});
 
 const futureIso = () =>
   new Date(Date.now() + 86400000 * 365).toISOString();
@@ -38,7 +59,7 @@ describe("PATCH /predictions/:prediction_id/snooze", () => {
 
   it("should return 400 if check_date is missing", async () => {
     const response = await request(app)
-      .patch("/4/snooze")
+      .patch("/1/snooze")
       .send({ discord_id: "111111111111111111" });
     expect(response.status).toBe(400);
     expect(
@@ -67,7 +88,7 @@ describe("PATCH /predictions/:prediction_id/snooze", () => {
 
   it("should reject retired predictions", async () => {
     const response = await request(app)
-      .patch("/11/snooze")
+      .patch("/2/snooze")
       .send({
         discord_id: "111111111111111111",
         check_date: futureIso(),
@@ -85,7 +106,7 @@ describe("PATCH /predictions/:prediction_id/snooze", () => {
     const emitSpy = vi.spyOn(eventsManager, "emit");
 
     const response = await request(app)
-      .patch("/10/snooze")
+      .patch("/1/snooze")
       .send({
         discord_id: "111111111111111111",
         check_date: futureIso(),
@@ -93,7 +114,7 @@ describe("PATCH /predictions/:prediction_id/snooze", () => {
 
     expect(response.status).toBe(200);
     expect(response.body.data).toBeDefined();
-    expect(response.body.data.id).toBe(10);
+    expect(response.body.data.id).toBe(1);
     expect(emitSpy).toHaveBeenCalledWith(
       "prediction_edit",
       expect.any(Object),

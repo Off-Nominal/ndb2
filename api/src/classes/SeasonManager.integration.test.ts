@@ -1,10 +1,16 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { PoolClient } from "pg";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import { SeasonManager } from "./SeasonManager";
-import { resetTestDatabase } from "../test/global-setup";
 import schedule from "node-schedule";
-import pool from "../db";
 import predictions from "../db/queries/predictions";
+import { useEphemeralDb } from "../test/with-ephemeral-db";
+import { defaultUsers } from "../test/factories/users";
+import { defaultPastCurrentFutureSeasons } from "../test/factories/seasons";
+
+useEphemeralDb({
+  users: defaultUsers(),
+  seasons: defaultPastCurrentFutureSeasons(),
+  predictions: [],
+});
 
 vi.mock("../db/queries/predictions", () => ({
   default: {

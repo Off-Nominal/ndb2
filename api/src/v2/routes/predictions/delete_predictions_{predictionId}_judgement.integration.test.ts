@@ -2,25 +2,81 @@ import { unjudgePredictionById } from "./delete_predictions_{predictionId}_judge
 import express from "express";
 import request from "supertest";
 import * as API from "@offnominal/ndb2-api-types/v2";
-import { useDbTransactionMock } from "../../../test/db-transaction-mock";
 import { vi } from "vitest";
 import { eventsManager } from "../../managers/events";
 import pool from "../../../db";
+import { useEphemeralDb } from "../../../test/with-ephemeral-db";
+import { defaultUsers } from "../../../test/factories/users";
+import { defaultPastCurrentFutureSeasons } from "../../../test/factories/seasons";
+import { prediction } from "../../../test/factories/predictions";
+import * as C from "../../../test/factories/constants";
 
-// Enable transaction wrapping for all tests in this file
-useDbTransactionMock();
+useEphemeralDb({
+  users: defaultUsers(),
+  seasons: defaultPastCurrentFutureSeasons(),
+  predictions: [
+    prediction(1, { text: "open", baseDate: { days: 0 }, due: { days: 25 } }),
+    prediction(2, {
+      text: "checking",
+      baseDate: { quarter: "past", days: 10 },
+      due: { days: 20 },
+      checks: [{ checked: { days: 0 } }],
+    }),
+    prediction(3, {
+      text: "retired",
+      baseDate: { quarter: "past", days: 10 },
+      due: { days: 20 },
+      retired: { days: 5 },
+    }),
+    prediction(4, {
+      text: "closed",
+      baseDate: { quarter: "past", days: 25 },
+      due: { days: 40 },
+      closed: { days: 40 },
+      triggered: { days: 40 },
+      votes: [
+        {
+          user_id: C.USER_1_ID,
+          voted: { days: 40, minutes: 5 },
+          vote: true,
+        },
+      ],
+    }),
+    prediction(5, {
+      text: "successful",
+      baseDate: { quarter: "past", days: 25 },
+      due: { days: 40 },
+      closed: { days: 40 },
+      triggered: { days: 40 },
+      judged: { days: 41 },
+      votes: [
+        {
+          user_id: C.USER_1_ID,
+          voted: { days: 40, minutes: 5 },
+          vote: true,
+        },
+        {
+          user_id: C.USER_2_ID,
+          voted: { days: 40, minutes: 10 },
+          vote: true,
+        },
+        {
+          user_id: C.USER_3_ID,
+          voted: { days: 40, minutes: 15 },
+          vote: false,
+        },
+      ],
+    }),
+  ],
+});
 
 const defaultUserId = "550e8400-e29b-41d4-a716-446655440001";
 
 const insertJudgedPredictionInOpenSeason = async (predictionId: number) => {
   const client = await pool.connect();
-  const connectMock = pool.connect as unknown as {
-    mockResolvedValue: (value: typeof client) => void;
-  };
-  connectMock.mockResolvedValue(client);
-
-  await client.query(
-    `INSERT INTO predictions (
+  try {
+    await client.query(
+      `INSERT INTO predictions (
       id,
       user_id,
       text,
@@ -42,8 +98,11 @@ const insertJudgedPredictionInOpenSeason = async (predictionId: number) => {
       NOW() + interval '1 day',
       'date'
     )`,
-    [predictionId, defaultUserId, "Open season judged prediction"]
-  );
+      [predictionId, defaultUserId, "Open season judged prediction"]
+    );
+  } finally {
+    client.release();
+  }
 };
 
 describe("DELETE /predictions/:prediction_id/judgement", () => {
@@ -92,8 +151,7 @@ describe("DELETE /predictions/:prediction_id/judgement", () => {
 
   describe("should reject predictions with incorrect status", () => {
     it("should reject prediction with 'open' status", async () => {
-      // Use seeded prediction with ID 4 (open status)
-      const response = await request(app).delete("/4/judgement");
+      const response = await request(app).delete("/1/judgement");
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("errors");
       expect(
@@ -105,8 +163,7 @@ describe("DELETE /predictions/:prediction_id/judgement", () => {
     });
 
     it("should reject prediction with 'checking' status", async () => {
-      // Use seeded prediction with ID 5 (checking status)
-      const response = await request(app).delete("/5/judgement");
+      const response = await request(app).delete("/2/judgement");
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("errors");
       expect(
@@ -118,8 +175,7 @@ describe("DELETE /predictions/:prediction_id/judgement", () => {
     });
 
     it("should reject prediction with 'retired' status", async () => {
-      // Use seeded prediction with ID 6 (retired status)
-      const response = await request(app).delete("/6/judgement");
+      const response = await request(app).delete("/3/judgement");
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("errors");
       expect(
@@ -131,8 +187,7 @@ describe("DELETE /predictions/:prediction_id/judgement", () => {
     });
 
     it("should reject prediction with 'closed' status", async () => {
-      // Use seeded prediction with ID 7 (closed status)
-      const response = await request(app).delete("/7/judgement");
+      const response = await request(app).delete("/4/judgement");
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("errors");
       expect(
@@ -145,8 +200,7 @@ describe("DELETE /predictions/:prediction_id/judgement", () => {
   });
 
   it("should reject unjudgement if the prediction season is closed", async () => {
-    // Use seeded prediction with ID 8 (successful status, past season)
-    const response = await request(app).delete("/8/judgement");
+    const response = await request(app).delete("/5/judgement");
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("errors");
     expect(
