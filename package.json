@@ -7,6 +7,7 @@
     "dev": "NODE_ENV=dev pnpm --filter @offnominal/ndb2-api-types build && concurrently \"pnpm --filter @offnominal/ndb2-api-types dev\" \"pnpm --filter ndb2-api dev\" \"pnpm --filter ndb2-api sql-watch\"",
     "start": "pnpm --filter ndb2-api start",
     "build": "pnpm --filter @offnominal/ndb2-api-types build && pnpm --filter @offnominal/ndb2-db build && pnpm --filter ndb2-api build",
+    "clean": "pnpm --filter @offnominal/ndb2-api-types clear && pnpm --filter @offnominal/ndb2-db clear && pnpm --filter ndb2-api clear",
     "compile": "pnpm --filter ndb2-api compile",
     "build:test-deps": "pnpm --filter @offnominal/ndb2-api-types build && pnpm --filter @offnominal/ndb2-db build",
     "test:unit": "pnpm run build:test-deps && concurrently -n api,db \"pnpm --filter ndb2-api test:unit\" \"pnpm --filter @offnominal/ndb2-db test\"",
