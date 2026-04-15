@@ -1,5 +1,5 @@
 import express from "express";
-import { getAllSeasons } from "./routes/seasons/getAll";
+import { getAllSeasons } from "./routes/seasons/get";
 import { getPredictionsSearch } from "./routes/predictions/get_predictions_search";
 import { getPredictionById } from "./routes/predictions/get_predictions_{predictionId}";
 import { untriggerPredictionById } from "./routes/predictions/delete_predictions_{predictionId}_trigger";

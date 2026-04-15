@@ -1,4 +1,4 @@
-import { getAllSeasons } from "./getAll";
+import { getAllSeasons } from "./get";
 import express from "express";
 import request from "supertest";
 import { useEphemeralDb } from "../../../test/with-ephemeral-db";
