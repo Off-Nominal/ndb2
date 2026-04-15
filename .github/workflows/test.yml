@@ -5,6 +5,11 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
 
+env:
+  NODE_ENV: test
+  # Must match api default; used for integration tests (ephemeral DBs + schema template).
+  TEST_POSTGRES_BASE_URL: postgresql://test_user:test_password@localhost:5433/ndb2_test
+
 jobs:
   test:
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
@@ -16,6 +21,11 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+
+      - name: Install database client tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gettext-base postgresql-client
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -35,25 +45,18 @@ jobs:
           pnpm --filter @offnominal/ndb2-api-types build
           pnpm --filter @offnominal/ndb2-db build
 
-      - name: Start test database
+      - name: Start test database (Docker)
         working-directory: ./db/scripts
         run: |
-          # Make the script executable
           chmod +x start-db.sh
-
-          # Start the test database using the existing script
           ./start-db.sh test
 
-      - name: Wait for database
+      - name: Wait for Postgres on host port
         run: |
           until pg_isready -h localhost -p 5433 -U test_user -d ndb2_test; do
-            echo "Waiting for database..."
+            echo "Waiting for database on localhost:5433..."
             sleep 2
           done
 
       - name: Run tests
-        env:
-          TEST_DATABASE_URL: postgresql://test_user:test_password@localhost:5433/ndb2_test
-          NODE_ENV: test
-        run: |
-          pnpm test
+        run: pnpm test
