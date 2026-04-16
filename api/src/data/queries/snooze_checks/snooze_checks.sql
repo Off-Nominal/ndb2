@@ -27,3 +27,20 @@ UPDATE snooze_checks
   SET closed = true, closed_at = NOW()
   WHERE id = :snooze_check_id!
   RETURNING id, prediction_id, check_date, closed, closed_at;
+
+/* @name insertSnoozeCheck */
+INSERT INTO snooze_checks (
+  prediction_id
+) VALUES (
+  :prediction_id!
+) RETURNING id, prediction_id, check_date, closed, closed_at;
+
+/* @name getNextUnactionedSnoozeCheck */
+SELECT
+  id,
+  prediction_id
+FROM snooze_checks
+WHERE closed IS false
+  AND check_date <= NOW() - INTERVAL '1 day'
+ORDER BY check_date
+LIMIT 1;

@@ -8,6 +8,10 @@ import {
   closePredictionById as closePredictionByIdQuery,
   insertDateDrivenPrediction,
   insertEventDrivenPrediction,
+  getNextPredictionToCheck,
+  getNextPredictionToTrigger,
+  getNextPredictionToJudge,
+  judgePredictionById,
   prediction_driver,
   retirePredictionById,
   searchPredictions,
@@ -98,6 +102,22 @@ function mapSearchRowToDTO(
 }
 
 export default {
+  getNextToTrigger: (dbClient: PoolClient) => async () => {
+    const [row] = await getNextPredictionToTrigger.run(undefined, dbClient);
+    return row;
+  },
+  getNextToCheck: (dbClient: PoolClient) => async () => {
+    const [row] = await getNextPredictionToCheck.run(undefined, dbClient);
+    return row;
+  },
+  getNextToJudge: (dbClient: PoolClient) => async () => {
+    const [row] = await getNextPredictionToJudge.run(undefined, dbClient);
+    return row;
+  },
+  judgeById: (dbClient: PoolClient) => async (prediction_id: number) => {
+    await judgePredictionById.run({ prediction_id }, dbClient);
+    return null;
+  },
   search:
     (dbClient: PoolClient) =>
     async (
@@ -249,7 +269,7 @@ export default {
     (dbClient: PoolClient) =>
     async (
       prediction_id: number,
-      triggerer_id: string,
+      triggerer_id: string | null,
       closed_date: Date,
     ): Promise<void> => {
       try {

@@ -73,6 +73,13 @@ eventsManager.on("triggered_snooze_check", (prediction) => {
   );
 });
 
+eventsManager.on("judged_prediction", (prediction) => {
+  notifySubscribers(
+    subscribers,
+    generateResponse("judged_prediction", { prediction }),
+  );
+});
+
 eventsManager.on("unjudged_prediction", (prediction) => {
   notifySubscribers(
     subscribers,

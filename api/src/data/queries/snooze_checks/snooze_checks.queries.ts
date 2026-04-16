@@ -114,3 +114,71 @@ const closeSnoozeCheckByIdIR: any = {"usedParamSet":{"snooze_check_id":true},"pa
 export const closeSnoozeCheckById = new PreparedQuery<ICloseSnoozeCheckByIdParams,ICloseSnoozeCheckByIdResult>(closeSnoozeCheckByIdIR);
 
 
+/** 'InsertSnoozeCheck' parameters type */
+export interface IInsertSnoozeCheckParams {
+  prediction_id: number;
+}
+
+/** 'InsertSnoozeCheck' return type */
+export interface IInsertSnoozeCheckResult {
+  check_date: Date;
+  closed: boolean;
+  closed_at: Date | null;
+  id: number;
+  prediction_id: number | null;
+}
+
+/** 'InsertSnoozeCheck' query type */
+export interface IInsertSnoozeCheckQuery {
+  params: IInsertSnoozeCheckParams;
+  result: IInsertSnoozeCheckResult;
+}
+
+const insertSnoozeCheckIR: any = {"usedParamSet":{"prediction_id":true},"params":[{"name":"prediction_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":57,"b":71}]}],"statement":"INSERT INTO snooze_checks (\n  prediction_id\n) VALUES (\n  :prediction_id!\n) RETURNING id, prediction_id, check_date, closed, closed_at"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * INSERT INTO snooze_checks (
+ *   prediction_id
+ * ) VALUES (
+ *   :prediction_id!
+ * ) RETURNING id, prediction_id, check_date, closed, closed_at
+ * ```
+ */
+export const insertSnoozeCheck = new PreparedQuery<IInsertSnoozeCheckParams,IInsertSnoozeCheckResult>(insertSnoozeCheckIR);
+
+
+/** 'GetNextUnactionedSnoozeCheck' parameters type */
+export type IGetNextUnactionedSnoozeCheckParams = void;
+
+/** 'GetNextUnactionedSnoozeCheck' return type */
+export interface IGetNextUnactionedSnoozeCheckResult {
+  id: number;
+  prediction_id: number | null;
+}
+
+/** 'GetNextUnactionedSnoozeCheck' query type */
+export interface IGetNextUnactionedSnoozeCheckQuery {
+  params: IGetNextUnactionedSnoozeCheckParams;
+  result: IGetNextUnactionedSnoozeCheckResult;
+}
+
+const getNextUnactionedSnoozeCheckIR: any = {"usedParamSet":{},"params":[],"statement":"SELECT\n  id,\n  prediction_id\nFROM snooze_checks\nWHERE closed IS false\n  AND check_date <= NOW() - INTERVAL '1 day'\nORDER BY check_date\nLIMIT 1"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * SELECT
+ *   id,
+ *   prediction_id
+ * FROM snooze_checks
+ * WHERE closed IS false
+ *   AND check_date <= NOW() - INTERVAL '1 day'
+ * ORDER BY check_date
+ * LIMIT 1
+ * ```
+ */
+export const getNextUnactionedSnoozeCheck = new PreparedQuery<IGetNextUnactionedSnoozeCheckParams,IGetNextUnactionedSnoozeCheckResult>(getNextUnactionedSnoozeCheckIR);
+
+

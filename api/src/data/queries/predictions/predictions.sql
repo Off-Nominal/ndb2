@@ -35,9 +35,45 @@ WHERE id = :prediction_id!;
 /* @name closePredictionById */
 UPDATE predictions
 SET
-  triggerer_id = :triggerer_id!,
+  triggerer_id = :triggerer_id,
   closed_date = :closed_date!,
   triggered_date = NOW()
+WHERE predictions.id = :prediction_id!;
+
+/* @name getNextPredictionToTrigger */
+SELECT
+  id,
+  due_date
+FROM predictions
+WHERE driver = 'date'
+  AND due_date < NOW()
+  AND status = 'open'
+ORDER BY due_date ASC
+LIMIT 1;
+
+/* @name getNextPredictionToCheck */
+SELECT
+  id,
+  check_date
+FROM predictions
+WHERE driver = 'event'
+  AND check_date < NOW()
+  AND status = 'open'
+ORDER BY check_date ASC
+LIMIT 1;
+
+/* @name getNextPredictionToJudge */
+SELECT
+  id
+FROM predictions
+WHERE status = 'closed'
+  AND triggered_date + '1 day' < NOW()
+ORDER BY due_date ASC
+LIMIT 1;
+
+/* @name judgePredictionById */
+UPDATE predictions
+SET judged_date = NOW()
 WHERE predictions.id = :prediction_id!;
 
 /* @name unjudgePredictionById */

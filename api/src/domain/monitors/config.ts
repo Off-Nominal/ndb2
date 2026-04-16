@@ -1,8 +1,8 @@
-import { Pool, PoolClient } from "pg";
-import predictions from "../../data/legacy-queries/predictions";
-import webhookManager from "../webhooks/subscribers";
+import { PoolClient } from "pg";
+import { eventsManager } from "../events/eventsManager";
 import { MonitorConfig, MonitorLog } from "./PredictionMonitor";
-import snoozes from "../../data/legacy-queries/snoozes";
+import predictions from "../../data/queries/predictions";
+import snoozeChecks from "../../data/queries/snooze_checks";
 import pool from "../../data/db";
 
 const getPoolClient = (callback: (client: PoolClient) => Promise<void>) => {
@@ -18,25 +18,20 @@ export const monitors: MonitorConfig[] = [
     callback: (log: MonitorLog) => {
       const monitorCallback = (client: PoolClient) => {
         return predictions
-          .getNextPredictionToTrigger(client)()
+          .getNextToTrigger(client)()
           .then((pred) => {
             if (!pred) {
               return;
             }
             log(`Triggering prediction with id ${pred.id}`);
             return predictions
-              .closePredictionById(client)(
-                pred.id,
-                null,
-                new Date(pred.due_date),
-              )
-              .then(() => predictions.getPredictionById(client)(pred.id))
+              .closeByTriggerer(client)(pred.id, null, new Date(pred.due_date!))
+              .then(() => predictions.getById(client)(pred.id))
               .then((prediction) => {
-                if (!prediction) {
-                  return;
-                }
-                webhookManager.emit("triggered_prediction", prediction);
-              });
+                if (!prediction) return;
+                eventsManager.emit("triggered_prediction", prediction);
+              })
+              .then(() => undefined);
           });
       };
 
@@ -49,21 +44,22 @@ export const monitors: MonitorConfig[] = [
     callback: (log: MonitorLog) => {
       const monitorCallback = (client: PoolClient) => {
         return predictions
-          .getNextPredictionToCheck(client)()
+          .getNextToCheck(client)()
           .then((pred) => {
             if (!pred) {
               return;
             }
             log(`Checking prediction with id ${pred.id}`);
-            return snoozes
-              .addCheck(client)(pred.id)
-              .then(() => predictions.getPredictionById(client)(pred.id))
+            return snoozeChecks
+              .createForPrediction(client)(pred.id)
+              .then(() => predictions.getById(client)(pred.id))
               .then((prediction) => {
                 if (!prediction) {
                   return;
                 }
-                webhookManager.emit("new_snooze_check", prediction);
-              });
+                eventsManager.emit("triggered_snooze_check", prediction);
+              })
+              .then(() => undefined);
           });
       };
 
@@ -75,8 +71,8 @@ export const monitors: MonitorConfig[] = [
     schedule: "20,50 12-21 * * *", // every 30 minutes, on the 20 and 50, between 12pm and 9pm UTC
     callback: (log: MonitorLog) => {
       const monitorCallback = (client: PoolClient) => {
-        return snoozes
-          .getNextUnactionedSnoozeCheck(client)()
+        return snoozeChecks
+          .getNextUnactioned(client)()
           .then((check) => {
             if (!check) {
               return;
@@ -86,17 +82,16 @@ export const monitors: MonitorConfig[] = [
               `Snoozing unactioned Snooze Check with id ${check.id} for 1 day`,
             );
 
-            return snoozes
-              .deferSnoozeCheckById(client)(check.id)
-              .then(() =>
-                predictions.getPredictionById(client)(check.prediction_id),
-              )
+            return snoozeChecks
+              .deferById(client)(check.id, 1)
+              .then(() => predictions.getById(client)(check.prediction_id!))
               .then((prediction) => {
                 if (!prediction) {
                   return;
                 }
-                webhookManager.emit("snoozed_prediction", prediction);
-              });
+                eventsManager.emit("snoozed_prediction", prediction);
+              })
+              .then(() => undefined);
           });
       };
 
@@ -109,21 +104,22 @@ export const monitors: MonitorConfig[] = [
     callback: (log: MonitorLog) => {
       const monitorCallback = (client: PoolClient) => {
         return predictions
-          .getNextPredictionToJudge(client)()
+          .getNextToJudge(client)()
           .then((pred) => {
             if (!pred) {
               return;
             }
             log(`Judging prediction with id ${pred.id}`);
             return predictions
-              .judgePredictionById(client)(pred.id)
-              .then(() => predictions.getPredictionById(client)(pred.id))
+              .judgeById(client)(pred.id)
+              .then(() => predictions.getById(client)(pred.id))
               .then((prediction) => {
                 if (!prediction) {
                   return;
                 }
-                webhookManager.emit("judged_prediction", prediction);
-              });
+                eventsManager.emit("judged_prediction", prediction);
+              })
+              .then(() => undefined);
           });
       };
 

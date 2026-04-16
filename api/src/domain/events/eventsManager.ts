@@ -16,6 +16,9 @@ export interface NDBEvents {
   new_prediction: (prediction: API.Entities.Predictions.Prediction) => void;
   new_bet: (prediction: API.Entities.Predictions.Prediction) => void;
   new_vote: (prediction: API.Entities.Predictions.Prediction) => void;
+  judged_prediction: (
+    prediction: API.Entities.Predictions.Prediction,
+  ) => void;
   unjudged_prediction: (
     prediction: API.Entities.Predictions.Prediction,
   ) => void;

@@ -114,7 +114,7 @@ export const untriggerPredictionById = new PreparedQuery<IUntriggerPredictionByI
 export interface IClosePredictionByIdParams {
   closed_date: DateOrString;
   prediction_id: number;
-  triggerer_id: string;
+  triggerer_id?: string | null | void;
 }
 
 /** 'ClosePredictionById' return type */
@@ -126,20 +126,146 @@ export interface IClosePredictionByIdQuery {
   result: IClosePredictionByIdResult;
 }
 
-const closePredictionByIdIR: any = {"usedParamSet":{"triggerer_id":true,"closed_date":true,"prediction_id":true},"params":[{"name":"triggerer_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":40,"b":53}]},{"name":"closed_date","required":true,"transform":{"type":"scalar"},"locs":[{"a":72,"b":84}]},{"name":"prediction_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":135,"b":149}]}],"statement":"UPDATE predictions\nSET\n  triggerer_id = :triggerer_id!,\n  closed_date = :closed_date!,\n  triggered_date = NOW()\nWHERE predictions.id = :prediction_id!"};
+const closePredictionByIdIR: any = {"usedParamSet":{"triggerer_id":true,"closed_date":true,"prediction_id":true},"params":[{"name":"triggerer_id","required":false,"transform":{"type":"scalar"},"locs":[{"a":40,"b":52}]},{"name":"closed_date","required":true,"transform":{"type":"scalar"},"locs":[{"a":71,"b":83}]},{"name":"prediction_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":134,"b":148}]}],"statement":"UPDATE predictions\nSET\n  triggerer_id = :triggerer_id,\n  closed_date = :closed_date!,\n  triggered_date = NOW()\nWHERE predictions.id = :prediction_id!"};
 
 /**
  * Query generated from SQL:
  * ```
  * UPDATE predictions
  * SET
- *   triggerer_id = :triggerer_id!,
+ *   triggerer_id = :triggerer_id,
  *   closed_date = :closed_date!,
  *   triggered_date = NOW()
  * WHERE predictions.id = :prediction_id!
  * ```
  */
 export const closePredictionById = new PreparedQuery<IClosePredictionByIdParams,IClosePredictionByIdResult>(closePredictionByIdIR);
+
+
+/** 'GetNextPredictionToTrigger' parameters type */
+export type IGetNextPredictionToTriggerParams = void;
+
+/** 'GetNextPredictionToTrigger' return type */
+export interface IGetNextPredictionToTriggerResult {
+  due_date: Date | null;
+  id: number;
+}
+
+/** 'GetNextPredictionToTrigger' query type */
+export interface IGetNextPredictionToTriggerQuery {
+  params: IGetNextPredictionToTriggerParams;
+  result: IGetNextPredictionToTriggerResult;
+}
+
+const getNextPredictionToTriggerIR: any = {"usedParamSet":{},"params":[],"statement":"SELECT\n  id,\n  due_date\nFROM predictions\nWHERE driver = 'date'\n  AND due_date < NOW()\n  AND status = 'open'\nORDER BY due_date ASC\nLIMIT 1"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * SELECT
+ *   id,
+ *   due_date
+ * FROM predictions
+ * WHERE driver = 'date'
+ *   AND due_date < NOW()
+ *   AND status = 'open'
+ * ORDER BY due_date ASC
+ * LIMIT 1
+ * ```
+ */
+export const getNextPredictionToTrigger = new PreparedQuery<IGetNextPredictionToTriggerParams,IGetNextPredictionToTriggerResult>(getNextPredictionToTriggerIR);
+
+
+/** 'GetNextPredictionToCheck' parameters type */
+export type IGetNextPredictionToCheckParams = void;
+
+/** 'GetNextPredictionToCheck' return type */
+export interface IGetNextPredictionToCheckResult {
+  check_date: Date | null;
+  id: number;
+}
+
+/** 'GetNextPredictionToCheck' query type */
+export interface IGetNextPredictionToCheckQuery {
+  params: IGetNextPredictionToCheckParams;
+  result: IGetNextPredictionToCheckResult;
+}
+
+const getNextPredictionToCheckIR: any = {"usedParamSet":{},"params":[],"statement":"SELECT\n  id,\n  check_date\nFROM predictions\nWHERE driver = 'event'\n  AND check_date < NOW()\n  AND status = 'open'\nORDER BY check_date ASC\nLIMIT 1"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * SELECT
+ *   id,
+ *   check_date
+ * FROM predictions
+ * WHERE driver = 'event'
+ *   AND check_date < NOW()
+ *   AND status = 'open'
+ * ORDER BY check_date ASC
+ * LIMIT 1
+ * ```
+ */
+export const getNextPredictionToCheck = new PreparedQuery<IGetNextPredictionToCheckParams,IGetNextPredictionToCheckResult>(getNextPredictionToCheckIR);
+
+
+/** 'GetNextPredictionToJudge' parameters type */
+export type IGetNextPredictionToJudgeParams = void;
+
+/** 'GetNextPredictionToJudge' return type */
+export interface IGetNextPredictionToJudgeResult {
+  id: number;
+}
+
+/** 'GetNextPredictionToJudge' query type */
+export interface IGetNextPredictionToJudgeQuery {
+  params: IGetNextPredictionToJudgeParams;
+  result: IGetNextPredictionToJudgeResult;
+}
+
+const getNextPredictionToJudgeIR: any = {"usedParamSet":{},"params":[],"statement":"SELECT\n  id\nFROM predictions\nWHERE status = 'closed'\n  AND triggered_date + '1 day' < NOW()\nORDER BY due_date ASC\nLIMIT 1"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * SELECT
+ *   id
+ * FROM predictions
+ * WHERE status = 'closed'
+ *   AND triggered_date + '1 day' < NOW()
+ * ORDER BY due_date ASC
+ * LIMIT 1
+ * ```
+ */
+export const getNextPredictionToJudge = new PreparedQuery<IGetNextPredictionToJudgeParams,IGetNextPredictionToJudgeResult>(getNextPredictionToJudgeIR);
+
+
+/** 'JudgePredictionById' parameters type */
+export interface IJudgePredictionByIdParams {
+  prediction_id: number;
+}
+
+/** 'JudgePredictionById' return type */
+export type IJudgePredictionByIdResult = void;
+
+/** 'JudgePredictionById' query type */
+export interface IJudgePredictionByIdQuery {
+  params: IJudgePredictionByIdParams;
+  result: IJudgePredictionByIdResult;
+}
+
+const judgePredictionByIdIR: any = {"usedParamSet":{"prediction_id":true},"params":[{"name":"prediction_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":66,"b":80}]}],"statement":"UPDATE predictions\nSET judged_date = NOW()\nWHERE predictions.id = :prediction_id!"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * UPDATE predictions
+ * SET judged_date = NOW()
+ * WHERE predictions.id = :prediction_id!
+ * ```
+ */
+export const judgePredictionById = new PreparedQuery<IJudgePredictionByIdParams,IJudgePredictionByIdResult>(judgePredictionByIdIR);
 
 
 /** 'UnjudgePredictionById' parameters type */
