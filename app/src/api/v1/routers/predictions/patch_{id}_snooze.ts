@@ -1,6 +1,5 @@
 import { isAfter, isBefore } from "date-fns";
 import express, { Request, Response } from "express";
-import webhookManager from "../../../../domain/webhooks/subscribers";
 import dateValidator from "../../middleware/dateValidator";
 import { getDbClient } from "../../middleware/getDbClient";
 import { getPrediction } from "../../middleware/getPrediction";
@@ -72,12 +71,6 @@ router.patch(
         if (!req.prediction || !req.prediction.check_date || !prediction) {
           throw new Error("Prediction is not defined");
         }
-        // Notify Subscribers
-        const oldCheckDate = new Date(req.prediction.check_date);
-        webhookManager.emit("prediction_edit", prediction, {
-          check_date: { old: oldCheckDate, new: checkDate },
-        });
-        webhookManager.emit("snoozed_prediction", prediction);
 
         return res.json(
           responseUtils_deprecated.writeSuccess(

@@ -1,5 +1,4 @@
 import express, { Request, Response } from "express";
-import webhookManager from "../../../../domain/webhooks/subscribers";
 import bets from "../../../../data/legacy-queries/bets";
 import predictions from "../../../../data/legacy-queries/predictions";
 import responseUtils_deprecated from "../../utils/response";
@@ -105,8 +104,6 @@ router.post(
             "Prediction created successfully."
           )
         );
-        // Notify subscribers
-        webhookManager.emit("new_prediction", ep);
       })
       .catch((err) => {
         console.error(err);

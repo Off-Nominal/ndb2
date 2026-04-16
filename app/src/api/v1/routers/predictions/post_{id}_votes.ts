@@ -1,5 +1,4 @@
 import express, { Request, Response } from "express";
-import webhookManager from "../../../../domain/webhooks/subscribers";
 import paramValidator from "../../middleware/paramValidator";
 import { getPrediction } from "../../middleware/getPrediction";
 import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
@@ -69,8 +68,6 @@ router.post(
         if (!prediction) {
           throw new Error("Prediction not found");
         }
-        // Notify Subscribers
-        webhookManager.emit("new_vote", prediction);
 
         const message = !!existingVote
           ? `Vote successfully changed from ${

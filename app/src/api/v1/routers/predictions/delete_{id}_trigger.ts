@@ -1,5 +1,4 @@
 import express, { Request, Response } from "express";
-import webhookManager from "../../../../domain/webhooks/subscribers";
 import { getDbClient } from "../../middleware/getDbClient";
 import { getPrediction } from "../../middleware/getPrediction";
 import paramValidator from "../../middleware/paramValidator";
@@ -45,8 +44,6 @@ router.delete(
         if (!prediction) {
           throw new Error("Prediction not found");
         }
-        // Notify Subscribers
-        webhookManager.emit("untriggered_prediction", prediction);
 
         return res.json(
           responseUtils_deprecated.writeSuccess(
