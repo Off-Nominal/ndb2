@@ -1,5 +1,4 @@
 import express, { Request, Response } from "express";
-import webhookManager from "../../../../domain/webhooks/subscribers";
 import paramValidator from "../../middleware/paramValidator";
 import { getPrediction } from "../../middleware/getPrediction";
 import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
@@ -92,8 +91,6 @@ router.post(
         if (!ep) {
           throw new Error("Prediction not found");
         }
-        // Notify subscribers
-        webhookManager.emit("new_bet", ep);
 
         const message = !!bet
           ? "Bet successfully changed"

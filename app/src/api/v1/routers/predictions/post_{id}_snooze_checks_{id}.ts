@@ -9,7 +9,6 @@ import { isAllowableSnooze } from "../../types/snoozes";
 import responseUtils_deprecated from "../../utils/response";
 import { ErrorCode } from "../../types/responses";
 import snoozes from "../../../../data/legacy-queries/snoozes";
-import webhookManager from "../../../../domain/webhooks/subscribers";
 
 const router = express.Router();
 
@@ -96,14 +95,6 @@ router.post(
     return snoozes
       .addSnoozeVote(req.dbClient)(snooze_check_id, req.user_id, value)
       .then((prediction) => {
-        // Notify Subscribers
-        webhookManager.emit("new_snooze_vote", prediction);
-
-        // If the prediction is now open, notify subscribers of a snoozing
-        if (prediction.status === PredictionLifeCycle.OPEN) {
-          webhookManager.emit("snoozed_prediction", prediction);
-        }
-
         return res.json(
           responseUtils_deprecated.writeSuccess(
             prediction,

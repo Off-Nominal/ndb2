@@ -1,7 +1,6 @@
 import { add, isAfter } from "date-fns";
 import express, { Request, Response } from "express";
 import GAME_MECHANICS from "../../../../domain/gameMechanics";
-import webhookManager from "../../../../domain/webhooks/subscribers";
 import paramValidator from "../../middleware/paramValidator";
 import { getPrediction } from "../../middleware/getPrediction";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
@@ -89,8 +88,6 @@ router.patch(
         if (!prediction) {
           throw new Error("Prediction not found");
         }
-        // Notify subscribers
-        webhookManager.emit("retired_prediction", prediction);
 
         return res.json(
           responseUtils_deprecated.writeSuccess(

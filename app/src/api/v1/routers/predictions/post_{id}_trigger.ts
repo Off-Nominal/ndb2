@@ -1,6 +1,5 @@
 import { isBefore } from "date-fns";
 import express, { Request, Response } from "express";
-import webhookManager from "../../../../domain/webhooks/subscribers";
 import dateValidator from "../../middleware/dateValidator";
 import { getDbClient } from "../../middleware/getDbClient";
 import { getPrediction } from "../../middleware/getPrediction";
@@ -79,13 +78,6 @@ router.post(
         if (!prediction || !req.prediction) {
           throw new Error("Prediction not found");
         }
-        // Notify Subscribers
-        if (req.prediction.status === PredictionLifeCycle.CHECKING) {
-          webhookManager.emit("triggered_snooze_check", prediction);
-        } else {
-          webhookManager.emit("triggered_prediction", prediction);
-        }
-
         return res.json(
           responseUtils_deprecated.writeSuccess(
             prediction,
