@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import * as API from "@offnominal/ndb2-api-types/v2";
-import { generateResponse, notifySubscribers } from "./v2EventWebhooks";
+import { generateResponse, notifySubscribers } from "./utilities";
 
 const mockPrediction: API.Entities.Predictions.Prediction = {
   id: 1,
@@ -44,12 +44,10 @@ describe("notifySubscribers", () => {
     mockFetch.mockReset();
     mockFetch.mockResolvedValue({ ok: true, statusText: "OK" });
     vi.stubGlobal("fetch", mockFetch);
-    process.env.DISCORD_CLIENT_API_KEY = "test-key";
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
-    delete process.env.DISCORD_CLIENT_API_KEY;
   });
 
   it("POSTs JSON to each subscriber URL with auth header", async () => {
@@ -60,6 +58,7 @@ describe("notifySubscribers", () => {
     notifySubscribers(
       ["https://a.example/hook", "https://b.example/hook"],
       payload,
+      "test-key",
     );
 
     await vi.waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2));
@@ -88,9 +87,9 @@ describe("notifySubscribers", () => {
       prediction: mockPrediction,
     });
 
-    notifySubscribers([], payload);
+    notifySubscribers([], payload, "test-key");
 
-    await new Promise((r) => setImmediate(r));
+    await Promise.resolve();
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
@@ -104,7 +103,7 @@ describe("notifySubscribers", () => {
       prediction: mockPrediction,
     });
 
-    notifySubscribers(["https://x.example/hook"], payload);
+    notifySubscribers(["https://x.example/hook"], payload, "test-key");
 
     await vi.waitFor(() => expect(consoleErrorSpy).toHaveBeenCalled());
     consoleErrorSpy.mockRestore();
@@ -120,9 +119,10 @@ describe("notifySubscribers", () => {
       prediction: mockPrediction,
     });
 
-    notifySubscribers(["https://x.example/hook"], payload);
+    notifySubscribers(["https://x.example/hook"], payload, "test-key");
 
     await vi.waitFor(() => expect(consoleErrorSpy).toHaveBeenCalled());
     consoleErrorSpy.mockRestore();
   });
 });
+
