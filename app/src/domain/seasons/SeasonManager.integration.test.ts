@@ -1,7 +1,8 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
 import { SeasonManager } from "./SeasonManager";
+import SeasonMonitor from "./SeasonMonitor";
+import { monitors as seasonMonitors } from "./config";
 import schedule from "node-schedule";
-import predictions from "../../data/legacy-queries/predictions";
 import { useEphemeralDb } from "../../test/with-ephemeral-db";
 import { defaultUsers } from "../../test/factories/users";
 import { defaultPastCurrentFutureSeasons } from "../../test/factories/seasons";
@@ -11,12 +12,6 @@ useEphemeralDb({
   seasons: defaultPastCurrentFutureSeasons(),
   predictions: [],
 });
-
-vi.mock("../../data/legacy-queries/predictions", () => ({
-  default: {
-    getNextPredictionToTrigger: vi.fn(),
-  },
-}));
 
 // Mock the schedule package
 vi.mock("node-schedule", () => ({
@@ -70,6 +65,9 @@ describe("SeasonManager", () => {
         const seasonManager = new SeasonManager();
 
         await seasonManager.initialize();
+
+        const seasonMonitor = new SeasonMonitor(seasonMonitors);
+        seasonMonitor.initiate();
 
         // Verify that scheduleJob was called with the correct cron expression
         expect(mockScheduleJob).toHaveBeenCalledWith(

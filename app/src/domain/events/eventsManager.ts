@@ -42,6 +42,8 @@ export interface NDBEvents {
   snoozed_prediction: (
     prediction: API.Entities.Predictions.Prediction,
   ) => void;
+  season_start: (season: API.Entities.Seasons.Season) => void;
+  season_end: (results: API.Webhooks.Events.SeasonResults) => void;
 }
 
 /**

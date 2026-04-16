@@ -1,15 +1,9 @@
 import { PoolClient } from "pg";
 import { eventsManager } from "../events/eventsManager";
-import { MonitorConfig, MonitorLog } from "./PredictionMonitor";
+import { MonitorConfig, MonitorLog } from "../monitors/types";
 import predictions from "../../data/queries/predictions";
 import snoozeChecks from "../../data/queries/snooze_checks";
-import pool from "../../data/db";
-
-const getPoolClient = (callback: (client: PoolClient) => Promise<void>) => {
-  return pool
-    .connect()
-    .then((client) => callback(client).finally(() => client.release()));
-};
+import { withPoolClient } from "../monitors/withPoolClient";
 
 export const monitors: MonitorConfig[] = [
   {
@@ -35,7 +29,7 @@ export const monitors: MonitorConfig[] = [
           });
       };
 
-      return getPoolClient(monitorCallback);
+      return withPoolClient(monitorCallback);
     },
   },
   {
@@ -63,7 +57,7 @@ export const monitors: MonitorConfig[] = [
           });
       };
 
-      return getPoolClient(monitorCallback);
+      return withPoolClient(monitorCallback);
     },
   },
   {
@@ -95,7 +89,7 @@ export const monitors: MonitorConfig[] = [
           });
       };
 
-      return getPoolClient(monitorCallback);
+      return withPoolClient(monitorCallback);
     },
   },
   {
@@ -123,7 +117,7 @@ export const monitors: MonitorConfig[] = [
           });
       };
 
-      return getPoolClient(monitorCallback);
+      return withPoolClient(monitorCallback);
     },
   },
 ];

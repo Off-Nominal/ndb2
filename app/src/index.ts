@@ -1,8 +1,10 @@
 import express from "express";
 import { authenticateApplication } from "./api/v1/middleware/authenticateApplication";
 import { validateContentType } from "./api/v1/middleware/validateContentType";
-import PredictionMonitor from "./domain/monitors/PredictionMonitor";
-import { monitors } from "./domain/monitors/config";
+import PredictionMonitor from "./domain/predictions/PredictionMonitor";
+import { monitors } from "./domain/predictions/config";
+import SeasonMonitor from "./domain/seasons/SeasonMonitor";
+import { monitors as seasonMonitors } from "./domain/seasons/config";
 import { seasonsManager } from "./domain/seasons/SeasonManager";
 
 // Routers
@@ -79,3 +81,7 @@ monitor.initiate();
 
 // Seasons Manager Initialization
 seasonsManager.initialize();
+
+// Season Monitor Initialization
+const seasonMonitor = new SeasonMonitor(seasonMonitors);
+seasonMonitor.initiate();
