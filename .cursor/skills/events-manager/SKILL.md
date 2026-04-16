@@ -9,7 +9,7 @@ description: Describes the NDB2 Events Manager (eventsManager) as the root typed
 
 - `app/src/domain/events/eventsManager.ts` exports `eventsManager`, a **singleton typed event emitter** for **game events**.
 - A “game event” is something meaningful to players/observers (user actions or game-engine actions), not low-level internal signals.
-- Other systems “fan out” from it (e.g. `app/src/domain/webhooks/v2EventWebhooks.ts` sends v2 webhooks for selected events).
+- Other systems “fan out” from it (e.g. `app/src/domain/webhooks/config.ts` sends v2 webhooks for selected events).
 
 ## When to use it
 
@@ -37,7 +37,7 @@ Avoid `eventsManager` for:
      - monitors under `app/src/domain/monitors/config.ts`
 
 3. **Wire downstream consumers**
-   - **v2 webhooks**: add a listener in `app/src/domain/webhooks/v2EventWebhooks.ts` that calls:
+   - **v2 webhooks**: add a listener in `app/src/domain/webhooks/config.ts` that calls:
      - `generateResponse("<event_name>", { ... })`
      - `notifySubscribers(subscribers, payload)`
    - Keep webhook payloads aligned with the shared type package: `@offnominal/ndb2-api-types/v2`.
@@ -58,9 +58,8 @@ Avoid `eventsManager` for:
 ## Quick reference (key files)
 
 - **Event bus**: `app/src/domain/events/eventsManager.ts`
-- **Webhook fanout**: `app/src/domain/webhooks/v2EventWebhooks.ts`
+- **Webhook fanout**: `app/src/domain/webhooks/config.ts`
 - **Webhook event types**: `types/src/v2/webhooks.ts`
 - **Common emitters**:
   - v2 routes: `app/src/api/v2/routes/**`
   - monitors: `app/src/domain/monitors/config.ts`
-
