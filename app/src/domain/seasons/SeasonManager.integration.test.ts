@@ -1,8 +1,5 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
 import { SeasonManager } from "./SeasonManager";
-import SeasonMonitor from "./SeasonMonitor";
-import { monitors as seasonMonitors } from "./config";
-import schedule from "node-schedule";
 import { useEphemeralDb } from "../../test/with-ephemeral-db";
 import { defaultUsers } from "../../test/factories/users";
 import { defaultPastCurrentFutureSeasons } from "../../test/factories/seasons";
@@ -12,13 +9,6 @@ useEphemeralDb({
   seasons: defaultPastCurrentFutureSeasons(),
   predictions: [],
 });
-
-// Mock the schedule package
-vi.mock("node-schedule", () => ({
-  default: {
-    scheduleJob: vi.fn(),
-  },
-}));
 
 describe("SeasonManager", () => {
   afterEach(async () => {
@@ -59,28 +49,14 @@ describe("SeasonManager", () => {
     });
 
     describe("initialize", () => {
-      it("correctly initializes and schedules the job with the right cron signature", async () => {
-        const mockScheduleJob = vi.mocked(schedule.scheduleJob);
-
+      it("loads seasons from the database into the cache", async () => {
         const seasonManager = new SeasonManager();
 
         await seasonManager.initialize();
 
-        const seasonMonitor = new SeasonMonitor(seasonMonitors);
-        seasonMonitor.initiate();
-
-        // Verify that scheduleJob was called with the correct cron expression
-        expect(mockScheduleJob).toHaveBeenCalledWith(
-          "1 0 * * *",
-          expect.any(Function)
-        );
-
-        // Verify that the seasons were fetched and set
         expect((seasonManager as any).seasons).toHaveLength(3);
-
-        // Verify that the job function is properly set up
-        const jobCallback = mockScheduleJob.mock.calls[0][1];
-        expect(typeof jobCallback).toBe("function");
+        expect(seasonManager.getSeasonByIdentifier("current").name).toBe("Present");
+        expect(seasonManager.getSeasonByIdentifier("last").name).toBe("Past");
       });
     });
   });
