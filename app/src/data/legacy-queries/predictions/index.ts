@@ -1,5 +1,8 @@
 import { PoolClient } from "pg";
-import { APIPredictions, PredictionDriver } from "../../../api/v1/types/predicitions";
+import {
+  APIPredictions,
+  PredictionDriver,
+} from "../../../api/v1/types/predicitions";
 import {
   generate_SEARCH_PREDICTIONS,
   SearchOptions,
@@ -13,7 +16,7 @@ const add = (client: PoolClient) =>
     text: string,
     drive_date: Date,
     created_date: Date = new Date(),
-    driver: PredictionDriver
+    driver: PredictionDriver,
   ): Promise<APIPredictions.AddPrediction> {
     let query: string;
 
@@ -36,7 +39,7 @@ const add = (client: PoolClient) =>
 
 const getPredictionById = (client: PoolClient) =>
   function (
-    prediction_id: number | string
+    prediction_id: number | string,
   ): Promise<APIPredictions.GetPredictionById | null> {
     const query = queries.get("GetPredictionById");
     return client
@@ -46,7 +49,7 @@ const getPredictionById = (client: PoolClient) =>
 
 const retirePredictionById = (client: PoolClient) =>
   function (
-    prediction_id: number | string
+    prediction_id: number | string,
   ): Promise<APIPredictions.RetirePredictionById | null> {
     const query = queries.get("RetirePredictionById");
     return client
@@ -58,7 +61,7 @@ const closePredictionById = (client: PoolClient) =>
   async function (
     prediction_id: number | string,
     triggerer_id: number | string | null,
-    closed_date: Date
+    closed_date: Date,
   ): Promise<APIPredictions.ClosePredictionById> {
     await client.query("BEGIN");
 
@@ -67,7 +70,7 @@ const closePredictionById = (client: PoolClient) =>
       const prediction = await client
         .query<APIPredictions.GetPredictionById>(
           queries.get("GetPredictionById"),
-          [prediction_id]
+          [prediction_id],
         )
         .then((response) => response.rows[0]);
       const openCheck = prediction.checks.find((check) => !check.closed);
@@ -85,43 +88,9 @@ const closePredictionById = (client: PoolClient) =>
     }
   };
 
-const judgePredictionById = (client: PoolClient) =>
-  function (
-    prediction_id: number | string
-  ): Promise<APIPredictions.JudgePredictionById> {
-    const query = queries.get("JudgePredictionById");
-    return client
-      .query(query, [prediction_id])
-      .then((response) => response.rows[0]);
-  };
-
-const getNextPredictionToTrigger = (client: PoolClient) =>
-  function (): Promise<APIPredictions.GetNextPredictionToTrigger | undefined> {
-    const query = queries.get("GetNextPredictionToTrigger");
-    return client
-      .query<APIPredictions.GetNextPredictionToTrigger>(query)
-      .then((res) => res.rows[0]);
-  };
-
-const getNextPredictionToCheck = (client: PoolClient) =>
-  function (): Promise<APIPredictions.GetNextPredictionToCheck | undefined> {
-    const query = queries.get("GetNextPredictionToCheck");
-    return client
-      .query<APIPredictions.GetNextPredictionToCheck>(query)
-      .then((res) => res.rows[0]);
-  };
-
-const getNextPredictionToJudge = (client: PoolClient) =>
-  function (): Promise<APIPredictions.GetNextPredictionToJudge | undefined> {
-    const query = queries.get("GetNextPredictionToJudge");
-    return client
-      .query<APIPredictions.GetNextPredictionToJudge>(query)
-      .then((res) => res.rows[0]);
-  };
-
 const searchPredictions = (client: PoolClient) =>
   function (
-    options: SearchOptions
+    options: SearchOptions,
   ): Promise<APIPredictions.SearchPredictions[]> {
     const [query, params] = generate_SEARCH_PREDICTIONS(options);
     return client
@@ -132,7 +101,7 @@ const searchPredictions = (client: PoolClient) =>
 const snoozePredictionById = (client: PoolClient) =>
   function (
     prediction_id: number | string,
-    options: { days: APISnoozes.SnoozeOptions }
+    options: { days: APISnoozes.SnoozeOptions },
   ): Promise<APIPredictions.SnoozePredictionById> {
     const query = queries.get("SnoozePredictionById");
     return client
@@ -146,7 +115,7 @@ const snoozePredictionById = (client: PoolClient) =>
 const setCheckDateByPredictionId = (client: PoolClient) =>
   async function (
     prediction_id: number | string,
-    options: { date: Date }
+    options: { date: Date },
   ): Promise<APIPredictions.SetCheckDateByPredictionId> {
     await client.query("BEGIN");
 
@@ -172,7 +141,7 @@ const setCheckDateByPredictionId = (client: PoolClient) =>
 
 const undoClosePredictionById = (client: PoolClient) =>
   async function (
-    prediction_id: number | string
+    prediction_id: number | string,
   ): Promise<APIPredictions.UndoClosePredictionById> {
     await client.query("BEGIN");
 
@@ -211,10 +180,6 @@ export default {
   getPredictionById,
   retirePredictionById,
   closePredictionById,
-  judgePredictionById,
-  getNextPredictionToTrigger,
-  getNextPredictionToCheck,
-  getNextPredictionToJudge,
   searchPredictions,
   snoozePredictionById,
   setCheckDateByPredictionId,
