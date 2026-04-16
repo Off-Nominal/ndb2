@@ -1,5 +1,5 @@
 {
   "watch": ["src"],
-  "ignore": ["node_modules", "dist", "../api"],
+  "ignore": ["node_modules", "dist", "../app"],
   "ext": "ts,js,json"
 }

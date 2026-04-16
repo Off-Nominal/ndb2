@@ -1,7 +1,7 @@
 ---
 name: v2-api-endpoints
 description: >-
-  Describes how to add Express routes under api/src/api/v2: validate middleware
+  Describes how to add Express routes under app/src/api/v2: validate middleware
   with Zod, shared vs local schemas, server errors via the v2 errorHandler,
   responseUtils for JSON bodies, colocated supertest suites, and updating
   types/src/v2/endpoints for response shapes. Use when creating or changing v2
@@ -14,14 +14,14 @@ description: >-
 
 ## Layout and wiring
 
-- **Route modules**: `api/src/api/v2/routes/<area>/<verb>_<pathShape>.ts` (e.g. `routes/predictions/get_predictions_{predictionId}.ts`).
+- **Route modules**: `app/src/api/v2/routes/<area>/<verb>_<pathShape>.ts` (e.g. `routes/predictions/get_predictions_{predictionId}.ts`).
 - **Route type**: export a `Route` from `../../utils/routerMap` — a function `(router: Router) => void` that registers methods on the sub-router.
-- **Mounting**: import the route in `api/src/api/v2/index.ts`, add it to the `mapRoutes([...])` array for the appropriate prefix (`/predictions`, `/seasons`, etc.).
+- **Mounting**: import the route in `app/src/api/v2/index.ts`, add it to the `mapRoutes([...])` array for the appropriate prefix (`/predictions`, `/seasons`, etc.).
 - **Error middleware**: `errorHandler` from `middleware/errorHandler` is already registered **last** on `apiV2Router` in `index.ts`. Do not remove or reorder it for new routes.
 
 ## Validation: always `validate` + Zod
 
-Use **`validate`** from `api/src/api/v2/middleware/validate.ts` for every part of the request that the handler reads:
+Use **`validate`** from `app/src/api/v2/middleware/validate.ts` for every part of the request that the handler reads:
 
 - **`params`** — path segments (e.g. `:prediction_id`).
 - **`query`** — query string.
@@ -35,7 +35,7 @@ After `validate` runs, `req.params`, `req.query`, and `req.body` are the **parse
 
 ## Where to put Zod schemas
 
-- **Shared across several routes** (IDs, Discord IDs, enums, reused field shapes): add or reuse exports in `api/src/api/v2/validations/` (`index.ts`, `constants.ts`). Import from `../../validations` in route files.
+- **Shared across several routes** (IDs, Discord IDs, enums, reused field shapes): add or reuse exports in `app/src/api/v2/validations/` (`index.ts`, `constants.ts`). Import from `../../validations` in route files.
 - **Used only by one route**: keep the schema in the same route module (private `const` next to the handler), as in `post_predictions.ts` (`createPredictionBodySchema`, `predictionTextSchema`).
 
 ## Errors: client (4xx) vs server (5xx)
@@ -49,7 +49,7 @@ Signal server failures with **`throw new Error("short descriptive message for lo
 
 ## Responses: `responseUtils`
 
-Import the default export from `api/src/api/v2/utils/response.ts`:
+Import the default export from `app/src/api/v2/utils/response.ts`:
 
 - **Success**: `res.json(responseUtils.writeSuccess(data, "optional message"))`.
 - **Errors** (when handling 4xx in-route): `responseUtils.writeErrors([{ code, message }, …])`.
@@ -92,6 +92,6 @@ Add a **colocated** **`*.integration.test.ts`** next to the route module when th
 3. Obtain `dbClient` with `getDbClient(res)` when touching the DB; pass it into query wrappers per the v2-database-queries skill.
 4. Return **4xx** with explicit `code` + `message` via `responseUtils.writeErrors`.
 5. Forward **5xx** to `errorHandler` (throw `Error` / `next(err)` with a loggable message, not user-facing copy).
-6. Register the route in `api/src/api/v2/index.ts` inside `mapRoutes`.
+6. Register the route in `app/src/api/v2/index.ts` inside `mapRoutes`.
 7. Update `types/src/v2/endpoints/` (and `entities/` if needed); export new area modules from `endpoints/index.ts`.
 8. Add `*.integration.test.ts` beside the route: supertest, `useEphemeralDb({ ... })` with factory-composed seed when using the DB, optional `errorHandler` after the route, and cases for validation / domain errors / success (see **Tests** above).

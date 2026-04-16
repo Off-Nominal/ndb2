@@ -29,7 +29,7 @@ import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
  * |-------|------|
  * | `status` | Optional. One or more lifecycle values; repeat the key or pass one value. Drives SQL `statuses` filter when non-empty. |
  * | `sort_by` | Optional. Single sort key; if the key is repeated, only the **first** value is used. |
- * | `keyword` | Optional. Max 500 chars. See keyword tuning and matching rules in `api/src/data/queries/predictions/predictions.sql` (`searchPredictions` comment block). |
+ * | `keyword` | Optional. Max 500 chars. See keyword tuning and matching rules in `app/src/data/queries/predictions/predictions.sql` (`searchPredictions` comment block). |
  * | `creator` | Optional. Predictor filter: Discord snowflake (`discordIdSchema`). Resolved to internal user id; unknown id → 404 `USER_NOT_FOUND`. |
  * | `unbetter` | Optional. Exclude predictions where this Discord user has a bet (`discordIdSchema`). Same lookup rules as `creator`. |
  * | `season_id` | Optional. Coerced to a Postgres INT (positive, in range). |

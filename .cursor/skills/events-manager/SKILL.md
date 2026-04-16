@@ -7,9 +7,9 @@ description: Describes the NDB2 Events Manager (eventsManager) as the root typed
 
 ## What it is
 
-- `api/src/domain/events/eventsManager.ts` exports `eventsManager`, a **singleton typed event emitter** for **game events**.
+- `app/src/domain/events/eventsManager.ts` exports `eventsManager`, a **singleton typed event emitter** for **game events**.
 - A “game event” is something meaningful to players/observers (user actions or game-engine actions), not low-level internal signals.
-- Other systems “fan out” from it (e.g. `api/src/domain/webhooks/v2EventWebhooks.ts` sends v2 webhooks for selected events).
+- Other systems “fan out” from it (e.g. `app/src/domain/webhooks/v2EventWebhooks.ts` sends v2 webhooks for selected events).
 
 ## When to use it
 
@@ -27,17 +27,17 @@ Avoid `eventsManager` for:
 ## How to add a new event (repo pattern)
 
 1. **Add the typed event name**
-   - Update `NDBEvents` in `api/src/domain/events/eventsManager.ts`.
+   - Update `NDBEvents` in `app/src/domain/events/eventsManager.ts`.
    - Payload types should usually be v2 DTOs (commonly `API.Entities.Predictions.Prediction`).
 
 2. **Emit it at the source of truth**
    - Emit from the place where the state transition happens and you have the final DTO.
    - Common sources:
-     - v2 routes under `api/src/api/v2/routes/**` (after DB write, re-fetch updated DTO, then `emit`)
-     - monitors under `api/src/domain/monitors/config.ts`
+     - v2 routes under `app/src/api/v2/routes/**` (after DB write, re-fetch updated DTO, then `emit`)
+     - monitors under `app/src/domain/monitors/config.ts`
 
 3. **Wire downstream consumers**
-   - **v2 webhooks**: add a listener in `api/src/domain/webhooks/v2EventWebhooks.ts` that calls:
+   - **v2 webhooks**: add a listener in `app/src/domain/webhooks/v2EventWebhooks.ts` that calls:
      - `generateResponse("<event_name>", { ... })`
      - `notifySubscribers(subscribers, payload)`
    - Keep webhook payloads aligned with the shared type package: `@offnominal/ndb2-api-types/v2`.
@@ -53,14 +53,14 @@ Avoid `eventsManager` for:
 
 - **Event names** are snake_case strings (e.g. `triggered_prediction`, `judged_prediction`).
 - Prefer emitting a **single primary object** (often `{ prediction }` for webhooks) rather than multiple loosely-related fields.
-- Emit **after** mutations complete, using the **updated** v2 DTO (typically via `api/src/data/queries/**` wrappers).
+- Emit **after** mutations complete, using the **updated** v2 DTO (typically via `app/src/data/queries/**` wrappers).
 
 ## Quick reference (key files)
 
-- **Event bus**: `api/src/domain/events/eventsManager.ts`
-- **Webhook fanout**: `api/src/domain/webhooks/v2EventWebhooks.ts`
+- **Event bus**: `app/src/domain/events/eventsManager.ts`
+- **Webhook fanout**: `app/src/domain/webhooks/v2EventWebhooks.ts`
 - **Webhook event types**: `types/src/v2/webhooks.ts`
 - **Common emitters**:
-  - v2 routes: `api/src/api/v2/routes/**`
-  - monitors: `api/src/domain/monitors/config.ts`
+  - v2 routes: `app/src/api/v2/routes/**`
+  - monitors: `app/src/domain/monitors/config.ts`
 
