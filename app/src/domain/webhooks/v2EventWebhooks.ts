@@ -12,18 +12,18 @@ if (missionControlWebhookEndpointV2) {
 export const generateResponse = <P extends API.Webhooks.Payload>(
   event_name: P["event_name"],
   data: P["data"],
-): API.Webhooks.Payload => {
+): P => {
   return {
     event_name,
     version: 2,
     date: new Date(),
     data,
-  } as API.Webhooks.Payload;
+  } as P;
 };
 
-export const notifySubscribers = <E extends API.Webhooks.WebhookEvent, D>(
+export const notifySubscribers = (
   subscriberUrls: readonly string[],
-  data: API.Webhooks.BasePayload<E, D>,
+  data: API.Webhooks.Payload,
 ) => {
   const requests = [];
 
@@ -125,4 +125,12 @@ eventsManager.on("snoozed_prediction", (prediction) => {
     subscribers,
     generateResponse("snoozed_prediction", { prediction }),
   );
+});
+
+eventsManager.on("season_start", (season) => {
+  notifySubscribers(subscribers, generateResponse("season_start", { season }));
+});
+
+eventsManager.on("season_end", (results) => {
+  notifySubscribers(subscribers, generateResponse("season_end", { results }));
 });

@@ -1,4 +1,5 @@
 import { Prediction } from "./entities/predictions";
+import { Season, SeasonResults } from "./entities/seasons";
 
 // Single source of truth for webhook events
 const WEBHOOK_EVENTS = [
@@ -14,6 +15,8 @@ const WEBHOOK_EVENTS = [
   "prediction_edit",
   "new_snooze_vote",
   "snoozed_prediction",
+  "season_start",
+  "season_end",
 ] as const;
 
 // Derive the type from the array
@@ -107,6 +110,18 @@ export namespace Events {
       prediction: Prediction;
     }
   >;
+  export type SeasonStart = BasePayload<
+    "season_start",
+    {
+      season: Season;
+    }
+  >;
+  export type SeasonEnd = BasePayload<
+    "season_end",
+    {
+      results: SeasonResults;
+    }
+  >;
 }
 
 export type Payload =
@@ -121,7 +136,9 @@ export type Payload =
   | Events.NewVote
   | Events.PredictionEdit
   | Events.NewSnoozeVote
-  | Events.SnoozedPrediction;
+  | Events.SnoozedPrediction
+  | Events.SeasonStart
+  | Events.SeasonEnd;
 
 export const isWebhookPayloadV2 = (payload: any): payload is Payload => {
   if (!payload || typeof payload !== "object") {
