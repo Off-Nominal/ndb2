@@ -22,6 +22,12 @@ export interface NDBEvents {
   untriggered_prediction: (
     prediction: API.Entities.Predictions.Prediction,
   ) => void;
+  triggered_prediction: (
+    prediction: API.Entities.Predictions.Prediction,
+  ) => void;
+  triggered_snooze_check: (
+    prediction: API.Entities.Predictions.Prediction,
+  ) => void;
   retired_prediction: (prediction: API.Entities.Predictions.Prediction) => void;
   prediction_edit: (
     prediction: API.Entities.Predictions.Prediction,

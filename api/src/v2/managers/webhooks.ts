@@ -59,6 +59,20 @@ eventsManager.on("untriggered_prediction", (prediction) => {
   );
 });
 
+eventsManager.on("triggered_prediction", (prediction) => {
+  notifySubscribers(
+    subscribers,
+    generateResponse("triggered_prediction", { prediction }),
+  );
+});
+
+eventsManager.on("triggered_snooze_check", (prediction) => {
+  notifySubscribers(
+    subscribers,
+    generateResponse("triggered_snooze_check", { prediction }),
+  );
+});
+
 eventsManager.on("unjudged_prediction", (prediction) => {
   notifySubscribers(
     subscribers,

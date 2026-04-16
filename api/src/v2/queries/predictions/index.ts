@@ -1,12 +1,11 @@
 import { PoolClient } from "pg";
-import { getBetsByPredictionId } from "../bets/bets.queries";
 import {
+  closeSnoozeCheckById,
   closeSnoozeChecksByPredictionId,
   getSnoozeChecksByPredictionId,
 } from "../snooze_checks/snooze_checks.queries";
-import { getVotesByPredictionId } from "../votes/votes.queries";
 import {
-  getPredictionsById,
+  closePredictionById as closePredictionByIdQuery,
   insertDateDrivenPrediction,
   insertEventDrivenPrediction,
   prediction_driver,
@@ -17,9 +16,12 @@ import {
   type ISearchPredictionsResult,
   unjudgePredictionById,
   untriggerPredictionById,
+  getPredictionsById,
 } from "./predictions.queries";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import betsQueries from "../bets";
+import { getVotesByPredictionId } from "../votes/votes.queries";
+import { getBetsByPredictionId } from "../bets/bets.queries";
 
 /** Must match `LIMIT` in `searchPredictions` in predictions.sql. */
 export const PREDICTION_SEARCH_PAGE_SIZE = 10;
@@ -60,9 +62,7 @@ function mapSearchRowToDTO(
       ? row.last_check_date.toString()
       : null,
     closed_date: row.closed_date ? row.closed_date.toString() : null,
-    triggered_date: row.triggered_date
-      ? row.triggered_date.toString()
-      : null,
+    triggered_date: row.triggered_date ? row.triggered_date.toString() : null,
     triggerer,
     judged_date: row.judged_date ? row.judged_date.toString() : null,
     retired_date: row.retired_date ? row.retired_date.toString() : null,
@@ -137,7 +137,6 @@ export default {
     if (predictionResult.length === 0) {
       return undefined;
     }
-
     const prediction = predictionResult[0];
 
     const triggerer =
@@ -242,6 +241,40 @@ export default {
     await untriggerPredictionById.run({ prediction_id }, dbClient);
     return null;
   },
+  /**
+   * Closes the prediction (trigger): sets triggerer, closed_date, triggered_date,
+   * and closes any open snooze check for the prediction (legacy parity with v1).
+   */
+  closeByTriggerer:
+    (dbClient: PoolClient) =>
+    async (
+      prediction_id: number,
+      triggerer_id: string,
+      closed_date: Date,
+    ): Promise<void> => {
+      try {
+        await dbClient.query("BEGIN");
+        const checks = await getSnoozeChecksByPredictionId.run(
+          { prediction_id },
+          dbClient,
+        );
+        const openCheck = checks.find((check) => !check.closed);
+        if (openCheck) {
+          await closeSnoozeCheckById.run(
+            { snooze_check_id: openCheck.id },
+            dbClient,
+          );
+        }
+        await closePredictionByIdQuery.run(
+          { prediction_id, triggerer_id, closed_date },
+          dbClient,
+        );
+        await dbClient.query("COMMIT");
+      } catch (error) {
+        await dbClient.query("ROLLBACK");
+        throw error;
+      }
+    },
   retireById: (dbClient: PoolClient) => async (prediction_id: number) => {
     await retirePredictionById.run({ prediction_id }, dbClient);
     return null;
@@ -255,10 +288,7 @@ export default {
     async (prediction_id: number, check_date: Date) => {
       try {
         await dbClient.query("BEGIN");
-        await closeSnoozeChecksByPredictionId.run(
-          { prediction_id },
-          dbClient,
-        );
+        await closeSnoozeChecksByPredictionId.run({ prediction_id }, dbClient);
         await setCheckDateByPredictionIdQuery.run(
           { prediction_id, check_date },
           dbClient,

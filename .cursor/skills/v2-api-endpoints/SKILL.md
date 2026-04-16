@@ -75,7 +75,7 @@ Add a **colocated** **`*.integration.test.ts`** next to the route module when th
 
 - Build a minimal **`express()`** app in `beforeAll`, register **only** the route under test by passing the app into your exported `Route` (same pattern as `get_predictions_{predictionId}.integration.test.ts` / `post_predictions.integration.test.ts`).
 - For handlers that read JSON bodies, use **`app.use(express.json())`** before registering the route.
-- When the route uses **`getDbClient`** / the real pool, call **`useEphemeralDb({ users, seasons, predictions })`** once at the top of the file (from **`../../../test/with-ephemeral-db`**) and compose data with **`defaultUsers()`**, **`defaultPastCurrentFutureSeasons()`**, and **`prediction(id, { ... })`** from **`../../../test/factories/{users,seasons,predictions}`** — defaults cover common cases; override fields on `prediction()` for the shape you need. Each file should inline only the rows that suite requires.
+- When the route uses **`getDbClient`** / the real pool, call **`useEphemeralDb({ users, seasons, predictions })`** once at the top of the file (from **`../../../test/with-ephemeral-db`**) and compose data with **`defaultUsers()`**, **`defaultPastCurrentFutureSeasons()`**, and **`prediction(id, { ... })`** from **`../../../test/factories/{users,seasons,predictions}`** — defaults cover common cases; override fields on `prediction()` for the shape you need. Each file should inline only the rows that suite requires. Register **`errorHandler`** after the route when you want thrown errors to return the same 500 payload as production (see `post_predictions_{predictionId}_bets.integration.test.ts`).
 
 **Assertions:**
 
@@ -83,7 +83,7 @@ Add a **colocated** **`*.integration.test.ts`** next to the route module when th
 - Import **`@offnominal/ndb2-api-types/v2`** as **`API`** to assert **`API.Errors.*`** codes and type error entries as **`API.Utils.ErrorInfo`** where helpful.
 - Cover **validation failures** (400 + `MALFORMED_*` or field messages), **domain errors** (expected 4xx + correct `code`), and **success** shapes (`data`, important fields). For side effects (e.g. **`eventsManager.emit`**), use **Vitest** **`vi.spyOn`** like `post_predictions.integration.test.ts`.
 
-**References**: `get_predictions_{predictionId}.integration.test.ts`, `post_predictions.integration.test.ts`, `patch_predictions_{predictionId}_retire.integration.test.ts`, `delete_predictions_{predictionId}_trigger.integration.test.ts`.
+**References**: `get_predictions_{predictionId}.integration.test.ts`, `post_predictions.integration.test.ts`, `post_predictions_{predictionId}_trigger.integration.test.ts`, `patch_predictions_{predictionId}_retire.integration.test.ts`, `delete_predictions_{predictionId}_trigger.integration.test.ts`.
 
 ## Checklist for a new endpoint
 
@@ -94,4 +94,4 @@ Add a **colocated** **`*.integration.test.ts`** next to the route module when th
 5. Forward **5xx** to `errorHandler` (throw `Error` / `next(err)` with a loggable message, not user-facing copy).
 6. Register the route in `api/src/v2/index.ts` inside `mapRoutes`.
 7. Update `types/src/v2/endpoints/` (and `entities/` if needed); export new area modules from `endpoints/index.ts`.
-8. Add `*.integration.test.ts` beside the route: supertest, `useEphemeralDb({ ... })` with factory-composed seed when using the DB, and cases for validation / domain errors / success (see **Tests** above).
+8. Add `*.integration.test.ts` beside the route: supertest, `useEphemeralDb({ ... })` with factory-composed seed when using the DB, optional `errorHandler` after the route, and cases for validation / domain errors / success (see **Tests** above).

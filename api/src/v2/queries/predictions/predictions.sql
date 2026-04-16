@@ -32,6 +32,14 @@ UPDATE predictions SET
   closed_date = NULL
 WHERE id = :prediction_id!;
 
+/* @name closePredictionById */
+UPDATE predictions
+SET
+  triggerer_id = :triggerer_id!,
+  closed_date = :closed_date!,
+  triggered_date = NOW()
+WHERE predictions.id = :prediction_id!;
+
 /* @name unjudgePredictionById */
 WITH deleted_votes AS (
   DELETE FROM votes WHERE prediction_id = :prediction_id!

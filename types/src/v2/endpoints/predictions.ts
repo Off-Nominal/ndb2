@@ -14,6 +14,17 @@ export namespace DELETE_ById_trigger {
   export type Response = APIResponse<Data>;
 }
 
+// POST /predictions/{prediction_id}/trigger
+export namespace POST_ById_trigger {
+  export type Body = {
+    discord_id: string;
+    /** ISO 8601 datetime; optional. Defaults to request time when omitted. */
+    closed_date?: string;
+  };
+  export type Data = Entities.Predictions.Prediction;
+  export type Response = APIResponse<Data>;
+}
+
 // PATCH /predictions/{prediction_id}/retire
 export namespace PATCH_ById_retire {
   export type Body = {

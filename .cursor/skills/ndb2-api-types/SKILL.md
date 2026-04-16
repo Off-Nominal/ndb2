@@ -20,13 +20,13 @@ The entry re-exports namespaces from `types/src/v2/index.ts`. Keep types aligned
 
 ## Top-level namespaces (`types/src/v2/index.ts`)
 
-| Export | Purpose |
-|--------|---------|
-| **`Entities`** | Domain shapes (resources as returned by the API or embedded in payloads). Organized by resource under `entities/<name>.ts`, aggregated in `entities/index.ts`. |
+| Export          | Purpose                                                                                                                                                                                                                                                                 |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`Entities`**  | Domain shapes (resources as returned by the API or embedded in payloads). Organized by resource under `entities/<name>.ts`, aggregated in `entities/index.ts`.                                                                                                          |
 | **`Endpoints`** | Per-route request/response types. Organized by area under `endpoints/<area>.ts`, aggregated in `endpoints/index.ts`. Each route is usually a **namespace** with `Data`, `Response` (`APIResponse<Data>`), and **`Body`** (or similar) when part of the public contract. |
-| **`Webhooks`** | Webhook event names, per-event payload types, discriminated **`Payload`**, and runtime helpers (e.g. `isWebhookPayloadV2`). Lives in `webhooks.ts`. |
-| **`Errors`** | Numeric error codes and the `NDB2APIError` union; see `errors.ts` and the comment legend for code ranges by resource. |
-| **`Utils`** | Shared wire shapes: `SuccessResponse`, `ErrorResponse`, `ErrorInfo`, `APIResponse<T>`, etc. |
+| **`Webhooks`**  | Webhook event names, per-event payload types, discriminated **`Payload`**, and runtime helpers (e.g. `isWebhookPayloadV2`). Lives in `webhooks.ts`.                                                                                                                     |
+| **`Errors`**    | Numeric error codes and the `NDB2APIError` union; see `errors.ts` and the comment legend for code ranges by resource.                                                                                                                                                   |
+| **`Utils`**     | Shared wire shapes: `SuccessResponse`, `ErrorResponse`, `ErrorInfo`, `APIResponse<T>`, etc.                                                                                                                                                                             |
 
 When adding a new **resource area**, extend the right subtree (`entities/index.ts`, `endpoints/index.ts`) so exports flow through `v2/index.ts`.
 
@@ -55,13 +55,13 @@ When adding a new **resource area**, extend the right subtree (`entities/index.t
 
 ## Versioning and npm (`types/package.json`)
 
-The package **version must be bumped** on any PR that changes **published** type definitions, constants, or exports under `types/` that ship in the npm artifact—so downstream installs get a new semver.
+The package **version must be bumped** on any PR that changes **published** type definitions, constants, or exports under `types/` that ship in the npm artifact—so downstream installs get a new semver. Only bump the version once on a PR - all changes on one PR can be bundled on one published change.
 
-| Bump | When | Agent / automation |
-|------|------|---------------------|
-| **MAJOR** | **Breaking** changes: removed or renamed exports, changed types incompatibly, removed errors/events, etc. | **Never bump major automatically.** Requires an explicit product decision and release plan. |
-| **MINOR** | **New** functionality: new endpoints namespaces, new entity fields or types that are additive, new webhook events, new error codes, new exports. | Appropriate default when adding surface area without breaking consumers. |
-| **PATCH** | Small **non-breaking** fixes: typos in types, doc comments, narrowing that matches actual API behavior, internal refactors with identical public types. | Use for corrections that do not add new contract surface. |
+| Bump      | When                                                                                                                                                    | Agent / automation                                                                          |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| **MAJOR** | **Breaking** changes: removed or renamed exports, changed types incompatibly, removed errors/events, etc.                                               | **Never bump major automatically.** Requires an explicit product decision and release plan. |
+| **MINOR** | **New** functionality: new endpoints namespaces, new entity fields or types that are additive, new webhook events, new error codes, new exports.        | Appropriate default when adding surface area without breaking consumers.                    |
+| **PATCH** | Small **non-breaking** fixes: typos in types, doc comments, narrowing that matches actual API behavior, internal refactors with identical public types. | Use for corrections that do not add new contract surface.                                   |
 
 When in doubt between patch and minor, prefer **minor** if consumers could reasonably write new code against the change.
 
