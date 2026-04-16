@@ -1,5 +1,5 @@
 import { Prediction } from "./entities/predictions";
-import { Season } from "./entities/seasons";
+import { Season, SeasonResults } from "./entities/seasons";
 
 // Single source of truth for webhook events
 const WEBHOOK_EVENTS = [
@@ -37,40 +37,6 @@ export type BasePayload<E extends WebhookEvent, D> = {
 };
 
 export namespace Events {
-  export type SeasonResults = {
-    season: Season;
-    predictions: {
-      closed: number | null;
-      successes: number | null;
-      failures: number | null;
-    };
-    bets: {
-      closed: number | null;
-      successes: number | null;
-      failures: number | null;
-    };
-    scores: {
-      payouts: number;
-      penalties: number;
-    };
-    largest_payout: {
-      value: number;
-      prediction_id: number;
-      better: {
-        id: string;
-        discord_id: string;
-      };
-    } | null;
-    largest_penalty: {
-      value: number;
-      prediction_id: number;
-      better: {
-        id: string;
-        discord_id: string;
-      };
-    } | null;
-  };
-
   export type JudgedPrediction = BasePayload<
     "judged_prediction",
     {

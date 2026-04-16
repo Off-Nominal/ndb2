@@ -16,9 +16,7 @@ export interface NDBEvents {
   new_prediction: (prediction: API.Entities.Predictions.Prediction) => void;
   new_bet: (prediction: API.Entities.Predictions.Prediction) => void;
   new_vote: (prediction: API.Entities.Predictions.Prediction) => void;
-  judged_prediction: (
-    prediction: API.Entities.Predictions.Prediction,
-  ) => void;
+  judged_prediction: (prediction: API.Entities.Predictions.Prediction) => void;
   unjudged_prediction: (
     prediction: API.Entities.Predictions.Prediction,
   ) => void;
@@ -36,14 +34,10 @@ export interface NDBEvents {
     prediction: API.Entities.Predictions.Prediction,
     edited_fields: API.Webhooks.PredictionEditChangedFields,
   ) => void;
-  new_snooze_vote: (
-    prediction: API.Entities.Predictions.Prediction,
-  ) => void;
-  snoozed_prediction: (
-    prediction: API.Entities.Predictions.Prediction,
-  ) => void;
+  new_snooze_vote: (prediction: API.Entities.Predictions.Prediction) => void;
+  snoozed_prediction: (prediction: API.Entities.Predictions.Prediction) => void;
   season_start: (season: API.Entities.Seasons.Season) => void;
-  season_end: (results: API.Webhooks.Events.SeasonResults) => void;
+  season_end: (results: API.Entities.Seasons.SeasonResults) => void;
 }
 
 /**
