@@ -1,18 +1,18 @@
 import express from "express";
-import { authenticateApplication } from "./middleware/authenticateApplication";
-import { validateContentType } from "./middleware/validateContentType";
-import PredictionMonitor from "./classes/PredictionMonitor";
-import { monitors } from "./config/monitors";
-import { seasonsManager } from "./classes/SeasonManager";
+import { authenticateApplication } from "./api/v1/middleware/authenticateApplication";
+import { validateContentType } from "./api/v1/middleware/validateContentType";
+import PredictionMonitor from "./domain/monitors/PredictionMonitor";
+import { monitors } from "./domain/monitors/config";
+import { seasonsManager } from "./domain/seasons/SeasonManager";
 
 // Routers
-import predictionsRouter from "./routers/predictions";
-import usersRouter from "./routers/users";
-import scoresRouter from "./routers/scores";
-import seasonsRouter from "./routers/seasons";
-import { apiV2Router } from "./v2";
+import predictionsRouter from "./api/v1/routers/predictions";
+import usersRouter from "./api/v1/routers/users";
+import scoresRouter from "./api/v1/routers/scores";
+import seasonsRouter from "./api/v1/routers/seasons";
+import { apiV2Router } from "./api/v2";
 import { createLogger } from "@mendahu/utilities";
-import pool from "./db";
+import pool from "./data/db";
 
 const logger = createLogger({ namespace: "NDB2", env: ["dev", "production"] });
 
