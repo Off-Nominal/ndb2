@@ -12,6 +12,7 @@ description: >-
 ## Where it lives
 
 - **SQL and generated code**: `app/src/data/queries/<entity>/`
+- **Imports from route code** may use the alias `import … from "@data/queries/…"` (see `app/tsconfig.json`); relative paths to `data/` remain valid.
 - **One folder per entity** (e.g. `bets`, `predictions`, `users`).
 - **Reference implementation**: read existing folders in that tree; follow the same shape as `bets/` and `predictions/`.
 

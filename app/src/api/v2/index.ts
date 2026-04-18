@@ -11,7 +11,7 @@ import { postPredictionVote } from "./routes/predictions/post_predictions_{predi
 import { patchPredictionSnooze } from "./routes/predictions/patch_predictions_{predictionId}_snooze";
 import { postPredictionSnoozeCheckVote } from "./routes/predictions/post_predictions_{predictionId}_snooze_checks_{snoozeCheckId}";
 import { triggerPredictionById } from "./routes/predictions/post_predictions_{predictionId}_trigger";
-import { mapRoutes } from "../../shared/routerMap";
+import { mapRoutes } from "@shared/routerMap";
 import { errorHandler } from "./middleware/errorHandler";
 import "../../domain/webhooks/config"; // Initialize webhook event listeners
 

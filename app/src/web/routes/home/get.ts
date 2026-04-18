@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { Route } from "../../../shared/routerMap";
+import { Route } from "@shared/routerMap";
 
 export const Home: Route = (router: Router) => {
   router.get("/", (req, res) => {

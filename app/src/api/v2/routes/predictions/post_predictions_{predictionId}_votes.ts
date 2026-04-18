@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { discordIdSchema, predictionIdSchema } from "../../validations";
-import { Route } from "../../../../shared/routerMap";
+import { Route } from "@shared/routerMap";
 import predictions from "../../../../data/queries/predictions";
 import votesQueries from "../../../../data/queries/votes";
 import users from "../../../../data/queries/users";

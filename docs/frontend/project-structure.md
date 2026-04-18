@@ -27,6 +27,21 @@ This document proposes a repo structure for serving **HTML pages** and the **v2 
 - **Shared data layer**: DB queries should not be “v2-only” if the web UI uses them too.
 - **Clear separation**: web rendering concerns live in `web/`; API concerns live in `api/v2/`.
 
+## TypeScript path aliases (`app/tsconfig.json`)
+
+The API package resolves:
+
+| Alias | Maps to |
+|-------|---------|
+| `@shared/*` | `app/src/shared/*` |
+| `@data/*` | `app/src/data/*` |
+| `@domain/*` | `app/src/domain/*` |
+
+Example: `import { mapRoutes } from "@shared/routerMap";`
+
+- **`pnpm run build`** runs **`tsc-alias`** after `tsc` so emitted `dist/**/*.js` uses relative paths Node can load.
+- **Vitest** uses the same aliases via `app/vitest.shared.ts` (`resolve.alias`).
+
 ## Proposed `app/src` layout
 
 High-level shape:

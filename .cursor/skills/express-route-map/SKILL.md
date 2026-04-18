@@ -19,12 +19,12 @@ This keeps registration colocated per feature file while aggregation stays in a 
 
 ## Shared helper
 
-- **`app/src/shared/routerMap.ts`** exports `Route` and `mapRoutes`. Import from here in both v2 and web. Examples: `app/src/api/v2/index.ts` → `../../shared/routerMap`; `app/src/api/v2/routes/<area>/*.ts` → `../../../../shared/routerMap`; `app/src/web/routes/index.ts` → `../../shared/routerMap`; `app/src/web/routes/<page>/get.ts` → `../../../shared/routerMap`.
+- **`app/src/shared/routerMap.ts`** exports `Route` and `mapRoutes`. Import with the path alias: `import { Route, mapRoutes } from "@shared/routerMap"` (see `app/tsconfig.json` `paths` and `docs/frontend/project-structure.md`).
 
 ## v2 JSON API
 
-- **Mount**: `app/src/api/v2/index.ts` — `import { mapRoutes } from "../../shared/routerMap"`; `apiV2Router.use("/seasons", mapRoutes([getAllSeasons]))`, same for `/predictions` with a longer array.
-- **Per-route file**: e.g. `app/src/api/v2/routes/seasons/get.ts` — `import { Route } from "../../../../shared/routerMap"`; `export const getAllSeasons: Route = (router) => { router.get("/", …); }` so the effective path is **`/api/v2/seasons/`** (prefix + `/`).
+- **Mount**: `app/src/api/v2/index.ts` — `import { mapRoutes } from "@shared/routerMap"`; `apiV2Router.use("/seasons", mapRoutes([getAllSeasons]))`, same for `/predictions` with a longer array.
+- **Per-route file**: e.g. `app/src/api/v2/routes/seasons/get.ts` — `import { Route } from "@shared/routerMap"`; `export const getAllSeasons: Route = (router) => { router.get("/", …); }` so the effective path is **`/api/v2/seasons/`** (prefix + `/`).
 - **Errors / async**: use `wrapRouteWithErrorBoundary` and the v2 `errorHandler` as documented in **`v2-api-endpoints`** — do not duplicate that guidance here.
 
 ## Web (EJS / HTMX)

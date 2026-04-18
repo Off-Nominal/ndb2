@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { predictionIdSchema } from "../../validations";
-import { Route } from "../../../../shared/routerMap";
+import { Route } from "@shared/routerMap";
 import predictions from "../../../../data/queries/predictions";
 import seasons from "../../../../data/queries/seasons";
 import responseUtils from "../../utils/response";

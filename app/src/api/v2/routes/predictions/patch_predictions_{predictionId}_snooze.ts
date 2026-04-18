@@ -6,7 +6,7 @@ import {
   discordIdSchema,
   predictionIdSchema,
 } from "../../validations";
-import { Route } from "../../../../shared/routerMap";
+import { Route } from "@shared/routerMap";
 import predictions from "../../../../data/queries/predictions";
 import users from "../../../../data/queries/users";
 import responseUtils from "../../utils/response";
