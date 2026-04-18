@@ -11,6 +11,9 @@
     "strict": true,
     "module": "NodeNext",
     "moduleResolution": "nodenext",
+    "jsx": "react-jsx",
+    "jsxImportSource": "@kitajs/html",
+    "plugins": [{ "name": "@kitajs/ts-html-plugin" }],
     "baseUrl": ".",
     "paths": {
       "@shared/*": ["src/shared/*"],

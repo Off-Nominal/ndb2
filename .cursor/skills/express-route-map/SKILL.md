@@ -27,16 +27,17 @@ This keeps registration colocated per feature file while aggregation stays in a 
 - **Per-route file**: e.g. `app/src/api/v2/routes/seasons/get.ts` — `import { Route } from "@shared/routerMap"`; `export const getAllSeasons: Route = (router) => { router.get("/", …); }` so the effective path is **`/api/v2/seasons/`** (prefix + `/`).
 - **Errors / async**: use `wrapRouteWithErrorBoundary` and the v2 `errorHandler` as documented in **`v2-api-endpoints`** — do not duplicate that guidance here.
 
-## Web (EJS / HTMX)
+## Web (Kitajs HTML / HTMX)
 
-- **Mount**: `app/src/web/routes/index.ts` — `webRouter.use("/", mapRoutes([Home]))`; add more prefixes later (e.g. `webRouter.use("/predictions", mapRoutes([…]))`).
-- **Per-page / feature**: e.g. `app/src/web/routes/home/get.ts` — export the page as a **PascalCase** name matching the page (`Home`, `Predictions`, …): `export const Home: Route = (router) => { router.get("/", …); }` and `res.render(...)`.
+- **Mount**: `app/src/web/routes/index.ts` — `webRouter.use("/", mapRoutes([…]))` aggregates feature **`handler.ts`** modules; add more prefixes later (e.g. `webRouter.use("/predictions", mapRoutes([…]))`).
+- **Per feature** (colocation): `app/src/web/routes/<area>/` — **`page.tsx`** (snake_case page function, e.g. `home_page`), **`handler.ts`** (exports a **`Route`** such as `Home`), **`tests/`** (route-level supertest), **`components/`** (snake_case `.tsx` + colocated **`*.test.ts`**). Shared JSX → **`app/src/web/shared/components/`** when reused. Use `res.type("html").send(await Promise.resolve(home_page(props)))` when the tree may be async.
+- **Streaming async subtrees**: **`renderToStream`** + **`Suspense`** from `@kitajs/html/suspense`, `stream.pipe(res)` — see **`kitajs-html-web`** and `app/src/web/routes/demo/suspense/handler.ts`.
 
 ## Conventions
 
 - **New v2 endpoint**: add a `Route` in `routes/<area>/…`, import it in `api/v2/index.ts`, append to the right `mapRoutes([...])` for that prefix. Follow **`v2-api-endpoints`** for validation, responses, and types.
-- **New web page**: add a `Route` under `web/routes/<area>/…`, import in `web/routes/index.ts`, add to the appropriate `mapRoutes` under the right prefix.
-- **Naming**: v2 keeps verb-style exports (`getAllSeasons`, `createPrediction`, …). **Web** uses **PascalCase page names** (`Home`, …) in route modules; filenames can stay `get.ts` or similar under a folder per page.
+- **New web feature**: add `routes/<area>/page.tsx`, `handler.ts`, optional `components/`, optional `tests/`, export a **`Route`** from `handler.ts`, import it in `web/routes/index.ts`, append to `mapRoutes([...])`.
+- **Naming**: v2 keeps verb-style exports (`getAllSeasons`, …). **Web** exports a **PascalCase** **`Route`** name from **`handler.ts`** (`Home`, `SuspenseDemo`). **Kitajs components** in **`components/`** and page functions in **`page.tsx`** use **snake_case** (see **`kitajs-html-web`**).
 
 ## Quick reference
 

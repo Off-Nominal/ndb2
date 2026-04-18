@@ -6,9 +6,6 @@ import { webRouter } from "./routes/index";
 const webRoot = __dirname;
 
 export function mountWeb(app: Express): void {
-  app.set("view engine", "ejs");
-  app.set("views", path.join(webRoot, "views"));
-
   app.use("/assets", express.static(path.join(webRoot, "public")));
 
   app.use(webRouter);

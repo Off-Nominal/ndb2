@@ -2,7 +2,7 @@
 
 ## Implementation status
 
-- **In place:** EJS + HTMX dependency, `app/src/web/` scaffold, public welcome page at `/`, shared Express app with JSON API (`createApp` / `mountWeb` / `mountJsonApi`). See `project-structure.md` for a detailed checklist.
+- **In place:** `@kitajs/html` + HTMX, `app/src/web/routes/` feature folders (`page.tsx`, `handler.ts`, `tests/`, snake_case `components/` + colocated `*.test.ts`), welcome page at `/`, HTMX example (`GET /home/lucky-number`), Suspense streaming demo at `/demo/suspense`, shared Express app with JSON API (`createApp` / `mountWeb` / `mountJsonApi`). See `project-structure.md` and `.cursor/skills/kitajs-html-web/SKILL.md`.
 - **Not yet:** Discord session auth, dashboard pages, CUBE CSS build from tokens, most routes in `routes.md`.
 
 ## Objectives
@@ -17,9 +17,13 @@ This project will add a new web dashboard for users to interact with Nostradambo
 
 The frontend will be server-rendered and progressively enhanced.
 
-- **Server rendering**: EJS templates
+- **Server rendering**: Kitajs HTML (JSX/TSX → HTML strings on the server)
 - **Interactivity**: HTMX (progressive enhancement; minimal bespoke JS)
 - **Styling**: Custom “Cube CSS” framework (project-specific conventions)
+
+## Templating decision
+
+**We use Kitajs HTML for all server-rendered UI** under `app/src/web`. Earlier exploration considered a traditional Express view engine (e.g. EJS); that path is **not** adopted. UI is **typed `.tsx`** colocated with routes: **`routes/<area>/page.tsx`**, **`handler.ts`**, **`tests/`**, **`components/`** (snake_case component names; shared pieces in `web/shared/components/` when needed), optionally streamed with Kita’s **`Suspense`** / **`renderToStream`** for slow subtrees. See `.cursor/skills/kitajs-html-web/SKILL.md` for patterns.
 
 ## Product principles (high-level)
 
@@ -39,7 +43,7 @@ What “dashboard” includes will evolve, but the initial expectation is:
 ## Open questions (to resolve early)
 
 - **Auth/session model**: still to implement; plan favors cookie + server session (see `authentication.md`). v2 remains API-key only.
-- **Routing**: URL map for product pages is in `routes.md`; only `/` is scaffolded so far—how each maps to EJS partials/fragments as features land.
+- **Routing**: URL map for product pages is in `routes.md`; demo routes and `/` are scaffolded—product areas will add `routes/<area>/page.tsx`, `handler.ts`, and `components/` as features land.
 - **Cube CSS specifics**: token naming, layout primitives, component conventions (no generated CSS in-repo yet).
 - **Build/deploy**: **resolved for dev**—same Node process serves HTML and `/api/v2`; production packaging can follow the same layout.
 
