@@ -43,6 +43,7 @@ The API package resolves:
 Example: `import { mapRoutes } from "@shared/routerMap";`
 
 - **JSX**: `app/tsconfig.json` sets `jsx: "react-jsx"` and `jsxImportSource: "@kitajs/html"`; **`@kitajs/ts-html-plugin`** adds editor XSS hints. **Vitest** sets matching `esbuild.jsxImportSource` in `vitest.*.config.ts`.
+- **HTMX + types**: `app/src/web/htmx_kitajs.d.ts` augments **`JSX.HtmlTag`** with [htmx core attributes](https://htmx.org/reference/#attributes) (per [Kita extending JSX](https://html.kitajs.org/guide/jsx/extending-types)).
 - **`pnpm run build`** runs **`tsc-alias`** after `tsc` so emitted `dist/**/*.js` uses relative paths Node can load (for path aliases).
 - **Vitest** uses the same aliases via `app/vitest.shared.ts` (`resolve.alias`).
 

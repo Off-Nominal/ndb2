@@ -33,6 +33,10 @@ Official concepts: [Async components and Suspense](https://html.kitajs.org/guide
 - **`routes/<area>/components/foo.test.ts`** — colocated next to **`foo.tsx`** (e.g. `banana.tsx` + `banana.test.ts`).
 - **`mountWeb.test.ts`** — app-level concerns (e.g. static `/assets`); avoid duplicating feature tests here.
 
+## HTMX attribute types
+
+- **`app/src/web/htmx_kitajs.d.ts`** augments **`JSX.HtmlTag`** with the [htmx core attribute list](https://htmx.org/reference/#attributes) so you can write **`hx-get`**, **`hx-target`**, etc. directly on elements. Open-ended **`hx-on`** variants may still use **`attrs`** (see file comment).
+
 ## Tooling
 
 - **`app/tsconfig.json`**: `jsx: "react-jsx"`, `jsxImportSource: "@kitajs/html"`, **`@kitajs/ts-html-plugin`**.

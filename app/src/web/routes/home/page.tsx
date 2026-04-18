@@ -26,11 +26,9 @@ export function home_page(props: home_page_props): JSX.Element {
           <p>
             <button
               type="button"
-              attrs={{
-                "hx-get": "/home/lucky-number",
-                "hx-target": "#lucky-result",
-                "hx-swap": "innerHTML",
-              }}
+              hx-get="/home/lucky-number"
+              hx-target="#lucky-result"
+              hx-swap="innerHTML"
             >
               Get a random number
             </button>
