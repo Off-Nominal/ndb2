@@ -2,6 +2,9 @@ node_modules
 .env
 dist
 
+# Vendored from htmx.org on postinstall (see package.json vendor-htmx)
+src/web/public/htmx.min.js
+
 db/dumps
 
 manual_queries.sql

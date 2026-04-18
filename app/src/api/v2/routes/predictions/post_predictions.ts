@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { Route } from "../../utils/routerMap";
+import { Route } from "../../../../shared/routerMap";
 import responseUtils from "../../utils/response";
 import { validate } from "../../middleware/validate";
 import { getDbClient } from "../../../../data/db/getDbClient";

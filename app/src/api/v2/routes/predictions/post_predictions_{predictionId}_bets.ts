@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { add, isAfter } from "date-fns";
 import { discordIdSchema, predictionIdSchema } from "../../validations";
-import { Route } from "../../utils/routerMap";
+import { Route } from "../../../../shared/routerMap";
 import predictions from "../../../../data/queries/predictions";
 import betsQueries from "../../../../data/queries/bets";
 import users from "../../../../data/queries/users";
