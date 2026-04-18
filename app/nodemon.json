@@ -10,5 +10,5 @@
     "dist",
     "src/web/public/htmx.min.js"
   ],
-  "ext": "ts,js,json,ejs"
+  "ext": "ts,tsx,js,json"
 }

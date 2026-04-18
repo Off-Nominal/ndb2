@@ -22,6 +22,10 @@ Many variables are preloaded with default configurations, but you'll need to add
 
 ## Developing for NDB2 API
 
+### Web dashboard (HTML)
+
+The `app` service also serves server-rendered pages from `src/web/routes/` (**`page.tsx`**, **`handler.ts`**, **`components/`** per feature) using **[@kitajs/html](https://github.com/kitajs/html)** (TSX → HTML). There is **no** EJS or Express view engine — see `docs/frontend/overview.md` and `.cursor/skills/kitajs-html-web/SKILL.md`.
+
 ### Migrations
 
 To create a new migration, run `npm run db:migrate:create my-migration-description -- --sql-file`.

@@ -112,7 +112,7 @@ Recommended stored values:
 - `userId` (internal UUID)
 - `discordId` (Discord snowflake)
 
-This gives route handlers and view rendering a consistent way to access auth without fighting Express request typing or custom validation types.
+This gives route handlers and Kitajs page rendering a consistent way to access auth without fighting Express request typing or custom validation types.
 
 For `app/src/api/v2`:
 v2 remains **API-key only**; no session cookie support is required.
@@ -133,7 +133,7 @@ Even with `SameSite=Lax`, we should plan for CSRF on state-changing requests:
   - Validate on the server for all non-idempotent routes (POST/PATCH/DELETE).
 
 Practical HTMX patterns:
-- Set a global `hx-headers` on a top-level wrapper element (or layout template) so partials inherit it.
+- Set a global `hx-headers` on a top-level wrapper element (or shared layout page component) so HTMX-driven requests inherit it.
 - For standard form posts, include a hidden input and copy it to a header (or validate from form body).
 
 ## Error handling + UX

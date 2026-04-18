@@ -27,16 +27,17 @@ This keeps registration colocated per feature file while aggregation stays in a 
 - **Per-route file**: e.g. `app/src/api/v2/routes/seasons/get.ts` — `import { Route } from "@shared/routerMap"`; `export const getAllSeasons: Route = (router) => { router.get("/", …); }` so the effective path is **`/api/v2/seasons/`** (prefix + `/`).
 - **Errors / async**: use `wrapRouteWithErrorBoundary` and the v2 `errorHandler` as documented in **`v2-api-endpoints`** — do not duplicate that guidance here.
 
-## Web (EJS / HTMX)
+## Web (Kitajs HTML / HTMX)
 
-- **Mount**: `app/src/web/routes/index.ts` — `webRouter.use("/", mapRoutes([Home]))`; add more prefixes later (e.g. `webRouter.use("/predictions", mapRoutes([…]))`).
-- **Per-page / feature**: e.g. `app/src/web/routes/home/get.ts` — export the page as a **PascalCase** name matching the page (`Home`, `Predictions`, …): `export const Home: Route = (router) => { router.get("/", …); }` and `res.render(...)`.
+- **Mount**: `app/src/web/routes/index.ts` — `webRouter.use("/", mapRoutes([…]))` aggregates feature **`handler.ts`** modules; add more prefixes later (e.g. `webRouter.use("/predictions", mapRoutes([…]))`).
+- **Per feature** (React-like colocation): `app/src/web/routes/<area>/` — **`page.tsx`** (main Kitajs tree), **`handler.ts`** (exports a **`Route`** that registers `router.get` for that area), **`components/`** (area-local JSX). Shared JSX → **`app/src/web/shared/components/`** when reused. Use `res.type("html").send(await Promise.resolve(Page(props)))` when `JSX.Element` may be async.
+- **Streaming async subtrees**: **`renderToStream`** + **`Suspense`** from `@kitajs/html/suspense`, `stream.pipe(res)` — see **`kitajs-html-web`** and `app/src/web/routes/demo/suspense/handler.ts`.
 
 ## Conventions
 
 - **New v2 endpoint**: add a `Route` in `routes/<area>/…`, import it in `api/v2/index.ts`, append to the right `mapRoutes([...])` for that prefix. Follow **`v2-api-endpoints`** for validation, responses, and types.
-- **New web page**: add a `Route` under `web/routes/<area>/…`, import in `web/routes/index.ts`, add to the appropriate `mapRoutes` under the right prefix.
-- **Naming**: v2 keeps verb-style exports (`getAllSeasons`, `createPrediction`, …). **Web** uses **PascalCase page names** (`Home`, …) in route modules; filenames can stay `get.ts` or similar under a folder per page.
+- **New web feature**: add `routes/<area>/page.tsx`, `handler.ts`, optional `components/`, export a **`Route`** from `handler.ts`, import it in `web/routes/index.ts`, append to `mapRoutes([...])`.
+- **Naming**: v2 keeps verb-style exports (`getAllSeasons`, `createPrediction`, …). **Web** exports a **`Route`** per feature with a **PascalCase** name (`Home`, `SuspenseDemo`, …) from **`handler.ts`**.
 
 ## Quick reference
 
