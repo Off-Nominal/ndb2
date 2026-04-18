@@ -1,4 +1,4 @@
-import users from "../../../data/legacy-queries/users";
+import users from "@data/legacy-queries/users";
 import responseUtils_deprecated from "../utils/response";
 import { ErrorCode } from "../types/responses";
 import { RequestHandler } from "express";

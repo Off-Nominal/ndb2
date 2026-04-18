@@ -7,11 +7,11 @@ const { emit, getAll } = vi.hoisted(() => ({
   getAll: vi.fn(),
 }));
 
-vi.mock("../events/eventsManager", () => ({
+vi.mock("@domain/events/eventsManager", () => ({
   eventsManager: { emit },
 }));
 
-vi.mock("../../data/queries/seasons", () => ({
+vi.mock("@data/queries/seasons", () => ({
   default: {
     getAll: () => getAll,
   },

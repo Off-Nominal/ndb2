@@ -1,8 +1,12 @@
-import pool from "../../../data/db";
+import pool from "@data/db";
 import responseUtils_deprecated from "../utils/response";
 import { ErrorCode } from "../types/responses";
 import { RequestHandler } from "express";
 
+/**
+ *
+ * @deprecated Use getDbClient from data/db/getDbClient.ts instead.
+ */
 export const getDbClient: RequestHandler = (req, res, next) => {
   pool
     .connect()
@@ -27,8 +31,8 @@ export const getDbClient: RequestHandler = (req, res, next) => {
           responseUtils_deprecated.writeError(
             ErrorCode.SERVER_ERROR,
             `Unable to make database connection, request aborted.`,
-            null
-          )
+            null,
+          ),
         );
     });
 };

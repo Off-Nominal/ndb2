@@ -1,13 +1,13 @@
 import { Router } from "express";
 import { z } from "zod";
-import { Route } from "../../utils/routerMap";
+import { Route } from "@shared/routerMap";
 import responseUtils from "../../utils/response";
 import { validate } from "../../middleware/validate";
-import { getDbClient } from "../../../../data/db/getDbClient";
-import predictions from "../../../../data/queries/predictions";
-import users from "../../../../data/queries/users";
+import { getDbClient } from "@data/db/getDbClient";
+import predictions from "@data/queries/predictions";
+import users from "@data/queries/users";
 import * as API from "@offnominal/ndb2-api-types/v2";
-import { eventsManager } from "../../../../domain/events/eventsManager";
+import { eventsManager } from "@domain/events/eventsManager";
 import {
   createFutureDateSchema,
   discordIdSchema,

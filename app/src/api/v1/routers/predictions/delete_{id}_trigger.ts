@@ -3,7 +3,7 @@ import { getDbClient } from "../../middleware/getDbClient";
 import { getPrediction } from "../../middleware/getPrediction";
 import paramValidator from "../../middleware/paramValidator";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
-import predictions from "../../../../data/legacy-queries/predictions";
+import predictions from "@data/legacy-queries/predictions";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils_deprecated from "../../utils/response";
 import { ErrorCode } from "../../types/responses";

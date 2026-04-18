@@ -1,7 +1,7 @@
 import { PoolClient } from "pg";
-import pool from "../../data/db";
-import { eventsManager } from "../events/eventsManager";
-import seasonsV2 from "../../data/queries/seasons";
+import pool from "@data/db";
+import { eventsManager } from "@domain/events/eventsManager";
+import seasonsV2 from "@data/queries/seasons";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { createLogger } from "@mendahu/utilities";
 

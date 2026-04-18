@@ -1,5 +1,7 @@
 # Authentication (Discord OAuth2)
 
+**Status:** Specification only. The web app does not yet implement `/auth/discord`, sessions, or route guards; the HTML surface is currently public.
+
 All ndb2 users must have a Discord account. We do **not** manage passwords or identity ourselves.
 
 Instead, we use **Discord OAuth2** as the only authentication mechanism, and map Discord’s user id (“snowflake”) to our internal `users` record.

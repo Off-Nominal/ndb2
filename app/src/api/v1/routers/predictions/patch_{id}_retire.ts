@@ -1,10 +1,10 @@
 import { add, isAfter } from "date-fns";
 import express, { Request, Response } from "express";
-import GAME_MECHANICS from "../../../../domain/gameMechanics";
+import GAME_MECHANICS from "@domain/gameMechanics";
 import paramValidator from "../../middleware/paramValidator";
 import { getPrediction } from "../../middleware/getPrediction";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
-import predictions from "../../../../data/legacy-queries/predictions";
+import predictions from "@data/legacy-queries/predictions";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils_deprecated from "../../utils/response";
 import { getDbClient } from "../../middleware/getDbClient";

@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { getDbClient } from "../../middleware/getDbClient";
-import seasons from "../../../../data/legacy-queries/seasons";
+import seasons from "@data/legacy-queries/seasons";
 import responseUtils_deprecated from "../../utils/response";
 import { ErrorCode } from "../../types/responses";
 

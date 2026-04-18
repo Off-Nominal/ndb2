@@ -1,5 +1,5 @@
-import { MonitorRunner } from "../monitors/MonitorRunner";
-import { MonitorConfig } from "../monitors/types";
+import { MonitorRunner } from "@domain/monitors/MonitorRunner";
+import { MonitorConfig } from "@domain/monitors/types";
 
 export default class PredictionMonitor extends MonitorRunner {
   constructor(monitors: MonitorConfig[]) {

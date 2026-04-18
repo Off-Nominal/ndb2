@@ -2,7 +2,7 @@ import { beforeAll, afterAll } from "vitest";
 import { Client } from "pg";
 import { seedFromData } from "@offnominal/ndb2-db";
 import type { PredictionSeed, SeasonSeed, UserSeed } from "@offnominal/ndb2-db";
-import { resetPoolForTests } from "../data/db";
+import { resetPoolForTests } from "@data/db";
 import {
   createDatabaseFromTemplate,
   databaseUrlWithName,

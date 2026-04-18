@@ -3,6 +3,7 @@
     "target": "es2020",
     "sourceMap": true,
     "outDir": "dist",
+    "rootDir": "src",
     "lib": ["es2021.string"],
     "downlevelIteration": true,
     "skipLibCheck": true,
@@ -10,6 +11,12 @@
     "strict": true,
     "module": "NodeNext",
     "moduleResolution": "nodenext",
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["src/shared/*"],
+      "@data/*": ["src/data/*"],
+      "@domain/*": ["src/domain/*"]
+    },
     "types": ["node", "vitest/globals"]
   },
   "include": ["src/**/*"],

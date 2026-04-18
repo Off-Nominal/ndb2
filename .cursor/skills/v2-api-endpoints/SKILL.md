@@ -15,7 +15,7 @@ description: >-
 ## Layout and wiring
 
 - **Route modules**: `app/src/api/v2/routes/<area>/<verb>_<pathShape>.ts` (e.g. `routes/predictions/get_predictions_{predictionId}.ts`).
-- **Route type**: export a `Route` from `../../utils/routerMap` — a function `(router: Router) => void` that registers methods on the sub-router.
+- **Route type**: export a `Route` from `@shared/routerMap` — a function `(router: Router) => void` that registers methods on the sub-router.
 - **Mounting**: import the route in `app/src/api/v2/index.ts`, add it to the `mapRoutes([...])` array for the appropriate prefix (`/predictions`, `/seasons`, etc.).
 - **Error middleware**: `errorHandler` from `middleware/errorHandler` is already registered **last** on `apiV2Router` in `index.ts`. Do not remove or reorder it for new routes.
 

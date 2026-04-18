@@ -3,8 +3,8 @@ import paramValidator from "../../middleware/paramValidator";
 import { getPrediction } from "../../middleware/getPrediction";
 import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
-import predictions from "../../../../data/legacy-queries/predictions";
-import votes from "../../../../data/legacy-queries/votes/index.ts";
+import predictions from "@data/legacy-queries/predictions";
+import votes from "@data/legacy-queries/votes";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils_deprecated from "../../utils/response";
 import { getDbClient } from "../../middleware/getDbClient";
@@ -33,13 +33,13 @@ router.post(
           responseUtils_deprecated.writeError(
             ErrorCode.SERVER_ERROR,
             "Something went wrong. Please try again.",
-            null
-          )
+            null,
+          ),
         );
     }
 
     const existingVote = req.prediction.votes.find(
-      (vote) => vote.voter.discord_id === discord_id
+      (vote) => vote.voter.discord_id === discord_id,
     );
 
     if (existingVote?.vote === vote) {
@@ -50,8 +50,8 @@ router.post(
             req.prediction,
             `You already voted ${
               existingVote?.vote === true ? "'yes'" : "'no'"
-            } on this prediction, no change necessary.`
-          )
+            } on this prediction, no change necessary.`,
+          ),
         );
     }
 
@@ -76,7 +76,7 @@ router.post(
           : `${vote === true ? "'Yes'" : "'No'"} vote added successfully.`;
 
         return res.json(
-          responseUtils_deprecated.writeSuccess(prediction, message)
+          responseUtils_deprecated.writeSuccess(prediction, message),
         );
       })
       .catch((err) => {
@@ -87,11 +87,11 @@ router.post(
             responseUtils_deprecated.writeError(
               ErrorCode.SERVER_ERROR,
               "There was an error updating this vote.",
-              null
-            )
+              null,
+            ),
           );
       });
-  }
+  },
 );
 
 export default router;

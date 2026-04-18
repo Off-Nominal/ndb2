@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
-import bets from "../../../../data/legacy-queries/bets";
-import predictions from "../../../../data/legacy-queries/predictions";
+import bets from "@data/legacy-queries/bets";
+import predictions from "@data/legacy-queries/predictions";
 import responseUtils_deprecated from "../../utils/response";
 import paramValidator from "../../middleware/paramValidator";
 import dateValidator from "../../middleware/dateValidator";

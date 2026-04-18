@@ -1,4 +1,4 @@
-import predictions from "../../../data/legacy-queries/predictions";
+import predictions from "@data/legacy-queries/predictions";
 import responseUtils_deprecated from "../utils/response";
 import { ErrorCode } from "../types/responses";
 import { RequestHandler } from "express";

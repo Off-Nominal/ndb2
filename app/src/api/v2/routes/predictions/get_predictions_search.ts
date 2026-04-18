@@ -1,10 +1,10 @@
 import { z } from "zod";
-import { Route } from "../../utils/routerMap";
+import { Route } from "@shared/routerMap";
 import responseUtils from "../../utils/response";
 import { validate } from "../../middleware/validate";
-import { getDbClient } from "../../../../data/db/getDbClient";
-import predictions from "../../../../data/queries/predictions";
-import { getUserByDiscordId } from "../../../../data/queries/users/users.queries";
+import { getDbClient } from "@data/db/getDbClient";
+import predictions from "@data/queries/predictions";
+import { getUserByDiscordId } from "@data/queries/users/users.queries";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import {
   createBooleanStringSchema,

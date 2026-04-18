@@ -2,14 +2,14 @@ import { Router } from "express";
 import { z } from "zod";
 import { isAfter, isBefore } from "date-fns";
 import { discordIdSchema, predictionIdSchema } from "../../validations";
-import { Route } from "../../utils/routerMap";
-import predictions from "../../../../data/queries/predictions";
-import users from "../../../../data/queries/users";
+import { Route } from "@shared/routerMap";
+import predictions from "@data/queries/predictions";
+import users from "@data/queries/users";
 import responseUtils from "../../utils/response";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { validate } from "../../middleware/validate";
-import { getDbClient } from "../../../../data/db/getDbClient";
-import { eventsManager } from "../../../../domain/events/eventsManager";
+import { getDbClient } from "@data/db/getDbClient";
+import { eventsManager } from "@domain/events/eventsManager";
 import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
 
 const triggerPredictionBodySchema = z.object({

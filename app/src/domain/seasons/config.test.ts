@@ -21,21 +21,21 @@ const search = vi.fn();
 const getResultsById = vi.fn();
 const closeById = vi.fn();
 
-vi.mock("../monitors/withPoolClient", () => ({
+vi.mock("@domain/monitors/withPoolClient", () => ({
   withPoolClient,
 }));
 
-vi.mock("../events/eventsManager", () => ({
+vi.mock("@domain/events/eventsManager", () => ({
   eventsManager: { emit },
 }));
 
-vi.mock("../../data/queries/predictions", () => ({
+vi.mock("@data/queries/predictions", () => ({
   default: {
     search: () => search,
   },
 }));
 
-vi.mock("../../data/queries/seasons", () => ({
+vi.mock("@data/queries/seasons", () => ({
   default: {
     getResultsById: () => getResultsById,
     closeById: () => closeById,

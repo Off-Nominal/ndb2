@@ -1,5 +1,7 @@
 # Design tokens (initial draft)
 
+**Status:** Reference values only. No token JSON → CSS pipeline or global stylesheet is wired into `app/src/web` yet.
+
 This document seeds our **base design tokens**. These values are a starting point and should be refined once we see real screens (tables, forms, detail pages).
 
 Token sources of truth will ultimately live as JSON and generate:

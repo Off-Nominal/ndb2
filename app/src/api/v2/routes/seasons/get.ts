@@ -1,8 +1,8 @@
 import { Router } from "express";
-import seasons from "../../../../data/queries/seasons";
+import seasons from "@data/queries/seasons";
 import responseUtils_deprecated from "../../../../api/v1/utils/response";
-import { getDbClient } from "../../../../data/db/getDbClient";
-import { Route } from "../../utils/routerMap";
+import { getDbClient } from "@data/db/getDbClient";
+import { Route } from "@shared/routerMap";
 import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
 
 export const getAllSeasons: Route = (router: Router) => {
