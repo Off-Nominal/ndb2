@@ -2,6 +2,8 @@
 
 This document describes the initial set of web routes served by `app/src/web`.
 
+**Status:** Only **`/`** is implemented today (minimal welcome placeholder). The sections below describe the **target** product routes; auth behavior is not enforced until Discord sessions exist.
+
 Conventions:
 
 - Pages are server-rendered (EJS) and may use HTMX for partial updates.
@@ -11,7 +13,9 @@ Conventions:
 
 ### `/`
 
-Landing page dashboard featuring:
+**Current:** static welcome copy (scaffold).
+
+**Target:** landing page dashboard featuring:
 
 - leaderboard for the current season
 - summary of current season stats

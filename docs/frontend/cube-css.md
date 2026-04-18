@@ -1,5 +1,7 @@
 # CUBE CSS summary (for ndb2)
 
+**Status:** Methodology and intent only. Application CSS layers (global, composition, utilities, blocks) are not yet implemented under `web/public/` or equivalent.
+
 This document summarizes the CUBE CSS methodology (Andy Bell) and captures how we intend to apply it in the ndb2 frontend.
 
 References:

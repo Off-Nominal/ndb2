@@ -1,5 +1,7 @@
 # Discord client plan (`discord.js`)
 
+**Status:** Not implemented. No `discord.js` client or guild/role checks in `app/` yet.
+
 The web app needs a reliable way to fetch and display Discord user metadata (display name, avatar) and to enforce authorization rules based on **guild membership** and **roles**.
 
 This document outlines a plan to add `discord.js` as an `app/` dependency and run a long-lived Discord client alongside the web server.

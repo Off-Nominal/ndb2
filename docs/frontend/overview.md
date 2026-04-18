@@ -1,5 +1,10 @@
 # Frontend overview (ndb2)
 
+## Implementation status
+
+- **In place:** EJS + HTMX dependency, `app/src/web/` scaffold, public welcome page at `/`, shared Express app with JSON API (`createApp` / `mountWeb` / `mountJsonApi`). See `project-structure.md` for a detailed checklist.
+- **Not yet:** Discord session auth, dashboard pages, CUBE CSS build from tokens, most routes in `routes.md`.
+
 ## Objectives
 
 This project will add a new web dashboard for users to interact with Nostradambot2 (ndb2).
@@ -33,8 +38,8 @@ What “dashboard” includes will evolve, but the initial expectation is:
 
 ## Open questions (to resolve early)
 
-- **Auth/session model**: shared with API or separate frontend session? (cookie/session vs JWT)
-- **Routing**: URL structure and how it maps to EJS views/partials.
-- **Cube CSS specifics**: token naming, layout primitives, component conventions.
-- **Build/deploy**: where the frontend server runs relative to the API (same Express app vs separate service).
+- **Auth/session model**: still to implement; plan favors cookie + server session (see `authentication.md`). v2 remains API-key only.
+- **Routing**: URL map for product pages is in `routes.md`; only `/` is scaffolded so far—how each maps to EJS partials/fragments as features land.
+- **Cube CSS specifics**: token naming, layout primitives, component conventions (no generated CSS in-repo yet).
+- **Build/deploy**: **resolved for dev**—same Node process serves HTML and `/api/v2`; production packaging can follow the same layout.
 
