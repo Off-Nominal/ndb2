@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { getDbClient } from "../../middleware/getDbClient";
-import scores from "../../../../data/legacy-queries/scores";
+import scores from "@data/legacy-queries/scores";
 import responseUtils_deprecated from "../../utils/response";
 import { isScoreView, ScoreView } from "./get";
 import paramValidator from "../../middleware/paramValidator";

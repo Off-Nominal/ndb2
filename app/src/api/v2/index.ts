@@ -13,7 +13,7 @@ import { postPredictionSnoozeCheckVote } from "./routes/predictions/post_predict
 import { triggerPredictionById } from "./routes/predictions/post_predictions_{predictionId}_trigger";
 import { mapRoutes } from "@shared/routerMap";
 import { errorHandler } from "./middleware/errorHandler";
-import "../../domain/webhooks/config"; // Initialize webhook event listeners
+import "@domain/webhooks/config"; // Initialize webhook event listeners
 
 export const apiV2Router = express.Router();
 

@@ -1,10 +1,10 @@
 import { createLogger } from "@mendahu/utilities";
-import PredictionMonitor from "./domain/predictions/PredictionMonitor";
-import { monitors } from "./domain/predictions/config";
-import SeasonMonitor from "./domain/seasons/SeasonMonitor";
-import { monitors as seasonMonitors } from "./domain/seasons/config";
-import { seasonsManager } from "./domain/seasons/SeasonManager";
-import pool from "./data/db";
+import PredictionMonitor from "@domain/predictions/PredictionMonitor";
+import { monitors } from "@domain/predictions/config";
+import SeasonMonitor from "@domain/seasons/SeasonMonitor";
+import { monitors as seasonMonitors } from "@domain/seasons/config";
+import { seasonsManager } from "@domain/seasons/SeasonManager";
+import pool from "@data/db";
 import { createApp } from "./server/createApp";
 
 // Config

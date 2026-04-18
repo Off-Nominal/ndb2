@@ -2,12 +2,12 @@ import { Router } from "express";
 import { z } from "zod";
 import { predictionIdSchema } from "../../validations";
 import { Route } from "@shared/routerMap";
-import predictions from "../../../../data/queries/predictions";
+import predictions from "@data/queries/predictions";
 import responseUtils from "../../utils/response";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { validate } from "../../middleware/validate";
-import { getDbClient } from "../../../../data/db/getDbClient";
-import { eventsManager } from "../../../../domain/events/eventsManager";
+import { getDbClient } from "@data/db/getDbClient";
+import { eventsManager } from "@domain/events/eventsManager";
 import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
 
 export const untriggerPredictionById: Route = (router: Router) => {

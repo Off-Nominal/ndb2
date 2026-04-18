@@ -3,15 +3,15 @@ import { z } from "zod";
 import { add, isAfter } from "date-fns";
 import { discordIdSchema, predictionIdSchema } from "../../validations";
 import { Route } from "@shared/routerMap";
-import predictions from "../../../../data/queries/predictions";
-import betsQueries from "../../../../data/queries/bets";
-import users from "../../../../data/queries/users";
+import predictions from "@data/queries/predictions";
+import betsQueries from "@data/queries/bets";
+import users from "@data/queries/users";
 import responseUtils from "../../utils/response";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { validate } from "../../middleware/validate";
-import { getDbClient } from "../../../../data/db/getDbClient";
-import { eventsManager } from "../../../../domain/events/eventsManager";
-import GAME_MECHANICS from "../../../../domain/gameMechanics";
+import { getDbClient } from "@data/db/getDbClient";
+import { eventsManager } from "@domain/events/eventsManager";
+import GAME_MECHANICS from "@domain/gameMechanics";
 import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
 
 export const postPredictionBet: Route = (router: Router) => {

@@ -1,9 +1,9 @@
 import { PoolClient } from "pg";
-import { eventsManager } from "../events/eventsManager";
-import { MonitorConfig, MonitorLog } from "../monitors/types";
-import predictions from "../../data/queries/predictions";
-import snoozeChecks from "../../data/queries/snooze_checks";
-import { withPoolClient } from "../monitors/withPoolClient";
+import { eventsManager } from "@domain/events/eventsManager";
+import { MonitorConfig, MonitorLog } from "@domain/monitors/types";
+import predictions from "@data/queries/predictions";
+import snoozeChecks from "@data/queries/snooze_checks";
+import { withPoolClient } from "@domain/monitors/withPoolClient";
 
 export const monitors: MonitorConfig[] = [
   {

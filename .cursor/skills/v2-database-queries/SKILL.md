@@ -12,7 +12,7 @@ description: >-
 ## Where it lives
 
 - **SQL and generated code**: `app/src/data/queries/<entity>/`
-- **Imports from route code** may use the alias `import … from "@data/queries/…"` (see `app/tsconfig.json`); relative paths to `data/` remain valid.
+- **Imports from route code** should use `import … from "@data/…"` (see `app/tsconfig.json`). **Legacy votes** module lives in a misnamed file `legacy-queries/votes/index.ts.ts`; import it as `@data/legacy-queries/votes/index.ts` until that file is renamed.
 - **One folder per entity** (e.g. `bets`, `predictions`, `users`).
 - **Reference implementation**: read existing folders in that tree; follow the same shape as `bets/` and `predictions/`.
 

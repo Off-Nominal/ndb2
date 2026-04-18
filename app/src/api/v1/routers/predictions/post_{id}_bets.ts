@@ -3,13 +3,13 @@ import paramValidator from "../../middleware/paramValidator";
 import { getPrediction } from "../../middleware/getPrediction";
 import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
-import bets from "../../../../data/legacy-queries/bets";
-import predictions from "../../../../data/legacy-queries/predictions";
+import bets from "@data/legacy-queries/bets";
+import predictions from "@data/legacy-queries/predictions";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils_deprecated from "../../utils/response";
 import { getDbClient } from "../../middleware/getDbClient";
 import { add, isAfter } from "date-fns";
-import GAME_MECHANICS from "../../../../domain/gameMechanics";
+import GAME_MECHANICS from "@domain/gameMechanics";
 import { ErrorCode } from "../../types/responses";
 const router = express.Router();
 

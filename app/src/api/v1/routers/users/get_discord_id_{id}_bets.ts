@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import { getDbClient } from "../../middleware/getDbClient";
 import { getUserByDiscordId } from "../../middleware/getUserByDiscordId";
 import paramValidator from "../../middleware/paramValidator";
-import users from "../../../../data/legacy-queries/users";
+import users from "@data/legacy-queries/users";
 import responseUtils_deprecated from "../../utils/response";
 import { ErrorCode } from "../../types/responses";
 const router = express.Router();

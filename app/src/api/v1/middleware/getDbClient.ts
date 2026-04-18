@@ -1,4 +1,4 @@
-import pool from "../../../data/db";
+import pool from "@data/db";
 import responseUtils_deprecated from "../utils/response";
 import { ErrorCode } from "../types/responses";
 import { RequestHandler } from "express";

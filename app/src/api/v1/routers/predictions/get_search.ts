@@ -1,11 +1,11 @@
 import express, { Request, Response } from "express";
 import { getDbClient } from "../../middleware/getDbClient";
 import paramValidator from "../../middleware/paramValidator";
-import predictions from "../../../../data/legacy-queries/predictions";
-import { SortByOption } from "../../../../data/legacy-queries/predictions_search";
+import predictions from "@data/legacy-queries/predictions";
+import { SortByOption } from "@data/legacy-queries/predictions_search";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils_deprecated from "../../utils/response";
-import users from "../../../../data/legacy-queries/users";
+import users from "@data/legacy-queries/users";
 import { ErrorCode } from "../../types/responses";
 const router = express.Router();
 

@@ -8,7 +8,7 @@ import { getPrediction } from "../../middleware/getPrediction";
 import { isAllowableSnooze } from "../../types/snoozes";
 import responseUtils_deprecated from "../../utils/response";
 import { ErrorCode } from "../../types/responses";
-import snoozes from "../../../../data/legacy-queries/snoozes";
+import snoozes from "@data/legacy-queries/snoozes";
 
 const router = express.Router();
 

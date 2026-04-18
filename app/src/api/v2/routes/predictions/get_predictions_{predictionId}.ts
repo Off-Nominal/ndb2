@@ -3,9 +3,9 @@ import { predictionIdSchema } from "../../validations";
 import { Route } from "@shared/routerMap";
 import responseUtils from "../../utils/response";
 import { validate } from "../../middleware/validate";
-import predictions from "../../../../data/queries/predictions";
+import predictions from "@data/queries/predictions";
 import * as API from "@offnominal/ndb2-api-types/v2";
-import { getDbClient } from "../../../../data/db/getDbClient";
+import { getDbClient } from "@data/db/getDbClient";
 import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
 
 export const getPredictionById: Route = (router) => {

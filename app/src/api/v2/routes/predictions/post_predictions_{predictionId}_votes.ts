@@ -2,14 +2,14 @@ import { Router } from "express";
 import { z } from "zod";
 import { discordIdSchema, predictionIdSchema } from "../../validations";
 import { Route } from "@shared/routerMap";
-import predictions from "../../../../data/queries/predictions";
-import votesQueries from "../../../../data/queries/votes";
-import users from "../../../../data/queries/users";
+import predictions from "@data/queries/predictions";
+import votesQueries from "@data/queries/votes";
+import users from "@data/queries/users";
 import responseUtils from "../../utils/response";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { validate } from "../../middleware/validate";
-import { getDbClient } from "../../../../data/db/getDbClient";
-import { eventsManager } from "../../../../domain/events/eventsManager";
+import { getDbClient } from "@data/db/getDbClient";
+import { eventsManager } from "@domain/events/eventsManager";
 import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
 
 export const postPredictionVote: Route = (router: Router) => {
