@@ -24,7 +24,7 @@ Many variables are preloaded with default configurations, but you'll need to add
 
 ### Web dashboard (HTML)
 
-The `app` service also serves server-rendered pages from `src/web/routes/` (**`page.tsx`**, **`handler.ts`**, **`components/`** per feature) using **[@kitajs/html](https://github.com/kitajs/html)** (TSX → HTML). There is **no** EJS or Express view engine — see `docs/frontend/overview.md` and `.cursor/skills/kitajs-html-web/SKILL.md`.
+The `app` service also serves server-rendered pages from `src/web/routes/` (**`page.tsx`**, **`handler.ts`**, **`tests/`**, snake_case **`components/`** + colocated **`*.test.ts`**) using **[@kitajs/html](https://github.com/kitajs/html)** (TSX → HTML). There is **no** EJS or Express view engine — see `docs/frontend/overview.md` and `.cursor/skills/kitajs-html-web/SKILL.md`.
 
 ### Migrations
 

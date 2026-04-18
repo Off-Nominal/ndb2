@@ -2,7 +2,7 @@
 
 ## Implementation status
 
-- **In place:** `@kitajs/html` + HTMX, `app/src/web/routes/` feature folders (`page.tsx`, `handler.ts`, `components/`), welcome page at `/`, HTMX example (`GET /home/lucky-number`), Suspense streaming demo at `/demo/suspense`, shared Express app with JSON API (`createApp` / `mountWeb` / `mountJsonApi`). See `project-structure.md` and `.cursor/skills/kitajs-html-web/SKILL.md`.
+- **In place:** `@kitajs/html` + HTMX, `app/src/web/routes/` feature folders (`page.tsx`, `handler.ts`, `tests/`, snake_case `components/` + colocated `*.test.ts`), welcome page at `/`, HTMX example (`GET /home/lucky-number`), Suspense streaming demo at `/demo/suspense`, shared Express app with JSON API (`createApp` / `mountWeb` / `mountJsonApi`). See `project-structure.md` and `.cursor/skills/kitajs-html-web/SKILL.md`.
 - **Not yet:** Discord session auth, dashboard pages, CUBE CSS build from tokens, most routes in `routes.md`.
 
 ## Objectives
@@ -23,7 +23,7 @@ The frontend will be server-rendered and progressively enhanced.
 
 ## Templating decision
 
-**We use Kitajs HTML for all server-rendered UI** under `app/src/web`. Earlier exploration considered a traditional Express view engine (e.g. EJS); that path is **not** adopted. UI is **typed `.tsx`** colocated with routes: **`routes/<area>/page.tsx`**, **`handler.ts`**, **`components/`** (shared pieces in `web/shared/components/` when needed), optionally streamed with Kita’s **`Suspense`** / **`renderToStream`** for slow subtrees. See `.cursor/skills/kitajs-html-web/SKILL.md` for patterns.
+**We use Kitajs HTML for all server-rendered UI** under `app/src/web`. Earlier exploration considered a traditional Express view engine (e.g. EJS); that path is **not** adopted. UI is **typed `.tsx`** colocated with routes: **`routes/<area>/page.tsx`**, **`handler.ts`**, **`tests/`**, **`components/`** (snake_case component names; shared pieces in `web/shared/components/` when needed), optionally streamed with Kita’s **`Suspense`** / **`renderToStream`** for slow subtrees. See `.cursor/skills/kitajs-html-web/SKILL.md` for patterns.
 
 ## Product principles (high-level)
 

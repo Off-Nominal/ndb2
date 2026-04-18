@@ -1,7 +1,7 @@
 import { Suspense } from "@kitajs/html/suspense";
-import { DelayedSnippet } from "./components/DelayedSnippet";
+import { delayed_snippet } from "./components/delayed_snippet";
 
-export type SuspenseDemoPageProps = {
+export type suspense_demo_page_props = {
   /** Request id from {@link renderToStream}; required on every `Suspense` boundary. */
   rid: number | string;
 };
@@ -10,7 +10,7 @@ export type SuspenseDemoPageProps = {
  * Full-page demo for Kita `Suspense` + `renderToStream` (chunked HTML + inline
  * `SuspenseScript`). See https://html.kitajs.org/guide/introduction#async-components-and-suspense
  */
-export function SuspenseDemoPage(props: SuspenseDemoPageProps): JSX.Element {
+export function suspense_demo_page(props: suspense_demo_page_props): JSX.Element {
   return (
     <html lang="en">
       <head>
@@ -40,7 +40,7 @@ export function SuspenseDemoPage(props: SuspenseDemoPageProps): JSX.Element {
               </p>
             }
           >
-            <DelayedSnippet delayMs={750} label="A" />
+            {delayed_snippet({ delayMs: 750, label: "A" })}
           </Suspense>
         </section>
 
@@ -54,7 +54,7 @@ export function SuspenseDemoPage(props: SuspenseDemoPageProps): JSX.Element {
               </p>
             }
           >
-            <DelayedSnippet delayMs={1750} label="B" />
+            {delayed_snippet({ delayMs: 1750, label: "B" })}
           </Suspense>
         </section>
       </body>

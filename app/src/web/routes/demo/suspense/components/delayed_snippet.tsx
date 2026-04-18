@@ -1,5 +1,5 @@
 /** Async child for `Suspense` demos (simulated slow server work). */
-export async function DelayedSnippet(props: {
+export async function delayed_snippet(props: {
   delayMs: number;
   label: string;
 }): Promise<string> {

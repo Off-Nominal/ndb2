@@ -1,10 +1,10 @@
-export type HomePageProps = {
+export type home_page_props = {
   title: string;
   message: string;
 };
 
 /** Full HTML document for `/` (Kitajs HTML JSX → string). */
-export function HomePage(props: HomePageProps): JSX.Element {
+export function home_page(props: home_page_props): JSX.Element {
   return (
     <html lang="en">
       <head>

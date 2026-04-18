@@ -30,14 +30,14 @@ This keeps registration colocated per feature file while aggregation stays in a 
 ## Web (Kitajs HTML / HTMX)
 
 - **Mount**: `app/src/web/routes/index.ts` — `webRouter.use("/", mapRoutes([…]))` aggregates feature **`handler.ts`** modules; add more prefixes later (e.g. `webRouter.use("/predictions", mapRoutes([…]))`).
-- **Per feature** (React-like colocation): `app/src/web/routes/<area>/` — **`page.tsx`** (main Kitajs tree), **`handler.ts`** (exports a **`Route`** that registers `router.get` for that area), **`components/`** (area-local JSX). Shared JSX → **`app/src/web/shared/components/`** when reused. Use `res.type("html").send(await Promise.resolve(Page(props)))` when `JSX.Element` may be async.
+- **Per feature** (colocation): `app/src/web/routes/<area>/` — **`page.tsx`** (snake_case page function, e.g. `home_page`), **`handler.ts`** (exports a **`Route`** such as `Home`), **`tests/`** (route-level supertest), **`components/`** (snake_case `.tsx` + colocated **`*.test.ts`**). Shared JSX → **`app/src/web/shared/components/`** when reused. Use `res.type("html").send(await Promise.resolve(home_page(props)))` when the tree may be async.
 - **Streaming async subtrees**: **`renderToStream`** + **`Suspense`** from `@kitajs/html/suspense`, `stream.pipe(res)` — see **`kitajs-html-web`** and `app/src/web/routes/demo/suspense/handler.ts`.
 
 ## Conventions
 
 - **New v2 endpoint**: add a `Route` in `routes/<area>/…`, import it in `api/v2/index.ts`, append to the right `mapRoutes([...])` for that prefix. Follow **`v2-api-endpoints`** for validation, responses, and types.
-- **New web feature**: add `routes/<area>/page.tsx`, `handler.ts`, optional `components/`, export a **`Route`** from `handler.ts`, import it in `web/routes/index.ts`, append to `mapRoutes([...])`.
-- **Naming**: v2 keeps verb-style exports (`getAllSeasons`, `createPrediction`, …). **Web** exports a **`Route`** per feature with a **PascalCase** name (`Home`, `SuspenseDemo`, …) from **`handler.ts`**.
+- **New web feature**: add `routes/<area>/page.tsx`, `handler.ts`, optional `components/`, optional `tests/`, export a **`Route`** from `handler.ts`, import it in `web/routes/index.ts`, append to `mapRoutes([...])`.
+- **Naming**: v2 keeps verb-style exports (`getAllSeasons`, …). **Web** exports a **PascalCase** **`Route`** name from **`handler.ts`** (`Home`, `SuspenseDemo`). **Kitajs components** in **`components/`** and page functions in **`page.tsx`** use **snake_case** (see **`kitajs-html-web`**).
 
 ## Quick reference
 
