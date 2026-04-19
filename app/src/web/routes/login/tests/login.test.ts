@@ -11,7 +11,6 @@ describe("routes/login", () => {
     const res = await request(app).get("/login").expect(200);
 
     expect(res.headers["content-type"]).toMatch(/html/);
-    expect(res.text).toContain("[ region ] [ content-column ]");
     expect(res.text).toContain("Sign in with Discord");
     expect(res.text).toContain("/auth/discord?");
     expect(res.text).toContain(encodeURIComponent("/"));

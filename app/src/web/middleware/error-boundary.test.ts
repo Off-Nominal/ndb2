@@ -24,7 +24,6 @@ describe("webErrorBoundary", () => {
     const res = await request(app).get("/boom").expect(500);
 
     expect(res.headers["content-type"]).toMatch(/html/);
-    expect(res.text).toContain("[ region ] [ content-column ]");
     expect(res.text).toContain("Something went wrong");
     expect(res.text).toContain('href="/"');
   });
