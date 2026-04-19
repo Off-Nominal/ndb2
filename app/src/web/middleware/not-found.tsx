@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
-import { error_htmx_snippet, error_page } from "../shared/components/error_page";
+import { ErrorHtmxSnippet, ErrorPage } from "../shared/components/error_page";
+import { PageLayout } from "../shared/components/page_layout";
 import { getThemePreference } from "./theme-preference";
 import { wrapWebRouteWithErrorBoundary } from "./error-boundary";
 
@@ -20,9 +21,13 @@ export const webNotFoundMiddleware: RequestHandler = wrapWebRouteWithErrorBounda
     const body = "There is no page at this URL.";
 
     const html = await Promise.resolve(
-      isHtmx
-        ? error_htmx_snippet({ title, body })
-        : error_page({ title, theme, body }),
+      isHtmx ? (
+        ErrorHtmxSnippet({ title, body })
+      ) : (
+        <PageLayout theme={theme} title={title}>
+          <ErrorPage title={title} body={body} />
+        </PageLayout>
+      ),
     );
 
     res.status(404).type("html").send(html);

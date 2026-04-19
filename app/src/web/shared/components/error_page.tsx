@@ -1,60 +1,44 @@
-import { html_head } from "./html_head";
-import { page_layout } from "./page_layout";
-import type { ThemePreference } from "../../middleware/theme-preference";
+export type ErrorPageBody = string | JSX.Element;
 
-export type error_page_body = string | JSX.Element;
-
-function render_body(body: error_page_body): JSX.Element {
+function renderBody(body: ErrorPageBody): JSX.Element {
   return typeof body === "string" ? <p>{body}</p> : body;
 }
 
-export type error_page_props = {
+export type ErrorPageProps = {
   title: string;
-  theme: ThemePreference;
   /** Plain text (wrapped in `<p>`) or a Kitajs fragment. */
-  body: error_page_body;
+  body: ErrorPageBody;
 };
 
-/** Full HTML document for user-facing error states (4xx/5xx, OAuth, 404, etc.). */
-export function error_page(props: error_page_props): JSX.Element {
+/** Main column content for user-facing error states (4xx/5xx, OAuth, 404). Wrap with {@link PageLayout} for a full document. */
+export function ErrorPage(props: ErrorPageProps): JSX.Element {
   return (
-    <html lang="en" data-theme={props.theme}>
-      <head>{html_head({ title: props.title })}</head>
-      <body>
-        {page_layout({
-          children: (
-            <main>
-              <h1>{props.title}</h1>
-              {render_body(props.body)}
-              <p>
-                <a href="/login?returnTo=%2F">Try again</a>
-              </p>
-              <p>
-                <a href="/">Home</a>
-              </p>
-            </main>
-          ),
-        })}
-      </body>
-    </html>
+    <main>
+      <h1>{props.title}</h1>
+      {renderBody(props.body)}
+      <p>
+        <a href="/login?returnTo=%2F">Try again</a>
+      </p>
+      <p>
+        <a href="/">Home</a>
+      </p>
+    </main>
   );
 }
 
-export type error_htmx_snippet_props = {
+export type ErrorHtmxSnippetProps = {
   title?: string;
-  body?: error_page_body;
+  body?: ErrorPageBody;
 };
 
 /** Minimal HTML for HTMX responses (fragments, alerts). */
-export function error_htmx_snippet(
-  props: error_htmx_snippet_props = {},
-): JSX.Element {
+export function ErrorHtmxSnippet(props: ErrorHtmxSnippetProps = {}): JSX.Element {
   const title = props.title ?? "Something went wrong";
   const body = props.body ?? "Please try again in a moment.";
   return (
     <div role="alert">
       <p>{title}</p>
-      {render_body(body)}
+      {renderBody(body)}
       <p>
         <a href="/">Return home</a> or reload the page.
       </p>

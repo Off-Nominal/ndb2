@@ -3,7 +3,7 @@ name: web-client-js
 description: >-
   ndb2 route-colocated client scripts: `*.client.js` under app/src/web/routes,
   build-client-js.mjs copy + generated routeClientScripts.ts, URLs under
-  /assets/routes/, html_head wiring via clientScriptsForModule. Use when adding
+  /assets/routes/, HtmlHead wiring via clientScriptsForModule. Use when adding
   or changing deferred browser scripts for the Kitajs HTML app, the static
   asset pipeline, or public/routes output.
 ---
@@ -35,7 +35,7 @@ description: >-
 ## Wiring pages
 
 1. Run **`pnpm run build:client-js`** (or full **`pnpm run build`** / **`postinstall`** — it runs after **`build:css`**).
-2. In **`page.tsx`**, pass into [`html_head`](app/src/web/shared/components/html_head.tsx):
+2. In **`page.tsx`**, pass into [`HtmlHead`](app/src/web/shared/components/html_head.tsx):
 
    **`clientScripts: clientScriptsForModule(__filename)`**
 
@@ -43,7 +43,7 @@ description: >-
 
 3. Optional: **`clientScriptsForRouteDir("home")`** from the generated file if you want an explicit key.
 
-`html_head` emits **`<script src="…" defer />`** for each URL **before** **`/assets/htmx.min.js`**.
+`HtmlHead` emits **`<script src="…" defer />`** for each URL **before** **`/assets/htmx.min.js`**.
 
 ## pnpm / dev
 
@@ -56,6 +56,6 @@ description: >-
 
 ## Related
 
-- **`kitajs-html-web`** — `page.tsx`, `handler.ts`, `html_head`.
-- **`css-build`** — stylesheet pipeline and **`html_head`** load order for CSS vs JS.
+- **`kitajs-html-web`** — `page.tsx`, `handler.tsx`, `HtmlHead`.
+- **`css-build`** — stylesheet pipeline and **`HtmlHead`** load order for CSS vs JS.
 - **`express-route-map`** — web router mount; static **`/assets`** is not behind JSON API auth.

@@ -1,6 +1,6 @@
 # CUBE CSS summary (for ndb2)
 
-**Status:** The web build emits five stylesheets under `app/src/web/public/` (served at `/assets/`): `design-tokens.css` (generated from JSON), `globals.css`, `compositions.css`, `utilities.css` (copied from `app/src/web/styles/`), and `blocks.css` (concatenated from colocated `*.css` next to components). All are linked from `app/src/web/shared/components/html_head.tsx` in cascade order. For an agent-oriented summary of the full pipeline (scripts, pnpm, nodemon, CUBE mapping), see `.cursor/skills/css-build/SKILL.md`. For **where to put CSS when authoring** pages and components (globals vs compositions vs utilities vs colocated blocks), see `.cursor/skills/cube-css-authoring/SKILL.md`.
+**Status:** The web build emits five stylesheets under `app/src/web/public/` (served at `/assets/`): `design-tokens.css` (generated from JSON), `globals.css`, `compositions.css`, `utilities.css` (copied from `app/src/web/styles/`), and `blocks.css` (concatenated from colocated `*.css` next to components). All are linked from `app/src/web/shared/components/html_head.tsx` (**`HtmlHead`**) in cascade order. For an agent-oriented summary of the full pipeline (scripts, pnpm, nodemon, CUBE mapping), see `.cursor/skills/css-build/SKILL.md`. For **where to put CSS when authoring** pages and components (globals vs compositions vs utilities vs colocated blocks), see `.cursor/skills/cube-css-authoring/SKILL.md`.
 
 This document summarizes the CUBE CSS methodology (Andy Bell) and captures how we intend to apply it in the ndb2 frontend.
 
@@ -124,7 +124,7 @@ Then implement utilities that apply those tokens (or apply them directly in bloc
 ### Theme (light / dark / system)
 
 - **`ndb2_theme` cookie:** **Not** `HttpOnly` so the client can persist the choice without a round trip. `Path=/`, `SameSite=Lax`. Values **`light`** or **`dark`**. **Absent** or cleared = **system**, matching OS **`prefers-color-scheme`**.
-- **`<html data-theme>`:** `light`, `dark`, or `system`. Server reads the cookie via `themePreferenceMiddleware` and sets the attribute on first paint; colocated **`routes/home/page.client.js`** updates `data-theme` and the cookie on `#theme-select` **change** (copied to `/assets/routes/...` by **`pnpm run build:client-js`**, included via `clientScriptsForModule(__filename)` in `html_head`).
+- **`<html data-theme>`:** `light`, `dark`, or `system`. Server reads the cookie via `themePreferenceMiddleware` and sets the attribute on first paint; colocated **`routes/home/page.client.js`** updates `data-theme` and the cookie on `#theme-select` **change** (copied to `/assets/routes/...` by **`pnpm run build:client-js`**, included via `clientScriptsForModule(__filename)` in `HtmlHead`).
 - **CSS:** `:root` holds light semantic aliases; `html[data-theme="dark"]` overrides for forced dark; `@media (prefers-color-scheme: dark) { html[data-theme="system"] { … } }` applies dark tokens when the cookie is not set and the OS prefers dark.
 - **Rolling expiry:** Middleware re-sends **`Set-Cookie`** on each web request when the user has **`light`** or **`dark`**, so **`Max-Age`** resets while they use the site (only long absence hits the timeout). Cookie shape lives in **`THEME_COOKIE_CONFIG`** in `theme-preference.ts` — duplicate in **`routes/home/page.client.js`** must stay identical.
 

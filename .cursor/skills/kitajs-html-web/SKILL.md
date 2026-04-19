@@ -1,9 +1,9 @@
 ---
 name: kitajs-html-web
 description: >-
-  NDB2 web rendering with @kitajs/html: snake_case Kitajs components, feature
-  folders (page.tsx, handler.ts, tests/, components/*.test.ts), HTMX, Suspense +
-  renderToStream. Use when adding or changing server-rendered UI under
+  NDB2 web rendering with @kitajs/html: PascalCase Kitajs components, snake_case
+  filenames, feature folders (page.tsx, handler.tsx, tests/, components/*.test.ts), HTMX,
+  Suspense + renderToStream. Use when adding or changing server-rendered UI under
   app/src/web; not for React client apps or EJS.
 ---
 
@@ -13,19 +13,22 @@ description: >-
 
 **Layout:** Features live under **`app/src/web/routes/<area>/`**. Each area typically has:
 
-- **`page.tsx`** — main document or screen; export **`home_page`**, **`suspense_demo_page`**, etc. (snake_case). Props types **`home_page_props`**, … Optional **`page.css`** beside **`page.tsx`** for block styles scoped to that route (see **`cube-css-authoring`**). Optional **`page.client.js`** (or other **`*.client.js`**) for small deferred scripts — colocation, build, and **`html_head`** wiring: **`web-client-js`** (uses **`clientScriptsForModule(__filename)`** from **`shared/clientScriptsForModule.ts`**).
-- **`handler.ts`** — Express **`Route`**; export name stays **PascalCase** (`Home`, `SuspenseDemo`) to match `mapRoutes` aggregation.
-- **`tests/`** — **route/page-level** tests (e.g. supertest on `mountWeb` for that feature’s URLs).
-- **`components/`** — area-local Kitajs modules; **snake_case** filenames and exports (`lucky_number.tsx`, `delayed_snippet.tsx`).
+- **`page.tsx`** — main document or screen; export **`HomePage`**, **`SuspenseDemoPage`**, etc. (**PascalCase**). Props types **`HomePageProps`**, … Optional **`page.css`** beside **`page.tsx`** for block styles scoped to that route (see **`cube-css-authoring`**). Optional **`page.client.js`** (or other **`*.client.js`**) for small deferred scripts — colocation, build, and **`HtmlHead`** wiring: **`web-client-js`** (uses **`clientScriptsForModule(__filename)`** from **`shared/clientScriptsForModule.ts`**).
+- **`handler.tsx`** — Express **`Route`**; export name stays **PascalCase** (`Home`, `SuspenseDemo`). Use **JSX** for page/components (`<HomePage … />`, `<LoginPage … />`) so this file is TSX.
+- **`tests/`** — **route/page-level** tests (e.g. supertest on `mountWeb` for that feature’s paths).
+- **`components/`** — area-local Kitajs modules; **snake_case** filenames (`lucky_number.tsx`) exporting **PascalCase** components (`LuckyNumber`).
 
 Cross-cutting UI → **`app/src/web/shared/components/`** (create when the first reuse appears).
 
 Official concepts: [Async components and Suspense](https://html.kitajs.org/guide/introduction#async-components-and-suspense) (v5 docs; API matches `@kitajs/html` **v4.x** via `@kitajs/html/suspense`).
 
-## Naming (snake_case)
+## Naming (PascalCase components, snake_case files)
 
-- **Components and props:** `lucky_number`, `lucky_number_props`; file `lucky_number.tsx`.
-- **Why not `<lucky_number />`?** The TS JSX transform treats **lowercase** tags as intrinsic HTML. Use **`lucky_number(props)`** as an expression, or **`createElement(lucky_number, props)`**, or keep a **PascalCase** first letter only if you standardize on a different pattern (this repo uses **function calls** for async children under **`Suspense`**, e.g. `{delayed_snippet({ delayMs: 750, label: "A" })}`).
+- **Filenames** stay **snake_case** (`page_layout.tsx`, `lucky_number.tsx`) for path consistency.
+- **Exports:** **`PageLayout`**, **`HtmlHead`**, **`LuckyNumber`**; props types **`PageLayoutProps`**, **`HtmlHeadProps`**, …
+- **JSX:** Use **`<PageLayout>`**, **`<HtmlHead />`**, etc. The TS JSX transform treats **lowercase** tags as intrinsic HTML, so **`page_layout`** is not a valid component tag.
+- **Function-call form** is still valid: **`PageLayout({ children: … })`**, **`HtmlHead({ title: "…" })`**, or **`createElement(SuspenseDemoPage, props)`** in handlers.
+- **Async children under `Suspense`** often use a **call** so the promise is explicit: **`{DelayedSnippet({ delayMs: 750, label: "A" })}`**.
 
 ## Tests
 
@@ -45,15 +48,15 @@ Official concepts: [Async components and Suspense](https://html.kitajs.org/guide
 
 ## Static HTML
 
-1. **`page.tsx`** — `export function home_page(props: home_page_props): JSX.Element { … }`
-2. **`handler.ts`** — `await Promise.resolve(home_page(props))`, then `res.type("html").send(html)`.
-3. **HTMX** — small HTML responses from **`lucky_number`**-style components; register paths on the same feature’s **`handler.ts`**.
+1. **`page.tsx`** — `export function HomePage(props: HomePageProps): JSX.Element { … }`
+2. **`handler.tsx`** — `await Promise.resolve(<HomePage … />)`, then `res.type("html").send(html)` (or `renderToStream` for streaming pages).
+3. **HTMX** — small HTML responses from **`LuckyNumber`**-style components; register paths on the same feature’s **`handler.tsx`**.
 
 ## Streaming + Suspense
 
-Async children: **`Promise<string>`** return type. In **`Suspense`**, pass the promise as an expression child, e.g. **`{delayed_snippet({ delayMs: 500, label: "A" })}`**.
+Async children: **`Promise<string>`** return type. In **`Suspense`**, pass the promise as an expression child, e.g. **`{DelayedSnippet({ delayMs: 500, label: "A" })}`**.
 
-Handler: **`renderToStream((rid) => createElement(suspense_demo_page, { rid }))`**, **`stream.pipe(res)`**.
+Handler: **`renderToStream((rid) => <SuspenseDemoPage rid={rid} theme={theme} />)`**, **`stream.pipe(res)`**.
 
 Reference: `app/src/web/routes/demo/suspense/`.
 
@@ -65,7 +68,7 @@ Use **`safe`**, **`e` / `escape`**, and **`@kitajs/ts-html-plugin`** for unsafe 
 
 - **`middleware-patterns`** / **`middleware-naming`** — request-scoped values and file naming (see `theme-preference.ts`, `middleware/auth/session.ts` for web sessions).
 - **`express-route-map`** — `Route`, `mapRoutes`, `web/routes/index.ts`.
-- **`css-build`** — CUBE layers, design tokens, `html_head` stylesheet order, `/assets` static CSS.
-- **`web-client-js`** — colocated `*.client.js`, `build:client-js`, `/assets/routes/...` scripts in `html_head`.
+- **`css-build`** — CUBE layers, design tokens, `HtmlHead` stylesheet order, `/assets` static CSS.
+- **`web-client-js`** — colocated `*.client.js`, `build:client-js`, `/assets/routes/...` scripts in `HtmlHead`.
 - **`cube-css-authoring`** — how to organize new CSS (which layer, colocation, `data-*` exceptions) when editing components or pages.
 - **`docs/frontend/project-structure.md`**, **`docs/frontend/overview.md`**.

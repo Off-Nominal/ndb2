@@ -5,7 +5,7 @@
  * because `mountWeb` uses `express.static` on `public` at `/assets`), and generates
  * `src/web/generated/routeClientScripts.ts` (map: route subdir → script URLs).
  *
- * Pages pass `clientScriptsForModule(__filename)` (see `shared/clientScriptsForModule.ts`).
+ * Route modules (e.g. `handler.tsx` or `page.tsx`) pass `clientScriptsForModule(__filename)` (see `shared/clientScriptsForModule.ts`).
  */
 
 import fs from "node:fs";

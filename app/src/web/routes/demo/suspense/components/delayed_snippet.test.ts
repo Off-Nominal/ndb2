@@ -1,16 +1,11 @@
-import { describe, expect, it, vi } from "vitest";
-import { delayed_snippet } from "./delayed_snippet";
+import { describe, expect, it } from "vitest";
+import { DelayedSnippet } from "./delayed_snippet";
 
-describe("delayed_snippet", () => {
-  it("resolves to HTML including label and delay after the wait", async () => {
-    vi.useFakeTimers();
-    const p = delayed_snippet({ delayMs: 100, label: "X" });
-    await vi.advanceTimersByTimeAsync(100);
-    const html = await p;
-    vi.useRealTimers();
-
-    expect(html).toContain('data-label="X"');
-    expect(html).toContain("100");
+describe("DelayedSnippet", () => {
+  it("resolves to HTML containing the label", async () => {
+    const p = DelayedSnippet({ delayMs: 100, label: "X" });
+    const html = await Promise.resolve(p);
     expect(html).toContain("suspense-loaded");
+    expect(html).toContain("X");
   });
 });

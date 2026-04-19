@@ -1,14 +1,31 @@
-export type page_layout_props = {
-  children: JSX.Element;
-};
+import type { ThemePreference } from "../../middleware/theme-preference";
+import type { HtmlHeadProps } from "./html_head";
+import { HtmlHead } from "./html_head";
 
 /**
  * Full-document shell (markup-driven CUBE — see cube-css-authoring skill).
- * Uses literal bracket tokens in `class` for scanning: `[ region ]` then `[ content-column ]`.
+ * Uses literal bracket tokens in `class` for scanning: `[ center ]` then `[ page-layout ]`.
  */
 const PAGE_LAYOUT_CLASSES = "[ center ] [ page-layout ]";
 
-/** Wraps body content in the default document column (region + center + measure + gutter). */
-export function page_layout(props: page_layout_props): JSX.Element {
-  return <div class={PAGE_LAYOUT_CLASSES}>{props.children}</div>;
+export type PageLayoutProps = HtmlHeadProps & {
+  theme: ThemePreference;
+  children: JSX.Element;
+  /** JSON for HTMX `hx-headers` on `<body>` (e.g. CSRF). */
+  hxHeaders?: string;
+};
+
+/** Full HTML document: `<html>`, `<head>` via {@link HtmlHead}, `<body>` + default column wrapper. */
+export function PageLayout(props: PageLayoutProps): JSX.Element {
+  const { theme, children, hxHeaders, title, clientScripts, csrfMetaToken } = props;
+  return (
+    <html lang="en" data-theme={theme}>
+      <head>
+        <HtmlHead title={title} clientScripts={clientScripts} csrfMetaToken={csrfMetaToken} />
+      </head>
+      <body {...(hxHeaders != null ? { "hx-headers": hxHeaders } : {})}>
+        <div class={PAGE_LAYOUT_CLASSES}>{children}</div>
+      </body>
+    </html>
+  );
 }
