@@ -19,6 +19,7 @@ export function createApp(): Express {
   });
 
   mountWeb(app);
+  /** JSON API is under `/api` only so `/assets/*` and HTML never run API auth middleware. */
   mountJsonApi(app);
 
   app.get("*", (req, res) => {

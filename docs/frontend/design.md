@@ -1,6 +1,6 @@
 # Design tokens (initial draft)
 
-**Status:** Token JSON lives under `app/src/web/tokens/`. `pnpm run build:tokens` (also part of `build` / `postinstall`) generates `app/src/web/public/design-tokens.css`, loaded from every page via `shared/components/html_head`. Utilities and composition CSS are not wired yet.
+**Status:** Token JSON lives under `app/src/web/tokens/`; `build:tokens` emits `design-tokens.css`. CUBE layer sources live under `app/src/web/styles/`; `build:css` copies them and bundles colocated block CSS into `blocks.css` (see `docs/frontend/cube-css.md`). All ship via `html_head`.
 
 This document seeds our **base design tokens**. These values are a starting point and should be refined once we see real screens (tables, forms, detail pages).
 

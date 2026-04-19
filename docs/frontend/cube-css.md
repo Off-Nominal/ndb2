@@ -1,6 +1,6 @@
 # CUBE CSS summary (for ndb2)
 
-**Status:** Design tokens compile to `app/src/web/public/design-tokens.css` (CSS custom properties). Application CSS layers (composition, utilities, blocks) beyond that file are not yet implemented.
+**Status:** The web build emits five stylesheets under `app/src/web/public/` (served at `/assets/`): `design-tokens.css` (generated from JSON), `globals.css`, `compositions.css`, `utilities.css` (copied from `app/src/web/styles/`), and `blocks.css` (concatenated from colocated `*.css` next to components). All are linked from `app/src/web/shared/components/html_head.tsx` in cascade order.
 
 This document summarizes the CUBE CSS methodology (Andy Bell) and captures how we intend to apply it in the ndb2 frontend.
 
@@ -107,9 +107,19 @@ At runtime, the app uses **CSS custom properties** for core tokens, such as:
 
 Then implement utilities that apply those tokens (or apply them directly in block CSS when appropriate).
 
-Recommended repo shape (subject to change when we wire the frontend build):
-- `app/src/web/tokens/`: JSON sources of truth (e.g. `colors.json`, `space.json`, `font-size.json`, …)
-- `frontend/generated/` (or similar): generated CSS artifacts (committed or not—TBD)
+### Stylesheet pipeline (implemented)
+
+| Role | Author under | Build output | `<head>` order |
+|------|----------------|--------------|----------------|
+| Tokens (custom properties) | `app/src/web/tokens/*.json` | `public/design-tokens.css` | 1 |
+| Globals (baseline / elements) | `app/src/web/styles/globals.css` | `public/globals.css` | 2 |
+| Compositions (layout) | `app/src/web/styles/compositions.css` | `public/compositions.css` | 3 |
+| Utilities | `app/src/web/styles/utilities.css` | `public/utilities.css` | 4 |
+| Blocks + exceptions | Colocated `*.css` under `app/src/web/` (not `public/`, `tokens/`, or `styles/`) | `public/blocks.css` | 5 |
+
+**Build:** `pnpm run build:css` runs `app/scripts/build-web-css.mjs` (layer copy + block bundle). `pnpm run build` runs `build:tokens` then `build:css`. **`public/` copies are generated**—edit the `styles/` sources or colocated block files, then rebuild.
+
+**Colocation:** Place one stylesheet next to the Kitajs component (e.g. `routes/home/components/lucky_number.css` beside `lucky_number.tsx`). Files are concatenated in **lexicographic path order**; each section is prefixed with `/* ndb2:block: relative/path.css */` in the bundle.
 
 ### Composition utilities we’ll likely want early
 
