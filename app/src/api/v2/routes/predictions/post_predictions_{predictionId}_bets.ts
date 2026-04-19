@@ -1,3 +1,4 @@
+import { config } from "@config";
 import { Router } from "express";
 import { z } from "zod";
 import { add, isAfter } from "date-fns";
@@ -11,7 +12,6 @@ import * as API from "@offnominal/ndb2-api-types/v2";
 import { validate } from "../../middleware/validate";
 import { getDbClient } from "@data/db/getDbClient";
 import { eventsManager } from "@domain/events/events-manager";
-import GAME_MECHANICS from "@domain/game-mechanics";
 import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
 
 export const postPredictionBet: Route = (router: Router) => {
@@ -79,7 +79,7 @@ export const postPredictionBet: Route = (router: Router) => {
 
         const now = new Date();
         const expiryWindow = add(new Date(bet.date), {
-          hours: GAME_MECHANICS.predictionUpdateWindow,
+          hours: config.gameMechanics.predictionUpdateWindowHours,
         });
 
         if (isAfter(now, expiryWindow)) {
@@ -87,7 +87,7 @@ export const postPredictionBet: Route = (router: Router) => {
             responseUtils.writeErrors([
               {
                 code: API.Errors.BETS_UNCHANGEABLE,
-                message: `Bets cannot be changed past the allowable time window of ${GAME_MECHANICS.predictionUpdateWindow} hours since the bet was made.`,
+                message: `Bets cannot be changed past the allowable time window of ${config.gameMechanics.predictionUpdateWindowHours} hours since the bet was made.`,
               },
             ]),
           );

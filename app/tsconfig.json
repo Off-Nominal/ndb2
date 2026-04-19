@@ -16,6 +16,7 @@
     "plugins": [{ "name": "@kitajs/ts-html-plugin" }],
     "baseUrl": ".",
     "paths": {
+      "@config": ["src/config.ts"],
       "@shared/*": ["src/shared/*"],
       "@data/*": ["src/data/*"],
       "@domain/*": ["src/domain/*"]

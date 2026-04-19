@@ -1,20 +1,14 @@
 // Vitest global setup: verify Postgres, build schema template for ephemeral DB tests
 
+import "./install-test-env.js";
 import { Client } from "pg";
 import { createLogger } from "@mendahu/utilities";
 import { isTest } from "@shared/utils";
 import { rebuildSchemaTemplate } from "./ephemeral-db";
 
-process.env.DATABASE_URL =
-  process.env.TEST_POSTGRES_BASE_URL ??
-  "postgresql://test_user:test_password@localhost:5433/ndb2_test";
-
-process.env.TZ = "UTC";
-process.env.NODE_ENV = "test";
 if (!isTest()) {
   throw new Error("Vitest global-setup: NODE_ENV must be test");
 }
-process.env.GM_PREDICTION_UPDATE_WINDOW_HOURS = "24";
 
 const logger = createLogger({ namespace: "TEST", env: ["test"] });
 

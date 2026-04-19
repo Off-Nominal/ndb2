@@ -39,6 +39,7 @@ If the repo upgrades Zod, re-validate existing schemas against the new major’s
 ## Project touchpoints
 
 - **`app/package.json`** — declares `zod`; use that version when reasoning about APIs.
+- **App-wide environment variables** — validated once at boot in `app/src/config.ts`; see `.cursor/skills/app-config/SKILL.md`.
 - Colocate small schemas next to the feature or under a shared `schemas/` module if the project establishes one; follow existing import and naming patterns.
 
 ## What not to do

@@ -1,6 +1,6 @@
+import { config } from "@config";
 import { add, isAfter } from "date-fns";
 import express, { Request, Response } from "express";
-import GAME_MECHANICS from "@domain/game-mechanics";
 import paramValidator from "../../middleware/paramValidator";
 import { getPrediction } from "../../middleware/getPrediction";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";
@@ -54,7 +54,7 @@ router.patch(
     // the due date, which ever comes first
     const now = new Date();
     const expiryWindow = add(new Date(req.prediction.created_date), {
-      hours: GAME_MECHANICS.predictionUpdateWindow,
+      hours: config.gameMechanics.predictionUpdateWindowHours,
     });
 
     const dueDate = new Date(

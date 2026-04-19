@@ -1,3 +1,4 @@
+import { config } from "@config";
 import { createLogger } from "@mendahu/utilities";
 import PredictionMonitor from "@domain/predictions/prediction-monitor";
 import { monitors } from "@domain/predictions/config";
@@ -8,8 +9,7 @@ import pool from "@data/db";
 import { isDev } from "@shared/utils";
 import { createApp } from "./server/createApp";
 
-// Config
-const PORT = process.env.PORT || 80;
+const PORT = config.port;
 
 const logger = createLogger({ namespace: "NDB2", env: ["dev", "production"] });
 

@@ -1,13 +1,10 @@
+import { config } from "@config";
 import { AsyncLocalStorage } from "node:async_hooks";
 import type { RequestHandler } from "express";
 import type { PoolClient } from "pg";
 import { getDbClient } from "@data/db/getDbClient";
 import webSessionsQueries from "@data/queries/web_sessions";
-import {
-  fetchGuildMember,
-  readDiscordAuthzRecheckIntervalMs,
-  readWebPortalAuthzConfig,
-} from "@domain/discord";
+import { fetchGuildMember } from "@domain/discord";
 import {
   buildSessionClearCookieHeader,
   parseSessionCookie,
@@ -53,29 +50,25 @@ async function recheckDiscordAuthzIfStale(
 ): Promise<
   { outcome: "active"; lastDiscordAuthzAt: Date } | { outcome: "revoked" }
 > {
-  const intervalMs = readDiscordAuthzRecheckIntervalMs();
+  const intervalMs = config.discord.authzRecheckMs;
   const ageMs = Date.now() - row.last_discord_authz_at.getTime();
   if (ageMs < intervalMs) {
     return { outcome: "active", lastDiscordAuthzAt: row.last_discord_authz_at };
   }
 
-  const portalAuthz = readWebPortalAuthzConfig();
-  if (!portalAuthz.ok) {
-    await webSessionsQueries.revoke(dbClient)(row.id);
-    return { outcome: "revoked" };
-  }
+  const portal = config.discord.webPortal;
 
   try {
     const member = await fetchGuildMember(
-      portalAuthz.botToken,
-      portalAuthz.guildId,
+      portal.botToken,
+      portal.guildId,
       row.discord_id,
     );
     if (!member) {
       await webSessionsQueries.revoke(dbClient)(row.id);
       return { outcome: "revoked" };
     }
-    const allowed = portalAuthz.allowedRoleIds.some((id) =>
+    const allowed = portal.allowedRoleIds.some((id) =>
       member.roles.includes(id),
     );
     if (!allowed) {

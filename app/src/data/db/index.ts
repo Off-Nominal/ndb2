@@ -1,3 +1,4 @@
+import { config } from "@config";
 import pg from "pg";
 
 let pool: pg.Pool | null = null;
@@ -12,9 +13,11 @@ const boundMethodCache = new Map<string | symbol, unknown>();
 const poolProxyTarget = {} as pg.Pool;
 
 function createPool(): pg.Pool {
+  /** Prefer live `process.env` so integration tests can swap `DATABASE_URL` after {@link resetPoolForTests}. */
+  const url = process.env.DATABASE_URL ?? config.database.url;
   return new pg.Pool({
-    connectionString: process.env.DATABASE_URL,
-    max: Number(process.env.PG_POOL_MAX ?? 10),
+    connectionString: url,
+    max: config.database.poolMax,
   });
 }
 
