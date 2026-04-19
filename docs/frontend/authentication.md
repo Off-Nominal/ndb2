@@ -1,6 +1,6 @@
 # Authentication (Discord OAuth2)
 
-**Status:** Specification only. The web app does not yet implement `/auth/discord`, sessions, or route guards; the HTML surface is currently public.
+**Status:** Implemented in the web app: `/auth/discord`, `/auth/discord/callback`, `POST /auth/logout`, `web_sessions` + `oauth_login_states` tables, `ndb2_session` cookie, and `webAuthMiddleware` + `getWebAuth()` (AsyncLocalStorage). Use `requireWebAuth` on routes that must be signed in. Configure `DISCORD_OAUTH_*` env vars (see `app/.env.example`).
 
 All ndb2 users must have a Discord account. We do **not** manage passwords or identity ourselves.
 

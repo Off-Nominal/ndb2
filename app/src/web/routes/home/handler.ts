@@ -1,18 +1,28 @@
 import { Router } from "express";
 import { Route } from "@shared/routerMap";
+import { getWebAuth } from "../../middleware/webAuthMiddleware";
+import { requireWebAuth } from "../../middleware/requireWebAuth";
 import { getThemePreference } from "../../middleware/themePreferenceMiddleware";
 import { lucky_number } from "./components/lucky_number";
 import { home_page } from "./page";
 
 /** Registers `/` and HTMX-targeted `GET /home/lucky-number`. */
 export const Home: Route = (router: Router) => {
-  router.get("/", async (req, res, next) => {
+  router.get("/", requireWebAuth, async (req, res, next) => {
     try {
+      const auth = getWebAuth();
+      if (auth.status !== "authenticated") {
+        next(new Error("Home route reached without a session (requireWebAuth bug)"));
+        return;
+      }
+      const csrfHeadersJson = JSON.stringify({ "X-CSRF-Token": auth.csrfToken });
       const html = await Promise.resolve(
         home_page({
           title: "NDB2",
           message: "welcome to the new ndb2 portal",
           theme: getThemePreference(),
+          auth,
+          csrfHeadersJson,
         }),
       );
       res.type("html").send(html);
@@ -21,7 +31,7 @@ export const Home: Route = (router: Router) => {
     }
   });
 
-  router.get("/home/lucky-number", async (req, res, next) => {
+  router.get("/home/lucky-number", requireWebAuth, async (req, res, next) => {
     try {
       const value = Math.floor(Math.random() * 1_000_000);
       const html = await Promise.resolve(lucky_number({ value }));
