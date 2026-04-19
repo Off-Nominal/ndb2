@@ -1,4 +1,5 @@
 import { html_head } from "./html_head";
+import { page_layout } from "./page_layout";
 import type { ThemePreference } from "../../middleware/theme-preference";
 
 export type error_page_body = string | JSX.Element;
@@ -20,16 +21,20 @@ export function error_page(props: error_page_props): JSX.Element {
     <html lang="en" data-theme={props.theme}>
       <head>{html_head({ title: props.title })}</head>
       <body>
-        <main>
-          <h1>{props.title}</h1>
-          {render_body(props.body)}
-          <p>
-            <a href="/login?returnTo=%2F">Try again</a>
-          </p>
-          <p>
-            <a href="/">Home</a>
-          </p>
-        </main>
+        {page_layout({
+          children: (
+            <main>
+              <h1>{props.title}</h1>
+              {render_body(props.body)}
+              <p>
+                <a href="/login?returnTo=%2F">Try again</a>
+              </p>
+              <p>
+                <a href="/">Home</a>
+              </p>
+            </main>
+          ),
+        })}
       </body>
     </html>
   );

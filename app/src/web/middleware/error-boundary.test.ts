@@ -2,7 +2,10 @@ import express from "express";
 import request from "supertest";
 import { describe, expect, it } from "vitest";
 import { themePreferenceMiddleware } from "./theme-preference";
-import { webErrorHandler, wrapWebRouteWithErrorBoundary } from "./error-boundary";
+import {
+  webErrorHandler,
+  wrapWebRouteWithErrorBoundary,
+} from "./error-boundary";
 
 describe("webErrorBoundary", () => {
   it("wrapWebRouteWithErrorBoundary surfaces errors to webErrorHandler as HTML 500", async () => {
@@ -21,6 +24,7 @@ describe("webErrorBoundary", () => {
     const res = await request(app).get("/boom").expect(500);
 
     expect(res.headers["content-type"]).toMatch(/html/);
+    expect(res.text).toContain("[ region ] [ content-column ]");
     expect(res.text).toContain("Something went wrong");
     expect(res.text).toContain('href="/"');
   });
@@ -44,7 +48,7 @@ describe("webErrorBoundary", () => {
       .expect(500);
 
     expect(res.headers["content-type"]).toMatch(/html/);
-    expect(res.text).toContain("role=\"alert\"");
+    expect(res.text).toContain('role="alert"');
     expect(res.text).not.toContain("<html");
   });
 });

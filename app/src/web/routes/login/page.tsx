@@ -1,4 +1,5 @@
 import { html_head } from "../../shared/components/html_head";
+import { page_layout } from "../../shared/components/page_layout";
 import type { ThemePreference } from "../../middleware/theme-preference";
 
 export type login_page_props = {
@@ -17,15 +18,22 @@ export function login_page(props: login_page_props): JSX.Element {
     <html lang="en" data-theme={props.theme}>
       <head>{html_head({ title: "Sign in" })}</head>
       <body>
-        <main class="login">
-          <h1>Sign in</h1>
-          <p>NDB2 uses Discord to verify your identity. Continue to Discord when you are ready.</p>
-          <p>
-            <a href={discordHref} class="login__action">
-              Sign in with Discord
-            </a>
-          </p>
-        </main>
+        {page_layout({
+          children: (
+            <main>
+              <h1>Sign in</h1>
+              <p>
+                NDB2 uses Discord to verify your identity. Continue to Discord when you are
+                ready.
+              </p>
+              <p>
+                <a href={discordHref} class="login__action">
+                  Sign in with Discord
+                </a>
+              </p>
+            </main>
+          ),
+        })}
       </body>
     </html>
   );
