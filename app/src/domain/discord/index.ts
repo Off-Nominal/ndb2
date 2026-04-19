@@ -1,7 +1,7 @@
 export {
   fetchGuildMember,
   type GuildMemberSummary,
-} from "./discordBotGateway";
+} from "./discord-gateway";
 export {
   readDiscordAuthzRecheckIntervalMs,
   readDiscordBotToken,
@@ -9,4 +9,4 @@ export {
   readWebPortalAuthzConfig,
   readWebPortalGuildId,
   type WebPortalAuthzConfig,
-} from "./discordWebPortalEnv";
+} from "./discord-web-portal-env";

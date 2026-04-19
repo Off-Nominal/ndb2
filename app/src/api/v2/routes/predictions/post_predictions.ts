@@ -7,7 +7,7 @@ import { getDbClient } from "@data/db/getDbClient";
 import predictions from "@data/queries/predictions";
 import users from "@data/queries/users";
 import * as API from "@offnominal/ndb2-api-types/v2";
-import { eventsManager } from "@domain/events/eventsManager";
+import { eventsManager } from "@domain/events/events-manager";
 import {
   createFutureDateSchema,
   discordIdSchema,

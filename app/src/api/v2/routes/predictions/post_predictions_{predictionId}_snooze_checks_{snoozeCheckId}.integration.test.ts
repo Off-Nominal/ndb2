@@ -4,7 +4,7 @@ import express from "express";
 import request from "supertest";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { vi } from "vitest";
-import { eventsManager } from "@domain/events/eventsManager";
+import { eventsManager } from "@domain/events/events-manager";
 import { useEphemeralDb } from "../../../../test/with-ephemeral-db";
 import { defaultUsers } from "../../../../test/factories/users";
 import { defaultPastCurrentFutureSeasons } from "../../../../test/factories/seasons";

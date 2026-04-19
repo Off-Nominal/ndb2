@@ -1,6 +1,6 @@
 import { add, isAfter } from "date-fns";
 import express, { Request, Response } from "express";
-import GAME_MECHANICS from "@domain/gameMechanics";
+import GAME_MECHANICS from "@domain/game-mechanics";
 import paramValidator from "../../middleware/paramValidator";
 import { getPrediction } from "../../middleware/getPrediction";
 import predictionStatusValidator from "../../middleware/predictionStatusValidator";

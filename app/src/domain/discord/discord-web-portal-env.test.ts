@@ -3,7 +3,7 @@ import {
   readDiscordAuthzRecheckIntervalMs,
   readWebPortalAllowedRoleIds,
   readWebPortalAuthzConfig,
-} from "./discordWebPortalEnv";
+} from "./discord-web-portal-env";
 
 describe("readWebPortalAllowedRoleIds", () => {
   afterEach(() => {

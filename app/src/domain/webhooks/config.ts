@@ -1,4 +1,4 @@
-import { eventsManager } from "@domain/events/eventsManager";
+import { eventsManager } from "@domain/events/events-manager";
 import { generateResponse, notifySubscribers } from "./utilities";
 
 const missionControlWebhookEndpointV2 = process.env.WEBHOOK_DISCORD_BOT + "/v2";

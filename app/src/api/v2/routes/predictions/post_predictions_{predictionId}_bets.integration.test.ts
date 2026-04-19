@@ -3,7 +3,7 @@ import request from "supertest";
 import { describe, beforeAll, it, expect, vi } from "vitest";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { postPredictionBet } from "./post_predictions_{predictionId}_bets";
-import { eventsManager } from "@domain/events/eventsManager";
+import { eventsManager } from "@domain/events/events-manager";
 import { errorHandler } from "../../middleware/errorHandler";
 import betsQueries from "@data/queries/bets";
 import { useEphemeralDb } from "../../../../test/with-ephemeral-db";

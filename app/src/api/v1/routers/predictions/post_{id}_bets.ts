@@ -9,7 +9,7 @@ import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils_deprecated from "../../utils/response";
 import { getDbClient } from "../../middleware/getDbClient";
 import { add, isAfter } from "date-fns";
-import GAME_MECHANICS from "@domain/gameMechanics";
+import GAME_MECHANICS from "@domain/game-mechanics";
 import { ErrorCode } from "../../types/responses";
 const router = express.Router();
 

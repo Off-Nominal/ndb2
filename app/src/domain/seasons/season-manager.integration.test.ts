@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { SeasonManager } from "./SeasonManager";
+import { SeasonManager } from "./season-manager";
 import { useEphemeralDb } from "../../test/with-ephemeral-db";
 import { defaultUsers } from "../../test/factories/users";
 import { defaultPastCurrentFutureSeasons } from "../../test/factories/seasons";

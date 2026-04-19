@@ -8,7 +8,7 @@ import responseUtils from "../../utils/response";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { validate } from "../../middleware/validate";
 import { getDbClient } from "@data/db/getDbClient";
-import { eventsManager } from "@domain/events/eventsManager";
+import { eventsManager } from "@domain/events/events-manager";
 import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
 
 export const unjudgePredictionById: Route = (router: Router) => {
