@@ -30,7 +30,7 @@ description: >-
 
 Work through in order; stop at the first layer that can own the change:
 
-1. **Globals** — Should this apply to all pages by default (e.g. `body`, `a`, `html` typography)? If yes, add minimal rules in **`globals.css`** and prefer **`var(--color-text)`**, **`var(--leading-normal)`**, etc.
+1. **Globals** — Should this apply to **every** document by default (e.g. `body`, `a`, `html`, unqualified `table`/`p`)? If yes, add minimal rules in **`globals.css`**. **Do not** put **page-specific** or **single-route** UI here (toolbars, hero blocks, a home-only theme switcher)—those are **blocks**; use **`page.css`** next to **`page.tsx`** or a colocated **`components/*.css`** file.
 2. **Composition** — Is this only **layout / rhythm** (gap, max-width, grid, vertical flow) with **no** component-specific chrome? Put it in **`compositions.css`** as a reusable class (e.g. `.flow`, `.cluster`).
 3. **Utility** — Is it a **small, reusable** tweak (one property or a tight group) that might appear on many different components? Put it in **`utilities.css`** (e.g. `.text-muted` → `color: var(--color-text-muted)`).
 4. **Block** — Does it define **this component’s** look or structure (card, toolbar, table row, HTMX fragment) or a **variant/state** of that component? Put it in a **colocated** stylesheet next to the component.
@@ -41,9 +41,9 @@ If unsure between composition and block: **composition** should not care *which*
 
 - **Feature component:** `app/src/web/routes/<area>/components/my_widget.tsx` → **`my_widget.css`** in the same folder.
 - **Shared component:** `app/src/web/shared/components/foo.tsx` → **`foo.css`** beside it (still picked up by the block bundle).
-- **Page-only styling:** optional **`page.css`** next to **`page.tsx`** when the rules are truly specific to that route document and not a reusable block.
+- **Page-only styling:** **`page.css`** next to **`page.tsx`** for markup and controls that exist **only** on that full document (e.g. `routes/home/page.tsx` + `routes/home/page.css` for the home layout chrome). If the same control is reused on multiple routes, move it to **`shared/components/`** with colocated **`.css`** there instead.
 
-One component can have **one** colocated CSS file (or split later if needed—both files must be valid standalone CSS; the build concatenates in path order).
+A single feature area can have **multiple** colocated CSS files (`page.css`, `components/foo.css`, …); the build concatenates **all** eligible `*.css` under `src/web/` (except `styles/`, `tokens/`, `public/`) in path order.
 
 **Bundle order** is lexicographic by path—avoid relying on cascade between two arbitrary components; keep selectors specific enough (e.g. a root class or id on the fragment).
 

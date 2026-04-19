@@ -17,5 +17,6 @@ describe("routes/demo/suspense", () => {
     expect(res.text).toContain("$KITA_RC");
     expect(res.text).toContain("750");
     expect(res.text).toContain("1750");
+    expect(res.text).toContain('data-theme="system"');
   });
 });

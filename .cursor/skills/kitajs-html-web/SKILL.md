@@ -13,7 +13,7 @@ description: >-
 
 **Layout:** Features live under **`app/src/web/routes/<area>/`**. Each area typically has:
 
-- **`page.tsx`** — main document or screen; export **`home_page`**, **`suspense_demo_page`**, etc. (snake_case). Props types **`home_page_props`**, …
+- **`page.tsx`** — main document or screen; export **`home_page`**, **`suspense_demo_page`**, etc. (snake_case). Props types **`home_page_props`**, … Optional **`page.css`** beside **`page.tsx`** for block styles scoped to that route (see **`cube-css-authoring`**). Optional **`page.client.js`** (or other **`*.client.js`**) for small deferred scripts — colocation, build, and **`html_head`** wiring: **`web-client-js`** (uses **`clientScriptsForModule(__filename)`** from **`shared/clientScriptsForModule.ts`**).
 - **`handler.ts`** — Express **`Route`**; export name stays **PascalCase** (`Home`, `SuspenseDemo`) to match `mapRoutes` aggregation.
 - **`tests/`** — **route/page-level** tests (e.g. supertest on `mountWeb` for that feature’s URLs).
 - **`components/`** — area-local Kitajs modules; **snake_case** filenames and exports (`lucky_number.tsx`, `delayed_snippet.tsx`).
@@ -63,7 +63,9 @@ Use **`safe`**, **`e` / `escape`**, and **`@kitajs/ts-html-plugin`** for unsafe 
 
 ## Related
 
+- **`middleware-patterns`** — request-scoped values: prefer Async Local Storage over `req` mutations (see `themePreferenceMiddleware`).
 - **`express-route-map`** — `Route`, `mapRoutes`, `web/routes/index.ts`.
 - **`css-build`** — CUBE layers, design tokens, `html_head` stylesheet order, `/assets` static CSS.
+- **`web-client-js`** — colocated `*.client.js`, `build:client-js`, `/assets/routes/...` scripts in `html_head`.
 - **`cube-css-authoring`** — how to organize new CSS (which layer, colocation, `data-*` exceptions) when editing components or pages.
 - **`docs/frontend/project-structure.md`**, **`docs/frontend/overview.md`**.

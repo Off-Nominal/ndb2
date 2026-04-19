@@ -115,11 +115,18 @@ Then implement utilities that apply those tokens (or apply them directly in bloc
 | Globals (baseline / elements) | `app/src/web/styles/globals.css` | `public/globals.css` | 2 |
 | Compositions (layout) | `app/src/web/styles/compositions.css` | `public/compositions.css` | 3 |
 | Utilities | `app/src/web/styles/utilities.css` | `public/utilities.css` | 4 |
-| Blocks + exceptions | Colocated `*.css` under `app/src/web/` (not `public/`, `tokens/`, or `styles/`) | `public/blocks.css` | 5 |
+| Blocks + exceptions | Colocated `*.css` under `app/src/web/` (not `public/`, `tokens/`, or `styles/`)—including **`page.css`** beside **`page.tsx`** for route-only UI | `public/blocks.css` | 5 |
 
 **Build:** `pnpm run build:css` runs `app/scripts/build-web-css.mjs` (layer copy + block bundle). `pnpm run build` runs `build:tokens` then `build:css`. **`public/` copies are generated**—edit the `styles/` sources or colocated block files, then rebuild.
 
 **Colocation:** Place one stylesheet next to the Kitajs component (e.g. `routes/home/components/lucky_number.css` beside `lucky_number.tsx`). Files are concatenated in **lexicographic path order**; each section is prefixed with `/* ndb2:block: relative/path.css */` in the bundle.
+
+### Theme (light / dark / system)
+
+- **`ndb2_theme` cookie:** **Not** `HttpOnly` so the client can persist the choice without a round trip. `Path=/`, `SameSite=Lax`. Values **`light`** or **`dark`**. **Absent** or cleared = **system**, matching OS **`prefers-color-scheme`**.
+- **`<html data-theme>`:** `light`, `dark`, or `system`. Server reads the cookie via `themePreferenceMiddleware` and sets the attribute on first paint; colocated **`routes/home/page.client.js`** updates `data-theme` and the cookie on `#theme-select` **change** (copied to `/assets/routes/...` by **`pnpm run build:client-js`**, included via `clientScriptsForModule(__filename)` in `html_head`).
+- **CSS:** `:root` holds light semantic aliases; `html[data-theme="dark"]` overrides for forced dark; `@media (prefers-color-scheme: dark) { html[data-theme="system"] { … } }` applies dark tokens when the cookie is not set and the OS prefers dark.
+- **Sync:** If you change **`THEME_COOKIE_MAX_AGE_SEC`** in `app/src/web/middleware/themePreferenceMiddleware.ts`, update **`MAX_AGE_SEC`** in `routes/home/page.client.js` to match.
 
 ### Composition utilities we’ll likely want early
 

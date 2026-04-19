@@ -189,13 +189,20 @@ function main() {
 
   lines.push("}");
   lines.push("");
-  lines.push('html[data-theme="dark"] {');
 
-  for (const t of colorDark.sort(sortByTokenName)) {
+  const darkBodyLines = colorDark.sort(sortByTokenName).map((t) => {
     const cssName = themeAliasCssName("color.dark.", t.name);
-    lines.push(`  ${cssName}: ${resolveValue(t.value)};`);
-  }
+    return `  ${cssName}: ${resolveValue(t.value)};`;
+  });
 
+  lines.push('html[data-theme="dark"] {');
+  lines.push(...darkBodyLines);
+  lines.push("}");
+  lines.push("");
+  lines.push("@media (prefers-color-scheme: dark) {");
+  lines.push('  html[data-theme="system"] {');
+  lines.push(...darkBodyLines.map((line) => `  ${line}`));
+  lines.push("  }");
   lines.push("}");
   lines.push("");
 

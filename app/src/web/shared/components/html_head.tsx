@@ -1,9 +1,12 @@
 export type html_head_props = {
   title: string;
+  /** Route colocated `*.client.js` URLs from `clientScriptsForModule(__filename)` (or manual list). */
+  clientScripts?: readonly string[];
 };
 
-/** Shared document head: charset, viewport, CUBE CSS layers + design tokens + HTMX. */
+/** Shared document head: charset, viewport, CUBE CSS layers, route client islands, HTMX. */
 export function html_head(props: html_head_props): JSX.Element {
+  const scripts = props.clientScripts ?? [];
   return (
     <>
       <meta charset="utf-8" />
@@ -14,6 +17,9 @@ export function html_head(props: html_head_props): JSX.Element {
       <link rel="stylesheet" href="/assets/compositions.css" />
       <link rel="stylesheet" href="/assets/utilities.css" />
       <link rel="stylesheet" href="/assets/blocks.css" />
+      {scripts.map((src) => (
+        <script src={src} defer />
+      ))}
       <script src="/assets/htmx.min.js" defer />
     </>
   );

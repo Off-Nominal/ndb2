@@ -13,6 +13,7 @@ export function createApp(): Express {
   }
 
   app.use(express.json());
+  app.use(express.urlencoded({ extended: false }));
 
   app.get("/health", (req, res) => {
     return res.status(200).json({ status: "healthy" });

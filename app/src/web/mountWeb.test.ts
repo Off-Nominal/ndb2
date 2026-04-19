@@ -4,6 +4,19 @@ import { describe, expect, it } from "vitest";
 import { mountWeb } from "./mountWeb";
 
 describe("mountWeb", () => {
+  it("GET /assets/routes/home/page.client.js serves home route client script", async () => {
+    const app = express();
+    mountWeb(app);
+
+    const res = await request(app)
+      .get("/assets/routes/home/page.client.js")
+      .expect(200);
+
+    expect(res.headers["content-type"]).toMatch(/javascript/);
+    expect(res.text).toContain("ndb2_theme");
+    expect(res.text).toContain("data-theme");
+  });
+
   it("GET /assets/htmx.min.js serves the HTMX script", async () => {
     const app = express();
     mountWeb(app);
@@ -24,6 +37,8 @@ describe("mountWeb", () => {
     expect(res.text).toContain(":root {");
     expect(res.text).toContain("--color-bg:");
     expect(res.text).toContain('html[data-theme="dark"]');
+    expect(res.text).toContain("prefers-color-scheme: dark");
+    expect(res.text).toContain('html[data-theme="system"]');
   });
 
   it("GET /assets/globals.css serves CUBE global layer", async () => {

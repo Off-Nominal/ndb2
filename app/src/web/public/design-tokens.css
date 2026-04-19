@@ -143,3 +143,19 @@ html[data-theme="dark"] {
   --color-text-muted: var(--neutral-300);
 }
 
+@media (prefers-color-scheme: dark) {
+  html[data-theme="system"] {
+    --color-bg: var(--neutral-900);
+    --color-border: var(--neutral-600);
+    --color-focus-ring: var(--brand-400);
+    --color-link: var(--brand-300);
+    --color-primary: var(--brand-400);
+    --color-primary-active: var(--brand-200);
+    --color-primary-hover: var(--brand-300);
+    --color-surface: var(--neutral-800);
+    --color-surface-muted: var(--neutral-700);
+    --color-text: var(--neutral-50);
+    --color-text-muted: var(--neutral-300);
+  }
+}
+

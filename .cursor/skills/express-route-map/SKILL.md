@@ -54,3 +54,7 @@ export const getExample: Route = (router) => {
 // index aggregation
 parentRouter.use("/prefix", mapRoutes([getExample, postExample]));
 ```
+
+## Related
+
+- **`middleware-patterns`** — request-scoped context on the web app (prefer Async Local Storage over mutating `req`).
