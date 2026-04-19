@@ -1,9 +1,10 @@
+import { config } from "@config";
 import { APIResponse, ErrorCode } from "../types/responses";
 import { RequestHandler } from "express";
 
 export const authenticateApplication: RequestHandler = (req, res, next) => {
   const authId = req.get("authorization");
-  const validID = process.env.DISCORD_CLIENT_API_KEY;
+  const validID = config.api.discordClientApiKey;
   if (!authId || authId !== `Bearer ${validID}`) {
     const error: APIResponse<null> = {
       success: false,

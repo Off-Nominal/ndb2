@@ -45,7 +45,7 @@ Important constraints:
 
 Expose a narrow module API that the rest of the codebase uses (do not spread `discord.js` calls everywhere):
 
-**Current (`app/src/domain/discord/`):** `fetchGuildMember` (REST) and `readWebPortalAuthzConfig`; web routes call the gateway and enforce guild + role checks inline.
+**Current (`app/src/domain/discord/`):** `fetchGuildMember` (REST); portal guild/roles come from `config.discord.webPortal` (`@config`). Web routes call the gateway and enforce guild + role checks inline.
 
 **Planned on top of the same gateway:**
 

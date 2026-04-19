@@ -1,6 +1,7 @@
+import type { TrustProxyResolved } from "@config";
+import { config } from "@config";
 import type { Express } from "express";
 import helmet from "helmet";
-import { isProduction } from "@shared/utils";
 
 /**
  * Express must trust the reverse proxy (e.g. Coolify’s Traefik) so `req.secure`,
@@ -12,23 +13,16 @@ import { isProduction } from "@shared/utils";
  *   without a proxy (rare).
  * - **Override hop count:** set `TRUST_PROXY` to `1`, `true`, or a positive integer
  *   (same behavior in all environments).
+ *
+ * Pass `trustProxy` to override the resolved value from `@config` (e.g. tests with
+ * {@link resolveTrustProxy}).
  */
-export function configureTrustProxy(app: Express): void {
-  const raw = process.env.TRUST_PROXY?.trim();
-
-  if (raw === "0" || raw === "false") {
-    return;
-  }
-  if (raw === "1" || raw === "true") {
-    app.set("trust proxy", 1);
-    return;
-  }
-  if (raw && /^\d+$/.test(raw)) {
-    app.set("trust proxy", Number.parseInt(raw, 10));
-    return;
-  }
-  if (isProduction()) {
-    app.set("trust proxy", 1);
+export function configureTrustProxy(
+  app: Express,
+  trustProxy: TrustProxyResolved = config.server.trustProxy,
+): void {
+  if (trustProxy.apply) {
+    app.set("trust proxy", trustProxy.hops);
   }
 }
 

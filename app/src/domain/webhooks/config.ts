@@ -1,14 +1,15 @@
+import { config } from "@config";
 import { eventsManager } from "@domain/events/events-manager";
 import { generateResponse, notifySubscribers } from "./utilities";
 
-const missionControlWebhookEndpointV2 = process.env.WEBHOOK_DISCORD_BOT + "/v2";
-const discordClientApiKey = process.env.DISCORD_CLIENT_API_KEY;
-
+const base = config.webhooks.missionControlBaseUrl;
 const subscribers: string[] = [];
-
-if (missionControlWebhookEndpointV2) {
-  subscribers.push(missionControlWebhookEndpointV2);
+if (base) {
+  const trimmed = base.replace(/\/+$/, "");
+  subscribers.push(`${trimmed}/v2`);
 }
+
+const discordClientApiKey = config.api.discordClientApiKey;
 
 eventsManager.on("untriggered_prediction", (prediction) => {
   notifySubscribers(

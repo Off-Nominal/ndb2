@@ -1,3 +1,4 @@
+import { config } from "@config";
 import { randomBytes } from "node:crypto";
 import { Router } from "express";
 import { getDbClient } from "@data/db/getDbClient";
@@ -6,11 +7,7 @@ import usersQueries from "@data/queries/users";
 import webSessionsQueries from "@data/queries/web_sessions";
 import { Route } from "@shared/routerMap";
 import { safeReturnTo } from "../../../auth/safeReturnTo";
-import {
-  fetchGuildMember,
-  type GuildMemberSummary,
-  readWebPortalAuthzConfig,
-} from "@domain/discord";
+import { fetchGuildMember, type GuildMemberSummary } from "@domain/discord";
 import {
   buildDiscordAuthorizeUrl,
   discordPkceCodeChallengeS256,
@@ -30,7 +27,6 @@ import { wrapWebRouteWithErrorBoundary } from "../../../middleware/error-boundar
 import type { error_page_props } from "../../../shared/components/error_page";
 import { error_page } from "../../../shared/components/error_page";
 import {
-  discord_oauth_env_missing_detail,
   discord_portal_requires_allowed_role_body,
   discord_portal_requires_guild_membership_body,
 } from "./discord_oauth_error_partials";
@@ -41,44 +37,13 @@ function renderAppErrorPage(props: Omit<error_page_props, "theme">) {
   return Promise.resolve(error_page({ ...props, theme: getThemePreference() }));
 }
 
-function readDiscordOAuthEnv(): {
-  clientId: string;
-  clientSecret: string;
-  redirectUri: string;
-} | null {
-  const clientId = process.env.DISCORD_OAUTH_CLIENT_ID?.trim();
-  const clientSecret = process.env.DISCORD_OAUTH_CLIENT_SECRET?.trim();
-  const redirectUri = process.env.DISCORD_OAUTH_REDIRECT_URI?.trim();
-  if (!clientId || !clientSecret || !redirectUri) {
-    return null;
-  }
-  return { clientId, clientSecret, redirectUri };
-}
-
 /** Discord OAuth start, callback, error page, and logout. */
 export const DiscordAuth: Route = (router: Router) => {
   router.get(
     "/auth/discord",
     wrapWebRouteWithErrorBoundary(async (req, res, next) => {
-      const env = readDiscordOAuthEnv();
-      if (!env) {
-        const html = await renderAppErrorPage({
-          title: "Sign-in unavailable",
-          body: discord_oauth_env_missing_detail(),
-        });
-        res.status(503).type("html").send(html);
-        return;
-      }
-
-      const portalAuthz = readWebPortalAuthzConfig();
-      if (!portalAuthz.ok) {
-        const html = await renderAppErrorPage({
-          title: "Sign-in unavailable",
-          body: "Web sign-in is not fully configured. The server needs a Discord bot token, guild id, and allowed role ids. See your deployment environment variables.",
-        });
-        res.status(503).type("html").send(html);
-        return;
-      }
+      const oauth = config.discord.oauth;
+      const portalAuthz = config.discord.webPortal;
 
       const dbClient = await getDbClient(res);
       await dbClient.query(
@@ -101,8 +66,8 @@ export const DiscordAuth: Route = (router: Router) => {
       });
 
       const url = buildDiscordAuthorizeUrl({
-        clientId: env.clientId,
-        redirectUri: env.redirectUri,
+        clientId: oauth.clientId,
+        redirectUri: oauth.redirectUri,
         state,
         codeChallenge,
       });
@@ -113,25 +78,8 @@ export const DiscordAuth: Route = (router: Router) => {
   router.get(
     "/auth/discord/callback",
     wrapWebRouteWithErrorBoundary(async (req, res, next) => {
-      const env = readDiscordOAuthEnv();
-      if (!env) {
-        const html = await renderAppErrorPage({
-          title: "Sign-in unavailable",
-          body: discord_oauth_env_missing_detail(),
-        });
-        res.status(503).type("html").send(html);
-        return;
-      }
-
-      const portalAuthz = readWebPortalAuthzConfig();
-      if (!portalAuthz.ok) {
-        const html = await renderAppErrorPage({
-          title: "Sign-in unavailable",
-          body: "Web sign-in is not fully configured. The server needs a Discord bot token, guild id, and allowed role ids. See your deployment environment variables.",
-        });
-        res.status(503).type("html").send(html);
-        return;
-      }
+      const oauth = config.discord.oauth;
+      const portalAuthz = config.discord.webPortal;
 
       const oauthErr =
         typeof req.query.error === "string" ? req.query.error : undefined;
@@ -177,9 +125,9 @@ export const DiscordAuth: Route = (router: Router) => {
       let accessToken: string;
       try {
         ({ access_token: accessToken } = await exchangeDiscordOAuthCode({
-          clientId: env.clientId,
-          clientSecret: env.clientSecret,
-          redirectUri: env.redirectUri,
+          clientId: oauth.clientId,
+          clientSecret: oauth.clientSecret,
+          redirectUri: oauth.redirectUri,
           code,
           codeVerifier: loginState.code_verifier,
         }));
