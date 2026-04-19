@@ -36,9 +36,7 @@ import {
 const OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
 function renderAppErrorPage(props: Omit<error_page_props, "theme">) {
-  return Promise.resolve(
-    error_page({ ...props, theme: getThemePreference() }),
-  );
+  return Promise.resolve(error_page({ ...props, theme: getThemePreference() }));
 }
 
 function readDiscordOAuthEnv(): {
@@ -74,8 +72,7 @@ export const DiscordAuth: Route = (router: Router) => {
       if (!portalAuthz.ok) {
         const html = await renderAppErrorPage({
           title: "Sign-in unavailable",
-          body:
-            "Web sign-in is not fully configured. The server needs a Discord bot token, guild id, and allowed role ids. See your deployment environment variables.",
+          body: "Web sign-in is not fully configured. The server needs a Discord bot token, guild id, and allowed role ids. See your deployment environment variables.",
         });
         res.status(503).type("html").send(html);
         return;
@@ -124,8 +121,7 @@ export const DiscordAuth: Route = (router: Router) => {
       if (!portalAuthz.ok) {
         const html = await renderAppErrorPage({
           title: "Sign-in unavailable",
-          body:
-            "Web sign-in is not fully configured. The server needs a Discord bot token, guild id, and allowed role ids. See your deployment environment variables.",
+          body: "Web sign-in is not fully configured. The server needs a Discord bot token, guild id, and allowed role ids. See your deployment environment variables.",
         });
         res.status(503).type("html").send(html);
         return;
@@ -211,8 +207,7 @@ export const DiscordAuth: Route = (router: Router) => {
       } catch {
         const html = await renderAppErrorPage({
           title: "Sign in failed",
-          body:
-            "Could not verify your Discord server membership. Please try again.",
+          body: "Could not verify your Discord server membership. Please try again.",
         });
         res.status(502).type("html").send(html);
         return;
