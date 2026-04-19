@@ -44,13 +44,7 @@
 }
 
 /* ndb2:block: routes/login/login.css */
-/* ndb2:block:login — sign-in landing */
-.login {
-  max-width: 36rem;
-  margin: var(--space-xl, 2rem) auto;
-  padding: 0 var(--space-m, 1rem);
-}
-
+/* ndb2:block:login — sign-in landing CTA */
 .login__action {
   display: inline-block;
   padding: var(--space-s, 0.75rem) var(--space-l, 1.5rem);
@@ -63,4 +57,10 @@
 
 .login__action:hover {
   filter: brightness(1.08);
+}
+
+/* ndb2:block: shared/components/page.css */
+.page-layout {
+  --center-column-max-width: 1200px;
+  --center-column-gutter-inline: var(--space-8);
 }

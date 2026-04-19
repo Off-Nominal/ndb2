@@ -1,0 +1,4 @@
+.page-layout {
+  --center-column-max-width: 1200px;
+  --center-column-gutter-inline: var(--space-8);
+}

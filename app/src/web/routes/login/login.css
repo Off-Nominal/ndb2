@@ -1,10 +1,4 @@
-/* ndb2:block:login — sign-in landing */
-.login {
-  max-width: 36rem;
-  margin: var(--space-xl, 2rem) auto;
-  padding: 0 var(--space-m, 1rem);
-}
-
+/* ndb2:block:login — sign-in landing CTA */
 .login__action {
   display: inline-block;
   padding: var(--space-s, 0.75rem) var(--space-l, 1.5rem);

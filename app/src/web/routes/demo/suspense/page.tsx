@@ -1,5 +1,6 @@
 import { Suspense } from "@kitajs/html/suspense";
 import { html_head } from "../../../shared/components/html_head";
+import { page_layout } from "../../../shared/components/page_layout";
 import { clientScriptsForModule } from "../../../shared/clientScriptsForModule";
 import type { ThemePreference } from "../../../middleware/theme-preference";
 import { delayed_snippet } from "./components/delayed_snippet";
@@ -24,43 +25,49 @@ export function suspense_demo_page(props: suspense_demo_page_props): JSX.Element
         })}
       </head>
       <body>
-        <p>
-          <a href="/">← Home</a>
-        </p>
-
-        <h1>Async + Suspense streaming</h1>
-        <p>
-          Two independent boundaries share the same request id. Each shows a fallback
-          immediately, then swaps to the resolved content when the async work finishes.
-        </p>
-
-        <section aria-labelledby="suspense-a">
-          <h2 id="suspense-a">Boundary A (shorter delay)</h2>
-          <Suspense
-            rid={props.rid}
-            fallback={
-              <p class="suspense-fallback">
-                Loading block A…
+        {page_layout({
+          children: (
+            <>
+              <p>
+                <a href="/">← Home</a>
               </p>
-            }
-          >
-            {delayed_snippet({ delayMs: 750, label: "A" })}
-          </Suspense>
-        </section>
 
-        <section aria-labelledby="suspense-b">
-          <h2 id="suspense-b">Boundary B (longer delay)</h2>
-          <Suspense
-            rid={props.rid}
-            fallback={
-              <p class="suspense-fallback">
-                Loading block B…
+              <h1>Async + Suspense streaming</h1>
+              <p>
+                Two independent boundaries share the same request id. Each shows a fallback
+                immediately, then swaps to the resolved content when the async work finishes.
               </p>
-            }
-          >
-            {delayed_snippet({ delayMs: 1750, label: "B" })}
-          </Suspense>
-        </section>
+
+              <section aria-labelledby="suspense-a">
+                <h2 id="suspense-a">Boundary A (shorter delay)</h2>
+                <Suspense
+                  rid={props.rid}
+                  fallback={
+                    <p class="suspense-fallback">
+                      Loading block A…
+                    </p>
+                  }
+                >
+                  {delayed_snippet({ delayMs: 750, label: "A" })}
+                </Suspense>
+              </section>
+
+              <section aria-labelledby="suspense-b">
+                <h2 id="suspense-b">Boundary B (longer delay)</h2>
+                <Suspense
+                  rid={props.rid}
+                  fallback={
+                    <p class="suspense-fallback">
+                      Loading block B…
+                    </p>
+                  }
+                >
+                  {delayed_snippet({ delayMs: 1750, label: "B" })}
+                </Suspense>
+              </section>
+            </>
+          ),
+        })}
       </body>
     </html>
   );
