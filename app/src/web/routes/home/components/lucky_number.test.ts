@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { lucky_number } from "./lucky_number";
+import { LuckyNumber } from "./lucky_number";
 
-describe("lucky_number", () => {
+describe("LuckyNumber", () => {
   it("renders the value in a span", () => {
-    expect(lucky_number({ value: 42 })).toBe(
+    expect(LuckyNumber({ value: 42 })).toBe(
       '<span class="lucky-number">42</span>',
     );
   });

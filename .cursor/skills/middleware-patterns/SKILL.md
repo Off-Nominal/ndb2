@@ -31,7 +31,7 @@ For data that belongs to **one request** (user preference, correlation id, auth 
 - Call **`getThemePreference()`** (or your getter) in the route handler when you need the value.
 - If the handler **defers** work (streaming, callbacks scheduled outside the current stack), **read the value once synchronously** at the start of the handler and pass it into closures. Do not assume `getThemePreference()` will see the same store inside every deferred callback unless that path is known to stay on the same async resource chain (Node propagates ALS across `async`/`await` in typical Express flows, but stream internals vary).
 
-Example: `app/src/web/routes/demo/suspense/handler.ts` captures `const theme = getThemePreference()` before `renderToStream`.
+Example: `app/src/web/routes/demo/suspense/handler.tsx` captures `const theme = getThemePreference()` before `renderToStream`.
 
 ## Middleware placement
 

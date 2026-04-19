@@ -42,7 +42,7 @@ If unsure between composition and block: **composition** should not care *which*
 
 Prefer **composing layout and tweaks in markup** (and in Kitajs `class` strings) from **reusable** composition and utility classes—not one bespoke class per screen. Avoid a single grab-bag “page layout” **block**; instead combine **one composition + one (behavior) utility** (e.g. `[ region ] [ content-column ]`) or tune a composition via **custom properties** from a block stylesheet.
 
-Shared wrappers (e.g. `page_layout` in TSX) should emit a **concatenation of existing layer classes** (documented in the component), not introduce a new monolithic selector for the same job.
+Shared wrappers (e.g. **`PageLayout`** in TSX) should emit a **concatenation of existing layer classes** (documented in the component), not introduce a new monolithic selector for the same job.
 
 ## Utilities — purpose, not atoms
 
@@ -151,4 +151,4 @@ HTMX can toggle **`data-*`** or classes via swaps; keep hooks documented in the 
 ## Related
 
 - **`css-build`** — scripts, `public/` outputs, nodemon, `<head>` link order.
-- **`kitajs-html-web`** — route structure, **`html_head`**, HTMX, tests.
+- **`kitajs-html-web`** — route structure, **`HtmlHead`**, HTMX, tests.

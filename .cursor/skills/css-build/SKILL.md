@@ -3,7 +3,7 @@ name: css-build
 description: >-
   Describes ndb2 web CSS end-to-end: CUBE CSS layers mapped to repo files, design tokens
   (JSON via build-design-tokens.mjs), globals/compositions/utilities/blocks (build-web-css.mjs),
-  html_head load order, /assets serving, pnpm build:tokens/build:css, and nodemon. Use when
+  HtmlHead load order, /assets serving, pnpm build:tokens/build:css, and nodemon. Use when
   editing tokens, CUBE layers, colocated component CSS, static assets, or stylesheet pipeline.
 ---
 
@@ -38,7 +38,7 @@ flowchart TB
   BC --> BW --> PB
   subgraph runtime [Runtime]
     MW[mountWeb /assets]
-    HH[html_head link order]
+    HH[HtmlHead link order]
   end
   PT --> MW
   PG --> MW
@@ -50,7 +50,7 @@ flowchart TB
 
 - **Compile output:** `pnpm run build` runs **`build:tokens`** then **`build:css`** then **`build:client-js`**, then `tsc`, `vendor-htmx`, `transfer-web`. Static files under `src/web/public/` are copied to **`dist/web/public/`** for production.
 - **Dev:** `nodemon` watches `src` (including **`css`** and token **`json`**). Generated files in `public/*.css` and **`public/routes/**`** (copied `*.client.js`) are **ignored** in `nodemon.json` so rebuilds do not loop.
-- **Serving:** [`mountWeb`](app/src/web/mountWeb.ts) mounts **`express.static`** at **`/assets`** → `path.join(__dirname, "public")` (i.e. `dist/web/public` when running compiled output). [`html_head`](app/src/web/shared/components/html_head.tsx) uses root-absolute URLs: **`/assets/<file>.css`**.
+- **Serving:** [`mountWeb`](app/src/web/mountWeb.ts) mounts **`express.static`** at **`/assets`** → `path.join(__dirname, "public")` (i.e. `dist/web/public` when running compiled output). [`HtmlHead`](app/src/web/shared/components/html_head.tsx) uses root-absolute URLs: **`/assets/<file>.css`**.
 - **API vs static:** [`mountJsonApi`](app/src/api/mountJsonApi.ts) is mounted at **`/api`** only, so JSON auth middleware never runs for **`/assets/*`** or HTML routes.
 
 ## CUBE CSS in ndb2
@@ -72,7 +72,7 @@ Full methodology and roadmap: [`docs/frontend/cube-css.md`](docs/frontend/cube-c
 
 ## `<head>` stylesheet order
 
-In [`html_head.tsx`](app/src/web/shared/components/html_head.tsx) (after meta/title):
+In [`html_head.tsx`](app/src/web/shared/components/html_head.tsx) (component **`HtmlHead`**; after meta/title):
 
 1. `design-tokens.css` — custom properties
 2. `globals.css` — resets / element defaults (use `var(--…)`)
@@ -117,7 +117,7 @@ Then HTMX (`htmx.min.js`).
 
 ## Route colocated client JS
 
-See **`web-client-js`** for colocation, `build-client-js.mjs`, generated **`routeClientScripts.ts`**, **`/assets/routes/...`**, and **`html_head`** wiring.
+See **`web-client-js`** for colocation, `build-client-js.mjs`, generated **`routeClientScripts.ts`**, **`/assets/routes/...`**, and **`HtmlHead`** wiring.
 
 ## Changing the pipeline
 
@@ -125,14 +125,14 @@ See **`web-client-js`** for colocation, `build-client-js.mjs`, generated **`rout
 - **New palette prefix:** extend color primitive detection in `build-design-tokens.mjs` (or refactor to a prefix list).
 - **New theme key:** add matching `color.light.<X>` and `color.dark.<X>` in `colors.json`.
 - **Dark selector:** change `html[data-theme="dark"]` in `build-design-tokens.mjs`; update tests if needed.
-- **New layer file:** uncommon; would require editing `build-web-css.mjs` and `html_head.tsx`.
+- **New layer file:** uncommon; would require editing `build-web-css.mjs` and `html_head.tsx` (`HtmlHead`).
 - **New route client script:** add `*.client.js` under `routes/<area>/`, run **`build:client-js`**; `page.tsx` already uses **`clientScriptsForModule(__filename)`** so no key edit is needed.
 - **Asset URL base:** if the app is ever served under a subpath, root-absolute `/assets/...` links may need a configurable prefix (not implemented today).
 
 ## Related
 
 - **cube-css-authoring** — where to put new CSS (globals vs compositions vs utilities vs blocks) when building pages/components.
-- **kitajs-html-web** — `page.tsx`, `handler.ts`, [`html_head`](app/src/web/shared/components/html_head.tsx), HTMX.
+- **kitajs-html-web** — `page.tsx`, `handler.tsx`, [`HtmlHead`](app/src/web/shared/components/html_head.tsx), HTMX.
 - **web-client-js** — route colocated `*.client.js`, `build:client-js`, static script URLs.
 - **express-route-map** — web `Route` modules.
 

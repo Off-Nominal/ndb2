@@ -24,17 +24,19 @@ import {
 } from "../../../middleware/auth/session-cookie-utils";
 import { getThemePreference } from "../../../middleware/theme-preference";
 import { wrapWebRouteWithErrorBoundary } from "../../../middleware/error-boundary";
-import type { error_page_props } from "../../../shared/components/error_page";
-import { error_page } from "../../../shared/components/error_page";
+import type { ErrorPageProps } from "../../../shared/components/error_page";
+import { ErrorPage } from "../../../shared/components/error_page";
 import {
-  discord_portal_requires_allowed_role_body,
-  discord_portal_requires_guild_membership_body,
+  DiscordPortalRequiresAllowedRoleBody,
+  DiscordPortalRequiresGuildMembershipBody,
 } from "./discord_oauth_error_partials";
 
 const OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
-function renderAppErrorPage(props: Omit<error_page_props, "theme">) {
-  return Promise.resolve(error_page({ ...props, theme: getThemePreference() }));
+function renderAppErrorPage(props: Omit<ErrorPageProps, "theme">) {
+  return Promise.resolve(
+    <ErrorPage {...props} theme={getThemePreference()} />,
+  );
 }
 
 /** Discord OAuth start, callback, error page, and logout. */
@@ -171,7 +173,7 @@ export const DiscordAuth: Route = (router: Router) => {
       if (!member) {
         const html = await renderAppErrorPage({
           title: "Access denied",
-          body: discord_portal_requires_guild_membership_body(),
+          body: DiscordPortalRequiresGuildMembershipBody(),
         });
         res.status(403).type("html").send(html);
         return;
@@ -183,7 +185,7 @@ export const DiscordAuth: Route = (router: Router) => {
       if (!allowed) {
         const html = await renderAppErrorPage({
           title: "Access denied",
-          body: discord_portal_requires_allowed_role_body(),
+          body: DiscordPortalRequiresAllowedRoleBody(),
         });
         res.status(403).type("html").send(html);
         return;

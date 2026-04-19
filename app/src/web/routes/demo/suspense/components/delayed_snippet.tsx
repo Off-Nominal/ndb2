@@ -1,8 +1,10 @@
-/** Async child for `Suspense` demos (simulated slow server work). */
-export async function delayed_snippet(props: {
+export type DelayedSnippetProps = {
   delayMs: number;
   label: string;
-}): Promise<string> {
+};
+
+/** Async child for `Suspense` demos (simulated slow server work). */
+export async function DelayedSnippet(props: DelayedSnippetProps): Promise<string> {
   await new Promise<void>((resolve) => {
     setTimeout(resolve, props.delayMs);
   });

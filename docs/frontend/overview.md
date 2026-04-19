@@ -2,7 +2,7 @@
 
 ## Implementation status
 
-- **In place:** `@kitajs/html` + HTMX, `app/src/web/routes/` feature folders (`page.tsx`, `handler.ts`, `tests/`, snake_case `components/` + colocated `*.test.ts`), welcome page at `/`, HTMX example (`GET /home/lucky-number`), Suspense streaming demo at `/demo/suspense`, shared Express app with JSON API (`createApp` / `mountWeb` / `mountJsonApi`). See `project-structure.md` and `.cursor/skills/kitajs-html-web/SKILL.md`.
+- **In place:** `@kitajs/html` + HTMX, `app/src/web/routes/` feature folders (`page.tsx`, `handler.tsx`, `tests/`, snake_case `components/` + colocated `*.test.ts`), welcome page at `/`, HTMX example (`GET /home/lucky-number`), Suspense streaming demo at `/demo/suspense`, shared Express app with JSON API (`createApp` / `mountWeb` / `mountJsonApi`). See `project-structure.md` and `.cursor/skills/kitajs-html-web/SKILL.md`.
 - **Not yet:** Discord session auth, dashboard pages, CUBE CSS build from tokens, most routes in `routes.md`.
 
 ## Objectives
@@ -23,7 +23,7 @@ The frontend will be server-rendered and progressively enhanced.
 
 ## Templating decision
 
-**We use Kitajs HTML for all server-rendered UI** under `app/src/web`. Earlier exploration considered a traditional Express view engine (e.g. EJS); that path is **not** adopted. UI is **typed `.tsx`** colocated with routes: **`routes/<area>/page.tsx`**, **`handler.ts`**, **`tests/`**, **`components/`** (snake_case component names; shared pieces in `web/shared/components/` when needed), optionally streamed with Kita’s **`Suspense`** / **`renderToStream`** for slow subtrees. See `.cursor/skills/kitajs-html-web/SKILL.md` for patterns.
+**We use Kitajs HTML for all server-rendered UI** under `app/src/web`. Earlier exploration considered a traditional Express view engine (e.g. EJS); that path is **not** adopted. UI is **typed `.tsx`** colocated with routes: **`routes/<area>/page.tsx`**, **`handler.tsx`**, **`tests/`**, **`components/`** (PascalCase component exports, snake_case filenames; shared pieces in `web/shared/components/` when needed), optionally streamed with Kita’s **`Suspense`** / **`renderToStream`** for slow subtrees. See `.cursor/skills/kitajs-html-web/SKILL.md` for patterns.
 
 ## Product principles (high-level)
 
@@ -43,7 +43,7 @@ What “dashboard” includes will evolve, but the initial expectation is:
 ## Open questions (to resolve early)
 
 - **Auth/session model**: still to implement; plan favors cookie + server session (see `authentication.md`). v2 remains API-key only.
-- **Routing**: URL map for product pages is in `routes.md`; demo routes and `/` are scaffolded—product areas will add `routes/<area>/page.tsx`, `handler.ts`, and `components/` as features land.
+- **Routing**: URL map for product pages is in `routes.md`; demo routes and `/` are scaffolded—product areas will add `routes/<area>/page.tsx`, `handler.tsx`, and `components/` as features land.
 - **Cube CSS specifics**: token naming, layout primitives, component conventions (no generated CSS in-repo yet).
 - **Build/deploy**: **resolved for dev**—same Node process serves HTML and `/api/v2`; production packaging can follow the same layout.
 

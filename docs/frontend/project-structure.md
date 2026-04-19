@@ -13,8 +13,8 @@ This document proposes a repo structure for serving **HTML pages** and the **v2 
 | `getDbClient` in `data/db` | **Done** | v2 uses it; v1 still uses legacy middleware `getDbClient` (optional future convergence). |
 | Shared route helper | **Done** | `app/src/shared/routerMap.ts` (`Route`, `mapRoutes`) for v2 and web. |
 | JSON API mount + scoped middleware | **Done** | `app/src/api/mountJsonApi.ts`: API-key auth + `validateContentType` apply only to API router, not HTML. |
-| Web scaffold (Kitajs HTML, HTMX, static) | **Done** | `app/src/web/mountWeb.ts`, `routes/<area>/page.tsx` + `handler.ts` + `components/` + `tests/`, `public/` (HTMX via `vendor-htmx` in `app/package.json`). |
-| Web route pattern | **Done** | Feature colocation; each area exports a **`Route`** from `handler.ts` (e.g. `Home`, `SuspenseDemo`); `mapRoutes` in `web/routes/index.ts` (see `.cursor/skills/express-route-map`, `kitajs-html-web`). |
+| Web scaffold (Kitajs HTML, HTMX, static) | **Done** | `app/src/web/mountWeb.ts`, `routes/<area>/page.tsx` + `handler.tsx` + `components/` + `tests/`, `public/` (HTMX via `vendor-htmx` in `app/package.json`). |
+| Web route pattern | **Done** | Feature colocation; each area exports a **`Route`** from `handler.tsx` (e.g. `Home`, `SuspenseDemo`); `mapRoutes` in `web/routes/index.ts` (see `.cursor/skills/express-route-map`, `kitajs-html-web`). |
 | `web/middleware/`, `web/viewModels/` | **Stub** | Directories reserved; auth guards and view-models not implemented yet. |
 | `data/services/`, `data/types/` | **Not started** | Optional internal layers from the plan below. |
 | CUBE CSS + design-token build | **Not started** | See `design.md`, `cube-css.md`. |
@@ -49,8 +49,8 @@ Example: `import { mapRoutes } from "@shared/routerMap";`
 
 ## Web naming and tests
 
-- **Kitajs components** use **snake_case** for TypeScript names and filenames (e.g. `lucky_number.tsx`, `export function lucky_number`, `export type lucky_number_props`). This differs from typical React PascalCase; it matches the rest of the ndb2 TS codebase. For **async** children inside **`Suspense`**, prefer a **function call** `{delayed_snippet({ ... })}` rather than a lowercase JSX tag (the JSX transform treats lowercase tags as built-in elements).
-- **Route-level tests:** each feature folder has a **`tests/`** directory next to `handler.ts` (e.g. `routes/home/tests/home.test.ts`) for **page and HTTP handler** coverage (supertest against `mountWeb`, or focused router tests).
+- **Kitajs components** use **PascalCase** for exported TypeScript names and props types (e.g. `export function LuckyNumber`, `LuckyNumberProps`) and **snake_case filenames** (e.g. `lucky_number.tsx`). For **async** children inside **`Suspense`**, use a **call** such as `{DelayedSnippet({ ... })}` (or JSX if you wrap the promise appropriately); the JSX transform treats **lowercase** tags as built-in HTML elements.
+- **Route-level tests:** each feature folder has a **`tests/`** directory next to `handler.tsx` (e.g. `routes/home/tests/home.test.ts`) for **page and HTTP handler** coverage (supertest against `mountWeb`, or focused router tests).
 - **Component tests:** colocated with the component — `components/banana.tsx` pairs with **`components/banana.test.ts`** (Vitest picks up `**/*.test.ts`).
 
 App-wide static wiring (e.g. `GET /assets/htmx.min.js`) stays in **`mountWeb.test.ts`** or a small `web/tests/` module if it grows.
@@ -69,7 +69,7 @@ High-level shape:
   - `validations/` (zod schemas)
   - `utils/` (**v2-specific** http/route utils only)
 - `app/src/web/` (HTML app: Kitajs HTML + HTMX)
-  - `routes/` — one folder per URL area (`home/`, `predictions/`, …): **`page.tsx`**, **`handler.ts`**, **`tests/`** (route/page HTTP tests), **`components/`** (snake_case `.tsx` + colocated **`*.test.ts`**)
+  - `routes/` — one folder per URL area (`home/`, `predictions/`, …): **`page.tsx`**, **`handler.tsx`**, **`tests/`** (route/page HTTP tests), **`components/`** (snake_case `.tsx` + colocated **`*.test.ts`**)
   - `shared/components/` (cross-area Kitajs components; add when needed)
   - `middleware/` (auth guards, etc.)
   - `viewModels/` (map domain objects → page-friendly props / view shapes)
@@ -117,7 +117,7 @@ HTMX-targeted components (small HTML responses, no full document):
 
 Rule of thumb:
 - Full page routes render a layout + **`page.tsx`** (full `<html>` document where appropriate).
-- HTMX `hx-get` routes return **component HTML** only (no `<html>`), from the same feature folder’s **`components/`** or an extra `router.get` in **`handler.ts`**.
+- HTMX `hx-get` routes return **component HTML** only (no `<html>`), from the same feature folder’s **`components/`** or an extra `router.get` in **`handler.tsx`**.
 
 ## Shared types strategy
 

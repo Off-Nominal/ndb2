@@ -1,7 +1,7 @@
 const OFF_NOMINAL_DISCORD_INVITE_HREF = "https://discord.gg/offnom";
 
-/** Shown when the signed-in Discord user is not in the portal guild — pass as {@link error_page} `body`. */
-export function discord_portal_requires_guild_membership_body(): JSX.Element {
+/** Shown when the signed-in Discord user is not in the portal guild — pass as {@link ErrorPage} `body`. */
+export function DiscordPortalRequiresGuildMembershipBody(): JSX.Element {
   return (
     <>
       <p>
@@ -22,8 +22,8 @@ export function discord_portal_requires_guild_membership_body(): JSX.Element {
   );
 }
 
-/** Shown when the user is in the guild but lacks an allowed role — pass as {@link error_page} `body`. */
-export function discord_portal_requires_allowed_role_body(): JSX.Element {
+/** Shown when the user is in the guild but lacks an allowed role — pass as {@link ErrorPage} `body`. */
+export function DiscordPortalRequiresAllowedRoleBody(): JSX.Element {
   return (
     <>
       <p>
@@ -40,8 +40,8 @@ export function discord_portal_requires_allowed_role_body(): JSX.Element {
   );
 }
 
-/** Rich copy for “OAuth env not set” — pass as {@link error_page} `body`. */
-export function discord_oauth_env_missing_detail(): JSX.Element {
+/** Rich copy for “OAuth env not set” — pass as {@link ErrorPage} `body`. */
+export function DiscordOAuthEnvMissingDetail(): JSX.Element {
   return (
     <>
       <p>Discord sign-in is not configured on this server. Set:</p>

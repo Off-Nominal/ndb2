@@ -1,5 +1,5 @@
 import type { RequestHandler } from "express";
-import { error_htmx_snippet, error_page } from "../shared/components/error_page";
+import { ErrorHtmxSnippet, ErrorPage } from "../shared/components/error_page";
 import { getThemePreference } from "./theme-preference";
 import { wrapWebRouteWithErrorBoundary } from "./error-boundary";
 
@@ -21,8 +21,8 @@ export const webNotFoundMiddleware: RequestHandler = wrapWebRouteWithErrorBounda
 
     const html = await Promise.resolve(
       isHtmx
-        ? error_htmx_snippet({ title, body })
-        : error_page({ title, theme, body }),
+        ? ErrorHtmxSnippet({ title, body })
+        : ErrorPage({ title, theme, body }),
     );
 
     res.status(404).type("html").send(html);

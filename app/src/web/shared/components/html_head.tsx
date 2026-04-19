@@ -1,4 +1,4 @@
-export type html_head_props = {
+export type HtmlHeadProps = {
   title: string;
   /** Route colocated `*.client.js` URLs from `clientScriptsForModule(__filename)` (or manual list). */
   clientScripts?: readonly string[];
@@ -7,7 +7,7 @@ export type html_head_props = {
 };
 
 /** Shared document head: charset, viewport, CUBE CSS layers, route client islands, HTMX. */
-export function html_head(props: html_head_props): JSX.Element {
+export function HtmlHead(props: HtmlHeadProps): JSX.Element {
   const scripts = props.clientScripts ?? [];
   return (
     <>
