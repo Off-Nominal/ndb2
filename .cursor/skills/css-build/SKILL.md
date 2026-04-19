@@ -96,7 +96,7 @@ Then HTMX (`htmx.min.js`).
 
 **Name → variable:** `brand.500` → `--brand-500`; `text.2xl` → `--text-2xl`.
 
-**`colors.json`:** Palette (`brand.*`, `neutral.*`, …); `color.semantic.*` → `--color-<kebab>`; `color.light.*` / `color.dark.*` → shared `--color-*` in `:root` vs `html[data-theme="dark"]` (pairs must match). **`data-theme`:** `light` | `dark` | `system`. Cookie **`ndb2_theme`** (non-HttpOnly) stores `light`/`dark`; absent = **`system`** → dark when `prefers-color-scheme: dark` (generated `@media` on `html[data-theme="system"]`). Route colocated **`page.client.js`** (see **`build-client-js`**) + `themePreferenceMiddleware` (rolling **`Set-Cookie`** refresh for `light`/`dark`): see `app/src/web/middleware/themePreferenceMiddleware.ts` and `routes/home/page.client.js`.
+**`colors.json`:** Palette (`brand.*`, `neutral.*`, …); `color.semantic.*` → `--color-<kebab>`; `color.light.*` / `color.dark.*` → shared `--color-*` in `:root` vs `html[data-theme="dark"]` (pairs must match). **`data-theme`:** `light` | `dark` | `system`. Cookie **`ndb2_theme`** (non-HttpOnly) stores `light`/`dark`; absent = **`system`** → dark when `prefers-color-scheme: dark` (generated `@media` on `html[data-theme="system"]`). Route colocated **`page.client.js`** (see **`build-client-js`**) + `themePreferenceMiddleware` (rolling **`Set-Cookie`** refresh for `light`/`dark`): see `app/src/web/middleware/theme-preference.ts` and `routes/home/page.client.js`.
 
 **`TOKEN_FILES` order** in the script controls declaration order inside `:root`. **`meta.json`** is not part of token CSS unless added to `TOKEN_FILES`.
 

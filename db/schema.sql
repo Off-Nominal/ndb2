@@ -690,6 +690,18 @@ ALTER SEQUENCE public.migrations_id_seq OWNED BY public.migrations.id;
 
 
 --
+-- Name: oauth_login_states; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.oauth_login_states (
+    state text NOT NULL,
+    return_to text NOT NULL,
+    expires_at timestamp with time zone NOT NULL,
+    code_verifier text NOT NULL
+);
+
+
+--
 -- Name: predictions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -830,6 +842,22 @@ ALTER SEQUENCE public.votes_id_seq OWNED BY public.votes.id;
 
 
 --
+-- Name: web_sessions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.web_sessions (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    csrf_token text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    expires_at timestamp with time zone NOT NULL,
+    revoked_at timestamp with time zone,
+    last_seen_at timestamp with time zone,
+    last_discord_authz_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
 -- Name: bets id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -893,6 +921,14 @@ ALTER TABLE ONLY public.bets
 
 ALTER TABLE ONLY public.migrations
     ADD CONSTRAINT migrations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: oauth_login_states oauth_login_states_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.oauth_login_states
+    ADD CONSTRAINT oauth_login_states_pkey PRIMARY KEY (state);
 
 
 --
@@ -968,10 +1004,25 @@ ALTER TABLE ONLY public.votes
 
 
 --
+-- Name: web_sessions web_sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.web_sessions
+    ADD CONSTRAINT web_sessions_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: bets_prediction_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX bets_prediction_id_idx ON public.bets USING btree (prediction_id);
+
+
+--
+-- Name: oauth_login_states_expires_at_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX oauth_login_states_expires_at_idx ON public.oauth_login_states USING btree (expires_at);
 
 
 --
@@ -993,6 +1044,20 @@ CREATE INDEX predictions_text_gist_trgm_idx ON public.predictions USING gist (te
 --
 
 CREATE INDEX predictions_text_idx ON public.predictions USING gist (text public.gist_trgm_ops);
+
+
+--
+-- Name: web_sessions_expires_at_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX web_sessions_expires_at_idx ON public.web_sessions USING btree (expires_at);
+
+
+--
+-- Name: web_sessions_user_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX web_sessions_user_id_idx ON public.web_sessions USING btree (user_id);
 
 
 --
@@ -1173,6 +1238,14 @@ ALTER TABLE ONLY public.votes
 
 
 --
+-- Name: web_sessions web_sessions_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.web_sessions
+    ADD CONSTRAINT web_sessions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
 -- PostgreSQL database dump complete
 --
 
@@ -1187,4 +1260,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20250507173754'),
     ('20250507191843'),
     ('20251120094857'),
-    ('20260402120000');
+    ('20260402120000'),
+    ('20260419120000');

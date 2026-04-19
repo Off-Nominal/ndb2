@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import schedule from "node-schedule";
 import { createLogger } from "@mendahu/utilities";
-import { MonitorRunner } from "./MonitorRunner";
+import { MonitorRunner } from "./monitor-runner";
 
 vi.mock("node-schedule", () => ({
   default: {

@@ -1,11 +1,16 @@
 import express, { type Express } from "express";
+import { isDev } from "@shared/utils";
 import { mountJsonApi } from "../api/mountJsonApi";
 import { mountWeb } from "../web/mountWeb";
+import { configureTrustProxy, installSecurityHeaders } from "./securityHeaders";
 
 export function createApp(): Express {
   const app = express();
 
-  if (process.env.NODE_ENV === "dev") {
+  configureTrustProxy(app);
+  installSecurityHeaders(app);
+
+  if (isDev()) {
     void (async () => {
       const morgan = (await import("morgan")).default;
       app.use(morgan("dev"));

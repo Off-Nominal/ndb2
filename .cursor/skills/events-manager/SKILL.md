@@ -7,7 +7,7 @@ description: Describes the NDB2 Events Manager (eventsManager) as the root typed
 
 ## What it is
 
-- `app/src/domain/events/eventsManager.ts` exports `eventsManager`, a **singleton typed event emitter** for **game events**.
+- `app/src/domain/events/events-manager.ts` exports `eventsManager`, a **singleton typed event emitter** for **game events**.
 - A “game event” is something meaningful to players/observers (user actions or game-engine actions), not low-level internal signals.
 - Other systems “fan out” from it (e.g. `app/src/domain/webhooks/config.ts` sends v2 webhooks for selected events).
 
@@ -27,7 +27,7 @@ Avoid `eventsManager` for:
 ## How to add a new event (repo pattern)
 
 1. **Add the typed event name**
-   - Update `NDBEvents` in `app/src/domain/events/eventsManager.ts`.
+   - Update `NDBEvents` in `app/src/domain/events/events-manager.ts`.
    - Payload types should usually be v2 DTOs (commonly `API.Entities.Predictions.Prediction`).
 
 2. **Emit it at the source of truth**
@@ -57,7 +57,7 @@ Avoid `eventsManager` for:
 
 ## Quick reference (key files)
 
-- **Event bus**: `app/src/domain/events/eventsManager.ts`
+- **Event bus**: `app/src/domain/events/events-manager.ts`
 - **Webhook fanout**: `app/src/domain/webhooks/config.ts`
 - **Webhook event types**: `types/src/v2/webhooks.ts`
 - **Common emitters**:

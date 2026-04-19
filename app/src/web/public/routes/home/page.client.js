@@ -7,7 +7,7 @@ var THEME_COOKIE_CONFIG = {
 
 /**
  * Home route client island: theme cookie + <html data-theme>.
- * `THEME_COOKIE_CONFIG` must match `THEME_COOKIE_CONFIG` in themePreferenceMiddleware.ts.
+ * `THEME_COOKIE_CONFIG` must match `THEME_COOKIE_CONFIG` in theme-preference.ts.
  */
 (function () {
   function buildPersistCookieHeader(theme) {

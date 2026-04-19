@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { SeasonManager } from "./SeasonManager";
+import { SeasonManager } from "./season-manager";
 import type * as API from "@offnominal/ndb2-api-types/v2";
 
 const { emit, getAll } = vi.hoisted(() => ({
@@ -7,7 +7,7 @@ const { emit, getAll } = vi.hoisted(() => ({
   getAll: vi.fn(),
 }));
 
-vi.mock("@domain/events/eventsManager", () => ({
+vi.mock("@domain/events/events-manager", () => ({
   eventsManager: { emit },
 }));
 

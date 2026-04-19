@@ -1,10 +1,11 @@
 import { createLogger } from "@mendahu/utilities";
-import PredictionMonitor from "@domain/predictions/PredictionMonitor";
+import PredictionMonitor from "@domain/predictions/prediction-monitor";
 import { monitors } from "@domain/predictions/config";
-import SeasonMonitor from "@domain/seasons/SeasonMonitor";
+import SeasonMonitor from "@domain/seasons/season-monitor";
 import { monitors as seasonMonitors } from "@domain/seasons/config";
-import { seasonsManager } from "@domain/seasons/SeasonManager";
+import { seasonsManager } from "@domain/seasons/season-manager";
 import pool from "@data/db";
+import { isDev } from "@shared/utils";
 import { createApp } from "./server/createApp";
 
 // Config
@@ -19,7 +20,7 @@ pool
     client.release();
   })
   .catch((err) => {
-    if (process.env.NODE_ENV === "dev") {
+    if (isDev()) {
       logger.error("Failed to connect to database. Ensure Docker is running.");
       process.exit(1);
     }

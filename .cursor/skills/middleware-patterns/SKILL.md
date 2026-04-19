@@ -9,6 +9,10 @@ description: >-
 
 # Web middleware patterns (ndb2)
 
+## Naming
+
+Filenames under **`app/src/web/middleware/`** are **`kebab-case`**; exported middleware and helpers are **`camelCase`**. See **`middleware-naming`**.
+
 ## Prefer Async Local Storage over `req` mutations
 
 For data that belongs to **one request** (user preference, correlation id, auth context, etc.):
@@ -18,7 +22,9 @@ For data that belongs to **one request** (user preference, correlation id, auth 
 
 **Why:** keeps `Request` close to Express’s own shape, avoids type augmentation drift, and matches Node’s model for implicit per-request context.
 
-**Reference implementation:** `app/src/web/middleware/themePreferenceMiddleware.ts` — `getThemePreference()` + `themePreferenceMiddleware`.
+**Reference implementations:**
+- `app/src/web/middleware/theme-preference.ts` — `getThemePreference()` + `themePreferenceMiddleware`.
+- `app/src/web/middleware/auth/` — `session.ts` (`getWebAuth()`), `require-auth.ts`, `session-cookie-utils.ts`. Import the specific modules (no barrel file).
 
 ## Handler usage
 

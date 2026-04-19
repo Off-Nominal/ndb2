@@ -1,6 +1,6 @@
 # Authentication (Discord OAuth2)
 
-**Status:** Specification only. The web app does not yet implement `/auth/discord`, sessions, or route guards; the HTML surface is currently public.
+**Status:** Implemented in the web app: `GET /login` (explicit Discord handoff), `/auth/discord`, `/auth/discord/callback`, `POST /auth/logout`, `web_sessions` + `oauth_login_states` tables, `ndb2_session` cookie, and `app/src/web/middleware/auth/` (`webAuthMiddleware` + `getWebAuth()` via AsyncLocalStorage). Use `requireWebAuth` on routes that must be signed in. Configure `DISCORD_OAUTH_*` env vars (see `app/.env.example`).
 
 All ndb2 users must have a Discord account. We do **not** manage passwords or identity ourselves.
 
@@ -14,6 +14,7 @@ Reference: Discord OAuth2 docs (`https://docs.discord.com/developers/topics/oaut
 - **Internal identity**: `users.id` (UUID)
 
 Rule:
+
 - After OAuth completes, we look up `users` by `discord_id`.
   - If found: that row’s `id` becomes the authenticated user id.
   - If not found: create a new user row with that `discord_id` and use the new UUID.
@@ -36,12 +37,18 @@ We will implement the standard **authorization code** flow:
 7. Browser is redirected to the originally requested page (or a default dashboard)
 
 Notes:
+
 - We should store the “return to” URL in a short-lived server-side state record, keyed by `state`.
 - Scopes should be kept minimal; `identify` is typically sufficient to get the Discord user id.
 
 ## Web app endpoints (proposed)
 
 Under `app/src/web/routes`:
+
+- `GET /login`
+  - optional query `returnTo` (path only, validated)
+  - if already signed in, redirects to `returnTo` (or `/` if absent)
+  - otherwise renders a page with a control that navigates to `/auth/discord?returnTo=…` (user explicitly starts OAuth)
 
 - `GET /auth/discord`
   - generates a `state` value
@@ -83,6 +90,7 @@ This keeps custom code small and avoids dependencies like Passport/session store
 ### Cookie settings (recommended defaults)
 
 Set the session cookie with:
+
 - `HttpOnly`: true (prevents JS from reading it)
 - `Secure`: true in production (HTTPS only)
 - `SameSite`: `Lax` (works with typical OAuth redirect flows; reduces CSRF risk)
@@ -98,17 +106,19 @@ For now, **skip signing** and keep the cookie value purely opaque. (We can add s
 ## Authorization (protecting routes)
 
 For `app/src/web`:
+
 - Add an auth middleware that:
   - reads `ndb2_session` cookie
   - loads the session record
   - resolves the internal `userId` (UUID) and `discordId` (Discord snowflake)
-  - redirects to `/auth/discord` when missing/invalid
+  - redirects to `/login` (with `returnTo`) when missing/invalid; the login page links to `/auth/discord` for an explicit Discord handoff
 
 ### Request-scoped auth context (AsyncLocalStorage)
 
 Prefer not to mutate `req` with additional fields. Instead, use Node’s `AsyncLocalStorage` to store an auth context that is accessible throughout the request lifecycle.
 
 Recommended stored values:
+
 - `userId` (internal UUID)
 - `discordId` (Discord snowflake)
 
@@ -122,6 +132,7 @@ If the web UI calls the DB/services directly (preferred), it may not need to cal
 ## CSRF considerations (HTMX)
 
 Even with `SameSite=Lax`, we should plan for CSRF on state-changing requests:
+
 - Use `POST`/`PATCH`/`DELETE` for mutations
 - Implement a synchronizer-token CSRF scheme with **small custom code** (no dependency required):
   - Generate a random CSRF token **per session** (or periodically rotate) and store it server-side (e.g. on the session record).
@@ -133,6 +144,7 @@ Even with `SameSite=Lax`, we should plan for CSRF on state-changing requests:
   - Validate on the server for all non-idempotent routes (POST/PATCH/DELETE).
 
 Practical HTMX patterns:
+
 - Set a global `hx-headers` on a top-level wrapper element (or shared layout page component) so HTMX-driven requests inherit it.
 - For standard form posts, include a hidden input and copy it to a header (or validate from form body).
 
@@ -140,6 +152,6 @@ Practical HTMX patterns:
 
 OAuth can fail for many reasons (user cancels, token exchange fails, state mismatch).
 On failure:
+
 - clear any partial state
 - show a simple error page with a “Try again” link to `/auth/discord`
-

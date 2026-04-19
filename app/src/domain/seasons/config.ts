@@ -1,9 +1,9 @@
 import { MonitorConfig } from "@domain/monitors/types";
-import { withPoolClient } from "@domain/monitors/withPoolClient";
-import { eventsManager } from "@domain/events/eventsManager";
+import { withPoolClient } from "@domain/monitors/with-pool-client";
+import { eventsManager } from "@domain/events/events-manager";
 import predictions from "@data/queries/predictions";
 import seasonsV2 from "@data/queries/seasons";
-import { seasonsManager } from "./SeasonManager";
+import { seasonsManager } from "./season-manager";
 
 export const monitors: MonitorConfig[] = [
   {

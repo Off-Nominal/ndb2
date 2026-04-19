@@ -6,7 +6,7 @@ import {
   generate_GET_USER_VOTE_SUMMARY_with_SEASON,
 } from "./scores";
 import { PoolClient } from "pg";
-import { seasonsManager } from "@domain/seasons/SeasonManager";
+import { seasonsManager } from "@domain/seasons/season-manager";
 import { APIBets } from "../../api/v1/types/bets";
 import { randomUUID } from "crypto";
 

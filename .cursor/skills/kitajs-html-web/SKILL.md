@@ -63,7 +63,7 @@ Use **`safe`**, **`e` / `escape`**, and **`@kitajs/ts-html-plugin`** for unsafe 
 
 ## Related
 
-- **`middleware-patterns`** — request-scoped values: prefer Async Local Storage over `req` mutations (see `themePreferenceMiddleware`).
+- **`middleware-patterns`** / **`middleware-naming`** — request-scoped values and file naming (see `theme-preference.ts`, `middleware/auth/session.ts` for web sessions).
 - **`express-route-map`** — `Route`, `mapRoutes`, `web/routes/index.ts`.
 - **`css-build`** — CUBE layers, design tokens, `html_head` stylesheet order, `/assets` static CSS.
 - **`web-client-js`** — colocated `*.client.js`, `build:client-js`, `/assets/routes/...` scripts in `html_head`.

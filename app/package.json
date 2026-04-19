@@ -34,6 +34,7 @@
     "@types/morgan": "^1.9.10",
     "date-fns": "^3.6.0",
     "express": "^4.21.2",
+    "helmet": "^8.1.0",
     "htmx.org": "^2.0.8",
     "node-schedule": "^2.1.1",
     "pg": "^8.12.0",

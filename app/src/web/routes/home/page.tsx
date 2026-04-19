@@ -1,11 +1,15 @@
 import { html_head } from "../../shared/components/html_head";
 import { clientScriptsForModule } from "../../shared/clientScriptsForModule";
-import type { ThemePreference } from "../../middleware/themePreferenceMiddleware";
+import type { WebAuthAuthenticated } from "../../middleware/auth/session";
+import type { ThemePreference } from "../../middleware/theme-preference";
 
 export type home_page_props = {
   title: string;
   message: string;
   theme: ThemePreference;
+  auth: WebAuthAuthenticated;
+  /** JSON for `hx-headers` (CSRF for HTMX). */
+  csrfHeadersJson: string;
 };
 
 /** Full HTML document for `/` (Kitajs HTML JSX → string). */
@@ -16,9 +20,10 @@ export function home_page(props: home_page_props): JSX.Element {
         {html_head({
           title: props.title,
           clientScripts: clientScriptsForModule(__filename),
+          csrfMetaToken: props.auth.csrfToken,
         })}
       </head>
-      <body>
+      <body hx-headers={props.csrfHeadersJson}>
         <div class="theme-switcher">
           <label for="theme-select">Appearance</label>
           <select id="theme-select" aria-label="Color scheme">
@@ -44,6 +49,14 @@ export function home_page(props: home_page_props): JSX.Element {
         </div>
 
         <p>{props.message}</p>
+
+        <p>
+          Signed in as Discord user <code>{props.auth.discordId}</code>.{" "}
+          <form method="post" action="/auth/logout" style="display: inline;">
+            <input type="hidden" name="_csrf" value={props.auth.csrfToken} />
+            <button type="submit">Sign out</button>
+          </form>
+        </p>
 
         <p>
           <a href="/demo/suspense">Suspense streaming demo</a> (async Kita Html + chunked
