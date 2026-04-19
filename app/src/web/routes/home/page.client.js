@@ -1,24 +1,41 @@
+var THEME_COOKIE_CONFIG = {
+  name: "ndb2_theme",
+  path: "/",
+  maxAgeSec: 60 * 60 * 24 * 400,
+  sameSite: "Lax",
+};
+
 /**
  * Home route client island: theme cookie + <html data-theme>.
- * Max-Age must stay in sync with THEME_COOKIE_MAX_AGE_SEC in app/src/web/middleware/themePreferenceMiddleware.ts
+ * `THEME_COOKIE_CONFIG` must match `THEME_COOKIE_CONFIG` in themePreferenceMiddleware.ts.
  */
 (function () {
-  var COOKIE_NAME = "ndb2_theme";
-  var MAX_AGE_SEC = 34560000; /* 400 days — sync with cookie.ts */
+  function buildPersistCookieHeader(theme) {
+    var c = THEME_COOKIE_CONFIG;
+    return (
+      c.name +
+      "=" +
+      encodeURIComponent(theme) +
+      "; Path=" +
+      c.path +
+      "; Max-Age=" +
+      c.maxAgeSec +
+      "; SameSite=" +
+      c.sameSite
+    );
+  }
+
+  function buildClearCookieHeader() {
+    var c = THEME_COOKIE_CONFIG;
+    return c.name + "=; Path=" + c.path + "; Max-Age=0; SameSite=" + c.sameSite;
+  }
 
   function setCookie(theme) {
     if (theme === "system") {
-      document.cookie =
-        COOKIE_NAME + "=; Path=/; Max-Age=0; SameSite=Lax";
+      document.cookie = buildClearCookieHeader();
       return;
     }
-    document.cookie =
-      COOKIE_NAME +
-      "=" +
-      encodeURIComponent(theme) +
-      "; Path=/; Max-Age=" +
-      MAX_AGE_SEC +
-      "; SameSite=Lax";
+    document.cookie = buildPersistCookieHeader(theme);
   }
 
   function apply(theme) {

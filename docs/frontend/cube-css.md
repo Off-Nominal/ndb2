@@ -126,7 +126,7 @@ Then implement utilities that apply those tokens (or apply them directly in bloc
 - **`ndb2_theme` cookie:** **Not** `HttpOnly` so the client can persist the choice without a round trip. `Path=/`, `SameSite=Lax`. Values **`light`** or **`dark`**. **Absent** or cleared = **system**, matching OS **`prefers-color-scheme`**.
 - **`<html data-theme>`:** `light`, `dark`, or `system`. Server reads the cookie via `themePreferenceMiddleware` and sets the attribute on first paint; colocated **`routes/home/page.client.js`** updates `data-theme` and the cookie on `#theme-select` **change** (copied to `/assets/routes/...` by **`pnpm run build:client-js`**, included via `clientScriptsForModule(__filename)` in `html_head`).
 - **CSS:** `:root` holds light semantic aliases; `html[data-theme="dark"]` overrides for forced dark; `@media (prefers-color-scheme: dark) { html[data-theme="system"] { … } }` applies dark tokens when the cookie is not set and the OS prefers dark.
-- **Sync:** If you change **`THEME_COOKIE_MAX_AGE_SEC`** in `app/src/web/middleware/themePreferenceMiddleware.ts`, update **`MAX_AGE_SEC`** in `routes/home/page.client.js` to match.
+- **Rolling expiry:** Middleware re-sends **`Set-Cookie`** on each web request when the user has **`light`** or **`dark`**, so **`Max-Age`** resets while they use the site (only long absence hits the timeout). Cookie shape lives in **`THEME_COOKIE_CONFIG`** in `themePreferenceMiddleware.ts` — duplicate in **`routes/home/page.client.js`** must stay identical.
 
 ### Composition utilities we’ll likely want early
 
