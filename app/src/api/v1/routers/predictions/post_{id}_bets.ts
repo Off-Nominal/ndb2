@@ -8,8 +8,8 @@ import predictions from "@data/legacy-queries/predictions";
 import { PredictionLifeCycle } from "../../types/predicitions";
 import responseUtils_deprecated from "../../utils/response";
 import { getDbClient } from "../../middleware/getDbClient";
+import { config } from "@config";
 import { add, isAfter } from "date-fns";
-import GAME_MECHANICS from "@domain/game-mechanics";
 import { ErrorCode } from "../../types/responses";
 const router = express.Router();
 
@@ -63,7 +63,7 @@ router.post(
       // Reject if change is outside the allowable time window
       const now = new Date();
       const expiryWindow = add(new Date(bet.date), {
-        hours: GAME_MECHANICS.predictionUpdateWindow,
+        hours: config.gameMechanics.predictionUpdateWindowHours,
       });
 
       if (isAfter(now, expiryWindow)) {
@@ -72,7 +72,7 @@ router.post(
           .json(
             responseUtils_deprecated.writeError(
               ErrorCode.BETS_UNCHANGEABLE,
-              `Bets cannot be changed past the allowable time window of ${GAME_MECHANICS.predictionUpdateWindow} hours since the bet was made.`,
+              `Bets cannot be changed past the allowable time window of ${config.gameMechanics.predictionUpdateWindowHours} hours since the bet was made.`,
               null
             )
           );

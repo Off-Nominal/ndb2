@@ -12,7 +12,7 @@ All **files** under `app/src/domain/` use **kebab-case** names, including test s
 
 - `season-manager.ts`, `season-manager.test.ts`, `season-manager.integration.test.ts`
 - `discord-gateway.ts`, `prediction-monitor.ts`
-- `events-manager.ts`, `game-mechanics.ts`, `monitor-runner.ts`, `with-pool-client.ts`
+- `events-manager.ts`, `monitor-runner.ts`, `with-pool-client.ts`
 
 **Imports** use the same stem as the file (via `@domain/...` or relative paths):
 

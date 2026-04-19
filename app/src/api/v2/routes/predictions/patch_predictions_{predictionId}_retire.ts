@@ -1,3 +1,4 @@
+import { config } from "@config";
 import { Router } from "express";
 import { z } from "zod";
 import { add, isAfter } from "date-fns";
@@ -9,7 +10,6 @@ import * as API from "@offnominal/ndb2-api-types/v2";
 import { validate } from "../../middleware/validate";
 import { getDbClient } from "@data/db/getDbClient";
 import { eventsManager } from "@domain/events/events-manager";
-import GAME_MECHANICS from "@domain/game-mechanics";
 import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
 
 export const retirePredictionById: Route = (router: Router) => {
@@ -73,7 +73,7 @@ export const retirePredictionById: Route = (router: Router) => {
       // the due date, which ever comes first
       const now = new Date();
       const expiryWindow = add(new Date(prediction.created_date), {
-        hours: GAME_MECHANICS.predictionUpdateWindow,
+        hours: config.gameMechanics.predictionUpdateWindowHours,
       });
 
       const dueDate = new Date(
