@@ -13,8 +13,10 @@ import {
 } from "@domain/discord";
 import {
   buildDiscordAuthorizeUrl,
+  discordPkceCodeChallengeS256,
   exchangeDiscordOAuthCode,
   fetchDiscordCurrentUser,
+  newDiscordPkceCodeVerifier,
 } from "../../../auth/discordOAuth";
 import { getWebAuth } from "../../../middleware/auth/session";
 import {
@@ -87,18 +89,22 @@ export const DiscordAuth: Route = (router: Router) => {
         typeof req.query.returnTo === "string" ? req.query.returnTo : undefined,
       );
       const state = randomBytes(32).toString("base64url");
+      const codeVerifier = newDiscordPkceCodeVerifier();
+      const codeChallenge = discordPkceCodeChallengeS256(codeVerifier);
       const expiresAt = new Date(Date.now() + OAUTH_STATE_TTL_MS);
 
       await oauthLoginStatesQueries.insert(dbClient)({
         state,
         return_to: returnTo,
         expires_at: expiresAt,
+        code_verifier: codeVerifier,
       });
 
       const url = buildDiscordAuthorizeUrl({
         clientId: env.clientId,
         redirectUri: env.redirectUri,
         state,
+        codeChallenge,
       });
       res.redirect(302, url);
     }),
@@ -155,9 +161,9 @@ export const DiscordAuth: Route = (router: Router) => {
       }
 
       const dbClient = await getDbClient(res);
-      const returnTo =
-        await oauthLoginStatesQueries.takeReturnToForState(dbClient)(state);
-      if (!returnTo) {
+      const loginState =
+        await oauthLoginStatesQueries.takeOauthLoginState(dbClient)(state);
+      if (!loginState) {
         const html = await renderAppErrorPage({
           title: "Sign in failed",
           body: "Invalid or expired sign-in state. Please try again.",
@@ -166,7 +172,7 @@ export const DiscordAuth: Route = (router: Router) => {
         return;
       }
 
-      const safePath = safeReturnTo(returnTo);
+      const safePath = safeReturnTo(loginState.return_to);
 
       let accessToken: string;
       try {
@@ -175,6 +181,7 @@ export const DiscordAuth: Route = (router: Router) => {
           clientSecret: env.clientSecret,
           redirectUri: env.redirectUri,
           code,
+          codeVerifier: loginState.code_verifier,
         }));
       } catch {
         const html = await renderAppErrorPage({

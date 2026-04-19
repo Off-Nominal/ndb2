@@ -696,7 +696,8 @@ ALTER SEQUENCE public.migrations_id_seq OWNED BY public.migrations.id;
 CREATE TABLE public.oauth_login_states (
     state text NOT NULL,
     return_to text NOT NULL,
-    expires_at timestamp with time zone NOT NULL
+    expires_at timestamp with time zone NOT NULL,
+    code_verifier text NOT NULL
 );
 
 

@@ -3,7 +3,8 @@
 CREATE TABLE oauth_login_states (
     state text PRIMARY KEY,
     return_to text NOT NULL,
-    expires_at timestamptz NOT NULL
+    expires_at timestamptz NOT NULL,
+    code_verifier text NOT NULL
 );
 
 CREATE INDEX oauth_login_states_expires_at_idx ON oauth_login_states (expires_at);
