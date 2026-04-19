@@ -1,14 +1,16 @@
 import { Router } from "express";
 import { Route } from "@shared/routerMap";
 import { safeReturnTo } from "../../auth/safeReturnTo";
-import { getWebAuth } from "../../middleware/webAuthMiddleware";
-import { getThemePreference } from "../../middleware/themePreferenceMiddleware";
+import { getWebAuth } from "../../middleware/auth/session";
+import { getThemePreference } from "../../middleware/theme-preference";
+import { wrapWebRouteWithErrorBoundary } from "../../middleware/error-boundary";
 import { login_page } from "./page";
 
 /** Public `GET /login` with explicit control to start Discord OAuth. */
 export const Login: Route = (router: Router) => {
-  router.get("/login", async (req, res, next) => {
-    try {
+  router.get(
+    "/login",
+    wrapWebRouteWithErrorBoundary(async (req, res, next) => {
       const auth = getWebAuth();
       const rawReturnTo =
         typeof req.query.returnTo === "string" ? req.query.returnTo : undefined;
@@ -27,8 +29,6 @@ export const Login: Route = (router: Router) => {
         }),
       );
       res.type("html").send(html);
-    } catch (err) {
-      next(err);
-    }
-  });
+    }),
+  );
 };

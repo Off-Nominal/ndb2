@@ -1,11 +1,12 @@
 import express, { type Express } from "express";
+import { isDev } from "@shared/utils";
 import { mountJsonApi } from "../api/mountJsonApi";
 import { mountWeb } from "../web/mountWeb";
 
 export function createApp(): Express {
   const app = express();
 
-  if (process.env.NODE_ENV === "dev") {
+  if (isDev()) {
     void (async () => {
       const morgan = (await import("morgan")).default;
       app.use(morgan("dev"));

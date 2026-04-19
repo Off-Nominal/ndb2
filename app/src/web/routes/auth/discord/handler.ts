@@ -7,25 +7,45 @@ import webSessionsQueries from "@data/queries/web_sessions";
 import { Route } from "@shared/routerMap";
 import { safeReturnTo } from "../../../auth/safeReturnTo";
 import {
+  fetchGuildMember,
+  type GuildMemberSummary,
+  readWebPortalAuthzConfig,
+} from "@domain/discord";
+import {
   buildDiscordAuthorizeUrl,
   exchangeDiscordOAuthCode,
   fetchDiscordCurrentUser,
 } from "../../../auth/discordOAuth";
-import { getWebAuth } from "../../../middleware/webAuthMiddleware";
+import { getWebAuth } from "../../../middleware/auth/session";
 import {
   SESSION_COOKIE_CONFIG,
-  buildSessionPersistCookieHeader,
   buildSessionClearCookieHeader,
+  buildSessionPersistCookieHeader,
   newCsrfToken,
-} from "../../../middleware/webSessionCookie";
-import { oauth_error_page } from "./pages/oauth_error";
-import { oauth_not_configured_page } from "./pages/oauth_not_configured";
+} from "../../../middleware/auth/session-cookie-utils";
+import { getThemePreference } from "../../../middleware/theme-preference";
+import { wrapWebRouteWithErrorBoundary } from "../../../middleware/error-boundary";
+import type { error_page_props } from "../../../shared/components/error_page";
+import { error_page } from "../../../shared/components/error_page";
+import {
+  discord_oauth_env_missing_detail,
+  discord_portal_requires_allowed_role_body,
+  discord_portal_requires_guild_membership_body,
+} from "./discord_oauth_error_partials";
 
 const OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
-function readDiscordOAuthEnv():
-  | { clientId: string; clientSecret: string; redirectUri: string }
-  | null {
+function renderAppErrorPage(props: Omit<error_page_props, "theme">) {
+  return Promise.resolve(
+    error_page({ ...props, theme: getThemePreference() }),
+  );
+}
+
+function readDiscordOAuthEnv(): {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+} | null {
   const clientId = process.env.DISCORD_OAUTH_CLIENT_ID?.trim();
   const clientSecret = process.env.DISCORD_OAUTH_CLIENT_SECRET?.trim();
   const redirectUri = process.env.DISCORD_OAUTH_REDIRECT_URI?.trim();
@@ -37,17 +57,34 @@ function readDiscordOAuthEnv():
 
 /** Discord OAuth start, callback, error page, and logout. */
 export const DiscordAuth: Route = (router: Router) => {
-  router.get("/auth/discord", async (req, res, next) => {
-    try {
+  router.get(
+    "/auth/discord",
+    wrapWebRouteWithErrorBoundary(async (req, res, next) => {
       const env = readDiscordOAuthEnv();
       if (!env) {
-        const html = await Promise.resolve(oauth_not_configured_page());
+        const html = await renderAppErrorPage({
+          title: "Sign-in unavailable",
+          body: discord_oauth_env_missing_detail(),
+        });
+        res.status(503).type("html").send(html);
+        return;
+      }
+
+      const portalAuthz = readWebPortalAuthzConfig();
+      if (!portalAuthz.ok) {
+        const html = await renderAppErrorPage({
+          title: "Sign-in unavailable",
+          body:
+            "Web sign-in is not fully configured. The server needs a Discord bot token, guild id, and allowed role ids. See your deployment environment variables.",
+        });
         res.status(503).type("html").send(html);
         return;
       }
 
       const dbClient = await getDbClient(res);
-      await dbClient.query(`DELETE FROM oauth_login_states WHERE expires_at < now()`);
+      await dbClient.query(
+        `DELETE FROM oauth_login_states WHERE expires_at < now()`,
+      );
 
       const returnTo = safeReturnTo(
         typeof req.query.returnTo === "string" ? req.query.returnTo : undefined,
@@ -67,16 +104,29 @@ export const DiscordAuth: Route = (router: Router) => {
         state,
       });
       res.redirect(302, url);
-    } catch (err) {
-      next(err);
-    }
-  });
+    }),
+  );
 
-  router.get("/auth/discord/callback", async (req, res, next) => {
-    try {
+  router.get(
+    "/auth/discord/callback",
+    wrapWebRouteWithErrorBoundary(async (req, res, next) => {
       const env = readDiscordOAuthEnv();
       if (!env) {
-        const html = await Promise.resolve(oauth_not_configured_page());
+        const html = await renderAppErrorPage({
+          title: "Sign-in unavailable",
+          body: discord_oauth_env_missing_detail(),
+        });
+        res.status(503).type("html").send(html);
+        return;
+      }
+
+      const portalAuthz = readWebPortalAuthzConfig();
+      if (!portalAuthz.ok) {
+        const html = await renderAppErrorPage({
+          title: "Sign-in unavailable",
+          body:
+            "Web sign-in is not fully configured. The server needs a Discord bot token, guild id, and allowed role ids. See your deployment environment variables.",
+        });
         res.status(503).type("html").send(html);
         return;
       }
@@ -84,41 +134,38 @@ export const DiscordAuth: Route = (router: Router) => {
       const oauthErr =
         typeof req.query.error === "string" ? req.query.error : undefined;
       if (oauthErr) {
-        const html = await Promise.resolve(
-          oauth_error_page({
-            title: "Sign in cancelled",
-            message:
-              oauthErr === "access_denied"
-                ? "Discord sign-in was cancelled."
-                : `Discord returned an error: ${oauthErr}.`,
-          }),
-        );
+        const html = await renderAppErrorPage({
+          title: "Sign in cancelled",
+          body:
+            oauthErr === "access_denied"
+              ? "Discord sign-in was cancelled."
+              : `Discord returned an error: ${oauthErr}.`,
+        });
         res.type("html").send(html);
         return;
       }
 
-      const code = typeof req.query.code === "string" ? req.query.code : undefined;
-      const state = typeof req.query.state === "string" ? req.query.state : undefined;
+      const code =
+        typeof req.query.code === "string" ? req.query.code : undefined;
+      const state =
+        typeof req.query.state === "string" ? req.query.state : undefined;
       if (!code || !state) {
-        const html = await Promise.resolve(
-          oauth_error_page({
-            title: "Sign in failed",
-            message: "Missing authorization code or state from Discord.",
-          }),
-        );
+        const html = await renderAppErrorPage({
+          title: "Sign in failed",
+          body: "Missing authorization code or state from Discord.",
+        });
         res.status(400).type("html").send(html);
         return;
       }
 
       const dbClient = await getDbClient(res);
-      const returnTo = await oauthLoginStatesQueries.takeReturnToForState(dbClient)(state);
+      const returnTo =
+        await oauthLoginStatesQueries.takeReturnToForState(dbClient)(state);
       if (!returnTo) {
-        const html = await Promise.resolve(
-          oauth_error_page({
-            title: "Sign in failed",
-            message: "Invalid or expired sign-in state. Please try again.",
-          }),
-        );
+        const html = await renderAppErrorPage({
+          title: "Sign in failed",
+          body: "Invalid or expired sign-in state. Please try again.",
+        });
         res.status(400).type("html").send(html);
         return;
       }
@@ -134,12 +181,10 @@ export const DiscordAuth: Route = (router: Router) => {
           code,
         }));
       } catch {
-        const html = await Promise.resolve(
-          oauth_error_page({
-            title: "Sign in failed",
-            message: "Could not complete sign-in with Discord. Please try again.",
-          }),
-        );
+        const html = await renderAppErrorPage({
+          title: "Sign in failed",
+          body: "Could not complete sign-in with Discord. Please try again.",
+        });
         res.status(502).type("html").send(html);
         return;
       }
@@ -148,23 +193,62 @@ export const DiscordAuth: Route = (router: Router) => {
       try {
         discordUser = await fetchDiscordCurrentUser(accessToken);
       } catch {
-        const html = await Promise.resolve(
-          oauth_error_page({
-            title: "Sign in failed",
-            message: "Could not load your Discord profile. Please try again.",
-          }),
-        );
+        const html = await renderAppErrorPage({
+          title: "Sign in failed",
+          body: "Could not load your Discord profile. Please try again.",
+        });
         res.status(502).type("html").send(html);
         return;
       }
 
+      let member: GuildMemberSummary | null;
+      try {
+        member = await fetchGuildMember(
+          portalAuthz.botToken,
+          portalAuthz.guildId,
+          discordUser.id,
+        );
+      } catch {
+        const html = await renderAppErrorPage({
+          title: "Sign in failed",
+          body:
+            "Could not verify your Discord server membership. Please try again.",
+        });
+        res.status(502).type("html").send(html);
+        return;
+      }
+
+      if (!member) {
+        const html = await renderAppErrorPage({
+          title: "Access denied",
+          body: discord_portal_requires_guild_membership_body(),
+        });
+        res.status(403).type("html").send(html);
+        return;
+      }
+
+      const allowed = portalAuthz.allowedRoleIds.some((id) =>
+        member.roles.includes(id),
+      );
+      if (!allowed) {
+        const html = await renderAppErrorPage({
+          title: "Access denied",
+          body: discord_portal_requires_allowed_role_body(),
+        });
+        res.status(403).type("html").send(html);
+        return;
+      }
+
       const user = await usersQueries.getByDiscordId(dbClient)(discordUser.id);
-      const sessionExpires = new Date(Date.now() + SESSION_COOKIE_CONFIG.maxAgeSec * 1000);
+      const sessionExpires = new Date(
+        Date.now() + SESSION_COOKIE_CONFIG.maxAgeSec * 1000,
+      );
       const csrfToken = newCsrfToken();
       const sessionRow = await webSessionsQueries.insert(dbClient)({
         user_id: user.id,
         csrf_token: csrfToken,
         expires_at: sessionExpires,
+        last_discord_authz_at: new Date(),
       });
 
       if (!sessionRow) {
@@ -174,13 +258,12 @@ export const DiscordAuth: Route = (router: Router) => {
 
       res.append("Set-Cookie", buildSessionPersistCookieHeader(sessionRow.id));
       res.redirect(302, safePath);
-    } catch (err) {
-      next(err);
-    }
-  });
+    }),
+  );
 
-  router.post("/auth/logout", async (req, res, next) => {
-    try {
+  router.post(
+    "/auth/logout",
+    wrapWebRouteWithErrorBoundary(async (req, res, next) => {
       const auth = getWebAuth();
       const body = req.body as { _csrf?: string } | undefined;
       const headerToken =
@@ -205,8 +288,6 @@ export const DiscordAuth: Route = (router: Router) => {
       await webSessionsQueries.revoke(dbClient)(auth.sessionId);
       res.append("Set-Cookie", buildSessionClearCookieHeader());
       res.redirect(302, "/");
-    } catch (err) {
-      next(err);
-    }
-  });
+    }),
+  );
 };

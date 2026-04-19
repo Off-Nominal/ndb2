@@ -1,7 +1,7 @@
 import { html_head } from "../../shared/components/html_head";
 import { clientScriptsForModule } from "../../shared/clientScriptsForModule";
-import type { WebAuthAuthenticated } from "../../middleware/webAuthMiddleware";
-import type { ThemePreference } from "../../middleware/themePreferenceMiddleware";
+import type { WebAuthAuthenticated } from "../../middleware/auth/session";
+import type { ThemePreference } from "../../middleware/theme-preference";
 
 export type home_page_props = {
   title: string;

@@ -7,6 +7,7 @@ export type DateOrString = Date | string;
 export interface IInsertWebSessionParams {
   csrf_token: string;
   expires_at: DateOrString;
+  last_discord_authz_at: DateOrString;
   user_id: string;
 }
 
@@ -15,6 +16,7 @@ export interface IInsertWebSessionResult {
   csrf_token: string;
   expires_at: Date;
   id: string;
+  last_discord_authz_at: Date;
   user_id: string;
 }
 
@@ -24,14 +26,14 @@ export interface IInsertWebSessionQuery {
   result: IInsertWebSessionResult;
 }
 
-const insertWebSessionIR: any = {"usedParamSet":{"user_id":true,"csrf_token":true,"expires_at":true},"params":[{"name":"user_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":67,"b":75}]},{"name":"csrf_token","required":true,"transform":{"type":"scalar"},"locs":[{"a":78,"b":89}]},{"name":"expires_at","required":true,"transform":{"type":"scalar"},"locs":[{"a":92,"b":103}]}],"statement":"INSERT INTO web_sessions (user_id, csrf_token, expires_at)\nVALUES (:user_id!, :csrf_token!, :expires_at!)\nRETURNING id, user_id, csrf_token, expires_at"};
+const insertWebSessionIR: any = {"usedParamSet":{"user_id":true,"csrf_token":true,"expires_at":true,"last_discord_authz_at":true},"params":[{"name":"user_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":90,"b":98}]},{"name":"csrf_token","required":true,"transform":{"type":"scalar"},"locs":[{"a":101,"b":112}]},{"name":"expires_at","required":true,"transform":{"type":"scalar"},"locs":[{"a":115,"b":126}]},{"name":"last_discord_authz_at","required":true,"transform":{"type":"scalar"},"locs":[{"a":129,"b":151}]}],"statement":"INSERT INTO web_sessions (user_id, csrf_token, expires_at, last_discord_authz_at)\nVALUES (:user_id!, :csrf_token!, :expires_at!, :last_discord_authz_at!)\nRETURNING id, user_id, csrf_token, expires_at, last_discord_authz_at"};
 
 /**
  * Query generated from SQL:
  * ```
- * INSERT INTO web_sessions (user_id, csrf_token, expires_at)
- * VALUES (:user_id!, :csrf_token!, :expires_at!)
- * RETURNING id, user_id, csrf_token, expires_at
+ * INSERT INTO web_sessions (user_id, csrf_token, expires_at, last_discord_authz_at)
+ * VALUES (:user_id!, :csrf_token!, :expires_at!, :last_discord_authz_at!)
+ * RETURNING id, user_id, csrf_token, expires_at, last_discord_authz_at
  * ```
  */
 export const insertWebSession = new PreparedQuery<IInsertWebSessionParams,IInsertWebSessionResult>(insertWebSessionIR);
@@ -47,6 +49,7 @@ export interface IGetWebSessionWithUserResult {
   csrf_token: string;
   discord_id: string;
   id: string;
+  last_discord_authz_at: Date;
   user_id: string;
 }
 
@@ -56,7 +59,7 @@ export interface IGetWebSessionWithUserQuery {
   result: IGetWebSessionWithUserResult;
 }
 
-const getWebSessionWithUserIR: any = {"usedParamSet":{"id":true},"params":[{"name":"id","required":true,"transform":{"type":"scalar"},"locs":[{"a":125,"b":128}]}],"statement":"SELECT\n  s.id,\n  s.user_id,\n  s.csrf_token,\n  u.discord_id\nFROM web_sessions s\nJOIN users u ON u.id = s.user_id\nWHERE s.id = :id!\n  AND s.revoked_at IS NULL\n  AND s.expires_at > now()"};
+const getWebSessionWithUserIR: any = {"usedParamSet":{"id":true},"params":[{"name":"id","required":true,"transform":{"type":"scalar"},"locs":[{"a":152,"b":155}]}],"statement":"SELECT\n  s.id,\n  s.user_id,\n  s.csrf_token,\n  s.last_discord_authz_at,\n  u.discord_id\nFROM web_sessions s\nJOIN users u ON u.id = s.user_id\nWHERE s.id = :id!\n  AND s.revoked_at IS NULL\n  AND s.expires_at > now()"};
 
 /**
  * Query generated from SQL:
@@ -65,6 +68,7 @@ const getWebSessionWithUserIR: any = {"usedParamSet":{"id":true},"params":[{"nam
  *   s.id,
  *   s.user_id,
  *   s.csrf_token,
+ *   s.last_discord_authz_at,
  *   u.discord_id
  * FROM web_sessions s
  * JOIN users u ON u.id = s.user_id
@@ -74,6 +78,40 @@ const getWebSessionWithUserIR: any = {"usedParamSet":{"id":true},"params":[{"nam
  * ```
  */
 export const getWebSessionWithUser = new PreparedQuery<IGetWebSessionWithUserParams,IGetWebSessionWithUserResult>(getWebSessionWithUserIR);
+
+
+/** 'UpdateWebSessionLastDiscordAuthzAt' parameters type */
+export interface IUpdateWebSessionLastDiscordAuthzAtParams {
+  id: string;
+  last_discord_authz_at: DateOrString;
+}
+
+/** 'UpdateWebSessionLastDiscordAuthzAt' return type */
+export interface IUpdateWebSessionLastDiscordAuthzAtResult {
+  id: string;
+  last_discord_authz_at: Date;
+}
+
+/** 'UpdateWebSessionLastDiscordAuthzAt' query type */
+export interface IUpdateWebSessionLastDiscordAuthzAtQuery {
+  params: IUpdateWebSessionLastDiscordAuthzAtParams;
+  result: IUpdateWebSessionLastDiscordAuthzAtResult;
+}
+
+const updateWebSessionLastDiscordAuthzAtIR: any = {"usedParamSet":{"last_discord_authz_at":true,"id":true},"params":[{"name":"last_discord_authz_at","required":true,"transform":{"type":"scalar"},"locs":[{"a":48,"b":70}]},{"name":"id","required":true,"transform":{"type":"scalar"},"locs":[{"a":83,"b":86}]}],"statement":"UPDATE web_sessions\nSET last_discord_authz_at = :last_discord_authz_at!\nWHERE id = :id!\n  AND revoked_at IS NULL\n  AND expires_at > now()\nRETURNING id, last_discord_authz_at"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * UPDATE web_sessions
+ * SET last_discord_authz_at = :last_discord_authz_at!
+ * WHERE id = :id!
+ *   AND revoked_at IS NULL
+ *   AND expires_at > now()
+ * RETURNING id, last_discord_authz_at
+ * ```
+ */
+export const updateWebSessionLastDiscordAuthzAt = new PreparedQuery<IUpdateWebSessionLastDiscordAuthzAtParams,IUpdateWebSessionLastDiscordAuthzAtResult>(updateWebSessionLastDiscordAuthzAtIR);
 
 
 /** 'RevokeWebSession' parameters type */

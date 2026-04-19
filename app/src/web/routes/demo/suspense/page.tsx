@@ -1,7 +1,7 @@
 import { Suspense } from "@kitajs/html/suspense";
 import { html_head } from "../../../shared/components/html_head";
 import { clientScriptsForModule } from "../../../shared/clientScriptsForModule";
-import type { ThemePreference } from "../../../middleware/themePreferenceMiddleware";
+import type { ThemePreference } from "../../../middleware/theme-preference";
 import { delayed_snippet } from "./components/delayed_snippet";
 
 export type suspense_demo_page_props = {

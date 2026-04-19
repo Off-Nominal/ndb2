@@ -1,5 +1,5 @@
 import { html_head } from "../../shared/components/html_head";
-import type { ThemePreference } from "../../middleware/themePreferenceMiddleware";
+import type { ThemePreference } from "../../middleware/theme-preference";
 
 export type login_page_props = {
   /** Post-login destination (path only, validated). */

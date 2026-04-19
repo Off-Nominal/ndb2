@@ -1,6 +1,6 @@
 # Discord client plan (`discord.js`)
 
-**Status:** Not implemented. No `discord.js` client or guild/role checks in `app/` yet.
+**Status:** Web OAuth **authorization** (guild + allowed roles) uses the Discord Bot REST API via `app/src/domain/discord/` (`fetchGuildMember`, env-driven guild/roles). A long-lived `discord.js` client is still **not** wired; the service module is the single gateway to extend for member/profile lookups and can be backed by `discord.js` later without changing OAuth call sites.
 
 The web app needs a reliable way to fetch and display Discord user metadata (display name, avatar) and to enforce authorization rules based on **guild membership** and **roles**.
 
@@ -44,6 +44,10 @@ Important constraints:
 ### A small internal service wrapper
 
 Expose a narrow module API that the rest of the codebase uses (do not spread `discord.js` calls everywhere):
+
+**Current (`app/src/domain/discord/`):** `fetchGuildMember` (REST) and `readWebPortalAuthzConfig`; web routes call the gateway and enforce guild + role checks inline.
+
+**Planned on top of the same gateway:**
 
 - `discordService.getMemberProfile(discordId)` → `{ displayName, avatarUrl } | null`
 - `discordService.assertAuthorized(discordId, requirements)` → throws/returns error when:
@@ -108,9 +112,9 @@ This keeps auth concerns separate and allows:
 
 Requirements:
 - **Must be in guild**: if not, deny access (and show a helpful error page)
-- **Must have roles**: configurable via env or config file, e.g.:
-  - `NDB2_GUILD_ID`
-  - `NDB2_ALLOWED_ROLE_IDS` (comma-separated list)
+- **Must have roles**: configurable via env, e.g.:
+  - `OFFNOMDISCORD_GUILD_ID`
+  - `ROLE_ID_*` (one env var per allowed role snowflake; web portal reads all `ROLE_ID_` prefixes)
 
 Role-check strategy:
 - default to “must have at least one allowed role”

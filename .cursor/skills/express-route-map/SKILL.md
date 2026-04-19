@@ -58,3 +58,4 @@ parentRouter.use("/prefix", mapRoutes([getExample, postExample]));
 ## Related
 
 - **`middleware-patterns`** — request-scoped context on the web app (prefer Async Local Storage over mutating `req`).
+- **`middleware-naming`** — short `kebab-case` filenames (no redundant `web` / `middleware` in the name), `camelCase` exports.

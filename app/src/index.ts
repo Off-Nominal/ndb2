@@ -5,6 +5,7 @@ import SeasonMonitor from "@domain/seasons/SeasonMonitor";
 import { monitors as seasonMonitors } from "@domain/seasons/config";
 import { seasonsManager } from "@domain/seasons/SeasonManager";
 import pool from "@data/db";
+import { isDev } from "@shared/utils";
 import { createApp } from "./server/createApp";
 
 // Config
@@ -19,7 +20,7 @@ pool
     client.release();
   })
   .catch((err) => {
-    if (process.env.NODE_ENV === "dev") {
+    if (isDev()) {
       logger.error("Failed to connect to database. Ensure Docker is running.");
       process.exit(1);
     }

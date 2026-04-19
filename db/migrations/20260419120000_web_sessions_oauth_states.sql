@@ -15,7 +15,8 @@ CREATE TABLE web_sessions (
     created_at timestamptz NOT NULL DEFAULT now(),
     expires_at timestamptz NOT NULL,
     revoked_at timestamptz,
-    last_seen_at timestamptz
+    last_seen_at timestamptz,
+    last_discord_authz_at timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE INDEX web_sessions_user_id_idx ON web_sessions (user_id);

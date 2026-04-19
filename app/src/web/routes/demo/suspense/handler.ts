@@ -2,7 +2,7 @@ import { createElement } from "@kitajs/html";
 import { renderToStream } from "@kitajs/html/suspense";
 import { Router } from "express";
 import { Route } from "@shared/routerMap";
-import { getThemePreference } from "../../../middleware/themePreferenceMiddleware";
+import { getThemePreference } from "../../../middleware/theme-preference";
 import { suspense_demo_page } from "./page";
 
 export const SuspenseDemo: Route = (router: Router) => {

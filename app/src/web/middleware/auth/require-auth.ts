@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
-import { safeReturnTo } from "../auth/safeReturnTo";
-import { getWebAuth } from "./webAuthMiddleware";
+import { safeReturnTo } from "../../auth/safeReturnTo";
+import { getWebAuth } from "./session";
 
 /** Redirects anonymous users to the login page; preserves path in `returnTo`. */
 export const requireWebAuth: RequestHandler = (req, res, next) => {

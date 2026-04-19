@@ -5,7 +5,7 @@ import {
   parseThemeCookie,
   themePreferenceMiddleware,
   THEME_COOKIE_CONFIG,
-} from "./themePreferenceMiddleware";
+} from "./theme-preference";
 
 describe("themePreferenceMiddleware (cookie parsing)", () => {
   it("parseThemeCookie returns system when header missing", () => {
