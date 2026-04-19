@@ -1,9 +1,13 @@
 import { Suspense } from "@kitajs/html/suspense";
+import { html_head } from "../../../shared/components/html_head";
+import { clientScriptsForModule } from "../../../shared/clientScriptsForModule";
+import type { ThemePreference } from "../../../middleware/themePreferenceMiddleware";
 import { delayed_snippet } from "./components/delayed_snippet";
 
 export type suspense_demo_page_props = {
   /** Request id from {@link renderToStream}; required on every `Suspense` boundary. */
   rid: number | string;
+  theme: ThemePreference;
 };
 
 /**
@@ -12,12 +16,12 @@ export type suspense_demo_page_props = {
  */
 export function suspense_demo_page(props: suspense_demo_page_props): JSX.Element {
   return (
-    <html lang="en">
+    <html lang="en" data-theme={props.theme}>
       <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Suspense streaming (Kita Html)</title>
-        <script src="/assets/htmx.min.js" defer />
+        {html_head({
+          title: "Suspense streaming (Kita Html)",
+          clientScripts: clientScriptsForModule(__filename),
+        })}
       </head>
       <body>
         <p>

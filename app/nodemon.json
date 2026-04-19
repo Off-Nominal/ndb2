@@ -8,7 +8,14 @@
     "types",
     "../types",
     "dist",
-    "src/web/public/htmx.min.js"
+    "src/web/public/htmx.min.js",
+    "src/web/public/design-tokens.css",
+    "src/web/public/globals.css",
+    "src/web/public/compositions.css",
+    "src/web/public/utilities.css",
+    "src/web/public/blocks.css",
+    "src/web/public/routes",
+    "src/web/generated/**"
   ],
-  "ext": "ts,tsx,js,json"
+  "ext": "ts,tsx,js,json,css"
 }

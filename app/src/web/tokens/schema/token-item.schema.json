@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ndb2.local/schemas/design-token-item.json",
+  "title": "Design token",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "value"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Unique token id (e.g. brand.500, space.4, color.light.bg)."
+    },
+    "value": {
+      "type": "string",
+      "description": "Literal CSS value, or another token's `name` to emit as var(--… ) in generated CSS (build script resolves by matching `name`)."
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional human-readable note for docs or design tooling."
+    }
+  }
+}

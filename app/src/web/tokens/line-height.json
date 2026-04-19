@@ -1,0 +1,6 @@
+[
+  { "name": "leading.tight", "value": "1.15" },
+  { "name": "leading.snug", "value": "1.3" },
+  { "name": "leading.normal", "value": "1.5" },
+  { "name": "leading.relaxed", "value": "1.65" }
+]

@@ -1,0 +1,6 @@
+[
+  { "name": "weight.regular", "value": "400" },
+  { "name": "weight.medium", "value": "500" },
+  { "name": "weight.semibold", "value": "600" },
+  { "name": "weight.bold", "value": "700" }
+]

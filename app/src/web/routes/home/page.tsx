@@ -1,19 +1,48 @@
+import { html_head } from "../../shared/components/html_head";
+import { clientScriptsForModule } from "../../shared/clientScriptsForModule";
+import type { ThemePreference } from "../../middleware/themePreferenceMiddleware";
+
 export type home_page_props = {
   title: string;
   message: string;
+  theme: ThemePreference;
 };
 
 /** Full HTML document for `/` (Kitajs HTML JSX → string). */
 export function home_page(props: home_page_props): JSX.Element {
   return (
-    <html lang="en">
+    <html lang="en" data-theme={props.theme}>
       <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>{props.title}</title>
-        <script src="/assets/htmx.min.js" defer />
+        {html_head({
+          title: props.title,
+          clientScripts: clientScriptsForModule(__filename),
+        })}
       </head>
       <body>
+        <div class="theme-switcher">
+          <label for="theme-select">Appearance</label>
+          <select id="theme-select" aria-label="Color scheme">
+            <option
+              value="system"
+              {...(props.theme === "system" ? { selected: true } : {})}
+            >
+              System
+            </option>
+            <option
+              value="light"
+              {...(props.theme === "light" ? { selected: true } : {})}
+            >
+              Light
+            </option>
+            <option
+              value="dark"
+              {...(props.theme === "dark" ? { selected: true } : {})}
+            >
+              Dark
+            </option>
+          </select>
+        </div>
+
         <p>{props.message}</p>
 
         <p>

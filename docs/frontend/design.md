@@ -1,6 +1,6 @@
 # Design tokens (initial draft)
 
-**Status:** Reference values only. No token JSON → CSS pipeline or global stylesheet is wired into `app/src/web` yet.
+**Status:** Token JSON lives under `app/src/web/tokens/`; `build:tokens` emits `design-tokens.css`. CUBE layer sources live under `app/src/web/styles/`; `build:css` copies them and bundles colocated block CSS into `blocks.css` (see `docs/frontend/cube-css.md`). All ship via `html_head`.
 
 This document seeds our **base design tokens**. These values are a starting point and should be refined once we see real screens (tables, forms, detail pages).
 

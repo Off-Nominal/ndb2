@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { Route } from "@shared/routerMap";
+import { getThemePreference } from "../../middleware/themePreferenceMiddleware";
 import { lucky_number } from "./components/lucky_number";
 import { home_page } from "./page";
 
@@ -11,6 +12,7 @@ export const Home: Route = (router: Router) => {
         home_page({
           title: "NDB2",
           message: "welcome to the new ndb2 portal",
+          theme: getThemePreference(),
         }),
       );
       res.type("html").send(html);

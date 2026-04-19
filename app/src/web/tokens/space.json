@@ -1,0 +1,19 @@
+[
+  {
+    "name": "space.0",
+    "value": "0",
+    "description": "Spacing scale; values in rem assuming 16px root (4px base unit)."
+  },
+  { "name": "space.1", "value": "0.25rem", "description": "4px" },
+  { "name": "space.2", "value": "0.5rem", "description": "8px" },
+  { "name": "space.3", "value": "0.75rem", "description": "12px" },
+  { "name": "space.4", "value": "1rem", "description": "16px" },
+  { "name": "space.5", "value": "1.25rem", "description": "20px" },
+  { "name": "space.6", "value": "1.5rem", "description": "24px" },
+  { "name": "space.8", "value": "2rem", "description": "32px" },
+  { "name": "space.10", "value": "2.5rem", "description": "40px" },
+  { "name": "space.12", "value": "3rem", "description": "48px" },
+  { "name": "space.16", "value": "4rem", "description": "64px" },
+  { "name": "space.20", "value": "5rem", "description": "80px" },
+  { "name": "space.24", "value": "6rem", "description": "96px" }
+]

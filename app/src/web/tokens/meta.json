@@ -1,0 +1,17 @@
+[
+  {
+    "name": "meta.version",
+    "value": "0.1.0",
+    "description": "Design tokens package version for generated artifacts and cache busting."
+  },
+  {
+    "name": "meta.baseSpacingPx",
+    "value": "4",
+    "description": "Base spacing unit in px; space scale uses rem assuming a 16px root."
+  },
+  {
+    "name": "meta.rootFontPx",
+    "value": "16",
+    "description": "Assumed root font size in px for rem-based tokens."
+  }
+]
