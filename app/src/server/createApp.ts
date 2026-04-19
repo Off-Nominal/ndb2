@@ -2,9 +2,13 @@ import express, { type Express } from "express";
 import { isDev } from "@shared/utils";
 import { mountJsonApi } from "../api/mountJsonApi";
 import { mountWeb } from "../web/mountWeb";
+import { configureTrustProxy, installSecurityHeaders } from "./securityHeaders";
 
 export function createApp(): Express {
   const app = express();
+
+  configureTrustProxy(app);
+  installSecurityHeaders(app);
 
   if (isDev()) {
     void (async () => {
