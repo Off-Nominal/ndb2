@@ -64,4 +64,6 @@ Use **`safe`**, **`e` / `escape`**, and **`@kitajs/ts-html-plugin`** for unsafe 
 ## Related
 
 - **`express-route-map`** — `Route`, `mapRoutes`, `web/routes/index.ts`.
+- **`css-build`** — CUBE layers, design tokens, `html_head` stylesheet order, `/assets` static CSS.
+- **`cube-css-authoring`** — how to organize new CSS (which layer, colocation, `data-*` exceptions) when editing components or pages.
 - **`docs/frontend/project-structure.md`**, **`docs/frontend/overview.md`**.
