@@ -10,7 +10,7 @@ description: >-
 
 ## Rules
 
-1. **Filenames:** **`kebab-case.ts`**. Do not embed the words **`web`** or **`middleware`** in the name (the path `app/src/web/middleware/` already provides that context).
+1. **Filenames:** **`kebab-case.ts`** (or **`kebab-case.tsx`** when the module contains JSX, e.g. Kitajs markup). Do not embed the words **`web`** or **`middleware`** in the name (the path `app/src/web/middleware/` already provides that context).
 2. **Tests:** **`kebab-case.test.ts`** next to the module.
 3. **Exports:** **`camelCase`** for middleware (`themePreferenceMiddleware`), getters (`getWebAuth`), etc.
 
@@ -19,8 +19,8 @@ description: >-
 | File | Typical exports |
 |------|-----------------|
 | `theme-preference.ts` | `themePreferenceMiddleware`, `getThemePreference`, … |
-| `error-boundary.ts` | `webErrorHandler`, `wrapWebRouteWithErrorBoundary` |
-| `not-found.ts` | `webNotFoundMiddleware` |
+| `error-boundary.tsx` | `webErrorHandler`, `wrapWebRouteWithErrorBoundary` |
+| `not-found.tsx` | `webNotFoundMiddleware` |
 | `auth/session.ts` | `webAuthMiddleware`, `getWebAuth`, … |
 | `auth/require-auth.ts` | `requireWebAuth` |
 | `auth/session-cookie-utils.ts` | `parseSessionCookie`, `SESSION_COOKIE_CONFIG`, … |

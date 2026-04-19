@@ -1,7 +1,8 @@
 import type { ErrorRequestHandler, RequestHandler } from "express";
 import { createLogger } from "@mendahu/utilities";
-import { getThemePreference } from "./theme-preference";
 import { ErrorHtmxSnippet, ErrorPage } from "../shared/components/error_page";
+import { PageLayout } from "../shared/components/page_layout";
+import { getThemePreference } from "./theme-preference";
 
 const logger = createLogger({
   namespace: "WebErrorBoundary",
@@ -33,16 +34,17 @@ export const webErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   const theme = getThemePreference();
   const isHtmx = req.get("HX-Request") === "true";
   const errBody = "Please try again in a moment.";
+  const errTitle = "Something went wrong";
   const htmlPayload = isHtmx
     ? ErrorHtmxSnippet({
-        title: "Something went wrong",
+        title: errTitle,
         body: errBody,
       })
-    : ErrorPage({
-        theme,
-        title: "Something went wrong",
-        body: errBody,
-      });
+    : (
+        <PageLayout theme={theme} title={errTitle}>
+          <ErrorPage title={errTitle} body={errBody} />
+        </PageLayout>
+      );
 
   void Promise.resolve(htmlPayload).then(
     (html) => {

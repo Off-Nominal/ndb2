@@ -4,6 +4,8 @@ import { getWebAuth } from "../../middleware/auth/session";
 import { requireWebAuth } from "../../middleware/auth/require-auth";
 import { getThemePreference } from "../../middleware/theme-preference";
 import { wrapWebRouteWithErrorBoundary } from "../../middleware/error-boundary";
+import { PageLayout } from "../../shared/components/page_layout";
+import { clientScriptsForModule } from "../../shared/clientScriptsForModule";
 import { LuckyNumber } from "./components/lucky_number";
 import { HomePage } from "./page";
 
@@ -20,13 +22,15 @@ export const Home: Route = (router: Router) => {
       }
       const csrfHeadersJson = JSON.stringify({ "X-CSRF-Token": auth.csrfToken });
       const html = await Promise.resolve(
-        <HomePage
-          title="NDB2"
-          message="welcome to the new ndb2 portal"
+        <PageLayout
           theme={getThemePreference()}
-          auth={auth}
-          csrfHeadersJson={csrfHeadersJson}
-        />,
+          title="NDB2"
+          clientScripts={clientScriptsForModule(__filename)}
+          csrfMetaToken={auth.csrfToken}
+          hxHeaders={csrfHeadersJson}
+        >
+          <HomePage message="welcome to the new ndb2 portal" auth={auth} />
+        </PageLayout>,
       );
       res.type("html").send(html);
     }),
