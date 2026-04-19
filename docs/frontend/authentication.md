@@ -1,6 +1,6 @@
 # Authentication (Discord OAuth2)
 
-**Status:** Implemented in the web app: `/auth/discord`, `/auth/discord/callback`, `POST /auth/logout`, `web_sessions` + `oauth_login_states` tables, `ndb2_session` cookie, and `webAuthMiddleware` + `getWebAuth()` (AsyncLocalStorage). Use `requireWebAuth` on routes that must be signed in. Configure `DISCORD_OAUTH_*` env vars (see `app/.env.example`).
+**Status:** Implemented in the web app: `GET /login` (explicit Discord handoff), `/auth/discord`, `/auth/discord/callback`, `POST /auth/logout`, `web_sessions` + `oauth_login_states` tables, `ndb2_session` cookie, and `webAuthMiddleware` + `getWebAuth()` (AsyncLocalStorage). Use `requireWebAuth` on routes that must be signed in. Configure `DISCORD_OAUTH_*` env vars (see `app/.env.example`).
 
 All ndb2 users must have a Discord account. We do **not** manage passwords or identity ourselves.
 
@@ -42,6 +42,11 @@ Notes:
 ## Web app endpoints (proposed)
 
 Under `app/src/web/routes`:
+
+- `GET /login`
+  - optional query `returnTo` (path only, validated)
+  - if already signed in, redirects to `returnTo` (or `/` if absent)
+  - otherwise renders a page with a control that navigates to `/auth/discord?returnTo=…` (user explicitly starts OAuth)
 
 - `GET /auth/discord`
   - generates a `state` value
@@ -102,7 +107,7 @@ For `app/src/web`:
   - reads `ndb2_session` cookie
   - loads the session record
   - resolves the internal `userId` (UUID) and `discordId` (Discord snowflake)
-  - redirects to `/auth/discord` when missing/invalid
+  - redirects to `/login` (with `returnTo`) when missing/invalid; the login page links to `/auth/discord` for an explicit Discord handoff
 
 ### Request-scoped auth context (AsyncLocalStorage)
 
