@@ -1,6 +1,6 @@
 # CUBE CSS summary (for ndb2)
 
-**Status:** Methodology and intent only. Application CSS layers (global, composition, utilities, blocks) are not yet implemented under `web/public/` or equivalent.
+**Status:** Design tokens compile to `app/src/web/public/design-tokens.css` (CSS custom properties). Application CSS layers (composition, utilities, blocks) beyond that file are not yet implemented.
 
 This document summarizes the CUBE CSS methodology (Andy Bell) and captures how we intend to apply it in the ndb2 frontend.
 
@@ -108,7 +108,7 @@ At runtime, the app uses **CSS custom properties** for core tokens, such as:
 Then implement utilities that apply those tokens (or apply them directly in block CSS when appropriate).
 
 Recommended repo shape (subject to change when we wire the frontend build):
-- `docs/frontend/tokens/`: JSON sources of truth (e.g. `colors.json`, `spacing.json`, `type.json`, …)
+- `app/src/web/tokens/`: JSON sources of truth (e.g. `colors.json`, `space.json`, `font-size.json`, …)
 - `frontend/generated/` (or similar): generated CSS artifacts (committed or not—TBD)
 
 ### Composition utilities we’ll likely want early

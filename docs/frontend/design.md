@@ -1,6 +1,6 @@
 # Design tokens (initial draft)
 
-**Status:** Reference values only. No token JSON → CSS pipeline or global stylesheet is wired into `app/src/web` yet.
+**Status:** Token JSON lives under `app/src/web/tokens/`. `pnpm run build:tokens` (also part of `build` / `postinstall`) generates `app/src/web/public/design-tokens.css`, loaded from every page via `shared/components/html_head`. Utilities and composition CSS are not wired yet.
 
 This document seeds our **base design tokens**. These values are a starting point and should be refined once we see real screens (tables, forms, detail pages).
 

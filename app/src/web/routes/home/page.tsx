@@ -1,3 +1,5 @@
+import { html_head } from "../../shared/components/html_head";
+
 export type home_page_props = {
   title: string;
   message: string;
@@ -7,12 +9,7 @@ export type home_page_props = {
 export function home_page(props: home_page_props): JSX.Element {
   return (
     <html lang="en">
-      <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>{props.title}</title>
-        <script src="/assets/htmx.min.js" defer />
-      </head>
+      <head>{html_head({ title: props.title })}</head>
       <body>
         <p>{props.message}</p>
 

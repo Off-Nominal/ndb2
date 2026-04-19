@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ndb2.local/schemas/design-token-file.json",
+  "title": "Design token file",
+  "type": "array",
+  "items": { "$ref": "token-item.schema.json" },
+  "minItems": 1
+}

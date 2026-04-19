@@ -1,4 +1,5 @@
 import { Suspense } from "@kitajs/html/suspense";
+import { html_head } from "../../../shared/components/html_head";
 import { delayed_snippet } from "./components/delayed_snippet";
 
 export type suspense_demo_page_props = {
@@ -13,12 +14,7 @@ export type suspense_demo_page_props = {
 export function suspense_demo_page(props: suspense_demo_page_props): JSX.Element {
   return (
     <html lang="en">
-      <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Suspense streaming (Kita Html)</title>
-        <script src="/assets/htmx.min.js" defer />
-      </head>
+      <head>{html_head({ title: "Suspense streaming (Kita Html)" })}</head>
       <body>
         <p>
           <a href="/">← Home</a>

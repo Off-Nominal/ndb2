@@ -1,0 +1,9 @@
+[
+  { "name": "radius.0", "value": "0" },
+  { "name": "radius.xs", "value": "0.125rem", "description": "2px" },
+  { "name": "radius.sm", "value": "0.25rem", "description": "4px" },
+  { "name": "radius.md", "value": "0.5rem", "description": "8px" },
+  { "name": "radius.lg", "value": "0.75rem", "description": "12px" },
+  { "name": "radius.xl", "value": "1rem", "description": "16px" },
+  { "name": "radius.full", "value": "9999px", "description": "Pill or circle." }
+]

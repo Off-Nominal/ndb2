@@ -1,0 +1,5 @@
+[
+  { "name": "tracking.tight", "value": "-0.01em" },
+  { "name": "tracking.normal", "value": "0em" },
+  { "name": "tracking.wide", "value": "0.02em" }
+]

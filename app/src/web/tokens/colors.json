@@ -1,0 +1,89 @@
+[
+  {
+    "name": "brand.50",
+    "value": "#F2F8FC",
+    "description": "Moonstone blue scale (tint)."
+  },
+  { "name": "brand.100", "value": "#DCECF6" },
+  { "name": "brand.200", "value": "#BFDCEC" },
+  { "name": "brand.300", "value": "#9CC7E0" },
+  { "name": "brand.400", "value": "#86B6D2" },
+  {
+    "name": "brand.500",
+    "value": "#73A6C4",
+    "description": "Primary brand (Moonstone Blue)."
+  },
+  { "name": "brand.600", "value": "#5B8EAC" },
+  { "name": "brand.700", "value": "#477392" },
+  { "name": "brand.800", "value": "#345877" },
+  { "name": "brand.900", "value": "#233B52" },
+  { "name": "neutral.0", "value": "#FFFFFF" },
+  {
+    "name": "neutral.50",
+    "value": "#F8FAFC",
+    "description": "Neutral scale for surfaces and text."
+  },
+  { "name": "neutral.100", "value": "#F1F5F9" },
+  { "name": "neutral.200", "value": "#E2E8F0" },
+  { "name": "neutral.300", "value": "#CBD5E1" },
+  { "name": "neutral.400", "value": "#94A3B8" },
+  { "name": "neutral.500", "value": "#64748B" },
+  { "name": "neutral.600", "value": "#475569" },
+  { "name": "neutral.700", "value": "#334155" },
+  { "name": "neutral.800", "value": "#1F2937" },
+  { "name": "neutral.900", "value": "#0F172A" },
+  {
+    "name": "success.50",
+    "value": "#ECFDF5",
+    "description": "Semantic success (states and messaging)."
+  },
+  { "name": "success.500", "value": "#10B981" },
+  { "name": "success.700", "value": "#047857" },
+  { "name": "warning.50", "value": "#FFFBEB" },
+  { "name": "warning.500", "value": "#F59E0B" },
+  { "name": "warning.700", "value": "#B45309" },
+  { "name": "danger.50", "value": "#FEF2F2" },
+  { "name": "danger.500", "value": "#EF4444" },
+  { "name": "danger.700", "value": "#B91C1C" },
+  { "name": "info.50", "value": "#EFF6FF" },
+  { "name": "info.500", "value": "#3B82F6" },
+  { "name": "info.700", "value": "#1D4ED8" },
+  {
+    "name": "color.light.bg",
+    "value": "neutral.50",
+    "description": "Light theme: page background. Value references a palette token name."
+  },
+  { "name": "color.light.surface", "value": "neutral.0" },
+  { "name": "color.light.surfaceMuted", "value": "neutral.100" },
+  { "name": "color.light.border", "value": "neutral.200" },
+  { "name": "color.light.text", "value": "neutral.900" },
+  { "name": "color.light.textMuted", "value": "neutral.600" },
+  { "name": "color.light.link", "value": "brand.700" },
+  { "name": "color.light.focusRing", "value": "brand.500" },
+  { "name": "color.light.primary", "value": "brand.500" },
+  { "name": "color.light.primaryHover", "value": "brand.600" },
+  { "name": "color.light.primaryActive", "value": "brand.700" },
+  {
+    "name": "color.dark.bg",
+    "value": "neutral.900",
+    "description": "Dark theme surface and text aliases."
+  },
+  { "name": "color.dark.surface", "value": "neutral.800" },
+  { "name": "color.dark.surfaceMuted", "value": "neutral.700" },
+  { "name": "color.dark.border", "value": "neutral.600" },
+  { "name": "color.dark.text", "value": "neutral.50" },
+  { "name": "color.dark.textMuted", "value": "neutral.300" },
+  { "name": "color.dark.link", "value": "brand.300" },
+  { "name": "color.dark.focusRing", "value": "brand.400" },
+  { "name": "color.dark.primary", "value": "brand.400" },
+  { "name": "color.dark.primaryHover", "value": "brand.300" },
+  { "name": "color.dark.primaryActive", "value": "brand.200" },
+  {
+    "name": "color.semantic.success",
+    "value": "success.500",
+    "description": "Semantic aliases; themeable later. Values reference palette token names."
+  },
+  { "name": "color.semantic.warning", "value": "warning.500" },
+  { "name": "color.semantic.danger", "value": "danger.500" },
+  { "name": "color.semantic.info", "value": "info.500" }
+]
