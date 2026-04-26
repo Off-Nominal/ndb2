@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
-import { ErrorHtmxSnippet, ErrorPage } from "../shared/components/error_page";
-import { PageLayout } from "../shared/components/page_layout";
+import { ErrorHtmxSnippet, ErrorPage } from "../shared/components/error-page";
+import { PageLayout } from "../shared/components/page-layout";
 import { getColorScheme, getThemePreference } from "./theme-preference";
 import { wrapWebRouteWithErrorBoundary } from "./error-boundary";
 

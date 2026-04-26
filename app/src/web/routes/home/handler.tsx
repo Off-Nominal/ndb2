@@ -4,9 +4,9 @@ import { getWebAuth } from "../../middleware/auth/session";
 import { requireWebAuth } from "../../middleware/auth/require-auth";
 import { getColorScheme, getThemePreference } from "../../middleware/theme-preference";
 import { wrapWebRouteWithErrorBoundary } from "../../middleware/error-boundary";
-import { AuthenticatedPageLayout } from "../../shared/components/page_layout";
+import { AuthenticatedPageLayout } from "../../shared/components/page-layout";
 import { clientScriptsForModule } from "../../shared/clientScriptsForModule";
-import { LuckyNumber } from "./components/lucky_number";
+import { LuckyNumber } from "./components/lucky-number";
 import { HomePage } from "./page";
 
 /** Registers `/` and HTMX-targeted `GET /home/lucky-number`. */

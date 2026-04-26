@@ -1,7 +1,7 @@
-import type { WebAuthAuthenticated } from "../../middleware/auth/session";
-import { Button } from "./button";
+import type { WebAuthAuthenticated } from "../../../middleware/auth/session";
+import { Button } from "../button";
 
-export type DefaultSiteNavProps = {
+export type NavigationMenuProps = {
   auth: WebAuthAuthenticated;
 };
 
@@ -10,7 +10,7 @@ export type DefaultSiteNavProps = {
  * on {@link AuthenticatedPageLayout} ({@link PageLayout} is main-only and has no site nav).
  * Logout matches the home page: POST to `/auth/logout` with the session CSRF token.
  */
-export function DefaultSiteNav(props: DefaultSiteNavProps): JSX.Element {
+export function NavigationMenu(props: NavigationMenuProps): JSX.Element {
   return (
     <nav class="[ site-nav ]">
       <ul class="[ stack ] [ list-plain ]">
@@ -22,6 +22,9 @@ export function DefaultSiteNav(props: DefaultSiteNavProps): JSX.Element {
         </li>
         <li>
           <Button href="/seasons">Seasons</Button>
+        </li>
+        <li>
+          <Button href="/profile">Profile</Button>
         </li>
       </ul>
       <div>

@@ -1,3 +1,8 @@
+.page-layout {
+  --center-column-max-width: 1200px;
+  --center-column-gutter-inline: var(--space-8);
+}
+
 /**
  * App shell: right-hand site nav — drawer (mobile), collapsible column (tablet), static column (desktop).
  * Toggled with a single checkbox (no JS). Breakpoints: 48rem / 64rem.

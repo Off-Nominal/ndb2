@@ -1,8 +1,9 @@
 ---
 name: kitajs-html-web
 description: >-
-  NDB2 web rendering with @kitajs/html: PascalCase Kitajs components, snake_case
-  filenames, feature folders (page.tsx, handler.tsx, tests/, components/*.test.ts), HTMX,
+  NDB2 web rendering with @kitajs/html: PascalCase Kitajs components, kebab-case
+  component files in one folder per component (name/name.tsx, name.css, name.test.tsx, index.ts), feature
+  folders (page.tsx, handler.tsx, tests/), HTMX,
   shared/utils (mergeClass, merge_class.ts), Suspense + renderToStream. Use when adding
   or changing server-rendered UI under app/src/web; not for React client apps or EJS.
 ---
@@ -16,26 +17,26 @@ description: >-
 - **`page.tsx`** — main document or screen; export **`HomePage`**, **`SuspenseDemoPage`**, etc. (**PascalCase**). Props types **`HomePageProps`**, … Optional **`page.css`** beside **`page.tsx`** for block styles scoped to that route (see **`cube-css-authoring`**). Optional **`page.client.js`** (or other **`*.client.js`**) for small deferred scripts — colocation, build, and **`HtmlHead`** wiring: **`web-client-js`** (uses **`clientScriptsForModule(__filename)`** from **`shared/clientScriptsForModule.ts`**).
 - **`handler.tsx`** — Express **`Route`**; export name stays **PascalCase** (`Home`, `SuspenseDemo`). Use **JSX** for page/components (`<HomePage … />`, `<LoginPage … />`) so this file is TSX.
 - **`tests/`** — **route/page-level** tests (e.g. supertest on `mountWeb` for that feature’s paths).
-- **`components/`** — area-local Kitajs modules; **snake_case** filenames (`lucky_number.tsx`) exporting **PascalCase** components (`LuckyNumber`).
+- **`components/<name>/`** — area-local Kitajs modules: **`lucky-number/lucky-number.tsx`**, colocated **`.css`**, optional **`lucky-number.test.tsx`**, and **`index.ts`** re-exporting the public API so importers can use **`import { LuckyNumber } from "./components/lucky-number"`** (PascalCase export **`LuckyNumber`**).
 
-Cross-cutting UI → **`app/src/web/shared/components/`** (create when the first reuse appears). Small **TypeScript** helpers (no JSX) that support markup/Kita components live in **`app/src/web/shared/utils/`** — e.g. **`mergeClass`** in **`merge_class.ts`** to concatenate a block’s **`[ bracket ]`** **`class`** with optional extra groups from props (used by **`Button`**; see also **`cube-css-authoring`**).
+Cross-cutting UI → **`app/src/web/shared/components/<name>/`** (same **folder-per-component** pattern: **`button/button.tsx`**, **`page-layout/page-layout.css`**, **`index.ts`**). Small **TypeScript** helpers (no JSX) that support markup/Kita components live in **`app/src/web/shared/utils/`** — e.g. **`mergeClass`** in **`merge_class.ts`** to concatenate a block’s **`[ bracket ]`** **`class`** with optional extra groups from props (used by **`Button`**; see also **`cube-css-authoring`**).
 
-**`PageLayout`** / **`AuthenticatedPageLayout`** (`page_layout.tsx`) — shared **`<head>`** and **`[ glass-background ]`** on **`body`**. **`PageLayout`** is **main column only** (login, 404, OAuth error pages, etc. — no site nav). **`AuthenticatedPageLayout`** takes **`auth`** ( **`WebAuthAuthenticated`** ) and adds the right-hand **site nav** (drawer on small viewports, collapsible column on tablet, fixed column on wide — no JS) + **`main#main`** with **`.center`**. **`DefaultSiteNav`** uses **`auth`** for the sign-out form (POST `/auth/logout` + CSRF, same as the home page). Optional **`navigation`** overrides **`DefaultSiteNav`**. Colocated block styles: **`page_layout.css`**.
+**`PageLayout`** / **`AuthenticatedPageLayout`** (`page-layout/page-layout.tsx` via `page-layout/index.ts`) — shared **`<head>`** and **`[ glass-background ]`** on **`body`**. **`PageLayout`** is **main column only** (login, 404, OAuth error pages, etc. — no site nav). **`AuthenticatedPageLayout`** takes **`auth`** ( **`WebAuthAuthenticated`** ) and adds the right-hand **site nav** (drawer on small viewports, collapsible column on tablet, fixed column on wide — no JS) + **`main#main`** with **`.center`**. Default **`NavigationMenu`** uses **`auth`** for the sign-out form (POST `/auth/logout` + CSRF, same as the home page). Optional **`navigation`** overrides that default. Colocated block styles: **`page-layout/page-layout.css`** (includes **`.page-layout`** layout tokens for **`.center`**).
 
 Official concepts: [Async components and Suspense](https://html.kitajs.org/guide/introduction#async-components-and-suspense) (v5 docs; API matches `@kitajs/html` **v4.x** via `@kitajs/html/suspense`).
 
-## Naming (PascalCase components, snake_case files)
+## Naming (PascalCase components, kebab-case component files)
 
-- **Filenames** stay **snake_case** (`page_layout.tsx`, `lucky_number.tsx`) for path consistency.
+- **Component** `.tsx` / colocated **`.css`** / **`.test.ts`** or **`.test.tsx`**: **kebab-case** file names **inside a folder** named for the component (`page-layout/page-layout.tsx`, `lucky-number/lucky-number.tsx`, `html-head/html-head.tsx`). **Barrel** **`index.ts`** re-exports the public API. Top-level **route** files such as **`page.tsx`** and **`handler.tsx`** stay as named by convention, not kebab renames.
 - **Exports:** **`PageLayout`**, **`HtmlHead`**, **`LuckyNumber`**; props types **`PageLayoutProps`**, **`HtmlHeadProps`**, …
-- **JSX:** Use **`<PageLayout>`**, **`<HtmlHead />`**, etc. The TS JSX transform treats **lowercase** tags as intrinsic HTML, so **`page_layout`** is not a valid component tag.
+- **JSX:** Use **`<PageLayout>`**, **`<HtmlHead />`**, etc. The TS JSX transform treats **lowercase** tags as intrinsic HTML, so a kebab file name is **not** a valid component tag (use **PascalCase** imports/exports for components).
 - **Function-call form** is still valid: **`PageLayout({ children: … })`**, **`HtmlHead({ title: "…" })`**, or **`createElement(SuspenseDemoPage, props)`** in handlers.
 - **Async children under `Suspense`** often use a **call** so the promise is explicit: **`{DelayedSnippet({ delayMs: 750, label: "A" })}`**.
 
 ## Tests
 
 - **`routes/<area>/tests/*.test.ts`** — HTTP behavior for that feature’s paths.
-- **`routes/<area>/components/foo.test.ts`** — colocated next to **`foo.tsx`** (e.g. `banana.tsx` + `banana.test.ts`).
+- **`routes/<area>/components/foo/foo.test.ts(x)`** — colocated in **`foo/`** next to **`foo.tsx`**.
 - **`mountWeb.test.ts`** — app-level concerns (e.g. static `/assets`); avoid duplicating feature tests here.
 
 ## HTMX attribute types

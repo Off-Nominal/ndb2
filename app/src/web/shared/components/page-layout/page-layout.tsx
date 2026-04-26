@@ -1,14 +1,14 @@
-import type { WebAuthAuthenticated } from "../../middleware/auth/session";
-import type { ColorScheme, ThemePreference } from "../../middleware/theme-preference";
-import type { HtmlHeadProps } from "./html_head";
-import { HtmlHead } from "./html_head";
-import { DefaultSiteNav } from "./site_nav";
+import type { WebAuthAuthenticated } from "../../../middleware/auth/session";
+import type { ColorScheme, ThemePreference } from "../../../middleware/theme-preference";
+import type { HtmlHeadProps } from "../html-head";
+import { HtmlHead } from "../html-head";
+import { NavigationMenu } from "../site-nav";
 
 const SITE_NAV_REVEAL_ID = "app-site-nav-reveal";
 
 /**
  * Full-document shell (markup-driven CUBE — see cube-css-authoring skill).
- * `app-shell__grid` + `page-layout`: main + right-nav grid; on wide/desktop see `page_layout.css` comments.
+ * `app-shell__grid` + `page-layout`: main + right-nav grid; on wide/desktop see `page-layout.css` comments.
  */
 const SHELL_GRID_CLASSES = "[ app-shell__grid ] [ page-layout ]";
 
@@ -27,7 +27,7 @@ export type PageLayoutProps = HtmlHeadProps & {
 export type AuthenticatedPageLayoutProps = PageLayoutProps & {
   /** Session (CSRF for default nav sign-out, etc.). */
   auth: WebAuthAuthenticated;
-  /** Right column / drawer; defaults to {@link DefaultSiteNav} with `auth`. */
+  /** Right column / drawer; defaults to {@link NavigationMenu} with `auth`. */
   navigation?: JSX.Element;
 };
 
@@ -75,7 +75,7 @@ export function PageLayout(props: PageLayoutProps): JSX.Element {
  * (and scrim, tab, HTMX `hx-headers` on `body` when provided).
  */
 export function AuthenticatedPageLayout(props: AuthenticatedPageLayoutProps): JSX.Element {
-  const { children, auth, navigation = <DefaultSiteNav auth={auth} />, ...rest } = props;
+  const { children, auth, navigation = <NavigationMenu auth={auth} />, ...rest } = props;
   return (
     <DocumentFrame
       {...rest}

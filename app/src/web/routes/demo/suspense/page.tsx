@@ -1,5 +1,5 @@
 import { Suspense } from "@kitajs/html/suspense";
-import { DelayedSnippet } from "./components/delayed_snippet";
+import { DelayedSnippet } from "./components/delayed-snippet";
 
 export type SuspenseDemoPageProps = {
   /** Request id from {@link renderToStream}; required on every `Suspense` boundary. */

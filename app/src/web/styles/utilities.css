@@ -14,7 +14,7 @@
  * Full “display glass” stack: opaque `color-bg` base + grid + soft radials. Shared by `body` and
  * mobile/tablet nav (a **second** sheet, same skin, stacked on the first). Diagonal uses an
  * **opaque** tint (`color-text` on `color-bg`); do not use frosted `color-surface` here — that
- * was the translucent white/dark haze. See `page_layout.css`: wide/desktop nav is **not** a
+ * was the translucent white/dark haze. See `page-layout.css`: wide/desktop nav is **not** a
  * second layer (transparent, one canvas from `body` only).
  */
 .glass-background {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DelayedSnippet } from "./delayed_snippet";
+import { DelayedSnippet } from "./delayed-snippet";
 
 describe("DelayedSnippet", () => {
   it("resolves to HTML containing the label", async () => {

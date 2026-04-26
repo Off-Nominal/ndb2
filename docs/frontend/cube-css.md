@@ -1,6 +1,6 @@
 # CUBE CSS summary (for ndb2)
 
-**Status:** The web build emits five stylesheets under `app/src/web/public/` (served at `/assets/`): `design-tokens.css` (generated from JSON), `globals.css`, `compositions.css`, `utilities.css` (copied from `app/src/web/styles/`), and `blocks.css` (concatenated from colocated `*.css` next to components). All are linked from `app/src/web/shared/components/html_head.tsx` (**`HtmlHead`**) in cascade order. For an agent-oriented summary of the full pipeline (scripts, pnpm, nodemon, CUBE mapping), see `.cursor/skills/css-build/SKILL.md`. For **where to put CSS when authoring** pages and components (globals vs compositions vs utilities vs colocated blocks), see `.cursor/skills/cube-css-authoring/SKILL.md`.
+**Status:** The web build emits five stylesheets under `app/src/web/public/` (served at `/assets/`): `design-tokens.css` (generated from JSON), `globals.css`, `compositions.css`, `utilities.css` (copied from `app/src/web/styles/`), and `blocks.css` (concatenated from colocated `*.css` next to components). All are linked from `app/src/web/shared/components/html-head/html-head.tsx` (**`HtmlHead`**) in cascade order. For an agent-oriented summary of the full pipeline (scripts, pnpm, nodemon, CUBE mapping), see `.cursor/skills/css-build/SKILL.md`. For **where to put CSS when authoring** pages and components (globals vs compositions vs utilities vs colocated blocks), see `.cursor/skills/cube-css-authoring/SKILL.md`.
 
 This document summarizes the CUBE CSS methodology (Andy Bell) and captures how we intend to apply it in the ndb2 frontend.
 
@@ -119,7 +119,7 @@ Then implement utilities that apply those tokens (or apply them directly in bloc
 
 **Build:** `pnpm run build:css` runs `app/scripts/build-web-css.mjs` (layer copy + block bundle). `pnpm run build` runs `build:tokens` then `build:css`. **`public/` copies are generated**—edit the `styles/` sources or colocated block files, then rebuild.
 
-**Colocation:** Place one stylesheet next to the Kitajs component (e.g. `routes/home/components/lucky_number.css` beside `lucky_number.tsx`). Files are concatenated in **lexicographic path order**; each section is prefixed with `/* ndb2:block: relative/path.css */` in the bundle.
+**Colocation:** Place one stylesheet next to the Kitajs component (e.g. `routes/home/components/lucky-number.css` beside `lucky-number.tsx`). Files are concatenated in **lexicographic path order**; each section is prefixed with `/* ndb2:block: relative/path.css */` in the bundle.
 
 ### Theme (light / dark / system)
 

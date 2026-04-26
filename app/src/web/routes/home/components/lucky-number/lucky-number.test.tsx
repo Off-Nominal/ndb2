@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { LuckyNumber } from "./lucky_number";
+import { LuckyNumber } from "./lucky-number";
 
 describe("LuckyNumber", () => {
   it("renders the value in a span", () => {

@@ -5,7 +5,7 @@ import { getWebAuth } from "../../../middleware/auth/session";
 import { getColorScheme, getThemePreference } from "../../../middleware/theme-preference";
 import { requireWebAuth } from "../../../middleware/auth/require-auth";
 import { wrapWebRouteWithErrorBoundary } from "../../../middleware/error-boundary";
-import { AuthenticatedPageLayout } from "../../../shared/components/page_layout";
+import { AuthenticatedPageLayout } from "../../../shared/components/page-layout";
 import { clientScriptsForModule } from "../../../shared/clientScriptsForModule";
 import { SuspenseDemoPage } from "./page";
 

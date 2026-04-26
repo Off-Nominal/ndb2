@@ -1,7 +1,7 @@
 import { createElement } from "@kitajs/html";
 import { describe, expect, it } from "vitest";
-import type { WebAuthAuthenticated } from "../../middleware/auth/session";
-import { AuthenticatedPageLayout, PageLayout } from "./page_layout";
+import type { WebAuthAuthenticated } from "../../../middleware/auth/session";
+import { AuthenticatedPageLayout, PageLayout } from "./page-layout";
 
 const testAuth: WebAuthAuthenticated = {
   status: "authenticated",

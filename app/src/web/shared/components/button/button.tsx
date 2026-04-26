@@ -1,5 +1,5 @@
 import type { Children } from "@kitajs/html";
-import { mergeClass } from "../utils/merge_class.js";
+import { mergeClass } from "../../utils/merge_class.js";
 
 type NativeButton = Omit<JSX.IntrinsicElements["button"], "class" | "children"> & {
   children: Children;

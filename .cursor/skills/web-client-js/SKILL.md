@@ -35,7 +35,7 @@ description: >-
 ## Wiring pages
 
 1. Run **`pnpm run build:client-js`** (or full **`pnpm run build`** / **`postinstall`** — it runs after **`build:css`**).
-2. In **`page.tsx`**, pass into [`HtmlHead`](app/src/web/shared/components/html_head.tsx):
+2. In **`page.tsx`**, pass into [`HtmlHead`](app/src/web/shared/components/html-head/html-head.tsx):
 
    **`clientScripts: clientScriptsForModule(__filename)`**
 

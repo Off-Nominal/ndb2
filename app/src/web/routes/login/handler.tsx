@@ -4,7 +4,7 @@ import { safeReturnTo } from "../../auth/safeReturnTo";
 import { getWebAuth } from "../../middleware/auth/session";
 import { getColorScheme, getThemePreference } from "../../middleware/theme-preference";
 import { wrapWebRouteWithErrorBoundary } from "../../middleware/error-boundary";
-import { PageLayout } from "../../shared/components/page_layout";
+import { PageLayout } from "../../shared/components/page-layout";
 import { LoginPage } from "./page";
 
 /** Public `GET /login` with explicit control to start Discord OAuth. */
