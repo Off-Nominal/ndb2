@@ -1,0 +1,30 @@
+/* Block: default site nav — fill aside; sign-out `form` at bottom (structural `& > form`, no extra BEM class). */
+
+/* `aside` host: not nested under `nav` in the DOM, but this rule exists only to size the next column — */
+.app-nav {
+  /* layout */
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* — `nav` block: all subtree rules nested here — */
+.site-nav {
+  /* layout */
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
+
+  & * {
+    /* layout */
+    display: block;
+    width: 100%;
+  }
+
+  & > :last-child {
+    margin-block-start: auto;
+  }
+}

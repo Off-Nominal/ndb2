@@ -6,7 +6,7 @@ export type HomePageProps = {
   auth: WebAuthAuthenticated;
 };
 
-/** Body content for `/` (Kitajs HTML JSX → string); document shell comes from {@link PageLayout} in the handler. */
+/** Body content for `/` (Kitajs HTML JSX → string); document shell is {@link AuthenticatedPageLayout} in the handler. */
 export function HomePage(props: HomePageProps): JSX.Element {
   const theme = getThemePreference();
   const colorScheme = getColorScheme();

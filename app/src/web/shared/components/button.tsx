@@ -16,9 +16,10 @@ type LinkButton = Omit<JSX.IntrinsicElements["a"], "class" | "children"> & {
 
 export type ButtonProps = NativeButton | LinkButton;
 
-const BASE_CLASS = "[ button ]";
+/** Compositions → utilities → blocks: `screen-element` (utility) then `button` (block). */
+const BASE_CLASS = "[ screen-element ] [ button ]";
 
-/** Theme-accent control: subtle corners (`--radius-xs`), soft edge glow (glass), primary border. */
+/** Theme-accent control; `screen-element` is the “glass screen” border/glow; `button` is block layout/type. */
 export function Button(props: ButtonProps): JSX.Element {
   if ("href" in props && props.href != null) {
     const { children, class: className, href, ...rest } = props;

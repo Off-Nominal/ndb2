@@ -12,6 +12,6 @@
   padding-inline: var(--center-column-gutter-inline, var(--space-4));
 }
 
-.stack * + * {
+.stack > * + * {
   margin-block-start: var(--stack-space, 1.5em);
 }

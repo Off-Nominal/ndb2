@@ -20,7 +20,7 @@ description: >-
 
 Cross-cutting UI → **`app/src/web/shared/components/`** (create when the first reuse appears). Small **TypeScript** helpers (no JSX) that support markup/Kita components live in **`app/src/web/shared/utils/`** — e.g. **`mergeClass`** in **`merge_class.ts`** to concatenate a block’s **`[ bracket ]`** **`class`** with optional extra groups from props (used by **`Button`**; see also **`cube-css-authoring`**).
 
-**`PageLayout`** (`page_layout.tsx`) — full document shell: **`HtmlHead`**, `body.app-bg-glass`, checkbox-driven **right-hand site nav** (drawer on small viewports, collapsible column on tablet, fixed column on wide screens — no JS) + **`main#main`** with an inner **`.center`** for primary content. Optional **`navigation`** prop overrides the default **`DefaultSiteNav`** (`site_nav.tsx`). Colocated block styles: **`page_layout.css`**.
+**`PageLayout`** / **`AuthenticatedPageLayout`** (`page_layout.tsx`) — shared **`<head>`** and **`[ glass-background ]`** on **`body`**. **`PageLayout`** is **main column only** (login, 404, OAuth error pages, etc. — no site nav). **`AuthenticatedPageLayout`** takes **`auth`** ( **`WebAuthAuthenticated`** ) and adds the right-hand **site nav** (drawer on small viewports, collapsible column on tablet, fixed column on wide — no JS) + **`main#main`** with **`.center`**. **`DefaultSiteNav`** uses **`auth`** for the sign-out form (POST `/auth/logout` + CSRF, same as the home page). Optional **`navigation`** overrides **`DefaultSiteNav`**. Colocated block styles: **`page_layout.css`**.
 
 Official concepts: [Async components and Suspense](https://html.kitajs.org/guide/introduction#async-components-and-suspense) (v5 docs; API matches `@kitajs/html` **v4.x** via `@kitajs/html/suspense`).
 

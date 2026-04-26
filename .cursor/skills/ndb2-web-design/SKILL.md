@@ -23,7 +23,7 @@ Deeper token history and hex tables (may lag named schemes): [`docs/frontend/des
 
 ## Layered glass (base screen vs content)
 
-- **`body.app-bg-glass`** (see **`utilities.css`**, shared with **`.app-glass-skin`**) is the **base** display glass: gradient, grid, accent radials, **opaque** diagonal (no frosted `color-surface` in that stack). On **phone/tablet** the right nav reuses **`.app-glass-skin`** so it reads as a **second sheet** sliding on top, same treatment as the first. On **wide/desktop** the **nav column** is not a second stack—**transparent**, side by side on the single body layer.
+- **`body`** + **`[ glass-background ]`** (see **`utilities.css`**) is the **base** display glass: gradient, grid, accent radials, **opaque** diagonal (no frosted `color-surface` in that stack). On **phone/tablet** the right nav reuses the same **`.glass-background`** (second sheet on top, same skin). On **wide/desktop** the **nav column** is not a second stack—**transparent**, side by side on the single body layer.
 - **Foreground UI** (inputs, cards, table chrome) still uses translucency via **`--color-surface*`** in **`globals.css`** where appropriate.
 - **Do not** stack another full-page opaque background on the main column—let the shell read as one continuous display. New blocks should default to translucent surfaces or borders-only until a solid is justified.
 
@@ -64,4 +64,4 @@ For **implementation** details (file paths, `Set-Cookie`, client script duplicat
 
 - **`css-build`** — `build:tokens` / `build:css`, `design-tokens.css` output, `HtmlHead` order, when to run builds.
 - **`cube-css-authoring`** — which stylesheet layer to extend; still use **semantic** `var(--color-*)` in hand-written CSS.
-- **`kitajs-html-web`** — `PageLayout` passes `theme` and `colorScheme` into the document.
+- **`kitajs-html-web`** — `PageLayout` / `AuthenticatedPageLayout` pass `theme` and `colorScheme` into the document; only the authenticated layout includes site nav.

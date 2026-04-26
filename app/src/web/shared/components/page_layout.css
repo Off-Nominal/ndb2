@@ -44,6 +44,11 @@ input.app-nav__state:checked + .app-nav__scrim {
   min-width: 0;
 }
 
+/* Simple shell: one main column only (no site nav) — e.g. login, OAuth errors, 404, 5xx. */
+.app-shell__main--solo {
+  min-height: 100dvh;
+}
+
 /* ---- Default site nav (inside aside) — list reset: `list-plain` in utilities.css; links: `Button` ---- */
 
 /* ---- Drawer + tab: tab is the left edge of the panel (phone/tablet) ---- */

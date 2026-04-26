@@ -115,6 +115,8 @@ Then HTMX (`htmx.min.js`).
 
 **Block bundle order:** Lexicographic sort of file paths. Add block CSS beside `*.tsx`; run `build:css` or `build`; do not hand-edit `public/blocks.css`.
 
+**Authoring style:** Layer and block sources may use **native CSS nesting** (`&` for pseudo-states, **and** for child/element rules under a single block root so related selectors are not split across many top-level stanzas). The script **copies** `globals.css` / `compositions.css` / `utilities.css` **verbatim** and **concatenates** block files without transforming CSS. See **`cube-css-authoring`**: **Nesting states in the parent**, **Nesting child and element rules under the block root**, and **Sectioning a block file**.
+
 ## Route colocated client JS
 
 See **`web-client-js`** for colocation, `build-client-js.mjs`, generated **`routeClientScripts.ts`**, **`/assets/routes/...`**, and **`HtmlHead`** wiring.

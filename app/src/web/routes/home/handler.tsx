@@ -4,7 +4,7 @@ import { getWebAuth } from "../../middleware/auth/session";
 import { requireWebAuth } from "../../middleware/auth/require-auth";
 import { getColorScheme, getThemePreference } from "../../middleware/theme-preference";
 import { wrapWebRouteWithErrorBoundary } from "../../middleware/error-boundary";
-import { PageLayout } from "../../shared/components/page_layout";
+import { AuthenticatedPageLayout } from "../../shared/components/page_layout";
 import { clientScriptsForModule } from "../../shared/clientScriptsForModule";
 import { LuckyNumber } from "./components/lucky_number";
 import { HomePage } from "./page";
@@ -22,16 +22,17 @@ export const Home: Route = (router: Router) => {
       }
       const csrfHeadersJson = JSON.stringify({ "X-CSRF-Token": auth.csrfToken });
       const html = await Promise.resolve(
-        <PageLayout
+        <AuthenticatedPageLayout
           theme={getThemePreference()}
           colorScheme={getColorScheme()}
           title="NDB2"
+          auth={auth}
           clientScripts={clientScriptsForModule(__filename)}
           csrfMetaToken={auth.csrfToken}
           hxHeaders={csrfHeadersJson}
         >
           <HomePage message="welcome to the new ndb2 portal" auth={auth} />
-        </PageLayout>,
+        </AuthenticatedPageLayout>,
       );
       res.type("html").send(html);
     }),

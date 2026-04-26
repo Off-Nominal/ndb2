@@ -69,47 +69,34 @@
 }
 
 /* ndb2:block: shared/components/button.css */
-/* Block: outline control with diffuse “light on glass” edge (theme primary) — compose in nav, forms, etc. */
+/* Block: theme-accent control; edge chrome from utility `.screen-element` (import order: utilities before blocks). */
 
+/* — Root — */
 .button {
-  display: block;
-  box-sizing: border-box;
-  width: 100%;
-  margin: 0;
+  /* layout */
   padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-primary);
-  border-radius: var(--radius-xs);
+
+  /* type */
   text-decoration: none;
-  text-align: start;
   font: inherit;
   line-height: var(--leading-normal);
+
+  /* color & surface */
   color: var(--color-text);
-  background: transparent;
+
+  /* interaction */
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
-  /* Soft outer bloom + thin inner specular, as if a rim of light on glass */
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--color-primary) 15%, transparent),
-    0 0 10px 0 color-mix(in srgb, var(--color-primary) 22%, transparent),
-    0 0 24px 2px color-mix(in srgb, var(--color-primary) 10%, transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--color-text) 5%, transparent);
-  transition: box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-}
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 
-.button:hover {
-  background: var(--color-surface-muted);
-  color: var(--color-primary);
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--color-primary) 25%, transparent),
-    0 0 16px 1px color-mix(in srgb, var(--color-primary) 32%, transparent),
-    0 0 32px 3px color-mix(in srgb, var(--color-primary) 16%, transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--color-text) 7%, transparent);
-}
-
-.button:focus-visible {
-  outline: 2px solid var(--color-focus-ring);
-  outline-offset: 2px;
+  &:hover {
+    /* color & surface */
+    background: var(--color-surface-muted);
+    color: var(--color-primary);
+  }
 }
 
 /* ndb2:block: shared/components/page_layout.css */
@@ -157,6 +144,11 @@ input.app-nav__state:checked + .app-nav__scrim {
 
 .app-shell__main {
   min-width: 0;
+}
+
+/* Simple shell: one main column only (no site nav) — e.g. login, OAuth errors, 404, 5xx. */
+.app-shell__main--solo {
+  min-height: 100dvh;
 }
 
 /* ---- Default site nav (inside aside) — list reset: `list-plain` in utilities.css; links: `Button` ---- */
@@ -402,4 +394,36 @@ input.app-nav__state:not(:checked) ~ .app-shell__grid .app-nav__icon-close {
 .page-layout {
   --center-column-max-width: 1200px;
   --center-column-gutter-inline: var(--space-8);
+}
+
+/* ndb2:block: shared/components/site_nav.css */
+/* Block: default site nav — fill aside; sign-out `form` at bottom (structural `& > form`, no extra BEM class). */
+
+/* `aside` host: not nested under `nav` in the DOM, but this rule exists only to size the next column — */
+.app-nav {
+  /* layout */
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* — `nav` block: all subtree rules nested here — */
+.site-nav {
+  /* layout */
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
+
+  & * {
+    /* layout */
+    display: block;
+    width: 100%;
+  }
+
+  & > :last-child {
+    margin-block-start: auto;
+  }
 }

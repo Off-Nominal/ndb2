@@ -10,7 +10,7 @@ export type ErrorPageProps = {
   body: ErrorPageBody;
 };
 
-/** Main column content for user-facing error states (4xx/5xx, OAuth, 404). Wrap with {@link PageLayout} for a full document. */
+/** Main column content for user-facing error states (4xx/5xx, OAuth, 404). Wrap with {@link PageLayout} (no site nav) or, for the signed-in shell, {@link AuthenticatedPageLayout} (requires `auth` for the default nav). */
 export function ErrorPage(props: ErrorPageProps): JSX.Element {
   return (
     <main>

@@ -7,7 +7,7 @@ export type SuspenseDemoPageProps = {
 };
 
 /**
- * Body content for the Suspense streaming demo; document shell comes from {@link PageLayout} in the handler.
+ * Body content for the Suspense streaming demo; document shell is {@link AuthenticatedPageLayout} in the handler.
  * See https://html.kitajs.org/guide/introduction#async-components-and-suspense
  */
 export function SuspenseDemoPage(props: SuspenseDemoPageProps): JSX.Element {

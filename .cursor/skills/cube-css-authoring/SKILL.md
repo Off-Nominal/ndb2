@@ -3,7 +3,7 @@ name: cube-css-authoring
 description: >-
   Guides where to put CSS when authoring ndb2 Kitajs pages and components using CUBE CSS:
   globals vs compositions vs utilities vs colocated blocks, exceptions via data-*,
-  markup-driven composition with a fixed class order in markup, app/src/web/shared/utils/merge_class (mergeClass) for class strings in TSX, and token usage. Use when
+  markup-driven composition with a fixed class order in markup, app/src/web/shared/utils/merge_class (mergeClass) for class strings in TSX, token usage, native CSS nesting (`&`) for pseudo-states and for child/element rules under one block root (not parallel top-level `.block` stanzas when one tree is enough), and colocated block CSS sectioning. Use when
   adding or styling UI and deciding which stylesheet layer to extend. For build scripts and
   file outputs, use css-build.
 ---
@@ -53,6 +53,67 @@ Shared wrappers (e.g. **`PageLayout`** in TSX) should emit a **concatenation of 
 **Good:** `.content-column` in stylesheets (center + measure + horizontal gutter); in markup often written **`[ content-column ]`** — see **Class order**. `.text-muted` (de-emphasized body text).
 
 **Avoid as default:** `.mx-auto` + `.px-4` + `.max-w-measure` as three utilities for one layout—unless those atoms are genuinely reused in different combinations everywhere.
+
+## Nesting states in the parent (native `&`)
+
+For a **single** block or utility, keep **base + interactive states** in **one** rule: use **native CSS nesting** with **`&`** (`&:hover`, `&:focus-visible`, `&:active`, etc.) instead of repeating a second top-level selector like `.my_block:hover` below `.my_block`.
+
+- **Why:** One place to read and edit; the component or utility stays **self-contained** (see e.g. **`.screen-element`** in **`utilities.css`**).
+- **When to split:** Rare — e.g. a state shared across many unrelated selectors, or a deliberate override file.
+- **Support:** Styles are **copied as-is** to **`/assets`** (no PostCSS flatten). Nesting targets **evergreen** browsers; see **`css-build`**.
+
+Example:
+
+```css
+.screen-element {
+  border: 1px solid var(--color-primary);
+  /* … */
+
+  &:hover {
+    box-shadow: /* … */;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+}
+```
+
+Same idea in **colocated block** CSS (e.g. `.button` + `&:hover` in **`button.css`**).
+
+## Nesting child and element rules under the block root
+
+Rules that only apply to **this** block’s **DOM subtree** should live **inside** the root class with **`&`**, not as **repeated top-level** selectors that share the same block prefix.
+
+- **Do:** one **`.my_block { … }`** and nest `& > form`, `& > li`, `& *`, `& .button` (when scoped to this block), `&[data-open]`, etc.
+- **Don’t (by default):** several parallel roots like `.my_block { }`, then `.my_block > form { }` further down the file, then `.my_block__footer .button { }` for the same component — that scatters one block and invites duplicate naming.
+- **BEM `__element` in markup** is for a **stable named** hook (multiple elements of the same kind, **variants** shared with tests/JS, or a hook you truly cannot express structurally). If you have a **single** form, `& > form` nested under `.site-nav` is enough; you may **omit** a `site-nav__logout` class.
+- **Another host node** in the same file (e.g. **`.app-nav`** on `aside` and **`.site-nav`** on `nav`) is still **two** top-level rules when the DOM is two elements—fine; a one-line cross-reference comment in the file is enough.
+
+```css
+.site-nav {
+  display: flex;
+  flex-direction: column;
+  /* … */
+
+  & * {
+    display: block;
+    width: 100%;
+  }
+
+  & > form {
+    margin-block-start: auto;
+
+    & .button {
+      width: 100%;
+      box-sizing: border-box;
+    }
+  }
+}
+```
+
+**Pair with** **Nesting states in the parent** and **Sectioning a block file** (section headers for `@media` or truly separate concerns).
 
 ## Compositions and custom properties
 
@@ -124,6 +185,33 @@ A single feature area can have **multiple** colocated CSS files (`page.css`, `co
 
 **Bundle order** is lexicographic by path—avoid relying on cascade between two arbitrary components; keep selectors specific enough (e.g. a root class or id on the fragment).
 
+### Sectioning a block file (selectors + declaration groups)
+
+In **colocated** `*.css` (one component or one page’s blocks), use **short comments** in two ways:
+
+1. **Between selectors (file structure)**  
+   Banners `/* — Label — */` **above** a top-level rule when you really have a **separate** concern (another host element, a **@media** block, keyframes). For **one** block component, **nest** `&` rules under the root instead of many parallel top-level **`.block …`** stanzas — see **Nesting child and element rules under the block root**. Labels should be **specific** (e.g. `Aside: flex for nav height`, not “part 2”).
+
+2. **Inside a rule (declaration groups)**  
+   Within a single `{ … }` block, group **properties by what they do**, not at random. Typical buckets (add **inline** `/* layout */`, `/* type */`, `/* color & surface */`, `/* shape / border */`, `/* effects */`, `/* interaction */` — use the names that fit the rule):
+
+| Group | What goes here (examples) |
+|-------|----------------------------|
+| **Layout** | `display`, `position`, `inset`, `z-index`, `box-sizing`, width/height/min/max, **margin, padding**, **flex**, **grid**, `gap`, `align-*`, `justify-*`, `overflow` |
+| **Type** | `font`, `line-height`, `letter-spacing`, `text-align`, `text-decoration`, `white-space` |
+| **Color & surface** | `color`, `background`, `border-color` (or full `border` when it is mostly paint); **opacity** when it reads as “ink”/fill |
+| **Shape** | `border-width`, `border-style`, `border-radius`, `outline` (when mostly geometric) — or fold **shorthand** `border` with color in one place under “color & surface” if you prefer not to split |
+| **Effects** | `box-shadow`, `filter`, `backdrop-filter` (often paired with `screen-element`-style chrome) |
+| **Interaction** | `cursor`, `pointer-events`, `user-select`, `transition`, `appearance` / vendor resets, touch-action |
+
+**Order inside the rule (loose convention):** **layout** → **type** → **color & surface** → **shape** (if not merged) → **effects** → **interaction** — so **padding/margin/flex/grid** come before **colours** where both appear.
+
+**Small rules:** if a class only has a few properties, one group or no in-rule comments is fine; do not pad for the sake of it.
+
+**File lead** (`/* Block: … */` or `/* <Feature> page — … */`) stays at the very top. Put **@keyframes** and **print** at the **end** with their own header.
+
+This does not change the build; it is for authors and review.
+
 ## Exceptions (variants and states)
 
 Express variants and states with **attributes**, not extra bespoke classes when possible:
@@ -149,6 +237,9 @@ HTMX can toggle **`data-*`** or classes via swaps; keep hooks documented in the 
 4. Otherwise → **colocated block** next to the **`tsx`**
 5. Are exceptions expressed with **`data-*`** / **`aria-*`** where appropriate?
 6. Does new markup follow **compositions → utilities → blocks → exceptions**, using **literal `[ name ]` groups** when you want bracket scanning?
+7. For new **`:hover` / `:focus` / `:focus-visible`** on one class, are they **nested under that class** with **`&`** instead of a separate top-level selector (unless there is a reason not to)?
+8. In colocated **block** CSS, are **comment headers** used to group **selectors** where helpful, and **in-rule groups** (layout, type, color & surface, …) when a rule is non-trivial (and is the file lead still accurate)?
+9. For **one** block, are **child/element** rules **nested** under the root with **`&`** (instead of many parallel top-level `.block …` / `.block__el` rules and extra markup classes where structure is enough)?
 
 ## Related
 
