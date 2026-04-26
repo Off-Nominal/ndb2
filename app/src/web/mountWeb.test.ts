@@ -14,7 +14,9 @@ describe("mountWeb", () => {
 
     expect(res.headers["content-type"]).toMatch(/javascript/);
     expect(res.text).toContain("ndb2_theme");
+    expect(res.text).toContain("ndb2_color_scheme");
     expect(res.text).toContain("data-theme");
+    expect(res.text).toContain("data-color-scheme");
   });
 
   it("GET /assets/htmx.min.js serves the HTMX script", async () => {
@@ -39,6 +41,7 @@ describe("mountWeb", () => {
     expect(res.text).toContain('html[data-theme="dark"]');
     expect(res.text).toContain("prefers-color-scheme: dark");
     expect(res.text).toContain('html[data-theme="system"]');
+    expect(res.text).toContain('html[data-color-scheme="neptune"]');
   });
 
   it("GET /assets/globals.css serves CUBE global layer", async () => {

@@ -2,7 +2,7 @@ import type { ErrorRequestHandler, RequestHandler } from "express";
 import { createLogger } from "@mendahu/utilities";
 import { ErrorHtmxSnippet, ErrorPage } from "../shared/components/error_page";
 import { PageLayout } from "../shared/components/page_layout";
-import { getThemePreference } from "./theme-preference";
+import { getColorScheme, getThemePreference } from "./theme-preference";
 
 const logger = createLogger({
   namespace: "WebErrorBoundary",
@@ -32,6 +32,7 @@ export const webErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   });
 
   const theme = getThemePreference();
+  const colorScheme = getColorScheme();
   const isHtmx = req.get("HX-Request") === "true";
   const errBody = "Please try again in a moment.";
   const errTitle = "Something went wrong";
@@ -41,7 +42,7 @@ export const webErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
         body: errBody,
       })
     : (
-        <PageLayout theme={theme} title={errTitle}>
+        <PageLayout theme={theme} colorScheme={colorScheme} title={errTitle}>
           <ErrorPage title={errTitle} body={errBody} />
         </PageLayout>
       );

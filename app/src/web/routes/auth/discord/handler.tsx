@@ -22,7 +22,7 @@ import {
   buildSessionPersistCookieHeader,
   newCsrfToken,
 } from "../../../middleware/auth/session-cookie-utils";
-import { getThemePreference } from "../../../middleware/theme-preference";
+import { getColorScheme, getThemePreference } from "../../../middleware/theme-preference";
 import { wrapWebRouteWithErrorBoundary } from "../../../middleware/error-boundary";
 import type { ErrorPageProps } from "../../../shared/components/error_page";
 import { ErrorPage } from "../../../shared/components/error_page";
@@ -36,7 +36,7 @@ const OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
 function renderAppErrorPage(props: ErrorPageProps) {
   return Promise.resolve(
-    <PageLayout theme={getThemePreference()} title={props.title}>
+    <PageLayout theme={getThemePreference()} colorScheme={getColorScheme()} title={props.title}>
       <ErrorPage {...props} />
     </PageLayout>,
   );

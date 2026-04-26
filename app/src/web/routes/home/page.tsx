@@ -1,5 +1,5 @@
 import type { WebAuthAuthenticated } from "../../middleware/auth/session";
-import { getThemePreference } from "../../middleware/theme-preference";
+import { getColorScheme, getThemePreference, SCHEME_HUE_DEFS } from "../../middleware/theme-preference";
 
 export type HomePageProps = {
   message: string;
@@ -9,21 +9,35 @@ export type HomePageProps = {
 /** Body content for `/` (Kitajs HTML JSX → string); document shell comes from {@link PageLayout} in the handler. */
 export function HomePage(props: HomePageProps): JSX.Element {
   const theme = getThemePreference();
+  const colorScheme = getColorScheme();
   return (
     <>
-      <div class="theme-switcher">
-        <label for="theme-select">Appearance</label>
-        <select id="theme-select" aria-label="Color scheme">
-          <option value="system" {...(theme === "system" ? { selected: true } : {})}>
-            System
-          </option>
-          <option value="light" {...(theme === "light" ? { selected: true } : {})}>
-            Light
-          </option>
-          <option value="dark" {...(theme === "dark" ? { selected: true } : {})}>
-            Dark
-          </option>
-        </select>
+      <div class="page-preferences">
+        <div class="theme-switcher">
+          <label for="theme-select">Appearance</label>
+          <select id="theme-select" aria-label="Light, dark, or system appearance">
+            <option value="system" {...(theme === "system" ? { selected: true } : {})}>
+              System
+            </option>
+            <option value="light" {...(theme === "light" ? { selected: true } : {})}>
+              Light
+            </option>
+            <option value="dark" {...(theme === "dark" ? { selected: true } : {})}>
+              Dark
+            </option>
+          </select>
+        </div>
+
+        <div class="color-scheme-switcher">
+          <label for="color-scheme-select">Colour</label>
+          <select id="color-scheme-select" aria-label="Accent palette">
+            {SCHEME_HUE_DEFS.map(({ id, label }) => (
+              <option value={id} {...(colorScheme === id ? { selected: true } : {})}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <p>{props.message}</p>
