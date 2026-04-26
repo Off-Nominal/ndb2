@@ -136,8 +136,8 @@ HTMX can toggle **`data-*`** or classes via swaps; keep hooks documented in the 
 
 ## Tokens and theme
 
-- Use **`var(--color-bg)`**, **`var(--space-4)`**, **`var(--text-sm)`**, etc., from generated **`design-tokens.css`**.
-- Theme switching uses **`html[data-theme="dark"]`** overrides for semantic colors—components should use **alias** variables like **`--color-bg`**, not hard-coded palette steps, unless there is a good reason.
+- Use **`var(--color-bg)`**, **`var(--space-4)`**, **`var(--text-sm)`**, etc., from **`design-tokens.css`**. Semantic **`--color-*`** are theme-aware; palette remapping for accent schemes uses **`data-color-scheme`** (see **`ndb2-web-design`** for intent; **`css-build`** for emission details).
+- Prefer **alias** tokens over raw **`--brand-*`** / **`--scheme-*`** in feature CSS unless you need a fixed step on purpose. For the glass-screen look, **`--color-surface`** / **`--color-surface-muted`** are translucent in **`globals.css`**; keep large areas on those (see **`ndb2-web-design`** / “Layered glass”) instead of opaque fills.
 
 ## Checklist before adding new CSS
 
@@ -150,5 +150,6 @@ HTMX can toggle **`data-*`** or classes via swaps; keep hooks documented in the 
 
 ## Related
 
+- **`ndb2-web-design`** — visual mood, how light/dark and named colour schemes fit together.
 - **`css-build`** — scripts, `public/` outputs, nodemon, `<head>` link order.
 - **`kitajs-html-web`** — route structure, **`HtmlHead`**, HTMX, tests.

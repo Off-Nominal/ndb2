@@ -25,7 +25,10 @@ export function PageLayout(props: PageLayoutProps): JSX.Element {
       <head>
         <HtmlHead title={title} clientScripts={clientScripts} csrfMetaToken={csrfMetaToken} />
       </head>
-      <body {...(hxHeaders != null ? { "hx-headers": hxHeaders } : {})}>
+      <body
+        class="app-bg-glass"
+        {...(hxHeaders != null ? { "hx-headers": hxHeaders } : {})}
+      >
         <div class={PAGE_LAYOUT_CLASSES}>{children}</div>
       </body>
     </html>

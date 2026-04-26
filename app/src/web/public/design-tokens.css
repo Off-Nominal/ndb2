@@ -6,7 +6,7 @@
 :root {
   /* Palette primitives, grouped by hue: --scheme-{hue}-* (accent) + --scheme-{hue}-neutral-* (surfaces) */
 
-  /* – Neptune: accent (brand) – */
+  /* – Neptune Blue: accent (brand) – */
   /* Moonstone blue scale (tint) — default accent. */
   --scheme-neptune-50: #F2F8FC;
   --scheme-neptune-100: #DCECF6;
@@ -19,7 +19,7 @@
   --scheme-neptune-700: #477392;
   --scheme-neptune-800: #345877;
   --scheme-neptune-900: #233B52;
-  /* – Neptune: surface neutrals – */
+  /* – Neptune Blue: surface neutrals – */
   /* Hue-matched surface/text neutrals: Tailwind slate (cool; pairs with Neptune accent). */
   --scheme-neptune-neutral-50: #F8FAFC;
   --scheme-neptune-neutral-100: #F1F5F9;
@@ -32,7 +32,7 @@
   --scheme-neptune-neutral-800: #1E293B;
   --scheme-neptune-neutral-900: #0F172A;
 
-  /* – Aurora: accent (brand) – */
+  /* – Aurora Green: accent (brand) – */
   /* Emerald-tinted accent scale. */
   --scheme-aurora-50: #ECFDF5;
   --scheme-aurora-100: #D1FAE5;
@@ -44,7 +44,7 @@
   --scheme-aurora-700: #047857;
   --scheme-aurora-800: #065F46;
   --scheme-aurora-900: #064E3B;
-  /* – Aurora: surface neutrals – */
+  /* – Aurora Green: surface neutrals – */
   /* Zinc (cool; with Aurora accent). */
   --scheme-aurora-neutral-50: #FAFAFA;
   --scheme-aurora-neutral-100: #F4F4F5;
@@ -57,7 +57,7 @@
   --scheme-aurora-neutral-800: #27272A;
   --scheme-aurora-neutral-900: #18181B;
 
-  /* – Helios: accent (brand) – */
+  /* – Helios Yellow: accent (brand) – */
   --scheme-helios-50: #FFFBEB;
   --scheme-helios-100: #FEF3C7;
   --scheme-helios-200: #FDE68A;
@@ -68,7 +68,7 @@
   --scheme-helios-700: #B45309;
   --scheme-helios-800: #92400E;
   --scheme-helios-900: #78350F;
-  /* – Helios: surface neutrals – */
+  /* – Helios Yellow: surface neutrals – */
   /* Gray (balanced, with yellow / amber accent). */
   --scheme-helios-neutral-50: #F9FAFB;
   --scheme-helios-neutral-100: #F3F4F6;
@@ -81,7 +81,7 @@
   --scheme-helios-neutral-800: #1F2937;
   --scheme-helios-neutral-900: #111827;
 
-  /* – Nebula: accent (brand) – */
+  /* – Nebula Purple: accent (brand) – */
   --scheme-nebula-50: #F5F3FF;
   --scheme-nebula-100: #EDE9FE;
   --scheme-nebula-200: #DDD6FE;
@@ -92,7 +92,7 @@
   --scheme-nebula-700: #6D28D9;
   --scheme-nebula-800: #5B21B6;
   --scheme-nebula-900: #4C1D95;
-  /* – Nebula: surface neutrals – */
+  /* – Nebula Purple: surface neutrals – */
   /* Violet-leaning gray (with purple accent). */
   --scheme-nebula-neutral-50: #FAF8FC;
   --scheme-nebula-neutral-100: #F2EEF5;
@@ -105,7 +105,7 @@
   --scheme-nebula-neutral-800: #352E48;
   --scheme-nebula-neutral-900: #1F1A2E;
 
-  /* – Redshift: accent (brand) – */
+  /* – Redshift Red: accent (brand) – */
   --scheme-redshift-50: #FFF1F2;
   --scheme-redshift-100: #FFE4E6;
   --scheme-redshift-200: #FECDD3;
@@ -116,7 +116,7 @@
   --scheme-redshift-700: #BE123C;
   --scheme-redshift-800: #9F1239;
   --scheme-redshift-900: #881337;
-  /* – Redshift: surface neutrals – */
+  /* – Redshift Red: surface neutrals – */
   /* Stone (warm, with red / rose accent). */
   --scheme-redshift-neutral-50: #FAF9F9;
   --scheme-redshift-neutral-100: #F5F4F2;
@@ -129,7 +129,7 @@
   --scheme-redshift-neutral-800: #2D2925;
   --scheme-redshift-neutral-900: #1C1916;
 
-  /* – Titan: accent (brand) – */
+  /* – Titan Orange: accent (brand) – */
   --scheme-titan-50: #FFF7ED;
   --scheme-titan-100: #FFEDD5;
   --scheme-titan-200: #FED7AA;
@@ -140,7 +140,7 @@
   --scheme-titan-700: #C2410C;
   --scheme-titan-800: #9A3412;
   --scheme-titan-900: #7C2D12;
-  /* – Titan: surface neutrals – */
+  /* – Titan Orange: surface neutrals – */
   /* True gray (with orange / amber accent). */
   --scheme-titan-neutral-50: #FAFAFA;
   --scheme-titan-neutral-100: #F5F5F5;
@@ -311,7 +311,7 @@ html[data-theme="dark"] {
 /* Per-`data-color-scheme` remaps (active accent + surface neutrals) */
 /* ———————————————————————————————————————————————————— */
 
-/* [Neptune] :root tokens → --brand-* / --neutral-* when data-color-scheme="neptune" */
+/* [Neptune Blue] :root tokens → --brand-* / --neutral-* when data-color-scheme="neptune" */
 html[data-color-scheme="neptune"] {
   --brand-50: var(--scheme-neptune-50);
   --brand-100: var(--scheme-neptune-100);
@@ -335,7 +335,7 @@ html[data-color-scheme="neptune"] {
   --neutral-900: var(--scheme-neptune-neutral-900);
 }
 
-/* [Aurora] :root tokens → --brand-* / --neutral-* when data-color-scheme="aurora" */
+/* [Aurora Green] :root tokens → --brand-* / --neutral-* when data-color-scheme="aurora" */
 html[data-color-scheme="aurora"] {
   --brand-50: var(--scheme-aurora-50);
   --brand-100: var(--scheme-aurora-100);
@@ -359,7 +359,7 @@ html[data-color-scheme="aurora"] {
   --neutral-900: var(--scheme-aurora-neutral-900);
 }
 
-/* [Helios] :root tokens → --brand-* / --neutral-* when data-color-scheme="helios" */
+/* [Helios Yellow] :root tokens → --brand-* / --neutral-* when data-color-scheme="helios" */
 html[data-color-scheme="helios"] {
   --brand-50: var(--scheme-helios-50);
   --brand-100: var(--scheme-helios-100);
@@ -383,7 +383,7 @@ html[data-color-scheme="helios"] {
   --neutral-900: var(--scheme-helios-neutral-900);
 }
 
-/* [Nebula] :root tokens → --brand-* / --neutral-* when data-color-scheme="nebula" */
+/* [Nebula Purple] :root tokens → --brand-* / --neutral-* when data-color-scheme="nebula" */
 html[data-color-scheme="nebula"] {
   --brand-50: var(--scheme-nebula-50);
   --brand-100: var(--scheme-nebula-100);
@@ -407,7 +407,7 @@ html[data-color-scheme="nebula"] {
   --neutral-900: var(--scheme-nebula-neutral-900);
 }
 
-/* [Redshift] :root tokens → --brand-* / --neutral-* when data-color-scheme="redshift" */
+/* [Redshift Red] :root tokens → --brand-* / --neutral-* when data-color-scheme="redshift" */
 html[data-color-scheme="redshift"] {
   --brand-50: var(--scheme-redshift-50);
   --brand-100: var(--scheme-redshift-100);
@@ -431,7 +431,7 @@ html[data-color-scheme="redshift"] {
   --neutral-900: var(--scheme-redshift-neutral-900);
 }
 
-/* [Titan] :root tokens → --brand-* / --neutral-* when data-color-scheme="titan" */
+/* [Titan Orange] :root tokens → --brand-* / --neutral-* when data-color-scheme="titan" */
 html[data-color-scheme="titan"] {
   --brand-50: var(--scheme-titan-50);
   --brand-100: var(--scheme-titan-100);

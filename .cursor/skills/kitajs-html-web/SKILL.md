@@ -68,6 +68,7 @@ Use **`safe`**, **`e` / `escape`**, and **`@kitajs/ts-html-plugin`** for unsafe 
 
 - **`middleware-patterns`** / **`middleware-naming`** — request-scoped values and file naming (see `theme-preference.ts`, `middleware/auth/session.ts` for web sessions).
 - **`express-route-map`** — `Route`, `mapRoutes`, `web/routes/index.ts`.
+- **`ndb2-web-design`** — visual tone, colour schemes, light/dark (optional when styling pages).
 - **`css-build`** — CUBE layers, design tokens, `HtmlHead` stylesheet order, `/assets` static CSS.
 - **`web-client-js`** — colocated `*.client.js`, `build:client-js`, `/assets/routes/...` scripts in `HtmlHead`.
 - **`cube-css-authoring`** — how to organize new CSS (which layer, colocation, `data-*` exceptions) when editing components or pages.

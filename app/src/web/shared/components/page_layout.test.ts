@@ -11,6 +11,7 @@ describe("PageLayout", () => {
       children: createElement("p", null, "hello"),
     });
     expect(html).toContain('<html lang="en" data-theme="dark" data-color-scheme="nebula">');
+    expect(html).toContain('<body class="app-bg-glass">');
     expect(html).toContain("<title>Test</title>");
     expect(html).toContain('<div class="[ center ] [ page-layout ]"><p>hello</p></div>');
   });
@@ -23,6 +24,7 @@ describe("PageLayout", () => {
       hxHeaders: '{"X-CSRF-Token":"abc"}',
       children: createElement("span", null, "x"),
     });
+    expect(html).toContain('class="app-bg-glass"');
     expect(html).toContain('hx-headers="{&#34;X-CSRF-Token&#34;:&#34;abc&#34;}"');
   });
 });

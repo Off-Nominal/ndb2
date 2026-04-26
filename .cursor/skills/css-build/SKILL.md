@@ -96,7 +96,7 @@ Then HTMX (`htmx.min.js`).
 
 **Name → variable:** `brand.500` → `--brand-500`; `text.2xl` → `--text-2xl`.
 
-**`colors.json`:** Palette (`brand.*`, `neutral.*`, …); `color.semantic.*` → `--color-<kebab>`; `color.light.*` / `color.dark.*` → shared `--color-*` in `:root` vs `html[data-theme="dark"]` (pairs must match). **`data-theme`:** `light` | `dark` | `system`. Cookie **`ndb2_theme`** (non-HttpOnly) stores `light`/`dark`; absent = **`system`** → dark when `prefers-color-scheme: dark` (generated `@media` on `html[data-theme="system"]`). Route colocated **`page.client.js`** (see **`build-client-js`**) + `themePreferenceMiddleware` (rolling **`Set-Cookie`** refresh for `light`/`dark`): see `app/src/web/middleware/theme-preference.ts` and `routes/home/page.client.js`.
+**`colors.json`:** `brand.*`, `neutral.*`, per-scheme `scheme.*`, `color.semantic.*` → `--color-*`; `color.light.*` / `color.dark.*` → shared alias names in `:root` vs `html[data-theme="dark"]` (light/dark **pairs must match**). `html[data-color-scheme="…"]` remaps `--brand-*` and `--neutral-*` to the chosen **accent palette**; cookie **`ndb2_color_scheme`**, default **neptune**. **Why and how the product uses themes / palettes (feel, light vs dark, named schemes):** **`ndb2-web-design`**. **Implementation:** `data-theme` `light` | `dark` | `system`; cookie **`ndb2_theme`**; absent = **system** with `@media (prefers-color-scheme: dark)` for `html[data-theme="system"]`. **`build-client-js`** + `themePreferenceMiddleware` (rolling `Set-Cookie`): `app/src/web/middleware/theme-preference.ts`, `routes/home/page.client.js`.
 
 **`TOKEN_FILES` order** in the script controls declaration order inside `:root`. **`meta.json`** is not part of token CSS unless added to `TOKEN_FILES`.
 
@@ -131,6 +131,7 @@ See **`web-client-js`** for colocation, `build-client-js.mjs`, generated **`rout
 
 ## Related
 
+- **ndb2-web-design** — look and feel, space-palette naming, light/dark vs colour-scheme behaviour, semantic `var(--color-*)` (not UX or a11y policy).
 - **cube-css-authoring** — where to put new CSS (globals vs compositions vs utilities vs blocks) when building pages/components.
 - **kitajs-html-web** — `page.tsx`, `handler.tsx`, [`HtmlHead`](app/src/web/shared/components/html_head.tsx), HTMX.
 - **web-client-js** — route colocated `*.client.js`, `build:client-js`, static script URLs.
