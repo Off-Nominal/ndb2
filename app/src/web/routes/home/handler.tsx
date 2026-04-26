@@ -5,7 +5,6 @@ import { requireWebAuth } from "../../middleware/auth/require-auth";
 import { getColorScheme, getThemePreference } from "../../middleware/theme-preference";
 import { wrapWebRouteWithErrorBoundary } from "../../middleware/error-boundary";
 import { AuthenticatedPageLayout } from "../../shared/components/page-layout";
-import { clientScriptsForModule } from "../../shared/clientScriptsForModule";
 import { LuckyNumber } from "./components/lucky-number";
 import { HomePage } from "./page";
 
@@ -27,9 +26,9 @@ export const Home: Route = (router: Router) => {
           colorScheme={getColorScheme()}
           title="NDB2"
           auth={auth}
-          clientScripts={clientScriptsForModule(__filename)}
           csrfMetaToken={auth.csrfToken}
           hxHeaders={csrfHeadersJson}
+          preferencesReturnTo={req.originalUrl.split("#")[0] || "/"}
         >
           <HomePage message="welcome to the new ndb2 portal" auth={auth} />
         </AuthenticatedPageLayout>,

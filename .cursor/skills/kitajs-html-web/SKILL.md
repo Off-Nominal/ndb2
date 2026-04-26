@@ -3,9 +3,11 @@ name: kitajs-html-web
 description: >-
   NDB2 web rendering with @kitajs/html: PascalCase Kitajs components, kebab-case
   component files in one folder per component (name/name.tsx, name.css, name.test.tsx, index.ts), feature
-  folders (page.tsx, handler.tsx, tests/), HTMX,
-  shared/utils (mergeClass, merge_class.ts), Suspense + renderToStream. Use when adding
-  or changing server-rendered UI under app/src/web; not for React client apps or EJS.
+  folders (page.tsx, handler.tsx, tests/), HTMX. Component props: use dot access (props.title) only; do
+  not destructure the props object at the start of a component (no const { x } = props) except the
+  documented rest-and-forward pattern — see Component props. mergeClass, Suspense + renderToStream. Use
+  when adding or changing server-rendered UI under app/src/web; not for React client apps or EJS.
+  Triggers: PreferencesForm, Button, PageLayout, props, destructuring.
 ---
 
 # Kitajs HTML (web) — ndb2 patterns
@@ -21,7 +23,7 @@ description: >-
 
 Cross-cutting UI → **`app/src/web/shared/components/<name>/`** (same **folder-per-component** pattern: **`button/button.tsx`**, **`page-layout/page-layout.css`**, **`index.ts`**). Small **TypeScript** helpers (no JSX) that support markup/Kita components live in **`app/src/web/shared/utils/`** — e.g. **`mergeClass`** in **`merge_class.ts`** to concatenate a block’s **`[ bracket ]`** **`class`** with optional extra groups from props (used by **`Button`**; see also **`cube-css-authoring`**).
 
-**`PageLayout`** / **`AuthenticatedPageLayout`** (`page-layout/page-layout.tsx` via `page-layout/index.ts`) — shared **`<head>`** and **`[ glass-background ]`** on **`body`**. **`PageLayout`** is **main column only** (login, 404, OAuth error pages, etc. — no site nav). **`AuthenticatedPageLayout`** takes **`auth`** ( **`WebAuthAuthenticated`** ) and adds the right-hand **site nav** (drawer on small viewports, collapsible column on tablet, fixed column on wide — no JS) + **`main#main`** with **`.center`**. Default **`NavigationMenu`** uses **`auth`** for the sign-out form (POST `/auth/logout` + CSRF, same as the home page). Optional **`navigation`** overrides that default. Colocated block styles: **`page-layout/page-layout.css`** (includes **`.page-layout`** layout tokens for **`.center`**).
+**`PageLayout`** / **`AuthenticatedPageLayout`** (`page-layout/page-layout.tsx` via `page-layout/index.ts`) — shared **`<head>`** and **`[ glass-background ]`** on **`body`**. **`PageLayout`** is **main column only** (login, 404, OAuth error pages, etc. — no site nav). **`AuthenticatedPageLayout`** takes **`auth`** ( **`WebAuthAuthenticated`** ) and adds the right-hand **site nav** (drawer on small viewports, collapsible column on tablet, fixed column on wide — no JS) + **`main#main`** with **`[ center-inline ]`** (composition: readable column + horizontal centering in **`compositions.css`**). Add **`[ center ]`** (utility, **`utilities.css`**) on inner content to vertically (and as a group, horizontally) center in the viewport when needed. Default **`NavigationMenu`** uses **`auth`** for the sign-out form (POST `/auth/logout` + CSRF, same as the home page). Optional **`navigation`** overrides that default. Colocated block styles: **`page-layout/page-layout.css`** (includes **`.page-layout`** layout tokens for **`--center-column-*`**, consumed by **`.center-inline`**).
 
 Official concepts: [Async components and Suspense](https://html.kitajs.org/guide/introduction#async-components-and-suspense) (v5 docs; API matches `@kitajs/html` **v4.x** via `@kitajs/html/suspense`).
 
@@ -32,6 +34,16 @@ Official concepts: [Async components and Suspense](https://html.kitajs.org/guide
 - **JSX:** Use **`<PageLayout>`**, **`<HtmlHead />`**, etc. The TS JSX transform treats **lowercase** tags as intrinsic HTML, so a kebab file name is **not** a valid component tag (use **PascalCase** imports/exports for components).
 - **Function-call form** is still valid: **`PageLayout({ children: … })`**, **`HtmlHead({ title: "…" })`**, or **`createElement(SuspenseDemoPage, props)`** in handlers.
 - **Async children under `Suspense`** often use a **call** so the promise is explicit: **`{DelayedSnippet({ delayMs: 750, label: "A" })}`**.
+
+## Component props (access pattern)
+
+**Default — dot access on `props`:** Kitajs **component** functions take a single **`props`** parameter (e.g. **`props: FooProps`**). **Do not** start the function body with **`const { a, b, c } = props`** (or similar) to pull fields onto locals. **Read with dots:** **`props.title`**, **`props.children`**, **`props.class`**, **`props.theme`**, etc. This applies to **all** “read the prop and use it in JSX / expressions” code — e.g. **`PreferencesForm`**, **`<HomePage … />`**, page bodies.
+
+**Why avoid top-level `props` destructuring:** It duplicates the props type in the function body, drifts from **`FooProps`**, and encourages React-style patterns that are not the project default for Kita components.
+
+**Exception — one destructuring to forward `...rest`:** When you must **peel** a few known fields and **pass the rest** to an intrinsic element **`{...rest}`**, use a **single** destructure, e.g. **`const { class: className, children, href, type, ...rest } = props`**, then spread **`rest`**. **Do not** use that pattern when you are only *reading* props with no rest spread. **`Button`** is the reference.
+
+- Other **“split for composition”** cases (e.g. pass a subset to a child) may use **minimal** destructuring only when **`...rest` or an equivalent** is required; use **`props.*`** for everything else.
 
 ## Tests
 

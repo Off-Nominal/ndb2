@@ -202,12 +202,12 @@
   { "name": "info.700", "value": "#1D4ED8" },
   {
     "name": "color.light.bg",
-    "value": "neutral.50",
+    "value": "neutral.100",
     "description": "Light theme: page background. Value references a palette token name."
   },
   { "name": "color.light.surface", "value": "neutral.0" },
-  { "name": "color.light.surfaceMuted", "value": "neutral.100" },
-  { "name": "color.light.border", "value": "neutral.200" },
+  { "name": "color.light.surfaceMuted", "value": "neutral.200" },
+  { "name": "color.light.border", "value": "neutral.300" },
   { "name": "color.light.text", "value": "brand.900" },
   { "name": "color.light.textMuted", "value": "brand.600" },
   { "name": "color.light.link", "value": "brand.700" },

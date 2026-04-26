@@ -144,6 +144,8 @@ Blocks should:
 - avoid encoding layout concerns that belong to composition (e.g. page-level spacing)
 - expose variants via `data-*` exceptions where needed
 
+**Do not** use BEM-style **`block__element`** or **`block__element--modifier`** class names for routine inner structure and layout (for example **`app-shell__grid`**, **`app-shell__main`**, **`app-shell__main--solo`**). In ndb2 CUBE, that duplicates parallel “families” instead of the intended flow: **one block** root per colocated component (e.g. `.page-layout`), **child rules nested with `&`** in the block stylesheet, **composition** classes from `compositions.css` for shared layout primitives, and **`data-*`** for variants. **`app-shell__*`** in `page-layout` is legacy. Full authoring rules, bracket grouping, and when `__` might still be acceptable: `.cursor/skills/cube-css-authoring/SKILL.md` (*Nesting child and element rules under the block root*).
+
 ### Exception conventions
 
 Prefer predictable attribute keys:

@@ -13,48 +13,9 @@
   font-weight: var(--weight-semibold);
 }
 
-/* ndb2:block: routes/home/page.css */
-/**
- * Block styles for the home route document (theme switcher and other page-only UI).
- * Bundled into /assets/blocks.css via build:css.
- */
-
-.page-preferences {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  margin-block-end: var(--space-4);
-  font-size: var(--text-sm);
-}
-
-.theme-switcher,
-.color-scheme-switcher {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.theme-switcher label,
-.color-scheme-switcher label {
-  font-weight: var(--weight-medium);
-  color: var(--color-text-muted);
-}
-
-.theme-switcher select,
-.color-scheme-switcher select {
-  font: inherit;
-  color: var(--color-text);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--space-1) var(--space-3);
-  min-width: 10rem;
-}
-
-/* ndb2:block: routes/login/login.css */
-/* ndb2:block:login — sign-in landing CTA */
-.login__action {
+/* ndb2:block: routes/login/components/discord-button/discord-button.css */
+/* ndb2:block:discord-button — Discord OAuth CTA (login route) */
+.discord-button {
   display: inline-block;
   padding: var(--space-s, 0.75rem) var(--space-l, 1.5rem);
   border-radius: var(--radius-m, 0.375rem);
@@ -62,10 +23,10 @@
   color: var(--color-on-accent, #fff);
   font-weight: 600;
   text-decoration: none;
-}
 
-.login__action:hover {
-  filter: brightness(1.08);
+  &:hover {
+    filter: brightness(1.08);
+  }
 }
 
 /* ndb2:block: shared/components/button/button.css */
@@ -96,6 +57,23 @@
     /* color & surface */
     background: var(--color-surface-muted);
     color: var(--color-primary);
+  }
+}
+
+/* ndb2:block: shared/components/form-field/form-field.css */
+/* Block: form-field — label + one child control; uses `[ stack ]` for vertical rhythm. */
+
+/* — Root — */
+.form-field {
+  & * {
+    --stack-space: var(--space-2);
+  }
+
+  & label {
+    /* type */
+    font-weight: var(--weight-medium);
+    /* color & surface */
+    color: var(--color-text-muted);
   }
 }
 
@@ -393,6 +371,30 @@ input.app-nav__state:not(:checked) ~ .app-shell__grid .app-nav__icon-close {
   .app-nav__tab {
     display: none;
   }
+}
+
+/* ndb2:block: shared/components/preferences-form/preferences-form.css */
+.preferences-form {
+  --stack-space: var(--space-3);
+}
+
+/* ndb2:block: shared/components/select/select.css */
+/* Block: select — native `<select>` chrome (e.g. inside `form-field`, site nav). */
+
+/* — Root — */
+.select {
+  /* type */
+  font: inherit;
+  /* color & surface */
+  color: var(--color-text);
+  background: var(--color-surface);
+  /* shape */
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  /* layout */
+  padding: var(--space-1) var(--space-3);
+  min-width: 10rem;
+  box-sizing: border-box;
 }
 
 /* ndb2:block: shared/components/site-nav/site-nav.css */

@@ -12,8 +12,6 @@ const SITE_NAV_REVEAL_ID = "app-site-nav-reveal";
  */
 const SHELL_GRID_CLASSES = "[ app-shell__grid ] [ page-layout ]";
 
-const SOLO_MAIN_CLASSES = "[ app-shell__main ] [ page-layout ] [ app-shell__main--solo ]";
-
 /** Base document: `<html>`, `<head>`, `<body>`, and a single `main` column (no site navigation). */
 export type PageLayoutProps = HtmlHeadProps & {
   theme: ThemePreference;
@@ -29,6 +27,8 @@ export type AuthenticatedPageLayoutProps = PageLayoutProps & {
   auth: WebAuthAuthenticated;
   /** Right column / drawer; defaults to {@link NavigationMenu} with `auth`. */
   navigation?: JSX.Element;
+  /** `POST /preferences` redirect target for the default nav form; default `"/"`. */
+  preferencesReturnTo?: string;
 };
 
 type DocumentFrameProps = Omit<PageLayoutProps, "children"> & {
@@ -36,17 +36,20 @@ type DocumentFrameProps = Omit<PageLayoutProps, "children"> & {
 };
 
 function DocumentFrame(props: DocumentFrameProps): JSX.Element {
-  const { theme, colorScheme, title, clientScripts, csrfMetaToken, hxHeaders, body } = props;
   return (
-    <html lang="en" data-theme={theme} data-color-scheme={colorScheme}>
+    <html lang="en" data-theme={props.theme} data-color-scheme={props.colorScheme}>
       <head>
-        <HtmlHead title={title} clientScripts={clientScripts} csrfMetaToken={csrfMetaToken} />
+        <HtmlHead
+          title={props.title}
+          clientScripts={props.clientScripts}
+          csrfMetaToken={props.csrfMetaToken}
+        />
       </head>
       <body
         class="[ glass-background ]"
-        {...(hxHeaders != null ? { "hx-headers": hxHeaders } : {})}
+        {...(props.hxHeaders != null ? { "hx-headers": props.hxHeaders } : {})}
       >
-        {body}
+        {props.body}
       </body>
     </html>
   );
@@ -57,13 +60,17 @@ function DocumentFrame(props: DocumentFrameProps): JSX.Element {
  * (login, OAuth error pages, 404, 5xx, etc.).
  */
 export function PageLayout(props: PageLayoutProps): JSX.Element {
-  const { children, ...rest } = props;
   return (
     <DocumentFrame
-      {...rest}
+      theme={props.theme}
+      colorScheme={props.colorScheme}
+      title={props.title}
+      clientScripts={props.clientScripts}
+      csrfMetaToken={props.csrfMetaToken}
+      hxHeaders={props.hxHeaders}
       body={
-        <main class={SOLO_MAIN_CLASSES} id="main">
-          <div class="[ center ]">{children}</div>
+        <main>
+          <div class="[ center-inline ]">{props.children}</div>
         </main>
       }
     />
@@ -75,10 +82,22 @@ export function PageLayout(props: PageLayoutProps): JSX.Element {
  * (and scrim, tab, HTMX `hx-headers` on `body` when provided).
  */
 export function AuthenticatedPageLayout(props: AuthenticatedPageLayoutProps): JSX.Element {
-  const { children, auth, navigation = <NavigationMenu auth={auth} />, ...rest } = props;
+  const navigation = props.navigation ?? (
+    <NavigationMenu
+      auth={props.auth}
+      theme={props.theme}
+      colorScheme={props.colorScheme}
+      preferencesReturnTo={props.preferencesReturnTo ?? "/"}
+    />
+  );
   return (
     <DocumentFrame
-      {...rest}
+      theme={props.theme}
+      colorScheme={props.colorScheme}
+      title={props.title}
+      clientScripts={props.clientScripts}
+      csrfMetaToken={props.csrfMetaToken}
+      hxHeaders={props.hxHeaders}
       body={
         <>
           <input
@@ -93,7 +112,7 @@ export function AuthenticatedPageLayout(props: AuthenticatedPageLayoutProps): JS
           />
           <div class={SHELL_GRID_CLASSES}>
             <main class="[ app-shell__main ]" id="main">
-              <div class="[ center ]">{children}</div>
+              <div class="[ center-inline ]">{props.children}</div>
             </main>
             <div class="[ app-nav-dock ]">
               <div class="[ app-nav-drawer ]">

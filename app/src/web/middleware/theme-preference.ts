@@ -12,7 +12,7 @@ const ALL_SCHEMES: readonly ColorScheme[] = SCHEME_HUE_DEFS.map((h) => h.id);
 export const COLOR_SCHEME_VALUES: readonly ColorScheme[] = SCHEME_HUE_DEFS.map((h) => h.id);
 
 /**
- * Theme persistence cookie — duplicated in `routes/home/page.client.js` (keep in sync).
+ * Theme persistence cookie. Set on the server from `POST /preferences` (see `routes/preferences/handler`).
  * Rolling `Max-Age` is refreshed on each HTML request when preference is `light`/`dark`.
  */
 export const THEME_COOKIE_CONFIG = {
@@ -25,7 +25,7 @@ export const THEME_COOKIE_CONFIG = {
 } as const;
 
 /**
- * Accent / palette cookie — duplicated in `routes/home/page.client.js` (keep in sync).
+ * Accent / palette cookie. Set on the server from `POST /preferences`.
  * Values are `id` in `src/web/tokens/scheme-hue-defs.ts`; when absent, default is `neptune` without `Set-Cookie`.
  */
 export const COLOR_SCHEME_COOKIE_CONFIG = {
@@ -58,7 +58,7 @@ export function isColorScheme(value: string | undefined | null): value is ColorS
   return value != null && ALL_SCHEMES.includes(value as ColorScheme);
 }
 
-/** `Set-Cookie` value for a persisted light/dark choice (non-HttpOnly; client island may update). */
+/** `Set-Cookie` value for a persisted light/dark choice (non-HttpOnly). */
 export function buildThemePreferencePersistCookieHeader(theme: "light" | "dark"): string {
   const c = THEME_COOKIE_CONFIG;
   return `${c.name}=${encodeURIComponent(theme)}; Path=${c.path}; Max-Age=${c.maxAgeSec}; SameSite=${c.sameSite}`;

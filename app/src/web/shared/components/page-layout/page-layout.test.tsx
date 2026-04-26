@@ -23,8 +23,8 @@ describe("PageLayout", () => {
     expect(html).toContain('<html lang="en" data-theme="dark" data-color-scheme="nebula">');
     expect(html).toContain('<body class="[ glass-background ]">');
     expect(html).toContain("<title>Test</title>");
-    expect(html).toContain("app-shell__main--solo");
-    expect(html).toContain('<div class="[ center ]"><p>hello</p></div>');
+    expect(html).toContain("<main>");
+    expect(html).toContain('<div class="[ center-inline ]"><p>hello</p></div>');
     expect(html).not.toContain('id="app-site-nav-reveal"');
     expect(html).not.toContain("app-nav-drawer");
   });
@@ -56,7 +56,7 @@ describe("AuthenticatedPageLayout", () => {
     expect(html).toContain("<title>Auth</title>");
     expect(html).toContain('id="app-site-nav-reveal"');
     expect(html).toContain('<main class="[ app-shell__main ]" id="main">');
-    expect(html).toContain('<div class="[ center ]"><p>hello</p></div>');
+    expect(html).toContain('<div class="[ center-inline ]"><p>hello</p></div>');
     expect(html).toContain("site-nav");
     expect(html).toContain("app-nav-drawer");
     expect(html).toContain("app-nav__tab");
@@ -64,5 +64,9 @@ describe("AuthenticatedPageLayout", () => {
     expect(html).toContain('action="/auth/logout"');
     expect(html).toContain('name="_csrf"');
     expect(html).toContain("test-csrf-token");
+    expect(html).toContain('action="/preferences"');
+    expect(html).toContain("form-field");
+    expect(html).toContain('hx-post="/preferences"');
+    expect(html).toContain('hx-trigger="change from:select"');
   });
 });

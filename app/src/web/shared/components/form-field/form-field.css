@@ -1,0 +1,15 @@
+/* Block: form-field — label + one child control; uses `[ stack ]` for vertical rhythm. */
+
+/* — Root — */
+.form-field {
+  & * {
+    --stack-space: var(--space-2);
+  }
+
+  & label {
+    /* type */
+    font-weight: var(--weight-medium);
+    /* color & surface */
+    color: var(--color-text-muted);
+  }
+}

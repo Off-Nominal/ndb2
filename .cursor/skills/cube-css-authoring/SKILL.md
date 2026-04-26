@@ -1,11 +1,12 @@
 ---
 name: cube-css-authoring
 description: >-
-  Guides where to put CSS when authoring ndb2 Kitajs pages and components using CUBE CSS:
-  globals vs compositions vs utilities vs colocated blocks, exceptions via data-*,
-  markup-driven composition with a fixed class order in markup, app/src/web/shared/utils/merge_class (mergeClass) for class strings in TSX, token usage, native CSS nesting (`&`) for pseudo-states and for child/element rules under one block root (not parallel top-level `.block` stanzas when one tree is enough), and colocated block CSS sectioning. Use when
-  adding or styling UI and deciding which stylesheet layer to extend. For build scripts and
-  file outputs, use css-build.
+  CUBE CSS authoring for ndb2: which layer (globals, compositions, utilities, colocated block).
+  Colocated block CSS must use one root selector (e.g. `.form-field`) and native `&` nesting for
+  children and states — not multiple parallel top-level `.block-*` stanzas for the same component, and not
+  new BEM `block__element` classes for routine structure. Use mergeClass and bracket groups in TSX, tokens,
+  section comments, in-rule property groups. Triggers: styling a component, block CSS, nesting,
+  form-field, site-nav, wrong layer. For build scripts and file outputs, use css-build.
 ---
 
 # CUBE CSS — authoring pages and components
@@ -88,7 +89,8 @@ Rules that only apply to **this** block’s **DOM subtree** should live **inside
 
 - **Do:** one **`.my_block { … }`** and nest `& > form`, `& > li`, `& *`, `& .button` (when scoped to this block), `&[data-open]`, etc.
 - **Don’t (by default):** several parallel roots like `.my_block { }`, then `.my_block > form { }` further down the file, then `.my_block__footer .button { }` for the same component — that scatters one block and invites duplicate naming.
-- **BEM `__element` in markup** is for a **stable named** hook (multiple elements of the same kind, **variants** shared with tests/JS, or a hook you truly cannot express structurally). If you have a **single** form, `& > form` nested under `.site-nav` is enough; you may **omit** a `site-nav__logout` class.
+- **Do not** introduce **BEM-style** class names of the form **`block__element`** or **`block__element--modifier`** for routine structure and layout (e.g. **`app-shell__grid`**, **`app-shell__main`**, **`app-shell__main--solo`**). That pattern duplicates “block + element + modifier” families instead of CUBE. **Prefer instead:** a **single block** root for the colocated component (e.g. **`.page-layout`** in **`page-layout.css`**), **child/region rules nested with `&`** under that root, **composition** classes from **`compositions.css`** for shared layout (flow, region, grid primitives), and **`data-*` / `data-variant`** (see **Exceptions**) for state and variants—not `--solo`-style class suffixes. **`app-shell__*`** in **`page-layout`** is **legacy**; new work should not copy that naming—extend the owning **block** and **compositions** above.
+- **BEM `__element` in markup** is reserved for **rare** cases: a **stable named** hook (multiple elements of the same kind, **variants** shared with tests/JS, or a hook you truly cannot express with **`&`** and structure). It is **not** the default way to name every inner node. If you have a **single** form, `& > form` nested under `.site-nav` is enough; you may **omit** a `site-nav__logout` class.
 - **Another host node** in the same file (e.g. **`.app-nav`** on `aside` and **`.site-nav`** on `nav`) is still **two** top-level rules when the DOM is two elements—fine; a one-line cross-reference comment in the file is enough.
 
 ```css
@@ -151,7 +153,7 @@ Order tokens for human scanning: **compositions → utilities → blocks → exc
 
 Each group can be **three class tokens**: an opening bracket, the **real** class name (what your CSS targets), and a closing bracket — e.g. `[` + `region` + `]` so the attribute reads `[ region ]`.
 
-- **Selectors** in CSS stay **`.region`**, **`.content-column`**, **`.theme-switcher`** (the “middle” token only).
+- **Selectors** in CSS stay **`.region`**, **`.content-column`**, **`.theme-selector`** (the “middle” token only).
 - **`[` and `]`** are extra class tokens; leave them **unstyled** (they only help readability). HTML accepts them like any other class name.
 
 Plain classes without brackets are still allowed when you do not need the visual group (e.g. a small fragment).
@@ -160,13 +162,13 @@ Rough mapping:
 
 1. **Compositions** — `[ region ]`, `[ cluster ]`, `[ flow ]`, …; may read **`--*`** hooks.
 2. **Utilities** — `[ content-column ]`, `[ text-muted ]`, …
-3. **Blocks** — `[ theme-switcher ]`, `[ login__action ]` (or unbracketed BEM if preferred).
+3. **Blocks** — one **kebab-case** name per block (e.g. **`[ page-layout ]`**, **`[ theme-selector ]`**). **Do not** add **`block__child`**-style class tokens for normal inner layout; nest under the block in CSS (see *Nesting child and element rules* and the **BEM-style** note above). Older markup may still show **`[ login__action ]`**, **`login__action`**-style names—**new** blocks should not add more of that family.
 4. **Exceptions** — Prefer **`data-*`** / **`aria-*`**; extra classes only if needed.
 
 Example:
 
 ```html
-<div class="[ region ] [ content-column ] [ theme-switcher ]" data-variant="compact"></div>
+<div class="[ region ] [ content-column ] [ theme-selector ]" data-variant="compact"></div>
 ```
 
 Same idea in Kitajs:
@@ -239,7 +241,7 @@ HTMX can toggle **`data-*`** or classes via swaps; keep hooks documented in the 
 6. Does new markup follow **compositions → utilities → blocks → exceptions**, using **literal `[ name ]` groups** when you want bracket scanning?
 7. For new **`:hover` / `:focus` / `:focus-visible`** on one class, are they **nested under that class** with **`&`** instead of a separate top-level selector (unless there is a reason not to)?
 8. In colocated **block** CSS, are **comment headers** used to group **selectors** where helpful, and **in-rule groups** (layout, type, color & surface, …) when a rule is non-trivial (and is the file lead still accurate)?
-9. For **one** block, are **child/element** rules **nested** under the root with **`&`** (instead of many parallel top-level `.block …` / `.block__el` rules and extra markup classes where structure is enough)?
+9. For **one** block, are **child/element** rules **nested** under the root with **`&`** (instead of many parallel top-level `.block …` / `.block__el` rules and extra markup classes where structure is enough)? **Have you avoided** new BEM-style **`app-shell__grid`**-style `__` chains in favor of that nesting + **compositions** (see the **BEM-style** callout in *Nesting child and element rules*)?
 
 ## Related
 

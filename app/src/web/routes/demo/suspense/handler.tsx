@@ -29,6 +29,7 @@ export const SuspenseDemo: Route = (router: Router) => {
           title="Suspense streaming (Kita Html)"
           auth={auth}
           clientScripts={clientScriptsForModule(__filename)}
+          preferencesReturnTo={req.originalUrl.split("#")[0] || "/"}
         >
           <SuspenseDemoPage rid={rid} />
         </AuthenticatedPageLayout>

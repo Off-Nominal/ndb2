@@ -23,9 +23,19 @@ export const Login: Route = (router: Router) => {
         return;
       }
 
+      const preferencesFormReturnTo = req.originalUrl.split("#")[0] || "/";
       const html = await Promise.resolve(
-        <PageLayout theme={getThemePreference()} colorScheme={getColorScheme()} title="Sign in">
-          <LoginPage returnTo={returnTo} />
+        <PageLayout
+          theme={getThemePreference()}
+          colorScheme={getColorScheme()}
+          title="Sign in"
+        >
+          <LoginPage
+            returnTo={returnTo}
+            theme={getThemePreference()}
+            colorScheme={getColorScheme()}
+            preferencesFormReturnTo={preferencesFormReturnTo}
+          />
         </PageLayout>,
       );
       res.type("html").send(html);

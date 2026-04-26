@@ -4,8 +4,14 @@
  */
 
 export const routeClientScripts = {
-  "home": ["/assets/routes/home/page.client.js"] as const,
 } as const;
+
+/**
+ * All `src/web/shared/components/**` `*.client.*` (after build → `.client.js`).
+ * `HtmlHead` prepends these before optional route `clientScripts`.
+ */
+export const sharedComponentsClientScriptUrls = [
+] as const;
 
 export type RouteClientScriptBundleKey = keyof typeof routeClientScripts;
 

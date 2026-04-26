@@ -3,7 +3,8 @@
  * Dev-only watcher: rebuild static assets without restarting the API process.
  * - Token JSON → build:tokens + transfer-web
  * - Colocated / layer CSS (excluding public/) → build:css + transfer-web
- * - *.client.js under routes → build:client-js, then bump src/index.ts mtime so
+ * - *.client.js under routes or shared/components → build:client-js, then bump
+ *   src/index.ts mtime so
  *   nodemon (ts/tsx only) restarts and picks up generated routeClientScripts.ts.
  */
 
@@ -77,10 +78,15 @@ const cssWatcher = chokidar.watch("src/web/**/*.css", {
   ignoreInitial: true,
 });
 
-const clientWatcher = chokidar.watch("src/web/routes/**/*.client.js", {
-  cwd: APP_ROOT,
-  ignoreInitial: true,
-});
+const clientWatcher = chokidar.watch(
+  [
+    "src/web/routes/**/*.client.ts",
+    "src/web/routes/**/*.client.js",
+    "src/web/shared/components/**/*.client.ts",
+    "src/web/shared/components/**/*.client.js",
+  ],
+  { cwd: APP_ROOT, ignoreInitial: true },
+);
 
 tokenWatcher.on("all", onTokens);
 cssWatcher.on("all", onCss);

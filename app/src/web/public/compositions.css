@@ -5,7 +5,8 @@
 
 /* Add .flow, .cluster, .wrapper, .grid, … as the design system grows. */
 
-.center {
+/* Readable column: max width + horizontal centering in the viewport (block axis is unconstrained). */
+.center-inline {
   box-sizing: content-box;
   max-inline-size: var(--center-column-max-width, 60ch);
   margin-inline: auto;
@@ -13,5 +14,5 @@
 }
 
 .stack > * + * {
-  margin-block-start: var(--stack-space, 1.5em);
+  margin-block-start: var(--stack-space, var(--space-6));
 }

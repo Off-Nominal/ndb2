@@ -1,14 +1,19 @@
+import { sharedComponentsClientScriptUrls } from "../../../generated/routeClientScripts";
+
 export type HtmlHeadProps = {
   title: string;
-  /** Route colocated `*.client.js` URLs from `clientScriptsForModule(__filename)` (or manual list). */
+  /**
+   * Route-colocated `*.client.js` URLs from `clientScriptsForModule(__filename)`.
+   * Loaded after the default {@link sharedComponentsClientScriptUrls} list.
+   */
   clientScripts?: readonly string[];
   /** When set, exposes the per-session CSRF secret for non-JS consumers (forms read `meta[name=csrf-token]`). */
   csrfMetaToken?: string;
 };
 
-/** Shared document head: charset, viewport, CUBE CSS layers, route client islands, HTMX. */
+/** Shared document head: charset, viewport, CUBE CSS layers, client islands, HTMX. */
 export function HtmlHead(props: HtmlHeadProps): JSX.Element {
-  const scripts = props.clientScripts ?? [];
+  const scripts = [...sharedComponentsClientScriptUrls, ...(props.clientScripts ?? [])];
   return (
     <>
       <meta charset="utf-8" />

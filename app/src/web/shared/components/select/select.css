@@ -1,0 +1,17 @@
+/* Block: select — native `<select>` chrome (e.g. inside `form-field`, site nav). */
+
+/* — Root — */
+.select {
+  /* type */
+  font: inherit;
+  /* color & surface */
+  color: var(--color-text);
+  background: var(--color-surface);
+  /* shape */
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  /* layout */
+  padding: var(--space-1) var(--space-3);
+  min-width: 10rem;
+  box-sizing: border-box;
+}
