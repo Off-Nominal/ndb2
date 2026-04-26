@@ -2,7 +2,7 @@ import { Router } from "express";
 import { Route } from "@shared/routerMap";
 import { safeReturnTo } from "../../auth/safeReturnTo";
 import { getWebAuth } from "../../middleware/auth/session";
-import { getThemePreference } from "../../middleware/theme-preference";
+import { getColorScheme, getThemePreference } from "../../middleware/theme-preference";
 import { wrapWebRouteWithErrorBoundary } from "../../middleware/error-boundary";
 import { PageLayout } from "../../shared/components/page_layout";
 import { LoginPage } from "./page";
@@ -24,7 +24,7 @@ export const Login: Route = (router: Router) => {
       }
 
       const html = await Promise.resolve(
-        <PageLayout theme={getThemePreference()} title="Sign in">
+        <PageLayout theme={getThemePreference()} colorScheme={getColorScheme()} title="Sign in">
           <LoginPage returnTo={returnTo} />
         </PageLayout>,
       );

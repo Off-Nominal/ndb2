@@ -1,7 +1,7 @@
 import { renderToStream } from "@kitajs/html/suspense";
 import { Router } from "express";
 import { Route } from "@shared/routerMap";
-import { getThemePreference } from "../../../middleware/theme-preference";
+import { getColorScheme, getThemePreference } from "../../../middleware/theme-preference";
 import { requireWebAuth } from "../../../middleware/auth/require-auth";
 import { wrapWebRouteWithErrorBoundary } from "../../../middleware/error-boundary";
 import { PageLayout } from "../../../shared/components/page_layout";
@@ -15,9 +15,11 @@ export const SuspenseDemo: Route = (router: Router) => {
     requireWebAuth,
     wrapWebRouteWithErrorBoundary(async (req, res) => {
       const theme = getThemePreference();
+      const colorScheme = getColorScheme();
       const stream = renderToStream((rid) => (
         <PageLayout
           theme={theme}
+          colorScheme={colorScheme}
           title="Suspense streaming (Kita Html)"
           clientScripts={clientScriptsForModule(__filename)}
         >

@@ -84,6 +84,29 @@ function escapeComment(s) {
   return s.replace(/\*\//g, "* /");
 }
 
+/**
+ * Authoritative palette list lives in `src/web/tokens/scheme-hue-defs.ts` (id + user-facing label).
+ * Parsed here so the token build has no second source of truth.
+ */
+function loadSchemeHueDefs() {
+  const p = path.join(TOKENS_DIR, "scheme-hue-defs.ts");
+  if (!fs.existsSync(p)) {
+    die(`Missing scheme hue def source: ${p}`);
+  }
+  const src = fs.readFileSync(p, "utf8");
+  const re = /\{ id: "([^"]+)" as const, label: "([^"]+)" \}/g;
+  const out = [];
+  for (;;) {
+    const m = re.exec(src);
+    if (m == null) break;
+    out.push({ id: m[1], label: m[2] });
+  }
+  if (out.length < 1) {
+    die("Could not parse any { id, label } from scheme-hue-defs.ts");
+  }
+  return out;
+}
+
 /** True if `value` is another token's name or a literal CSS fragment we accept. */
 function isValidTokenValue(value, names) {
   if (names.has(value)) return true;
@@ -127,7 +150,9 @@ function main() {
     if (n.startsWith("color.light.")) colorLight.push(t);
     else if (n.startsWith("color.dark.")) colorDark.push(t);
     else if (n.startsWith("color.semantic.")) colorSemantic.push(t);
-    else if (
+    else if (n.startsWith("scheme.")) {
+      colorPrimitives.push(t);
+    } else if (
       n.startsWith("brand.") ||
       n.startsWith("neutral.") ||
       n.startsWith("success.") ||
@@ -150,6 +175,10 @@ function main() {
     if (!lightKeys.has(k)) die(`Missing color.light.${k} (dark defines it)`);
   }
 
+  const SCHEME_HUE_DEFS = loadSchemeHueDefs();
+  const BRAND_STEPS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
+  const NEUTRAL_STEPS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
+
   const lines = [];
   lines.push("/**");
   lines.push(" * Design tokens as CSS custom properties.");
@@ -158,8 +187,36 @@ function main() {
   lines.push("");
 
   lines.push(":root {");
+  lines.push("  /* Palette primitives, grouped by hue: --scheme-{hue}-* (accent) + --scheme-{hue}-neutral-* (surfaces) */");
+  lines.push("");
 
-  for (const t of colorPrimitives.sort(sortByTokenName)) {
+  const tokenByName = new Map(
+    colorPrimitives
+      .filter((t) => t.name.startsWith("scheme."))
+      .map((t) => [t.name, t]),
+  );
+  for (const { id, label } of SCHEME_HUE_DEFS) {
+    lines.push(`  /* – ${label}: accent (brand) – */`);
+    for (const step of BRAND_STEPS) {
+      const name = `scheme.${id}.${step}`;
+      const t = tokenByName.get(name);
+      if (!t) die(`Missing token "${name}" (accent ramp for ${id})`);
+      if (t.description) lines.push(`  /* ${escapeComment(t.description)} */`);
+      lines.push(`  ${tokenNameToVar(t.name)}: ${resolveValue(t.value)};`);
+    }
+    lines.push(`  /* – ${label}: surface neutrals – */`);
+    for (const step of NEUTRAL_STEPS) {
+      const name = `scheme.${id}.neutral.${step}`;
+      const t = tokenByName.get(name);
+      if (!t) die(`Missing token "${name}" (neutral ramp for ${id})`);
+      if (t.description) lines.push(`  /* ${escapeComment(t.description)} */`);
+      lines.push(`  ${tokenNameToVar(t.name)}: ${resolveValue(t.value)};`);
+    }
+    lines.push("");
+  }
+
+  const otherPrimitives = colorPrimitives.filter((t) => !t.name.startsWith("scheme."));
+  for (const t of otherPrimitives.sort(sortByTokenName)) {
     if (t.description) lines.push(`  /* ${escapeComment(t.description)} */`);
     lines.push(`  ${tokenNameToVar(t.name)}: ${resolveValue(t.value)};`);
   }
@@ -205,6 +262,32 @@ function main() {
   lines.push("  }");
   lines.push("}");
   lines.push("");
+
+  /**
+   * Remap `brand.*` and `neutral.*` to the active hue (`ndb2_color_scheme` + `data-color-scheme`).
+   * `neutral.0` (white) is not remapped. Sources: `--scheme-{hue}-*`, `--scheme-{hue}-neutral-*`.
+   */
+  lines.push("/* ———————————————————————————————————————————————————— */");
+  lines.push("/* Per-`data-color-scheme` remaps (active accent + surface neutrals) */");
+  lines.push("/* ———————————————————————————————————————————————————— */");
+  lines.push("");
+
+  for (const { id, label } of SCHEME_HUE_DEFS) {
+    lines.push(`/* [${label}] :root tokens → --brand-* / --neutral-* when data-color-scheme=\"${id}\" */`);
+    lines.push(`html[data-color-scheme="${id}"] {`);
+    for (const step of BRAND_STEPS) {
+      const from = `scheme.${id}.${step}`;
+      if (!names.has(from)) die(`Missing token "${from}" (brand remap for ${id})`);
+      lines.push(`  --brand-${step}: var(${tokenNameToVar(from)});`);
+    }
+    for (const step of NEUTRAL_STEPS) {
+      const fromN = `scheme.${id}.neutral.${step}`;
+      if (!names.has(fromN)) die(`Missing token "${fromN}" (neutral remap for ${id})`);
+      lines.push(`  --neutral-${step}: var(${tokenNameToVar(fromN)});`);
+    }
+    lines.push("}");
+    lines.push("");
+  }
 
   fs.mkdirSync(path.dirname(OUT_FILE), { recursive: true });
   fs.writeFileSync(OUT_FILE, `${lines.join("\n")}\n`, "utf8");

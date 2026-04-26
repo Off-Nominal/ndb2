@@ -6,10 +6,11 @@ describe("PageLayout", () => {
   it("renders a full document with head, themed html, and center + page-layout wrapper", () => {
     const html = PageLayout({
       theme: "dark",
+      colorScheme: "nebula",
       title: "Test",
       children: createElement("p", null, "hello"),
     });
-    expect(html).toContain('<html lang="en" data-theme="dark">');
+    expect(html).toContain('<html lang="en" data-theme="dark" data-color-scheme="nebula">');
     expect(html).toContain("<title>Test</title>");
     expect(html).toContain('<div class="[ center ] [ page-layout ]"><p>hello</p></div>');
   });
@@ -17,6 +18,7 @@ describe("PageLayout", () => {
   it("sets hx-headers on body when hxHeaders is provided", () => {
     const html = PageLayout({
       theme: "system",
+      colorScheme: "neptune",
       title: "T",
       hxHeaders: '{"X-CSRF-Token":"abc"}',
       children: createElement("span", null, "x"),

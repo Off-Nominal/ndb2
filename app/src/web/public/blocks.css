@@ -19,21 +19,30 @@
  * Bundled into /assets/blocks.css via build:css.
  */
 
-.theme-switcher {
+.page-preferences {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
+  flex-direction: column;
+  gap: var(--space-3);
   margin-block-end: var(--space-4);
   font-size: var(--text-sm);
 }
 
-.theme-switcher label {
+.theme-switcher,
+.color-scheme-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.theme-switcher label,
+.color-scheme-switcher label {
   font-weight: var(--weight-medium);
   color: var(--color-text-muted);
 }
 
-.theme-switcher select {
+.theme-switcher select,
+.color-scheme-switcher select {
   font: inherit;
   color: var(--color-text);
   background: var(--color-surface);

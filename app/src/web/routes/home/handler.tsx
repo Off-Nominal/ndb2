@@ -2,7 +2,7 @@ import { Router } from "express";
 import { Route } from "@shared/routerMap";
 import { getWebAuth } from "../../middleware/auth/session";
 import { requireWebAuth } from "../../middleware/auth/require-auth";
-import { getThemePreference } from "../../middleware/theme-preference";
+import { getColorScheme, getThemePreference } from "../../middleware/theme-preference";
 import { wrapWebRouteWithErrorBoundary } from "../../middleware/error-boundary";
 import { PageLayout } from "../../shared/components/page_layout";
 import { clientScriptsForModule } from "../../shared/clientScriptsForModule";
@@ -24,6 +24,7 @@ export const Home: Route = (router: Router) => {
       const html = await Promise.resolve(
         <PageLayout
           theme={getThemePreference()}
+          colorScheme={getColorScheme()}
           title="NDB2"
           clientScripts={clientScriptsForModule(__filename)}
           csrfMetaToken={auth.csrfToken}

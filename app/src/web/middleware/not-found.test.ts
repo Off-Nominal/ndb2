@@ -16,6 +16,7 @@ describe("webNotFoundMiddleware", () => {
     expect(res.text).toContain("Page not found");
     expect(res.text).toContain("There is no page at this URL.");
     expect(res.text).toContain('data-theme=');
+    expect(res.text).toContain('data-color-scheme=');
   });
 
   it("returns an HTMX fragment for unknown paths when HX-Request is set", async () => {

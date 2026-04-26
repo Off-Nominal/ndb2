@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 import { ErrorHtmxSnippet, ErrorPage } from "../shared/components/error_page";
 import { PageLayout } from "../shared/components/page_layout";
-import { getThemePreference } from "./theme-preference";
+import { getColorScheme, getThemePreference } from "./theme-preference";
 import { wrapWebRouteWithErrorBoundary } from "./error-boundary";
 
 /**
@@ -16,6 +16,7 @@ export const webNotFoundMiddleware: RequestHandler = wrapWebRouteWithErrorBounda
     }
 
     const theme = getThemePreference();
+    const colorScheme = getColorScheme();
     const isHtmx = req.get("HX-Request") === "true";
     const title = "Page not found";
     const body = "There is no page at this URL.";
@@ -24,7 +25,7 @@ export const webNotFoundMiddleware: RequestHandler = wrapWebRouteWithErrorBounda
       isHtmx ? (
         ErrorHtmxSnippet({ title, body })
       ) : (
-        <PageLayout theme={theme} title={title}>
+        <PageLayout theme={theme} colorScheme={colorScheme} title={title}>
           <ErrorPage title={title} body={body} />
         </PageLayout>
       ),
