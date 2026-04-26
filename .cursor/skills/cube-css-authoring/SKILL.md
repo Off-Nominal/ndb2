@@ -3,7 +3,7 @@ name: cube-css-authoring
 description: >-
   Guides where to put CSS when authoring ndb2 Kitajs pages and components using CUBE CSS:
   globals vs compositions vs utilities vs colocated blocks, exceptions via data-*,
-  markup-driven composition with a fixed class order in markup, and token usage. Use when
+  markup-driven composition with a fixed class order in markup, app/src/web/shared/utils/merge_class (mergeClass) for class strings in TSX, and token usage. Use when
   adding or styling UI and deciding which stylesheet layer to extend. For build scripts and
   file outputs, use css-build.
 ---
@@ -41,6 +41,8 @@ If unsure between composition and block: **composition** should not care *which*
 ## Markup-driven composition
 
 Prefer **composing layout and tweaks in markup** (and in Kitajs `class` strings) from **reusable** composition and utility classes—not one bespoke class per screen. Avoid a single grab-bag “page layout” **block**; instead combine **one composition + one (behavior) utility** (e.g. `[ region ] [ content-column ]`) or tune a composition via **custom properties** from a block stylesheet.
+
+When **building `class` in TypeScript** (e.g. block tokens + `props.class`), use **`mergeClass`** from **`app/src/web/shared/utils/merge_class.ts`** so optional extras don’t add stray spaces; **`Button`** is the reference. See **`kitajs-html-web`**.
 
 Shared wrappers (e.g. **`PageLayout`** in TSX) should emit a **concatenation of existing layer classes** (documented in the component), not introduce a new monolithic selector for the same job.
 
@@ -150,6 +152,7 @@ HTMX can toggle **`data-*`** or classes via swaps; keep hooks documented in the 
 
 ## Related
 
+- **`app/src/web/shared/utils/merge_class.ts`** — **`mergeClass`**, for TSX `class` when combining bracket groups; **`kitajs-html-web`**.
 - **`ndb2-web-design`** — visual mood, how light/dark and named colour schemes fit together.
 - **`css-build`** — scripts, `public/` outputs, nodemon, `<head>` link order.
 - **`kitajs-html-web`** — route structure, **`HtmlHead`**, HTMX, tests.

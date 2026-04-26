@@ -23,8 +23,8 @@ Deeper token history and hex tables (may lag named schemes): [`docs/frontend/des
 
 ## Layered glass (base screen vs content)
 
-- **`body.app-bg-glass`** (see **`utilities.css`**) is the **back layer**—the imagined display glass: soft gradient, grid, and accent glow. It is the only full-viewport “screen”; it should stay relatively quiet.
-- **Foreground UI** (panels, inputs, cards, table chrome) should feel like **glass or film on top** of that screen: prefer **`background: var(--color-surface)`** or **`var(--color-surface-muted)`** and **avoid painting large areas with opaque neutrals** unless a component truly needs a solid (e.g. a blocking modal). **`globals.css`** redefines `--color-surface` / `--color-surface-muted` with **`color-mix(…, transparent)`** so the base background **flows through** while text and borders stay on semantic tokens.
+- **`body.app-bg-glass`** (see **`utilities.css`**, shared with **`.app-glass-skin`**) is the **base** display glass: gradient, grid, accent radials, **opaque** diagonal (no frosted `color-surface` in that stack). On **phone/tablet** the right nav reuses **`.app-glass-skin`** so it reads as a **second sheet** sliding on top, same treatment as the first. On **wide/desktop** the **nav column** is not a second stack—**transparent**, side by side on the single body layer.
+- **Foreground UI** (inputs, cards, table chrome) still uses translucency via **`--color-surface*`** in **`globals.css`** where appropriate.
 - **Do not** stack another full-page opaque background on the main column—let the shell read as one continuous display. New blocks should default to translucent surfaces or borders-only until a solid is justified.
 
 ## Two independent choices

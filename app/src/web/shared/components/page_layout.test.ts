@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { PageLayout } from "./page_layout";
 
 describe("PageLayout", () => {
-  it("renders a full document with head, themed html, and center + page-layout wrapper", () => {
+  it("renders a full document with main column, right nav shell, and centered content", () => {
     const html = PageLayout({
       theme: "dark",
       colorScheme: "nebula",
@@ -13,7 +13,12 @@ describe("PageLayout", () => {
     expect(html).toContain('<html lang="en" data-theme="dark" data-color-scheme="nebula">');
     expect(html).toContain('<body class="app-bg-glass">');
     expect(html).toContain("<title>Test</title>");
-    expect(html).toContain('<div class="[ center ] [ page-layout ]"><p>hello</p></div>');
+    expect(html).toContain('id="app-site-nav-reveal"');
+    expect(html).toContain('<main class="[ app-shell__main ]" id="main">');
+    expect(html).toContain('<div class="[ center ]"><p>hello</p></div>');
+    expect(html).toContain("site-nav");
+    expect(html).toContain("app-nav-drawer");
+    expect(html).toContain("app-nav__tab");
   });
 
   it("sets hx-headers on body when hxHeaders is provided", () => {

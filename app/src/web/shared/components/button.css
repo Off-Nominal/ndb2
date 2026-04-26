@@ -1,0 +1,42 @@
+/* Block: outline control with diffuse “light on glass” edge (theme primary) — compose in nav, forms, etc. */
+
+.button {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-xs);
+  text-decoration: none;
+  text-align: start;
+  font: inherit;
+  line-height: var(--leading-normal);
+  color: var(--color-text);
+  background: transparent;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  /* Soft outer bloom + thin inner specular, as if a rim of light on glass */
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--color-primary) 15%, transparent),
+    0 0 10px 0 color-mix(in srgb, var(--color-primary) 22%, transparent),
+    0 0 24px 2px color-mix(in srgb, var(--color-primary) 10%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--color-text) 5%, transparent);
+  transition: box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.button:hover {
+  background: var(--color-surface-muted);
+  color: var(--color-primary);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--color-primary) 25%, transparent),
+    0 0 16px 1px color-mix(in srgb, var(--color-primary) 32%, transparent),
+    0 0 32px 3px color-mix(in srgb, var(--color-primary) 16%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--color-text) 7%, transparent);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}

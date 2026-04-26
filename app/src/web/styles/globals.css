@@ -2,7 +2,17 @@
  * CUBE — global / baseline layer (element defaults, resets).
  * Loaded after design-tokens.css; use var(--…) for colors, space, and type.
  * Source of truth: copied to src/web/public/globals.css by build:css.
+ *
+ * Oxanium: self-hosted under /assets/ (CSP `font-src 'self'`), not Google Fonts.
  */
+
+@font-face {
+  font-family: Oxanium;
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("/assets/Oxanium-VariableFont_wght.ttf") format("truetype");
+}
 
 *,
 *::before,
@@ -11,14 +21,9 @@
 }
 
 html {
-  font-family:
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    Roboto,
-    "Helvetica Neue",
-    Arial,
-    sans-serif;
+  /* `--font-sans` from design tokens; Oxanium from @font-face + generic sans */
+  font-family: var(--font-sans);
+  font-optical-sizing: auto;
   font-size: var(--text-md);
   font-weight: var(--weight-regular);
   line-height: var(--leading-normal);

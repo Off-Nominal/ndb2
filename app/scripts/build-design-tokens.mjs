@@ -21,8 +21,9 @@ const TOKEN_FILES = [
   "colors.json",
   "space.json",
   "radius.json",
-  "font-weight.json",
+  "font-family.json",
   "font-size.json",
+  "font-weight.json",
   "line-height.json",
   "letter-spacing.json",
 ];
@@ -107,6 +108,13 @@ function loadSchemeHueDefs() {
   return out;
 }
 
+/** Comma-separated `font-family` list (e.g. `Oxanium, sans-serif` or `"Droid Sans", sans-serif`). */
+function isFontFamilyList(value) {
+  return /^("[^"]+"|'[^']+'|[-A-Za-z0-9.]+)(\s*,\s*("[^"]+"|'[^']+'|[-A-Za-z0-9.]+))+\s*$/.test(
+    value.trim(),
+  );
+}
+
 /** True if `value` is another token's name or a literal CSS fragment we accept. */
 function isValidTokenValue(value, names) {
   if (names.has(value)) return true;
@@ -115,6 +123,7 @@ function isValidTokenValue(value, names) {
   if (value === "0") return true;
   if (/^-?\d+(\.\d+)?$/.test(value)) return true;
   if (value === "0em" || value === "0rem") return true;
+  if (isFontFamilyList(value)) return true;
   return false;
 }
 

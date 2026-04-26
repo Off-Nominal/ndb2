@@ -3,12 +3,22 @@
  * Source of truth: copied to src/web/public/utilities.css by build:css.
  */
 
+/** Unstyled `ul` / `ol`: no markers, no UA margin or padding. Compose with e.g. `.stack` for gaps. */
+.list-plain {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
 /**
- * Far layer of the **glass screen**: gradients + light grid; all page chrome uses translucent
- * `var(--color-surface*)` (see `globals.css`) so this shows through. Applied to `<body>` in `PageLayout`.
+ * Full “display glass” stack: opaque `color-bg` base + grid + soft radials. Shared by `body` and
+ * mobile/tablet nav (a **second** sheet, same skin, stacked on the first). Diagonal uses an
+ * **opaque** tint (`color-text` on `color-bg`); do not use frosted `color-surface` here — that
+ * was the translucent white/dark haze. See `page_layout.css`: wide/desktop nav is **not** a
+ * second layer (transparent, one canvas from `body` only).
  */
+.app-glass-skin,
 .app-bg-glass {
-  /* Solid base; gradient stack paints on top */
   background-color: var(--color-bg);
   background-image:
     repeating-linear-gradient(
@@ -26,7 +36,7 @@
     linear-gradient(
       168deg,
       var(--color-bg) 0%,
-      color-mix(in srgb, var(--color-surface) 42%, var(--color-bg) 58%) 46%,
+      color-mix(in srgb, var(--color-text) 4.5%, var(--color-bg) 95.5%) 46%,
       var(--color-bg) 100%
     );
   background-repeat: repeat, repeat, no-repeat, no-repeat, no-repeat;

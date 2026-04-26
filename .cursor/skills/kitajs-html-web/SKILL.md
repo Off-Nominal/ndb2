@@ -3,8 +3,8 @@ name: kitajs-html-web
 description: >-
   NDB2 web rendering with @kitajs/html: PascalCase Kitajs components, snake_case
   filenames, feature folders (page.tsx, handler.tsx, tests/, components/*.test.ts), HTMX,
-  Suspense + renderToStream. Use when adding or changing server-rendered UI under
-  app/src/web; not for React client apps or EJS.
+  shared/utils (mergeClass, merge_class.ts), Suspense + renderToStream. Use when adding
+  or changing server-rendered UI under app/src/web; not for React client apps or EJS.
 ---
 
 # Kitajs HTML (web) — ndb2 patterns
@@ -18,7 +18,9 @@ description: >-
 - **`tests/`** — **route/page-level** tests (e.g. supertest on `mountWeb` for that feature’s paths).
 - **`components/`** — area-local Kitajs modules; **snake_case** filenames (`lucky_number.tsx`) exporting **PascalCase** components (`LuckyNumber`).
 
-Cross-cutting UI → **`app/src/web/shared/components/`** (create when the first reuse appears).
+Cross-cutting UI → **`app/src/web/shared/components/`** (create when the first reuse appears). Small **TypeScript** helpers (no JSX) that support markup/Kita components live in **`app/src/web/shared/utils/`** — e.g. **`mergeClass`** in **`merge_class.ts`** to concatenate a block’s **`[ bracket ]`** **`class`** with optional extra groups from props (used by **`Button`**; see also **`cube-css-authoring`**).
+
+**`PageLayout`** (`page_layout.tsx`) — full document shell: **`HtmlHead`**, `body.app-bg-glass`, checkbox-driven **right-hand site nav** (drawer on small viewports, collapsible column on tablet, fixed column on wide screens — no JS) + **`main#main`** with an inner **`.center`** for primary content. Optional **`navigation`** prop overrides the default **`DefaultSiteNav`** (`site_nav.tsx`). Colocated block styles: **`page_layout.css`**.
 
 Official concepts: [Async components and Suspense](https://html.kitajs.org/guide/introduction#async-components-and-suspense) (v5 docs; API matches `@kitajs/html` **v4.x** via `@kitajs/html/suspense`).
 
@@ -66,6 +68,7 @@ Use **`safe`**, **`e` / `escape`**, and **`@kitajs/ts-html-plugin`** for unsafe 
 
 ## Related
 
+- **`app/src/web/shared/utils/merge_class.ts`** — **`mergeClass`**, for composing `class` strings; **`cube-css-authoring`** for when to use it.
 - **`middleware-patterns`** / **`middleware-naming`** — request-scoped values and file naming (see `theme-preference.ts`, `middleware/auth/session.ts` for web sessions).
 - **`express-route-map`** — `Route`, `mapRoutes`, `web/routes/index.ts`.
 - **`ndb2-web-design`** — visual tone, colour schemes, light/dark (optional when styling pages).

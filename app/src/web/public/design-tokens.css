@@ -190,6 +190,8 @@
   --warning-500: #F59E0B;
   --warning-700: #B45309;
 
+  /* Base UI: Oxanium (wght 200–800) + generic sans; self-host variable TTF under /assets/ + @font-face in globals.css (CSP-safe). */
+  --font-sans: Oxanium, sans-serif;
   --leading-normal: 1.5;
   --leading-relaxed: 1.65;
   --leading-snug: 1.3;
