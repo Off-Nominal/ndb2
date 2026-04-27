@@ -1,1 +1,0 @@
-{"fullyTracked":false,"platform":"darwin","arch":"arm64","nodeVersion":"v22.15.0","command":"node -e \"process.exit(0)\"","extraArgs":[],"clean":true,"files":{},"output":[],"dependencies":{"[\"/Users/jakerobins/Repos/ndb2/app\",\"transfer-web\"]":"4165d1df00d1a83702d6a82433823593e39aaa9f7d2ed50e7a1ca98509b641d7"},"env":{}}
