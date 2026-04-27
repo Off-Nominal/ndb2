@@ -7,13 +7,40 @@
   width: 100%;
   box-sizing: border-box;
 
-  & * {
+  & .site-nav__title {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-block: var(--space-2);
+    align-items: baseline;
+    width: 100%;
+    font-size: var(--text-2xl);
+    font-weight: var(--weight-semibold);
+    letter-spacing: normal;
+    text-transform: uppercase;
+
+    & .site-nav__title-char {
+      flex: 0 0 auto;
+      display: inline-block;
+      width: auto;
+      background-image: linear-gradient(
+        to bottom,
+        var(--color-bg) 0%,
+        var(--color-bg) 100%
+      );
+      background-clip: text;
+      -webkit-background-clip: text;
+    }
+  }
+
+  & > * {
     /* layout */
     display: block;
     width: 100%;
   }
 
-  & > div {
+  & > div:last-child {
     flex: 0 0 auto;
     margin-block-start: auto;
   }

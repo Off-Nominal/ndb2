@@ -5,6 +5,11 @@
   /* layout */
   --screen-element-padding-x: var(--space-3);
   --screen-element-padding-y: var(--space-2);
+  /* Contain `::after` (absolute + % sizing); without this, the pseudo-element’s containing block is
+     not the control and can expand to the viewport—last button in a column would steal hit-testing. */
+
+  position: relative;
+  z-index: 0;
 
   /* type */
   text-decoration: none;

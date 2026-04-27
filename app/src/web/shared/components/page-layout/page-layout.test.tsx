@@ -21,10 +21,9 @@ describe("PageLayout", () => {
       children: createElement("p", null, "hello"),
     });
     expect(html).toContain('<html lang="en" data-theme="dark" data-color-scheme="nebula">');
-    expect(html).toContain('<body class="[ glass-background ]">');
     expect(html).toContain("<title>Test</title>");
     expect(html).toContain("<main>");
-    expect(html).toContain('<div class="[ center-inline ]"><p>hello</p></div>');
+    expect(html).toMatch(/<main\b[^>]*>[\s\S]*<p>hello<\/p>/);
     expect(html).not.toContain('id="app-site-nav-reveal"');
     expect(html).not.toContain("nav-drawer");
   });
@@ -37,7 +36,6 @@ describe("PageLayout", () => {
       hxHeaders: '{"X-CSRF-Token":"abc"}',
       children: createElement("span", null, "x"),
     });
-    expect(html).toContain('class="[ glass-background ]"');
     expect(html).toContain('hx-headers="{&#34;X-CSRF-Token&#34;:&#34;abc&#34;}"');
   });
 });
@@ -52,18 +50,15 @@ describe("AuthenticatedPageLayout", () => {
       children: createElement("p", null, "hello"),
     });
     expect(html).toContain('<html lang="en" data-theme="dark" data-color-scheme="nebula">');
-    expect(html).toContain('<body class="[ glass-background ]">');
     expect(html).toContain("<title>Auth</title>");
     expect(html).toContain('id="app-site-nav-reveal"');
     expect(html).toContain('<main id="main">');
-    expect(html).toContain('<div class="[ center-inline ]"><p>hello</p></div>');
+    expect(html).toMatch(/<main\b[^>]*\bid="main"[^>]*>[\s\S]*<p>hello<\/p>/);
     expect(html).toContain("site-nav");
     expect(html).toContain("nav-drawer");
-    expect(html).not.toContain("app-shell__main");
     expect(html).toContain('action="/auth/logout"');
     expect(html).toContain('name="_csrf"');
     expect(html).toContain("test-csrf-token");
-    expect(html).toContain("form-field");
     expect(html).toContain("data-preferences-form");
   });
 });

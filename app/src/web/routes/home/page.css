@@ -1,0 +1,12 @@
+.main-menu {
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.grid > * {
+  flex: 1 1 18rem;
+}

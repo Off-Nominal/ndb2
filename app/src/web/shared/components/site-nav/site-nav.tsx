@@ -3,6 +3,8 @@ import type { ColorScheme, ThemePreference } from "../../../middleware/theme-pre
 import { Button } from "../button";
 import { PreferencesForm } from "../preferences-form";
 
+const SITE_NAV_TITLE = "Nostradambot2";
+
 export type NavigationMenuProps = {
   auth: WebAuthAuthenticated;
   theme: ThemePreference;
@@ -19,18 +21,25 @@ export type NavigationMenuProps = {
 export function NavigationMenu(props: NavigationMenuProps): JSX.Element {
   return (
     <nav class="[ site-nav ]">
+      <div class="[ site-nav__title ]" aria-label={SITE_NAV_TITLE}>
+        {SITE_NAV_TITLE.split("").map((ch) => (
+          <span class="[ site-nav__title-char ]" aria-hidden="true">
+            {ch}
+          </span>
+        ))}
+      </div>
       <ul class="[ stack ] [ list-plain ]">
         <li>
-          <Button href="/">Main Menu</Button>
+          <Button class="[ full-width ]" href="/">Main Menu</Button>
         </li>
         <li>
-          <Button href="/predictions">Predictions</Button>
+          <Button class="[ full-width ]" href="/predictions">Predictions</Button>
         </li>
         <li>
-          <Button href="/seasons">Results</Button>
+          <Button class="[ full-width ]" href="/seasons">Results</Button>
         </li>
         <li>
-          <Button href="/profile">Profile</Button>
+          <Button class="[ full-width ]" href="/profile">Profile</Button>
         </li>
       </ul>
 
@@ -42,7 +51,7 @@ export function NavigationMenu(props: NavigationMenuProps): JSX.Element {
         />
         <form method="post" action="/auth/logout">
           <input type="hidden" name="_csrf" value={props.auth.csrfToken} />
-          <Button type="submit">Sign out</Button>
+          <Button class="[ full-width ]" type="submit">Sign out</Button>
         </form>
       </div>
     </nav>

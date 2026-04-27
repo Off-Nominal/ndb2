@@ -1,0 +1,57 @@
+/* Block: `screen-element` panel with a primary top ribbon and knockout title. */
+
+.card-screen-element {
+  --screen-element-padding-x: 0;
+  --screen-element-padding-y: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  overflow: hidden;
+
+  & .card-screen-element__bar {
+    /* Horizontal run of the trapezoid: height × tan(20°) so the right edge is 20° from vertical. */
+    --bar-trapezoid-run: calc(tan(20deg) * (1lh + 2 * var(--space-1)));
+
+    flex: 0 0 auto;
+    width: fit-content;
+    max-width: calc(100% - var(--space-4));
+    box-sizing: border-box;
+    /* Reserve space for the top-right overhang (keeps the shape inside the box, avoids parent clip). */
+    padding: var(--space-1) calc(var(--space-2) + var(--bar-trapezoid-run))
+      var(--space-1) var(--space-2);
+    /* Fill: `.primary-specular-gradient` (utilities.css). Right edge: slanted up and right. */
+    clip-path: polygon(
+      0% 0%,
+      100% 0%,
+      calc(100% - var(--bar-trapezoid-run)) 100%,
+      0% 100%
+    );
+  }
+
+  & .card-screen-element__heading {
+    /* type (match heading strip + global scale from element tag h1–h6) */
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    font-weight: var(--weight-semibold);
+    font-size: var(--text-md);
+
+    /* Knockout: glyph fill matches canvas */
+    background-image: linear-gradient(
+      to bottom,
+      var(--color-bg) 0%,
+      var(--color-bg) 100%
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  & .card-screen-element__body {
+    flex: 1 1 auto;
+    align-self: stretch;
+    min-width: 0;
+    padding: var(--space-4);
+  }
+}

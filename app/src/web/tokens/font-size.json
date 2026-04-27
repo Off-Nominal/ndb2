@@ -1,10 +1,10 @@
 [
-  { "name": "text.xs", "value": "0.75rem", "description": "12px" },
-  { "name": "text.sm", "value": "0.875rem", "description": "14px" },
-  { "name": "text.md", "value": "1rem", "description": "16px" },
-  { "name": "text.lg", "value": "1.125rem", "description": "18px" },
-  { "name": "text.xl", "value": "1.25rem", "description": "20px" },
-  { "name": "text.2xl", "value": "1.5rem", "description": "24px" },
-  { "name": "text.3xl", "value": "1.875rem", "description": "30px" },
-  { "name": "text.4xl", "value": "2.25rem", "description": "36px" }
+  { "name": "text.xs", "value": "0.6875rem", "description": "11px" },
+  { "name": "text.sm", "value": "0.8125rem", "description": "13px" },
+  { "name": "text.md", "value": "0.9375rem", "description": "15px" },
+  { "name": "text.lg", "value": "1.0625rem", "description": "17px" },
+  { "name": "text.xl", "value": "1.1875rem", "description": "19px" },
+  { "name": "text.2xl", "value": "1.4375rem", "description": "23px" },
+  { "name": "text.3xl", "value": "1.8125rem", "description": "29px" },
+  { "name": "text.4xl", "value": "2.1875rem", "description": "35px" }
 ]
