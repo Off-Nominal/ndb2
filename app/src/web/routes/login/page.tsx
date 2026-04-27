@@ -13,7 +13,7 @@ export type LoginPageProps = {
 export function LoginPage(props: LoginPageProps): JSX.Element {
   return (
     <div class="[ center ]">
-      <div class="[ stack ] [ screen-element ]">
+      <div class="[ stack ] [ screen-element ] [ login-page ]">
 
         <h1>Sign in</h1>
         <p>

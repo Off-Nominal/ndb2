@@ -1,7 +1,7 @@
 /**
  * CUBE — global / baseline layer (element defaults, resets).
  * Loaded after design-tokens.css; use var(--…) for colors, space, and type.
- * Source of truth: copied to src/web/public/globals.css by build:css.
+ * Source of truth: emitted to dist/web/public/globals.css by build:css.
  *
  * Oxanium: self-hosted under /assets/ (CSP `font-src 'self'`), not Google Fonts.
  */

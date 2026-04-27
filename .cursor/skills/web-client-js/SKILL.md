@@ -11,7 +11,7 @@ description: >-
 ## Colocation
 
 - **Routes:** **`*.client.ts`** or **`*.client.js`** under **`app/src/web/routes/`** (e.g. `home/page.client.ts`).
-- **Shared components:** under **`app/src/web/shared/components/`**; output **`public/routes/shared/components/.../file.client.js`**. Map key: POSIX **`dirname`**. The build lists them all in **`sharedComponentsClientScriptUrls`**; **`HtmlHead`** loads those by default, then any route **`clientScripts`**. Handlers only pass **`clientScripts`** for **route** colocated `*.client.*` (e.g. `clientScriptsForModule(__filename)`).
+- **Shared components:** under **`app/src/web/shared/components/`**; output **`dist/web/public/routes/shared/components/.../file.client.js`**. Map key: POSIX **`dirname`**. The build lists them all in **`sharedComponentsClientScriptUrls`**; **`HtmlHead`** loads those by default, then any route **`clientScripts`**. Handlers only pass **`clientScripts`** for **route** colocated `*.client.*` (e.g. `clientScriptsForModule(__filename)`).
 - **Authoring in TypeScript:** use **`*.client.ts`**. The server **`tsc`** build **excludes** `**/*.client.ts` (see `tsconfig.json`); compile for the browser is **`esbuild`** in **`build-client-js.mjs`**. For DOM types and a clean check, use **`app/tsconfig.client.json`** and **`pnpm run typecheck:client`**. Each `*.client.ts` entry should be a **module** (e.g. `export {}` at the end) so globals in two files do not merge.
 - Plain **`*.client.js`** is still **copied** as-is (no esbuild) if you add one.
 - Keep scripts small (progressive enhancement, cookies, tiny HTMX helpers).
@@ -21,15 +21,15 @@ description: >-
 | Step | Behavior |
 |------|----------|
 | **Discover** | All **`*.client.ts`** and **`*.client.js`** under the two roots, sorted. |
-| **Clean** | Delete **`src/web/public/routes/`**. |
-| **Emit** | **`*.client.ts`**: **esbuild** → **`public/routes/.../same-name.client.js`** (browser, **`iife`**, `es2020`, no minify by default). **`*.client.js`**: copy. |
+| **Clean** | Delete **`dist/web/public/routes/`**. |
+| **Emit** | **`*.client.ts`**: **esbuild** → **`dist/web/public/routes/.../same-name.client.js`** (browser, **`iife`**, `es2020`, no minify by default). **`*.client.js`**: copy. |
 | **Generate** | **`src/web/generated/routeClientScripts.ts`**: per-folder map, **`clientScriptsForRouteDir`**, and **`sharedComponentsClientScriptUrls`** (all shared-component scripts, for **`HtmlHead`**). |
 
 **Keys:** `dirname` of the path under `public/routes` (e.g. `home`, `shared/components/theme-selector`).
 
 ## URLs and static serving
 
-- **`mountWeb`** serves **`/assets`** from **`public/`** → **`/assets/routes/.../file.client.js`**.
+- **`mountWeb`** serves **`/assets`** from **`dist/web/public/`** (see **`mountWeb`**) → **`/assets/routes/.../file.client.js`**.
 
 ## Wiring pages
 
@@ -44,7 +44,7 @@ description: >-
 
 ## Tests and CI
 
-- Regenerate/check in **`routeClientScripts.ts`** and **`public/routes/**`** with the rest of generated assets.
+- Regenerate/check in **`routeClientScripts.ts`**; client bundles are emitted to **`dist/web/public/routes/**`**, not under **`src/web/public`**.
 
 ## Related
 

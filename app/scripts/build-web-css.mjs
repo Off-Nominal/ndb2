@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
  * CUBE CSS pipeline:
- * 1. Copy layer sources from src/web/styles/ → src/web/public/
+ * 1. Copy layer sources from src/web/styles/ → dist/web/public/
  * 2. Concatenate colocated *.css under src/web (excluding public, tokens, styles)
- *    into src/web/public/blocks.css
+ *    into dist/web/public/blocks.css
  */
 
 import fs from "node:fs";
@@ -14,7 +14,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const APP_ROOT = path.join(__dirname, "..");
 const WEB_ROOT = path.join(APP_ROOT, "src/web");
 const STYLES_DIR = path.join(WEB_ROOT, "styles");
-const PUBLIC_DIR = path.join(WEB_ROOT, "public");
+const PUBLIC_DIR = path.join(APP_ROOT, "dist/web/public");
 
 const LAYER_FILES = ["globals.css", "compositions.css", "utilities.css"];
 

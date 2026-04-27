@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
  * Dev-only watcher: rebuild static assets without restarting the API process.
- * - Token JSON → build:tokens + transfer-web
- * - Colocated / layer CSS (excluding public/) → build:css + transfer-web
- * - *.client.js under routes or shared/components → build:client-js, then bump
+ * - Token JSON → build:tokens + transfer-web (merge static from src/web/public)
+ * - Colocated / layer CSS (excluding src public) → build:css + transfer-web
+ * - *.client.ts|js under routes or shared/components → build:client-js, then bump
  *   src/index.ts mtime so
  *   nodemon (ts/tsx only) restarts and picks up generated routeClientScripts.ts.
  */

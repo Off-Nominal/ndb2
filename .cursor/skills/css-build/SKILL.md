@@ -24,7 +24,7 @@ flowchart TB
     BT[build-design-tokens.mjs]
     BW[build-web-css.mjs]
   end
-  subgraph public [app/src/web/public]
+  subgraph distPublic [app/dist/web/public]
     PT[design-tokens.css]
     PG[globals.css]
     PC[compositions.css]
@@ -48,9 +48,9 @@ flowchart TB
   MW --> HH
 ```
 
-- **Compile output:** `pnpm run build` runs **`build:tokens`** then **`build:css`** then **`build:client-js`**, then `tsc`, `vendor-htmx`, `transfer-web`. Static files under `src/web/public/` are copied to **`dist/web/public/`** for production.
-- **Dev:** `nodemon` watches `src` (including **`css`** and token **`json`**). Generated files in `public/*.css` and **`public/routes/**`** (copied `*.client.js`) are **ignored** in `nodemon.json` so rebuilds do not loop.
-- **Serving:** [`mountWeb`](app/src/web/mountWeb.ts) mounts **`express.static`** at **`/assets`** → `path.join(__dirname, "public")` (i.e. `dist/web/public` when running compiled output). [`HtmlHead`](app/src/web/shared/components/html-head/html-head.tsx) uses root-absolute URLs: **`/assets/<file>.css`**.
+- **Compile output:** `pnpm run build` runs **`vendor-htmx`**, **`build:tokens`**, **`build:css`**, **`build:client-js`**, then `tsc`, `tsc-alias`, `transfer-queries`, **`transfer-web`**. `build:*` and **`vendor-htmx`** write into **`app/dist/web/public/`**; hand-placed static (fonts, etc.) in **`app/src/web/public/`** is merged in by **`transfer-web`** and is not generated.
+- **Dev:** `nodemon` watches `src` (including **`css`** and token **`json`**). **`dev-watch-assets`** rebuilds tokens/css/client and re-runs **`transfer-web`**. The **`dist/`** tree is not watched by `nodemon` (see **`nodemon.json`**).
+- **Serving:** [`mountWeb`](app/src/web/mountWeb.ts) resolves **`express.static`** for **`/assets`** to **`dist/web/public`**, with a **fallback** when tests load the module from **`src/web`** (see `resolveWebPublicRoot`). [`HtmlHead`](app/src/web/shared/components/html-head/html-head.tsx) uses root-absolute URLs: **`/assets/<file>.css`**.
 - **API vs static:** [`mountJsonApi`](app/src/api/mountJsonApi.ts) is mounted at **`/api`** only, so JSON auth middleware never runs for **`/assets/*`** or HTML routes.
 
 ## CUBE CSS in ndb2
@@ -88,7 +88,7 @@ Then HTMX (`htmx.min.js`).
 |-------|----------|
 | Token sources | `app/src/web/tokens/*.json` (arrays; schema under `tokens/schema/`) |
 | Generator | `app/scripts/build-design-tokens.mjs` |
-| Output | `app/src/web/public/design-tokens.css` (do not edit by hand) |
+| Output | `app/dist/web/public/design-tokens.css` (do not edit by hand) |
 
 **pnpm:** `build:tokens` — also chained from `build` / `postinstall`.
 
@@ -113,7 +113,7 @@ Then HTMX (`htmx.min.js`).
 
 **pnpm:** `build:css` — also chained from `build` / `postinstall`.
 
-**Block bundle order:** Lexicographic sort of file paths. Add block CSS beside `*.tsx`; run `build:css` or `build`; do not hand-edit `public/blocks.css`.
+**Block bundle order:** Lexicographic sort of file paths. Add block CSS beside `*.tsx`; run `build:css` or `build`; do not hand-edit `dist/web/public/blocks.css`.
 
 **Authoring style:** Layer and block sources may use **native CSS nesting** (`&` for pseudo-states, **and** for child/element rules under a single block root so related selectors are not split across many top-level stanzas). The script **copies** `globals.css` / `compositions.css` / `utilities.css` **verbatim** and **concatenates** block files without transforming CSS. See **`cube-css-authoring`**: **Nesting states in the parent**, **Nesting child and element rules under the block root**, and **Sectioning a block file**.
 

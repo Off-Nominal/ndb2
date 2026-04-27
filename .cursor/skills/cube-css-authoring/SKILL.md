@@ -26,7 +26,7 @@ description: >-
 
 **Design tokens** are JSON → `design-tokens.css`; use **`var(--…)`** in hand-written CSS instead of raw hex/spacing literals when a token exists.
 
-**Do not** edit `app/src/web/public/*.css` by hand except vendored assets like `htmx.min.js`; run **`pnpm run build:css`** (or **`build`**) after changing sources.
+**Do not** hand-edit generated CSS under **`app/dist/web/public/`**; run **`pnpm run build:css`** (or **`build`**) after changing sources. **`app/src/web/public/`** is static-only (merged into **`dist`** by **`transfer-web`**), not a token/CSS build output.
 
 ## Decision order (apply before writing block CSS)
 

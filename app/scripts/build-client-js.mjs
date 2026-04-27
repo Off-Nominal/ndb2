@@ -3,7 +3,7 @@
  * Discovers `*.client.ts` and `*.client.js` under:
  * - `src/web/routes/`, and
  * - `src/web/shared/components/`,
- * emits `*.client.js` into `src/web/public/routes/...` (served as `/assets/routes/...`),
+ * emits `*.client.js` into `dist/web/public/routes/...` (served as `/assets/routes/...`),
  * and generates `src/web/generated/routeClientScripts.ts`.
  *
  * - `*.client.ts` → compiled with **esbuild** (browser, `iife`, `es2020`); no Node `tsc`.
@@ -23,7 +23,7 @@ const APP_ROOT = path.join(__dirname, "..");
 const WEB_ROOT = path.join(APP_ROOT, "src/web");
 const ROUTES_DIR = path.join(WEB_ROOT, "routes");
 const SHARED_COMPONENTS_DIR = path.join(WEB_ROOT, "shared", "components");
-const PUBLIC_ROUTES_CLIENT = path.join(WEB_ROOT, "public", "routes");
+const PUBLIC_ROUTES_CLIENT = path.join(APP_ROOT, "dist/web/public/routes");
 const GEN_FILE = path.join(APP_ROOT, "src/web/generated/routeClientScripts.ts");
 
 function die(msg) {

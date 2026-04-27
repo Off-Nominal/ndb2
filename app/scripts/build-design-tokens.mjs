@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Reads design token JSON under `src/web/tokens/` and writes
- * `src/web/public/design-tokens.css` (CSS custom properties).
+ * `dist/web/public/design-tokens.css` (CSS custom properties).
  *
  * If a token's `value` matches another token's `name`, the output uses
  * `var(--<name-with-dots-as-hyphens>)`.
@@ -14,7 +14,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const APP_ROOT = path.join(__dirname, "..");
 const TOKENS_DIR = path.join(APP_ROOT, "src/web/tokens");
-const OUT_FILE = path.join(APP_ROOT, "src/web/public/design-tokens.css");
+const OUT_FILE = path.join(APP_ROOT, "dist/web/public/design-tokens.css");
 
 /** Order is output order within :root (color primitives first, then scales). */
 const TOKEN_FILES = [
