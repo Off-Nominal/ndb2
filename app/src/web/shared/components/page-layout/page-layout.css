@@ -68,10 +68,7 @@
       width: 1px;
       pointer-events: none;
       z-index: 0;
-      box-shadow:
-        -1px 0 0 0 color-mix(in srgb, var(--color-primary) 12%, transparent),
-        -2px 0 10px 0 color-mix(in srgb, var(--color-primary) 17%, transparent),
-        -4px 0 24px 2px color-mix(in srgb, var(--color-primary) 7%, transparent);
+      box-shadow: var(--hud-shadow-nav-edge);
     }
 
     & .page-layout-nav-toggle {

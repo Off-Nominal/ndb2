@@ -1,0 +1,57 @@
+/**
+ * HUD / “screen chrome” glow — shared `box-shadow` stacks for framed controls and edge accents.
+ *
+ * - **Colors** (`--hud-glow-*`): reuse in custom stacks, `filter: drop-shadow()`, or pseudo-elements.
+ * - **Layers** (`--hud-shadow-rim` …): compose comma-separated `box-shadow` values.
+ * - **Bundles** (`--hud-shadow-screen-element` …): ready-made stacks for common surfaces.
+ *
+ * For a glow along one axis only (e.g. nav rail), use `--hud-shadow-*-edge` layers on `::before` /
+ * `::after` instead of the symmetric rim/mid/outer trio.
+ */
+:root {
+  --hud-glow-rim: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  --hud-glow-mid: color-mix(in srgb, var(--color-primary) 17%, transparent);
+  --hud-glow-outer: color-mix(in srgb, var(--color-primary) 7%, transparent);
+  --hud-glow-outer-muted: color-mix(in srgb, var(--color-primary) 5%, transparent);
+
+  --hud-glow-rim-hover: color-mix(in srgb, var(--color-primary) 19%, transparent);
+  --hud-glow-mid-hover: color-mix(in srgb, var(--color-primary) 26%, transparent);
+  --hud-glow-outer-hover: color-mix(in srgb, var(--color-primary) 12%, transparent);
+
+  --hud-shadow-rim: 0 0 0 1px var(--hud-glow-rim);
+  --hud-shadow-mid: 0 0 10px 0 var(--hud-glow-mid);
+  --hud-shadow-outer: 0 0 24px 2px var(--hud-glow-outer);
+
+  --hud-shadow-outer-tight: 0 0 16px 1px var(--hud-glow-outer);
+  --hud-shadow-outer-lift: 0 4px 16px 0 var(--hud-glow-outer);
+  --hud-shadow-outer-trim: 0 0 20px 1px var(--hud-glow-outer-muted);
+
+  --hud-shadow-inset: inset 0 1px 0 color-mix(in srgb, var(--color-text) 4%, transparent);
+  --hud-shadow-inset-soft: inset 0 1px 0 color-mix(in srgb, var(--color-text) 3%, transparent);
+  --hud-shadow-inset-hover: inset 0 1px 0 color-mix(in srgb, var(--color-text) 6%, transparent);
+
+  /* Cast along −X (e.g. narrow strip `::before` on the nav edge). */
+  --hud-shadow-rim-edge: -1px 0 0 0 var(--hud-glow-rim);
+  --hud-shadow-mid-edge: -2px 0 10px 0 var(--hud-glow-mid);
+  --hud-shadow-outer-edge: -4px 0 24px 2px var(--hud-glow-outer);
+
+  --hud-shadow-screen-element:
+    var(--hud-shadow-rim), var(--hud-shadow-mid), var(--hud-shadow-outer), var(--hud-shadow-inset);
+
+  --hud-shadow-screen-element-hover:
+    0 0 0 1px var(--hud-glow-rim-hover), 0 0 16px 1px var(--hud-glow-mid-hover),
+    0 0 32px 3px var(--hud-glow-outer-hover), var(--hud-shadow-inset-hover);
+
+  --hud-shadow-select-list-below:
+    var(--hud-shadow-rim), var(--hud-shadow-mid), var(--hud-shadow-outer-tight),
+    var(--hud-shadow-inset-soft);
+
+  --hud-shadow-select-list-above:
+    var(--hud-shadow-rim), var(--hud-shadow-mid), var(--hud-shadow-outer-lift),
+    var(--hud-shadow-inset-soft);
+
+  --hud-shadow-select-surface-open:
+    var(--hud-shadow-rim), var(--hud-shadow-mid), var(--hud-shadow-outer-trim), var(--hud-shadow-inset);
+
+  --hud-shadow-nav-edge: var(--hud-shadow-rim-edge), var(--hud-shadow-mid-edge), var(--hud-shadow-outer-edge);
+}

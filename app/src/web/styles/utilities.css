@@ -28,6 +28,47 @@
 }
 
 /**
+ * Remove an element from the visual layout while it stays in the DOM (forms, focus programmatically,
+ * etc.). Does not by itself make content available to assistive tech—pair with labelling / roles as
+ * needed, or hide from AT with `aria-hidden` when the visible control is elsewhere.
+ */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+/** Scrollable region with scrollbars hidden (wheel / touch / keyboard scrolling unchanged). */
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/** Single-line overflow: ellipsis. In flex layouts, pair with `min-width: 0` on the item (or a parent flex rule) so it can shrink. */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/** Standard focus ring; add to focusable controls (or compose with `.screen-element` on buttons). */
+.ring:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/**
  * Full “display glass” stack: opaque `color-bg` base + grid + soft radials. Shared by `body` and
  * mobile/tablet nav (a **second** sheet, same skin, stacked on the first). Diagonal uses an
  * **opaque** tint (`color-text` on `color-bg`); do not use frosted `color-surface` here — that
@@ -83,26 +124,13 @@
   background: transparent;
   border: 1px solid var(--color-primary);
   border-radius: var(--radius-sm);
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--color-primary) 12%, transparent),
-    0 0 10px 0 color-mix(in srgb, var(--color-primary) 17%, transparent),
-    0 0 24px 2px color-mix(in srgb, var(--color-primary) 7%, transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--color-text) 4%, transparent);
+  box-shadow: var(--hud-shadow-screen-element);
   transition:
     box-shadow 0.15s ease,
     border-color 0.15s ease;
 
   &:hover {
-    box-shadow:
-      0 0 0 1px color-mix(in srgb, var(--color-primary) 19%, transparent),
-      0 0 16px 1px color-mix(in srgb, var(--color-primary) 26%, transparent),
-      0 0 32px 3px color-mix(in srgb, var(--color-primary) 12%, transparent),
-      inset 0 1px 0 color-mix(in srgb, var(--color-text) 6%, transparent);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--color-focus-ring);
-    outline-offset: 2px;
+    box-shadow: var(--hud-shadow-screen-element-hover);
   }
 }
 

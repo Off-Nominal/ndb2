@@ -15,10 +15,12 @@ describe("Select", () => {
     expect(html).toContain("data-select");
     expect(html).toContain('[ select ]');
     expect(html).toContain('class="[ screen-element ] [ select__surface ]"');
-    expect(html).toContain('class="[ select__trigger ]"');
+    expect(html).toContain('class="[ ring ] [ select__trigger ]"');
+    expect(html).toContain('class="[ truncate ] [ select__value ]"');
+    expect(html).toContain('class="[ hide-scrollbar ] [ select__list ]"');
     expect(html).toContain('id="t-theme"');
     expect(html).toContain('id="t-theme-native"');
-    expect(html).toContain("select__native");
+    expect(html).toContain("visually-hidden");
     expect(html).toContain("data-select-native");
     expect(html).toContain('name="theme"');
     expect(html).toContain('role="listbox"');

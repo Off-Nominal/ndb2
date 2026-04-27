@@ -20,6 +20,7 @@ description: >-
 | CUBE role | Put new rules in | File (source of truth) |
 |-----------|------------------|-------------------------|
 | Baseline / resets / element defaults | **Globals** | `app/src/web/styles/globals.css` |
+| Shared **HUD glow** (`box-shadow` tints, layers, bundles) | **`hud-shadows.css`** | Imported after globals in **`cube-entry.css`**. Use **`var(--hud-shadow-*)`** / **`var(--hud-glow-*)`** instead of duplicating primary **`color-mix`** stacks in blocks; see **`css-build`**. |
 | Layout primitives (stack, cluster, wrapper, grid); may expose **`--*` hooks** (see below) | **Composition** | `app/src/web/styles/compositions.css` |
 | Single-purpose **behaviors** (often several properties); not Tailwind-style one-prop atoms | **Utility** | `app/src/web/styles/utilities.css` |
 | Component identity + structure + **exceptions** | **Block** | Colocated **`*.css`** next to the **`*.tsx`** (bundled into **`cube.css`** via `cube-blocks.css`) |
