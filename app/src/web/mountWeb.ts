@@ -23,8 +23,8 @@ function resolveWebPublicRoot(): string {
     return fromAppDist;
   }
   throw new Error(
-    "Web public assets are missing. From the `app` package, run: pnpm run prepare-dev " +
-      "(or pnpm run build:tokens, build:css, build:client-js, vendor-htmx, transfer-web) " +
+    "Web public assets are missing. From the `app` package, run: pnpm run build:web-assets " +
+      "(Wireit runs vendor-htmx, build:tokens, build:css, build:client-js, then merges src/web/public) " +
       "so `cube.css` exists under `dist/web/public/`.",
   );
 }

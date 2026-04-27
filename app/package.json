@@ -10,12 +10,11 @@
     "build:tokens": "wireit",
     "build:css": "wireit",
     "build:client-js": "wireit",
-    "postinstall": "pnpm run prepare-dev",
-    "transfer-web": "wireit",
-    "build": "pnpm run prepare-dev && tsc && tsc-alias -p tsconfig.json && pnpm run transfer-queries",
-    "prepare-dev": "wireit",
-    "compile:dev": "tsc && tsc-alias -p tsconfig.json && pnpm run transfer-queries && pnpm run transfer-web && node --env-file=.env ./dist/index.js",
-    "dev": "pnpm run prepare-dev && pnpm run transfer-queries && concurrently -k -n assets,api \"node ./scripts/dev-watch-assets.mjs\" \"NODE_ENV=dev dotenv -- tsx watch src/index.ts\"",
+    "postinstall": "pnpm run build:web-assets",
+    "build:web-assets": "wireit",
+    "build": "pnpm run build:web-assets && tsc && tsc-alias -p tsconfig.json && pnpm run transfer-queries",
+    "compile:dev": "tsc && tsc-alias -p tsconfig.json && pnpm run transfer-queries && pnpm run build:web-assets && node --env-file=.env ./dist/index.js",
+    "dev": "pnpm run build:web-assets && pnpm run transfer-queries && concurrently -k -n assets,api \"node ./scripts/dev-watch-assets.mjs\" \"NODE_ENV=dev dotenv -- tsx watch src/index.ts\"",
     "compile": "pnpm run clear && pnpm run build && node --env-file=.env ./dist/index.js",
     "start": "node ./dist/index.js",
     "sql-watch": "dotenv -- pgtyped -w -c pgtyped.config.json",
@@ -121,7 +120,7 @@
         "src/web/generated/routeClientScripts.ts"
       ]
     },
-    "transfer-web": {
+    "build:web-assets": {
       "command": "mkdir -p ./dist/web/public && cp -R ./src/web/public/. ./dist/web/public/",
       "dependencies": [
         "build:tokens",
@@ -134,12 +133,6 @@
       "output": [
         "dist/web/public/*.ttf",
         "dist/web/public/.gitkeep"
-      ]
-    },
-    "prepare-dev": {
-      "command": "node -e \"process.exit(0)\"",
-      "dependencies": [
-        "transfer-web"
       ]
     }
   }

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
  * Dev-only watcher: rebuild static assets without restarting the API process.
- * - Token JSON → build:tokens + transfer-web (merge static from src/web/public)
- * - Colocated / layer CSS → regenerate cube-blocks manifest + transfer-web (Vite serves / HMR CSS in dev)
+ * - Token JSON → build:tokens + build:web-assets (merge static from src/web/public)
+ * - Colocated / layer CSS → regenerate cube-blocks manifest + build:web-assets (Vite serves / HMR CSS in dev)
  * - *.client.ts|js under routes or shared/components → build:client-js, then bump
  *   src/index.ts mtime so tsx watch restarts and picks up generated routeClientScripts.ts.
  */
@@ -49,20 +49,20 @@ function touchApiEntry() {
 }
 
 const onTokens = debounce(() => {
-  console.error("[dev-watch-assets] tokens changed → build:tokens, transfer-web");
+  console.error("[dev-watch-assets] tokens changed → build:tokens, build:web-assets");
   pnpm(["run", "build:tokens"]);
-  pnpm(["run", "transfer-web"]);
+  pnpm(["run", "build:web-assets"]);
 }, 150);
 
 const onCss = debounce(() => {
-  console.error("[dev-watch-assets] CSS changed → cube-blocks manifest, transfer-web");
+  console.error("[dev-watch-assets] CSS changed → cube-blocks manifest, build:web-assets");
   const r = spawnSync(process.execPath, [path.join(__dirname, "generate-cube-blocks-manifest.mjs")], {
     cwd: APP_ROOT,
     stdio: "inherit",
     env: process.env,
   });
   if (r.status !== 0) process.exit(r.status ?? 1);
-  pnpm(["run", "transfer-web"]);
+  pnpm(["run", "build:web-assets"]);
 }, 150);
 
 const onClientJs = debounce(() => {

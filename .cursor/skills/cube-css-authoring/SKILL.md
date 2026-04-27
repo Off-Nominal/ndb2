@@ -26,7 +26,7 @@ description: >-
 
 **Design tokens** are JSON → `design-tokens.css`; use **`var(--…)`** in hand-written CSS instead of raw hex/spacing literals when a token exists.
 
-**Do not** hand-edit **`app/src/web/generated/cube-blocks.css`** or **`design-tokens.css`**; run **`pnpm run build:css`** / **`build:tokens`** (or **`build`**) after changing sources. **`app/dist/web/public/cube.css`** is the prod bundle. **`app/src/web/public/`** is static-only (fonts, etc.; merged by **`transfer-web`**).
+**Do not** hand-edit **`app/src/web/generated/cube-blocks.css`** or **`design-tokens.css`**; run **`pnpm run build:css`** / **`build:tokens`** (or **`build`**) after changing sources. **`app/dist/web/public/cube.css`** is the prod bundle. **`app/src/web/public/`** is static-only (fonts, etc.; merged by **`build:web-assets`**).
 
 ## Decision order (apply before writing block CSS)
 
