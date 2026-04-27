@@ -4,6 +4,7 @@
  */
 
 export const routeClientScripts = {
+  "shared/components/select": ["/assets/routes/shared/components/select/select.client.js"] as const,
 } as const;
 
 /**
@@ -11,6 +12,7 @@ export const routeClientScripts = {
  * `HtmlHead` prepends these before optional route `clientScripts`.
  */
 export const sharedComponentsClientScriptUrls = [
+  "/assets/routes/shared/components/select/select.client.js",
 ] as const;
 
 export type RouteClientScriptBundleKey = keyof typeof routeClientScripts;

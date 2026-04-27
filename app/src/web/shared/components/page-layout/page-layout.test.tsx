@@ -67,5 +67,6 @@ describe("AuthenticatedPageLayout", () => {
     expect(html).toContain("form-field");
     expect(html).toContain('hx-post="/preferences"');
     expect(html).toContain('hx-trigger="change from:select"');
+    expect(html).toContain('hx-sync="this:replace"');
   });
 });

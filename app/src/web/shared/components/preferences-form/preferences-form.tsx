@@ -36,6 +36,8 @@ const COLOR_SCHEME_SELECT_OPTIONS: readonly SelectOption[] = SCHEME_HUE_DEFS.map
 /**
  * Server-side appearance: `POST /preferences` sets cookies. HTMX submits on `select` change (no save button);
  * non-HTMX clients still post via the same `action` if you add a control or boost elsewhere.
+ * **`hx-sync="this:replace"`** cancels an in-flight POST when another `change` fires so rapid picks don’t
+ * complete out of order (each post still includes both fields from the form).
  */
 export function PreferencesForm(props: PreferencesFormProps): JSX.Element {
   const hasCsrfToken = props.csrfToken != null && props.csrfToken !== "";
@@ -51,6 +53,7 @@ export function PreferencesForm(props: PreferencesFormProps): JSX.Element {
       hx-post="/preferences"
       hx-trigger="change from:select"
       hx-swap="none"
+      hx-sync="this:replace"
     >
       {hasCsrfToken && (
         <input type="hidden" name="_csrf" value={props.csrfToken} />
