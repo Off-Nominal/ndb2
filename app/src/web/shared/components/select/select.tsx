@@ -48,7 +48,7 @@ export function Select(props: SelectProps): JSX.Element {
       <select
         {...selectRest}
         id={`${baseId}-native`}
-        class="select__native"
+        class="[ visually-hidden ]"
         tabindex={-1}
         aria-hidden="true"
         data-select-native
@@ -65,7 +65,7 @@ export function Select(props: SelectProps): JSX.Element {
       <div class="[ screen-element ] [ select__surface ]" data-select-surface>
         <button
           type="button"
-          class="[ select__trigger ]"
+          class="[ ring ] [ select__trigger ]"
           id={baseId}
           aria-haspopup="listbox"
           aria-expanded="false"
@@ -73,7 +73,7 @@ export function Select(props: SelectProps): JSX.Element {
           {...(ariaLabel != null && ariaLabel !== "" ? { "aria-label": ariaLabel } : {})}
           data-select-trigger
         >
-          <span class="select__value" data-select-value>
+          <span class="[ truncate ] [ select__value ]" data-select-value>
             {displayLabel}
           </span>
           <span class="select__chevron" aria-hidden="true">
@@ -81,7 +81,7 @@ export function Select(props: SelectProps): JSX.Element {
           </span>
         </button>
         <ul
-          class="[ select__list ]"
+          class="[ hide-scrollbar ] [ select__list ]"
           id={listboxId}
           role="listbox"
           hidden

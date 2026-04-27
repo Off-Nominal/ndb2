@@ -25,6 +25,7 @@ Deeper token history and hex tables (may lag named schemes): [`docs/frontend/des
 
 - **`body`** + **`[ glass-background ]`** (see **`utilities.css`**) is the **base** display glass: gradient, grid, accent radials, **opaque** diagonal (no frosted `color-surface` in that stack). On **mobile and tablet** (see **`web-breakpoints`**) the right nav often reuses the same **`.glass-background`** (second sheet on top, same skin). From **desktop** upward, the **nav column** is typically not a second stack—**transparent**, side by side on the single body layer. Exact widths and CSS live in **`page-layout`** / **`site-nav`**; tier names and `rem` cut points are authoritative in **`web-breakpoints`**.
 - **Foreground UI** (inputs, cards, table chrome) still uses translucency via **`--color-surface*`** in **`globals.css`** where appropriate.
+- **HUD rim / bloom around framed controls** (soft primary-tinted **`box-shadow`** stacks, including nav-edge glow on pseudo-elements) should use the shared **`--hud-*`** custom properties in **`app/src/web/styles/hud-shadows.css`** — not one-off **`color-mix`** copies in each block. **`css-build`** documents layer names, bundles, and when to extend that file.
 - **Do not** stack another full-page opaque background on the main column—let the shell read as one continuous display. New blocks should default to translucent surfaces or borders-only until a solid is justified.
 
 ## Two independent choices
@@ -62,7 +63,7 @@ For **implementation** details (file paths, `Set-Cookie`, client script duplicat
 
 ## Related
 
-- **`css-build`** — `build:tokens` / `build:css`, `generated/design-tokens.css`, `cube.css`, `HtmlHead` single link, when to run builds.
+- **`css-build`** — `build:tokens` / `build:css`, `generated/design-tokens.css`, **`hud-shadows.css`** (`--hud-*` glow tokens), `cube.css`, `HtmlHead` single link, when to run builds.
 - **`cube-css-authoring`** — which stylesheet layer to extend; still use **semantic** `var(--color-*)` in hand-written CSS.
 - **`web-breakpoints`** — mobile / tablet / desktop / wide `rem` boundaries; pair with this skill when describing nav or glass by viewport.
 - **`kitajs-html-web`** — `PageLayout` / `AuthenticatedPageLayout` pass `theme` and `colorScheme` into the document; only the authenticated layout includes site nav.

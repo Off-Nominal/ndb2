@@ -68,10 +68,7 @@
       width: 1px;
       pointer-events: none;
       z-index: 0;
-      box-shadow:
-        -1px 0 0 0 color-mix(in srgb, var(--color-primary) 12%, transparent),
-        -2px 0 10px 0 color-mix(in srgb, var(--color-primary) 17%, transparent),
-        -4px 0 24px 2px color-mix(in srgb, var(--color-primary) 7%, transparent);
+      box-shadow: var(--hud-shadow-nav-edge);
     }
 
     & .page-layout-nav-toggle {
@@ -79,6 +76,9 @@
       top: var(--space-8);
       left: calc(-1 * var(--space-8));
       width: var(--space-8);
+      /* Explicit square: `aspect-ratio` on checkbox inputs is inconsistent (Firefox / iOS Safari). */
+      height: var(--space-8);
+      box-sizing: border-box;
       z-index: 2;
     }
 

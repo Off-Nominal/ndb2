@@ -2,9 +2,10 @@
 name: css-build
 description: >-
   Describes ndb2 web CSS end-to-end: CUBE CSS via Vite (cube-entry.css → cube.css), design tokens
-  (JSON → src/web/generated/design-tokens.css), generate-cube-blocks-manifest.mjs + build-cube-css.mjs,
-  HtmlHead single link, /assets serving, pnpm build:tokens/build:css, and tsx watch. Use when
-  editing tokens, CUBE layers, colocated component CSS, static assets, or stylesheet pipeline.
+  (JSON → src/web/generated/design-tokens.css), hud-shadows.css (HUD glow custom properties),
+  generate-cube-blocks-manifest.mjs + build-cube-css.mjs, HtmlHead single link, /assets serving,
+  pnpm build:tokens/build:css, and tsx watch. Use when editing tokens, CUBE layers, colocated
+  component CSS, static assets, or stylesheet pipeline.
 ---
 
 # Web CSS build (CUBE + tokens)
@@ -16,6 +17,7 @@ flowchart TB
   subgraph sources [Author sources]
     TJ[tokens/*.json]
     SG[styles/globals.css]
+    SH[styles/hud-shadows.css]
     SC[styles/compositions.css]
     SU[styles/utilities.css]
     BC[colocated *.css]
@@ -36,6 +38,7 @@ flowchart TB
   BC --> GM --> CB
   TD --> VC
   SG --> VC
+  SH --> VC
   SC --> VC
   SU --> VC
   CB --> VC
@@ -59,7 +62,7 @@ flowchart TB
 
 | CUBE idea | ndb2 delivery | Author |
 |-----------|----------------|--------|
-| **CSS baseline** + token variables | First segments of **`cube.css`** | Tokens: `app/src/web/tokens/*.json` → **`generated/design-tokens.css`**; globals: **`styles/globals.css`** |
+| **CSS baseline** + token variables | First segments of **`cube.css`** | Tokens: `app/src/web/tokens/*.json` → **`generated/design-tokens.css`**; globals: **`styles/globals.css`**; HUD glow vars: **`styles/hud-shadows.css`** (after globals, see below) |
 | **Composition** | (bundled in **`cube.css`**) | `app/src/web/styles/compositions.css` |
 | **Utility** | (bundled in **`cube.css`**) | `app/src/web/styles/utilities.css` |
 | **Block** + **Exception** | (bundled in **`cube.css`**) | Colocated `*.css` via **`generated/cube-blocks.css`** `@import` list (sorted paths) |
@@ -72,7 +75,19 @@ Full methodology and roadmap: [`docs/frontend/cube-css.md`](docs/frontend/cube-c
 
 ## `<head>` stylesheet
 
-In [`html-head/html-head.tsx`](app/src/web/shared/components/html-head/html-head.tsx) (**`HtmlHead`**): one **`<link rel="stylesheet" href={cubeStylesheetHref()} />`** — dev **`/src/web/styles/cube-entry.css`**, prod **`/assets/cube.css`**. Cascade inside the bundle matches: tokens → globals → compositions → utilities → blocks (see **`styles/cube-entry.css`**). Then HTMX (`htmx.min.js`).
+In [`html-head/html-head.tsx`](app/src/web/shared/components/html-head/html-head.tsx) (**`HtmlHead`**): one **`<link rel="stylesheet" href={cubeStylesheetHref()} />`** — dev **`/src/web/styles/cube-entry.css`**, prod **`/assets/cube.css`**. Cascade inside the bundle matches: tokens → globals → **hud-shadows** → compositions → utilities → blocks (see **`styles/cube-entry.css`**). Then HTMX (`htmx.min.js`).
+
+## HUD / screen-chrome shadows (`hud-shadows.css`)
+
+**Author file:** [`app/src/web/styles/hud-shadows.css`](app/src/web/styles/hud-shadows.css) — defines **`--hud-*`** custom properties on **`:root`** so framed controls and edge accents share one glow language (see **`ndb2-web-design`** for product intent).
+
+- **Tints:** `--hud-glow-rim`, `--hud-glow-mid`, `--hud-glow-outer`, hover variants, etc. — reuse in **`box-shadow`**, **`filter: drop-shadow()`**, gradients, or pseudo-elements without duplicating **`color-mix`** recipes.
+- **Layers:** `--hud-shadow-rim`, `--hud-shadow-mid`, `--hud-shadow-outer`, and variants (**`outer-tight`**, **`outer-lift`**, **`outer-trim`**) — comma-compose in **`box-shadow`**.
+- **Edge-only stack (nav rail):** `--hud-shadow-rim-edge`, **`mid-edge`**, **`outer-edge`**, or bundle **`--hud-shadow-nav-edge`** for narrow **`::before` / `::after`** strips.
+- **Insets:** `--hud-shadow-inset`, **`inset-soft`**, **`inset-hover`**.
+- **Bundles:** e.g. **`--hud-shadow-screen-element`**, **`--hud-shadow-screen-element-hover`**, **`--hud-shadow-select-list-below` / `above`**, **`--hud-shadow-select-surface-open`**.
+
+**When adding new chrome:** prefer composing existing layers/bundles; extend **`hud-shadows.css`** if you need a new standard stack so **`utilities.css`** and blocks stay aligned.
 
 ## Design tokens (`build-design-tokens.mjs`)
 
@@ -98,11 +113,11 @@ In [`html-head/html-head.tsx`](app/src/web/shared/components/html-head/html-head
 
 | Piece | Location |
 |-------|----------|
-| Entry (author) | `app/src/web/styles/cube-entry.css` imports tokens, three layers, **`generated/cube-blocks.css`** |
+| Entry (author) | `app/src/web/styles/cube-entry.css` imports tokens, globals, **`hud-shadows.css`**, compositions, utilities, **`generated/cube-blocks.css`** |
 | Vite entry (build) | `app/src/web/styles/cube-bundle.ts` — `import "./cube-entry.css"` (prod Rollup only) |
 | Block manifest | `app/scripts/generate-cube-blocks-manifest.mjs` → **`src/web/generated/cube-blocks.css`** (`@import` per block, `/* ndb2:block: path */`) |
 | Prod bundle | `app/scripts/build-cube-css.mjs` — manifest + **`vite build`** → **`dist/web/public/cube.css`** |
-| Layer sources | `app/src/web/styles/globals.css`, `compositions.css`, `utilities.css` |
+| Layer sources | `app/src/web/styles/globals.css`, **`hud-shadows.css`**, `compositions.css`, `utilities.css` |
 | Block sources | Any `*.css` under `app/src/web/` **except** `public/`, `tokens/`, `styles/`, **`generated/`** |
 
 **pnpm:** `build:css` — also chained from `build` / `postinstall`.
@@ -121,7 +136,7 @@ See **`web-client-js`** for colocation, `build-client-js.mjs`, generated **`rout
 - **New palette prefix:** extend color primitive detection in `build-design-tokens.mjs` (or refactor to a prefix list).
 - **New theme key:** add matching `color.light.<X>` and `color.dark.<X>` in `colors.json`.
 - **Dark selector:** change `html[data-theme="dark"]` in `build-design-tokens.mjs`; update tests if needed.
-- **New layer file:** uncommon; add `@import` in **`styles/cube-entry.css`** and a source under **`styles/`**.
+- **New layer file:** uncommon; add `@import` in **`styles/cube-entry.css`** and a source under **`styles/`** (precedent: **`hud-shadows.css`** after **`globals.css`**).
 - **New route client script:** add `*.client.js` under `routes/<area>/`, run **`build:client-js`**; `page.tsx` already uses **`clientScriptsForModule(__filename)`** so no key edit is needed.
 - **Asset URL base:** if the app is ever served under a subpath, root-absolute `/assets/...` links may need a configurable prefix (not implemented today).
 

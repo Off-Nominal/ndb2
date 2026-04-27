@@ -10,6 +10,7 @@ export function NavDrawerToggle(): JSX.Element {
 
       <input
         type="checkbox"
+        class="[ ring ]"
         id="app-site-nav-reveal"
         aria-label="Toggle site navigation"
       />

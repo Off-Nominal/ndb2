@@ -16,8 +16,8 @@ type LinkButton = Omit<JSX.IntrinsicElements["a"], "class" | "children"> & {
 
 export type ButtonProps = NativeButton | LinkButton;
 
-/** Compositions → utilities → blocks: `screen-element` (utility) then `button` (block). */
-const BASE_CLASS = "[ screen-element ] [ button ]";
+/** Compositions → utilities → blocks: `screen-element`, `ring`, then `button` (block). */
+const BASE_CLASS = "[ screen-element ] [ ring ] [ button ]";
 
 /** Theme-accent control; `screen-element` is the “glass screen” border/glow; `button` is block layout/type. */
 export function Button(props: ButtonProps): JSX.Element {
