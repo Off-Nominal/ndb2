@@ -5,6 +5,11 @@
   /* layout */
   --screen-element-padding-x: var(--space-3);
   --screen-element-padding-y: var(--space-2);
+  /* Contain `::after` (absolute + % sizing); without this, the pseudo-element’s containing block is
+     not the control and can expand to the viewport—last button in a column would steal hit-testing. */
+
+  position: relative;
+  z-index: 0;
 
   /* type */
   text-decoration: none;
@@ -26,17 +31,5 @@
     /* color & surface */
     background: var(--color-surface-muted);
     color: var(--color-primary);
-  }
-
-  &::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 100%;
-    height: 100%;
-    background: var(--color-primary);
-    opacity: 0;
-    transition: opacity 0.15s ease;
   }
 }

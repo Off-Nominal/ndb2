@@ -3,6 +3,9 @@
  * Do not edit by hand.
  */
 
+/* ndb2:block: routes/home/page.css */
+@import "../routes/home/page.css";
+
 /* ndb2:block: routes/login/components/discord-button/discord-button.css */
 @import "../routes/login/components/discord-button/discord-button.css";
 
@@ -11,6 +14,9 @@
 
 /* ndb2:block: shared/components/button/button.css */
 @import "../shared/components/button/button.css";
+
+/* ndb2:block: shared/components/card-screen-element/card-screen-element.css */
+@import "../shared/components/card-screen-element/card-screen-element.css";
 
 /* ndb2:block: shared/components/form-field/form-field.css */
 @import "../shared/components/form-field/form-field.css";

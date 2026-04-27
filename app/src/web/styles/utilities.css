@@ -135,6 +135,31 @@
 }
 
 /**
+ * Primary-tinted diagonal fill: brighter toward upper-left (mixed with `--color-text`), solid primary
+ * mid, deeper toward lower-right (`--color-bg`). Use as `background-image` fill on ribbons, pills,
+ * etc.; compose with borders / clip-path in blocks.
+ */
+.primary-specular-gradient {
+  background-image: linear-gradient(
+    138deg,
+    color-mix(in srgb, var(--color-primary) 52%, var(--color-text)) 0%,
+    var(--color-primary) 46%,
+    color-mix(in srgb, var(--color-primary) 78%, var(--color-bg)) 100%
+  );
+}
+
+/**
+ * Thin frosted overlay: nearly transparent with a faint `--color-primary` wash plus backdrop blur so
+ * whatever sits beneath reads through softly. Unlike `.glass-background` (opaque HUD layers), this is
+ * for panels/chips atop existing chrome — compose with borders or `.screen-element` as needed.
+ */
+.glass-primary-frost {
+  background-color: color-mix(in srgb, var(--color-primary) 4%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/**
  * Use in regions that set `width: 100%` on broad selectors (e.g. nav sidebars) so a control
  * sizes to its content instead, without overflowing the container.
  */

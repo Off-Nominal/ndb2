@@ -3,6 +3,8 @@ import type { ColorScheme, ThemePreference } from "../../../middleware/theme-pre
 import { Button } from "../button";
 import { PreferencesForm } from "../preferences-form";
 
+const SITE_NAV_TITLE = "Nostradambot2";
+
 export type NavigationMenuProps = {
   auth: WebAuthAuthenticated;
   theme: ThemePreference;
@@ -19,6 +21,13 @@ export type NavigationMenuProps = {
 export function NavigationMenu(props: NavigationMenuProps): JSX.Element {
   return (
     <nav class="[ site-nav ]">
+      <div class="[ site-nav__title ]" aria-label={SITE_NAV_TITLE}>
+        {SITE_NAV_TITLE.split("").map((ch) => (
+          <span class="[ site-nav__title-char ]" aria-hidden="true">
+            {ch}
+          </span>
+        ))}
+      </div>
       <ul class="[ stack ] [ list-plain ]">
         <li>
           <Button href="/">Main Menu</Button>

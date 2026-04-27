@@ -1,17 +1,76 @@
-/* Block: `screen-element` frame around a heading; type rhythm from global `h1`–`h6`. */
+/* Block: trapezoid title ribbon + knockout heading — bar styles align with `.card-screen-element__bar`. */
 
 .heading-screen-element {
-  --screen-element-padding-x: var(--space-4);
-  --screen-element-padding-y: var(--space-2);
-  text-transform: uppercase;
+  --screen-element-padding-x: 0;
+  --screen-element-padding-y: 0;
 
-  & h1,
-  & h2,
-  & h3,
-  & h4,
-  & h5,
-  & h6 {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: flex-start;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+
+  & .heading-screen-element__bar {
+    /* Horizontal run of the trapezoid: height × tan(20°) so the right edge is 20° from vertical. */
+    --bar-trapezoid-run: calc(tan(20deg) * (1lh + 2 * var(--space-1)));
+
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1 1 auto;
+    align-self: flex-start;
+    width: fit-content;
+    max-width: 100%;
+    min-height: min-content;
+
+    padding: var(--space-1) calc(var(--space-2) + var(--bar-trapezoid-run)) var(--space-1) var(--space-2);
+
+    clip-path: polygon(
+      0% 0%,
+      100% 0%,
+      calc(100% - var(--bar-trapezoid-run)) 100%,
+      0% 100%
+    );
+
+    /* Fill: `.primary-specular-gradient` (utilities.css). */
+  }
+
+  @supports (clip-path: polygon(round 1px, 0% 0%, 100% 0%, 100% 100%, 0% 100%)) {
+    & .heading-screen-element__bar {
+      clip-path: polygon(
+        round var(--radius-sm),
+        0% 0%,
+        100% 0%,
+        calc(100% - var(--bar-trapezoid-run)) 100%,
+        0% 100%
+      );
+    }
+  }
+
+  & .heading-screen-element__bar h1,
+  & .heading-screen-element__bar h2,
+  & .heading-screen-element__bar h3,
+  & .heading-screen-element__bar h4,
+  & .heading-screen-element__bar h5,
+  & .heading-screen-element__bar h6 {
     letter-spacing: var(--tracking-wide);
     margin: 0;
+    text-transform: uppercase;
+
+    /* Knockout: glyph fill matches canvas */
+    background-image: linear-gradient(
+      to bottom,
+      var(--color-bg) 0%,
+      var(--color-bg) 100%
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
   }
 }
