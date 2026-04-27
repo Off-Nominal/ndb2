@@ -1,13 +1,19 @@
 /* Chevron over native checkbox; unchecked → points left (scaleX) */
 
 .nav-drawer-toggle {
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 0;
+
   & input {
     -webkit-appearance: none;
     appearance: none;
     display: block;
     box-sizing: border-box;
     width: 100%;
-    aspect-ratio: 1;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
     margin: 0;
     padding: 0;
 
