@@ -2,6 +2,12 @@
 
 /* — Root — */
 .select {
+  /* Inner curve of `.screen-element` border (1px); `:focus-visible` outline follows `border-radius`. */
+  --select-trigger-r-tl: calc(var(--radius-sm) - 1px);
+  --select-trigger-r-tr: calc(var(--radius-sm) - 1px);
+  --select-trigger-r-bl: calc(var(--radius-sm) - 1px);
+  --select-trigger-r-br: calc(var(--radius-sm) - 1px);
+
   /**
    * Floating list: `data-select-placement` (from JS) swaps “start” vs “end” edge — seam toward the
    * trigger, radii on the outer edge, anchor `top`/`bottom`, and a slightly different drop shadow.
@@ -62,7 +68,10 @@
     box-sizing: border-box;
     text-align: start;
     border: 0;
-    border-radius: 0;
+    border-top-left-radius: var(--select-trigger-r-tl);
+    border-top-right-radius: var(--select-trigger-r-tr);
+    border-bottom-left-radius: var(--select-trigger-r-bl);
+    border-bottom-right-radius: var(--select-trigger-r-br);
     /* type */
     font: inherit;
     line-height: var(--leading-normal);
@@ -144,6 +153,16 @@
     &[hidden] {
       display: none !important;
     }
+  }
+
+  &.select--open:not([data-select-placement="above"]) {
+    --select-trigger-r-bl: 0;
+    --select-trigger-r-br: 0;
+  }
+
+  &.select--open[data-select-placement="above"] {
+    --select-trigger-r-tl: 0;
+    --select-trigger-r-tr: 0;
   }
 
   /* open, panel below: bottom border “removed” in paint only — keep 1px transparent to avoid
