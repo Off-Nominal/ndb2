@@ -51,6 +51,8 @@ Official concepts: [Async components and Suspense](https://html.kitajs.org/guide
 - **`routes/<area>/components/foo/foo.test.ts(x)`** — colocated in **`foo/`** next to **`foo.tsx`**.
 - **`mountWeb.test.ts`** — app-level concerns (e.g. static `/assets`); avoid duplicating feature tests here.
 
+**Component unit tests (Vitest + HTML strings):** assert **behavior and semantics** — element types, **`id`**, **`href`**, **`name`**, **`type`**, ARIA **`role`**, **`data-*`** hooks meant for scripts/tests, document structure (e.g. **`main`** wraps expected content), and encoded HTMX attributes. **Do not** assert on **`class`** / **`mergeClass`** / bracket utility groups or other presentation strings; styling changes would make those tests brittle. Prefer stable **`data-*`** attributes when you need to pin part of the DOM for tests or client code.
+
 ## HTMX attribute types
 
 - **`app/src/web/htmx_kitajs.d.ts`** augments **`JSX.HtmlTag`** with the [htmx core attribute list](https://htmx.org/reference/#attributes) so you can write **`hx-get`**, **`hx-target`**, etc. directly on elements. Open-ended **`hx-on`** variants may still use **`attrs`** (see file comment).
