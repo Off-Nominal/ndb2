@@ -6,17 +6,17 @@
  * emits `*.client.js` into `dist/web/public/routes/...` (served as `/assets/routes/...`),
  * and generates `src/web/generated/routeClientScripts.ts`.
  *
- * - `*.client.ts` → compiled with **esbuild** (browser, `iife`, `es2020`); no Node `tsc`.
+ * - `*.client.ts` → bundled with **Vite** (browser, `iife`, `es2020`); no Node `tsc`.
  * - `*.client.js` → copied as-is.
  *
  * Handlers: `clientScriptsForModule` for route colocated scripts; `HtmlHead` also loads
  * `sharedComponentsClientScriptUrls` (all `*.client.ts` / `*.client.js` under `shared/components/`).
  */
 
-import * as esbuild from "esbuild";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { build } from "vite";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const APP_ROOT = path.join(__dirname, "..");
@@ -91,31 +91,57 @@ async function main() {
   fs.rmSync(PUBLIC_ROUTES_CLIENT, { recursive: true, force: true });
 
   const sources = collectAllClientSources();
+  const tsSources = sources.filter((s) => s.kind === "ts");
+
+  const viteClientConfig = {
+    configFile: false,
+    root: APP_ROOT,
+    publicDir: false,
+    logLevel: "warn",
+    resolve: {
+      alias: { "@web": path.join(APP_ROOT, "src/web") },
+    },
+  };
+
+  for (const { abs, relUnderPublicRoutes } of tsSources) {
+    const dest = path.join(PUBLIC_ROUTES_CLIENT, relUnderPublicRoutes);
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
+    const entryName = path.basename(dest, ".js");
+
+    await build({
+      ...viteClientConfig,
+      build: {
+        target: "es2020",
+        outDir: path.dirname(dest),
+        emptyOutDir: false,
+        minify: false,
+        chunkSizeWarningLimit: 100000,
+        rollupOptions: {
+          input: { [entryName]: path.resolve(abs) },
+          output: {
+            format: "iife",
+            dir: path.dirname(dest),
+            entryFileNames: "[name].js",
+          },
+        },
+      },
+    });
+
+    console.error("Wrote", path.join("dist/web/public/routes", relUnderPublicRoutes));
+  }
+
+  for (const { abs, relUnderPublicRoutes, kind } of sources) {
+    if (kind === "js") {
+      const dest = path.join(PUBLIC_ROUTES_CLIENT, relUnderPublicRoutes);
+      fs.mkdirSync(path.dirname(dest), { recursive: true });
+      fs.copyFileSync(abs, dest);
+      console.error("Wrote", path.relative(APP_ROOT, dest));
+    }
+  }
 
   /** @type {Map<string, string[]>} */
   const byDir = new Map();
-
-  for (const { abs, relUnderPublicRoutes, kind } of sources) {
-    const dest = path.join(PUBLIC_ROUTES_CLIENT, relUnderPublicRoutes);
-    fs.mkdirSync(path.dirname(dest), { recursive: true });
-    if (kind === "ts") {
-      const entry = path.relative(APP_ROOT, abs).split(path.sep).join("/");
-      await esbuild.build({
-        absWorkingDir: APP_ROOT,
-        entryPoints: [entry],
-        bundle: true,
-        outfile: dest,
-        platform: "browser",
-        target: "es2020",
-        format: "iife",
-        minify: false,
-        logLevel: "warning",
-      });
-    } else {
-      fs.copyFileSync(abs, dest);
-    }
-    console.error("Wrote", path.relative(APP_ROOT, dest));
-
+  for (const { relUnderPublicRoutes } of sources) {
     const dirKey = path.posix.dirname(relUnderPublicRoutes);
     const urlPath = `/assets/routes/${relUnderPublicRoutes}`;
     const list = byDir.get(dirKey) ?? [];

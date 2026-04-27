@@ -28,17 +28,23 @@ pool
     process.exit(1);
   });
 
-const app = createApp();
+async function bootstrap() {
+  const app = await createApp();
 
-app.listen(PORT, () => {
-  logger.log(`Application listening on port: ${PORT}`);
+  app.listen(PORT, () => {
+    logger.log(`Application listening on port: ${PORT}`);
+  });
+
+  const monitor = new PredictionMonitor(monitors);
+  monitor.initiate();
+
+  seasonsManager.initialize();
+
+  const seasonMonitor = new SeasonMonitor(seasonMonitors);
+  seasonMonitor.initiate();
+}
+
+bootstrap().catch((err) => {
+  logger.error(`Bootstrap failed: ${err instanceof Error ? err.message : String(err)}`);
+  process.exit(1);
 });
-
-// Initialize Game
-const monitor = new PredictionMonitor(monitors);
-monitor.initiate();
-
-seasonsManager.initialize();
-
-const seasonMonitor = new SeasonMonitor(seasonMonitors);
-seasonMonitor.initiate();

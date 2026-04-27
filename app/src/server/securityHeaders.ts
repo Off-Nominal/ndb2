@@ -2,6 +2,7 @@ import type { TrustProxyResolved } from "@config";
 import { config } from "@config";
 import type { Express } from "express";
 import helmet from "helmet";
+import { isDev } from "@shared/utils";
 
 /**
  * Express must trust the reverse proxy (e.g. Coolify’s Traefik) so `req.secure`,
@@ -34,22 +35,25 @@ export function configureTrustProxy(
 export function installSecurityHeaders(app: Express): void {
   app.use(
     helmet({
-      contentSecurityPolicy: {
-        useDefaults: false,
-        directives: {
-          defaultSrc: ["'self'"],
-          baseUri: ["'self'"],
-          connectSrc: ["'self'"],
-          fontSrc: ["'self'", "data:"],
-          formAction: ["'self'"],
-          frameAncestors: ["'none'"],
-          imgSrc: ["'self'", "data:"],
-          objectSrc: ["'none'"],
-          scriptSrc: ["'self'"],
-          scriptSrcAttr: ["'none'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-        },
-      },
+      /** Vite injects `@vite/client` and eval-based HMR; disable CSP in local dev only. */
+      contentSecurityPolicy: isDev()
+        ? false
+        : {
+            useDefaults: false,
+            directives: {
+              defaultSrc: ["'self'"],
+              baseUri: ["'self'"],
+              connectSrc: ["'self'"],
+              fontSrc: ["'self'", "data:"],
+              formAction: ["'self'"],
+              frameAncestors: ["'none'"],
+              imgSrc: ["'self'", "data:"],
+              objectSrc: ["'none'"],
+              scriptSrc: ["'self'"],
+              scriptSrcAttr: ["'none'"],
+              styleSrc: ["'self'", "'unsafe-inline'"],
+            },
+          },
       referrerPolicy: { policy: "strict-origin-when-cross-origin" },
       strictTransportSecurity: false,
       xFrameOptions: { action: "deny" },

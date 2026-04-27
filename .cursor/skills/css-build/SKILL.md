@@ -1,9 +1,9 @@
 ---
 name: css-build
 description: >-
-  Describes ndb2 web CSS end-to-end: CUBE CSS layers mapped to repo files, design tokens
-  (JSON via build-design-tokens.mjs), globals/compositions/utilities/blocks (build-web-css.mjs),
-  HtmlHead load order, /assets serving, pnpm build:tokens/build:css, and nodemon. Use when
+  Describes ndb2 web CSS end-to-end: CUBE CSS via Vite (cube-entry.css → cube.css), design tokens
+  (JSON → src/web/generated/design-tokens.css), generate-cube-blocks-manifest.mjs + build-cube-css.mjs,
+  HtmlHead single link, /assets serving, pnpm build:tokens/build:css, and tsx watch. Use when
   editing tokens, CUBE layers, colocated component CSS, static assets, or stylesheet pipeline.
 ---
 
@@ -20,37 +20,37 @@ flowchart TB
     SU[styles/utilities.css]
     BC[colocated *.css]
   end
+  subgraph generated [app/src/web/generated]
+    TD[design-tokens.css]
+    CB[cube-blocks.css]
+  end
   subgraph scripts [Build scripts]
     BT[build-design-tokens.mjs]
-    BW[build-web-css.mjs]
+    GM[generate-cube-blocks-manifest.mjs]
+    VC[build-cube-css.mjs + Vite]
   end
   subgraph distPublic [app/dist/web/public]
-    PT[design-tokens.css]
-    PG[globals.css]
-    PC[compositions.css]
-    PU[utilities.css]
-    PB[blocks.css]
+    CU[cube.css]
   end
-  TJ --> BT --> PT
-  SG --> BW --> PG
-  SC --> BW --> PC
-  SU --> BW --> PU
-  BC --> BW --> PB
+  TJ --> BT --> TD
+  BC --> GM --> CB
+  TD --> VC
+  SG --> VC
+  SC --> VC
+  SU --> VC
+  CB --> VC
+  VC --> CU
   subgraph runtime [Runtime]
     MW[mountWeb /assets]
-    HH[HtmlHead link order]
+    HH[HtmlHead one link]
   end
-  PT --> MW
-  PG --> MW
-  PC --> MW
-  PU --> MW
-  PB --> MW
+  CU --> MW
   MW --> HH
 ```
 
-- **Compile output:** `pnpm run build` runs **`vendor-htmx`**, **`build:tokens`**, **`build:css`**, **`build:client-js`**, then `tsc`, `tsc-alias`, `transfer-queries`, **`transfer-web`**. `build:*` and **`vendor-htmx`** write into **`app/dist/web/public/`**; hand-placed static (fonts, etc.) in **`app/src/web/public/`** is merged in by **`transfer-web`** and is not generated.
-- **Dev:** `nodemon` watches `src` (including **`css`** and token **`json`**). **`dev-watch-assets`** rebuilds tokens/css/client and re-runs **`transfer-web`**. The **`dist/`** tree is not watched by `nodemon` (see **`nodemon.json`**).
-- **Serving:** [`mountWeb`](app/src/web/mountWeb.ts) resolves **`express.static`** for **`/assets`** to **`dist/web/public`**, with a **fallback** when tests load the module from **`src/web`** (see `resolveWebPublicRoot`). [`HtmlHead`](app/src/web/shared/components/html-head/html-head.tsx) uses root-absolute URLs: **`/assets/<file>.css`**.
+- **Compile output:** `pnpm run build` runs **`build:web-assets`** (Wireit: **`vendor-htmx`**, **`build:tokens`**, **`build:css`**, **`build:client-js`**, then copy **`src/web/public`**) then `tsc`, `tsc-alias`, `transfer-queries`. **`build:css`** emits **`dist/web/public/cube.css`**; hand-placed static (fonts, etc.) in **`app/src/web/public/`** is merged by **`build:web-assets`**.
+- **Dev:** **`tsx watch`** + Vite middleware. **`HtmlHead`** uses **`cubeStylesheetHref()`**: **`/src/web/styles/cube-entry.css`** (Vite **CSS HMR**). **`vite-dev-asset-watch`** (Vite plugin) on token JSON runs **`build:tokens`** + **`build:web-assets`**; on other CSS it runs **`generate-cube-blocks-manifest.mjs`** + **`build:web-assets`** (watchers ignore **`src/web/generated/**`** so manifest writes do not loop). Client **`*.client.*`** still runs **`build:client-js`** and touches **`index.ts`**.
+- **Serving:** [`mountWeb`](app/src/web/mountWeb.ts) uses sentinel **`cube.css`** under **`dist/web/public/`**. [`HtmlHead`](app/src/web/shared/components/html-head/html-head.tsx) links **`/assets/cube.css`** in production.
 - **API vs static:** [`mountJsonApi`](app/src/api/mountJsonApi.ts) is mounted at **`/api`** only, so JSON auth middleware never runs for **`/assets/*`** or HTML routes.
 
 ## CUBE CSS in ndb2
@@ -59,10 +59,10 @@ flowchart TB
 
 | CUBE idea | ndb2 delivery | Author |
 |-----------|----------------|--------|
-| **CSS baseline** + token variables | `design-tokens.css` + `globals.css` | Tokens: `app/src/web/tokens/*.json`; globals: `app/src/web/styles/globals.css` |
-| **Composition** | `compositions.css` | `app/src/web/styles/compositions.css` |
-| **Utility** | `utilities.css` | `app/src/web/styles/utilities.css` |
-| **Block** + **Exception** | `blocks.css` | Colocated `*.css` next to components (variants/states via `data-*` in selectors) |
+| **CSS baseline** + token variables | First segments of **`cube.css`** | Tokens: `app/src/web/tokens/*.json` → **`generated/design-tokens.css`**; globals: **`styles/globals.css`** |
+| **Composition** | (bundled in **`cube.css`**) | `app/src/web/styles/compositions.css` |
+| **Utility** | (bundled in **`cube.css`**) | `app/src/web/styles/utilities.css` |
+| **Block** + **Exception** | (bundled in **`cube.css`**) | Colocated `*.css` via **`generated/cube-blocks.css`** `@import` list (sorted paths) |
 
 **Markup convention:** group classes in order: **compositions** → **utilities** → **blocks** → **exceptions** (see **`cube-css-authoring`**, *Class order in markup*). **Do not** add new BEM-style **`app-shell__grid`** / **`block__element`** class families for layout—use one **block** root + **composition** classes + nested **`&`** rules; **`app-shell__*`** in **`page-layout`** is legacy (see **`cube-css-authoring`**, *Nesting child and element rules*).
 
@@ -70,17 +70,9 @@ flowchart TB
 
 Full methodology and roadmap: [`docs/frontend/cube-css.md`](docs/frontend/cube-css.md). Token values: [`docs/frontend/design.md`](docs/frontend/design.md). Responsive **`@media`** cut points: **`web-breakpoints`**.
 
-## `<head>` stylesheet order
+## `<head>` stylesheet
 
-In [`html-head/html-head.tsx`](app/src/web/shared/components/html-head/html-head.tsx) (component **`HtmlHead`**; after meta/title):
-
-1. `design-tokens.css` — custom properties
-2. `globals.css` — resets / element defaults (use `var(--…)`)
-3. `compositions.css` — layout primitives
-4. `utilities.css` — token-backed helpers
-5. `blocks.css` — concatenated block + exception rules
-
-Then HTMX (`htmx.min.js`).
+In [`html-head/html-head.tsx`](app/src/web/shared/components/html-head/html-head.tsx) (**`HtmlHead`**): one **`<link rel="stylesheet" href={cubeStylesheetHref()} />`** — dev **`/src/web/styles/cube-entry.css`**, prod **`/assets/cube.css`**. Cascade inside the bundle matches: tokens → globals → compositions → utilities → blocks (see **`styles/cube-entry.css`**). Then HTMX (`htmx.min.js`).
 
 ## Design tokens (`build-design-tokens.mjs`)
 
@@ -88,7 +80,7 @@ Then HTMX (`htmx.min.js`).
 |-------|----------|
 | Token sources | `app/src/web/tokens/*.json` (arrays; schema under `tokens/schema/`) |
 | Generator | `app/scripts/build-design-tokens.mjs` |
-| Output | `app/dist/web/public/design-tokens.css` (do not edit by hand) |
+| Output | `app/src/web/generated/design-tokens.css` (do not edit by hand) |
 
 **pnpm:** `build:tokens` — also chained from `build` / `postinstall`.
 
@@ -102,20 +94,22 @@ Then HTMX (`htmx.min.js`).
 
 **Extend literals:** update **`isValidTokenValue`** in `build-design-tokens.mjs` if new CSS value shapes are needed.
 
-## CUBE layers + blocks (`build-web-css.mjs`)
+## CUBE bundle (`build-cube-css.mjs` + Vite)
 
 | Piece | Location |
 |-------|----------|
+| Entry (author) | `app/src/web/styles/cube-entry.css` imports tokens, three layers, **`generated/cube-blocks.css`** |
+| Vite entry (build) | `app/src/web/styles/cube-bundle.ts` — `import "./cube-entry.css"` (prod Rollup only) |
+| Block manifest | `app/scripts/generate-cube-blocks-manifest.mjs` → **`src/web/generated/cube-blocks.css`** (`@import` per block, `/* ndb2:block: path */`) |
+| Prod bundle | `app/scripts/build-cube-css.mjs` — manifest + **`vite build`** → **`dist/web/public/cube.css`** |
 | Layer sources | `app/src/web/styles/globals.css`, `compositions.css`, `utilities.css` |
-| Block sources | Any `*.css` under `app/src/web/` **except** `public/`, `tokens/`, `styles/` |
-| Generator | `app/scripts/build-web-css.mjs` |
-| Outputs | Copies of the three layer files + **`blocks.css`** (concatenated, `/* ndb2:block: path */` banners) |
+| Block sources | Any `*.css` under `app/src/web/` **except** `public/`, `tokens/`, `styles/`, **`generated/`** |
 
 **pnpm:** `build:css` — also chained from `build` / `postinstall`.
 
-**Block bundle order:** Lexicographic sort of file paths. Add block CSS beside `*.tsx`; run `build:css` or `build`; do not hand-edit `dist/web/public/blocks.css`.
+**Block order:** Same as before: lexicographic sort of paths. Do not hand-edit **`cube-blocks.css`**; run **`pnpm run build:css`** or **`generate-cube-blocks-manifest.mjs`**.
 
-**Authoring style:** Layer and block sources may use **native CSS nesting** (`&` for pseudo-states, **and** for child/element rules under a single block root so related selectors are not split across many top-level stanzas). The script **copies** `globals.css` / `compositions.css` / `utilities.css` **verbatim** and **concatenates** block files without transforming CSS. See **`cube-css-authoring`**: **Nesting states in the parent**, **Nesting child and element rules under the block root**, and **Sectioning a block file**.
+**Authoring style:** Vite bundles CSS with PostCSS defaults; sources still use **native nesting** as in **`cube-css-authoring`**.
 
 ## Route colocated client JS
 
@@ -127,7 +121,7 @@ See **`web-client-js`** for colocation, `build-client-js.mjs`, generated **`rout
 - **New palette prefix:** extend color primitive detection in `build-design-tokens.mjs` (or refactor to a prefix list).
 - **New theme key:** add matching `color.light.<X>` and `color.dark.<X>` in `colors.json`.
 - **Dark selector:** change `html[data-theme="dark"]` in `build-design-tokens.mjs`; update tests if needed.
-- **New layer file:** uncommon; would require editing `build-web-css.mjs` and `html-head.tsx` (`HtmlHead`).
+- **New layer file:** uncommon; add `@import` in **`styles/cube-entry.css`** and a source under **`styles/`**.
 - **New route client script:** add `*.client.js` under `routes/<area>/`, run **`build:client-js`**; `page.tsx` already uses **`clientScriptsForModule(__filename)`** so no key edit is needed.
 - **Asset URL base:** if the app is ever served under a subpath, root-absolute `/assets/...` links may need a configurable prefix (not implemented today).
 

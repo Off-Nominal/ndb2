@@ -1,8 +1,0 @@
-/**
- * Block styles for the `lucky-number` HTMX fragment (example colocated CSS).
- * Bundled into /assets/blocks.css via build:css.
- */
-
-#lucky-result {
-  font-weight: var(--weight-semibold);
-}

@@ -6,16 +6,15 @@
   "scripts": {
     "clear": "rm -rf ./dist",
     "transfer-queries": "rm -rf ./dist/data/legacy-queries/sql && mkdir -p ./dist/data/legacy-queries/sql && cp ./src/data/legacy-queries/**/*.sql ./dist/data/legacy-queries/sql/",
-    "vendor-htmx": "mkdir -p ./dist/web/public && cp ./node_modules/htmx.org/dist/htmx.min.js ./dist/web/public/htmx.min.js",
-    "build:tokens": "node ./scripts/build-design-tokens.mjs",
-    "build:css": "node ./scripts/build-web-css.mjs",
-    "build:client-js": "node ./scripts/build-client-js.mjs",
-    "postinstall": "pnpm run vendor-htmx && pnpm run build:tokens && pnpm run build:css && pnpm run build:client-js && pnpm run transfer-web",
-    "transfer-web": "mkdir -p ./dist/web/public && cp -R ./src/web/public/. ./dist/web/public/",
-    "build": "pnpm run vendor-htmx && pnpm run build:tokens && pnpm run build:css && pnpm run build:client-js && tsc && tsc-alias -p tsconfig.json && pnpm run transfer-queries && pnpm run transfer-web",
-    "prepare-dev": "pnpm run vendor-htmx && pnpm run build:tokens && pnpm run build:css && pnpm run build:client-js && pnpm run transfer-web",
-    "compile:dev": "tsc && tsc-alias -p tsconfig.json && pnpm run transfer-queries && pnpm run transfer-web && node --env-file=.env ./dist/index.js",
-    "dev": "pnpm run prepare-dev && concurrently -k -n assets,api \"node ./scripts/dev-watch-assets.mjs\" \"NODE_ENV=dev nodemon\"",
+    "vendor-htmx": "wireit",
+    "build:tokens": "wireit",
+    "build:css": "wireit",
+    "build:client-js": "wireit",
+    "postinstall": "pnpm run build:web-assets",
+    "build:web-assets": "wireit",
+    "build": "pnpm run build:web-assets && tsc && tsc-alias -p tsconfig.json && pnpm run transfer-queries",
+    "compile:dev": "tsc && tsc-alias -p tsconfig.json && pnpm run transfer-queries && pnpm run build:web-assets && node --env-file=.env ./dist/index.js",
+    "dev": "pnpm run build:web-assets && pnpm run transfer-queries && NODE_ENV=dev dotenv -- tsx watch src/index.ts",
     "compile": "pnpm run clear && pnpm run build && node --env-file=.env ./dist/index.js",
     "start": "node ./dist/index.js",
     "sql-watch": "dotenv -- pgtyped -w -c pgtyped.config.json",
@@ -52,18 +51,88 @@
     "@types/pg": "^8.11.8",
     "@types/supertest": "^6.0.3",
     "chokidar": "^3.6.0",
-    "concurrently": "^9.1.0",
     "dbmate": "^2.27.0",
     "dotenv-cli": "^8.0.0",
-    "esbuild": "^0.25.0",
     "morgan": "^1.10.0",
-    "nodemon": "^3.1.4",
     "supertest": "^7.1.4",
     "tsc-alias": "^1.8.16",
+    "tsx": "^4.21.0",
     "typescript": "^5.6.2",
-    "vitest": "^4.0.8"
+    "vite": "^6.3.5",
+    "vitest": "^4.0.8",
+    "wireit": "^0.14.12"
   },
   "engines": {
     "node": "22.x"
+  },
+  "wireit": {
+    "vendor-htmx": {
+      "command": "mkdir -p ./dist/web/public && cp ./node_modules/htmx.org/dist/htmx.min.js ./dist/web/public/htmx.min.js",
+      "files": [
+        "./node_modules/htmx.org/dist/htmx.min.js"
+      ],
+      "output": [
+        "dist/web/public/htmx.min.js"
+      ]
+    },
+    "build:tokens": {
+      "command": "node ./scripts/build-design-tokens.mjs",
+      "files": [
+        "scripts/build-design-tokens.mjs",
+        "src/web/tokens/**/*.json"
+      ],
+      "output": [
+        "src/web/generated/design-tokens.css"
+      ]
+    },
+    "build:css": {
+      "command": "node ./scripts/build-cube-css.mjs",
+      "dependencies": [
+        "build:tokens"
+      ],
+      "files": [
+        "scripts/build-cube-css.mjs",
+        "scripts/generate-cube-blocks-manifest.mjs",
+        "src/web/styles/cube-entry.css",
+        "src/web/styles/cube-bundle.ts",
+        "src/web/styles/**/*.css",
+        "src/web/**/*.css"
+      ],
+      "output": [
+        "dist/web/public/cube.css"
+      ]
+    },
+    "build:client-js": {
+      "command": "node ./scripts/build-client-js.mjs",
+      "dependencies": [
+        "vendor-htmx"
+      ],
+      "files": [
+        "scripts/build-client-js.mjs",
+        "src/web/routes/**/*.client.ts",
+        "src/web/routes/**/*.client.js",
+        "src/web/shared/components/**/*.client.ts",
+        "src/web/shared/components/**/*.client.js"
+      ],
+      "output": [
+        "dist/web/public/routes/**",
+        "src/web/generated/routeClientScripts.ts"
+      ]
+    },
+    "build:web-assets": {
+      "command": "mkdir -p ./dist/web/public && cp -R ./src/web/public/. ./dist/web/public/",
+      "dependencies": [
+        "build:tokens",
+        "build:css",
+        "build:client-js"
+      ],
+      "files": [
+        "src/web/public/**"
+      ],
+      "output": [
+        "dist/web/public/*.ttf",
+        "dist/web/public/.gitkeep"
+      ]
+    }
   }
 }

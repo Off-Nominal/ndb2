@@ -1,6 +1,6 @@
 # Design tokens (initial draft)
 
-**Status:** Token JSON lives under `app/src/web/tokens/`; `build:tokens` emits `design-tokens.css`. CUBE layer sources live under `app/src/web/styles/`; `build:css` copies them and bundles colocated block CSS into `blocks.css` (see `docs/frontend/cube-css.md`). All ship via **`HtmlHead`** (`shared/components/html-head/html-head.tsx`).
+**Status:** Token JSON lives under `app/src/web/tokens/`; `build:tokens` emits `src/web/generated/design-tokens.css`. CUBE layers and colocated blocks are bundled by Vite from `styles/cube-entry.css` to `dist/web/public/cube.css` (see `docs/frontend/cube-css.md`). **`HtmlHead`** links a single stylesheet (`cubeStylesheetHref`: dev `/src/web/styles/cube-entry.css`, prod `/assets/cube.css`).
 
 This document seeds our **base design tokens**. These values are a starting point and should be refined once we see real screens (tables, forms, detail pages).
 

@@ -25,14 +25,4 @@ describe("routes/home", () => {
 
     expect(res.headers.location).toMatch(/^\/login\?/);
   });
-
-  it("GET /home/lucky-number redirects when not signed in", async () => {
-    const app = express();
-    mountWeb(app);
-
-    const res = await request(app).get("/home/lucky-number").expect(302);
-
-    expect(res.headers.location).toContain("returnTo=");
-    expect(res.headers.location).toContain(encodeURIComponent("/home/lucky-number"));
-  });
 });

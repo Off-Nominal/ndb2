@@ -4,7 +4,7 @@ import express, { type Express } from "express";
 import { webRouter } from "./routes/index";
 
 /** Build output and vendored static files; `app/src/web/public` is static-only and merged here. */
-const WEB_PUBLIC_SENTINEL = "design-tokens.css";
+const WEB_PUBLIC_SENTINEL = "cube.css";
 
 function resolveWebPublicRoot(): string {
   const besideModule = path.join(__dirname, "public");
@@ -23,8 +23,9 @@ function resolveWebPublicRoot(): string {
     return fromAppDist;
   }
   throw new Error(
-    "Web public assets are missing. From the `app` package, run: pnpm run prepare-dev " +
-      "(or pnpm run build:tokens, build:css, build:client-js, vendor-htmx, transfer-web).",
+    "Web public assets are missing. From the `app` package, run: pnpm run build:web-assets " +
+      "(Wireit runs vendor-htmx, build:tokens, build:css, build:client-js, then merges src/web/public) " +
+      "so `cube.css` exists under `dist/web/public/`.",
   );
 }
 

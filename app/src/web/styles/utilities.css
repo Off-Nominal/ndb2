@@ -1,6 +1,6 @@
 /**
  * CUBE — utility layer (single-purpose *behaviors*, token-backed).
- * Source of truth: emitted to dist/web/public/utilities.css by build:css.
+ * Source of truth: bundled into dist/web/public/cube.css via styles/cube-entry.css + Vite.
  */
 
 /**

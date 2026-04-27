@@ -30,6 +30,7 @@
     "**/*.test.ts",
     "**/*.test.tsx",
     "**/*.client.ts",
-    "src/test/**"
+    "src/test/**",
+    "src/web/styles/cube-bundle.ts"
   ]
 }

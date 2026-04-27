@@ -1,6 +1,6 @@
 /// <reference lib="dom" />
 /**
- * Shared by `select.client.ts` and `preferences-form.client.ts` (separate esbuild bundles).
+ * Shared by `select.client.ts` and `preferences-form.client.ts` (separate Vite bundles).
  */
 
 /**

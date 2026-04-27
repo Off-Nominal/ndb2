@@ -12,7 +12,7 @@ export function HomePage(props: HomePageProps): JSX.Element {
       <p>{props.message}</p>
 
       <p>
-        Signed in as Discord user <code>{props.auth.discordId}</code>.
+        Signed in as Discord user <code>{props.auth.discordId}</code>. Have a nice day.
       </p>
     </>
   );

@@ -1,6 +1,6 @@
 /**
  * CUBE — composition layer (layout primitives: flow, cluster, wrapper, etc.).
- * Source of truth: emitted to dist/web/public/compositions.css by build:css.
+ * Source of truth: bundled into dist/web/public/cube.css via styles/cube-entry.css + Vite.
  */
 
 /* Add .flow, .cluster, .wrapper, .grid, … as the design system grows. */

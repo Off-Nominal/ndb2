@@ -5,7 +5,6 @@ import { requireWebAuth } from "../../middleware/auth/require-auth";
 import { getColorScheme, getThemePreference } from "../../middleware/theme-preference";
 import { wrapWebRouteWithErrorBoundary } from "../../middleware/error-boundary";
 import { AuthenticatedPageLayout } from "../../shared/components/page-layout";
-import { LuckyNumber } from "./components/lucky-number";
 import { HomePage } from "./page";
 
 /** Registers `/` and HTMX-targeted `GET /home/lucky-number`. */
@@ -36,13 +35,4 @@ export const Home: Route = (router: Router) => {
     }),
   );
 
-  router.get(
-    "/home/lucky-number",
-    requireWebAuth,
-    wrapWebRouteWithErrorBoundary(async (req, res, next) => {
-      const value = Math.floor(Math.random() * 1_000_000);
-      const html = await Promise.resolve(<LuckyNumber value={value} />);
-      res.type("html").send(html);
-    }),
-  );
 };
