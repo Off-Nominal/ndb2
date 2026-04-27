@@ -190,6 +190,12 @@
   --warning-500: #F59E0B;
   --warning-700: #B45309;
 
+  /* Min viewport width for desktop tier and up (1024px at 16px root). */
+  --breakpoint-desktop: 64rem;
+  /* Min viewport width for tablet tier and up (768px at 16px root). Pair with web-breakpoints skill. */
+  --breakpoint-tablet: 48rem;
+  /* Min viewport width for wide tier and up (1280px at 16px root). */
+  --breakpoint-wide: 80rem;
   /* Base UI: Oxanium (wght 200–800) + generic sans; self-host variable TTF under /assets/ + @font-face in globals.css (CSP-safe). */
   --font-sans: Oxanium, sans-serif;
   --leading-normal: 1.5;

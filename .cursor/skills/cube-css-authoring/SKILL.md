@@ -115,7 +115,7 @@ Rules that only apply to **this** block’s **DOM subtree** should live **inside
 }
 ```
 
-**Pair with** **Nesting states in the parent** and **Sectioning a block file** (section headers for `@media` or truly separate concerns).
+**Pair with** **Nesting states in the parent** and **Sectioning a block file** (section headers for `@media` or truly separate concerns). For **viewport tiers**, use **mobile-first** **`@media (min-width: …)`** only—see **`web-breakpoints`** (do not use fractional **`max-width: 63.99rem`**-style breakpoint banding).
 
 ## Compositions and custom properties
 
@@ -247,5 +247,6 @@ HTMX can toggle **`data-*`** or classes via swaps; keep hooks documented in the 
 
 - **`app/src/web/shared/utils/merge_class.ts`** — **`mergeClass`**, for TSX `class` when combining bracket groups; **`kitajs-html-web`**.
 - **`ndb2-web-design`** — visual mood, how light/dark and named colour schemes fit together.
+- **`web-breakpoints`** — canonical viewport tiers and `@media` cut points (`rem`).
 - **`css-build`** — scripts, `public/` outputs, nodemon, `<head>` link order.
 - **`kitajs-html-web`** — route structure, **`HtmlHead`**, HTMX, tests.

@@ -9,12 +9,13 @@ export type NavigationMenuProps = {
   colorScheme: ColorScheme;
   /** `POST /preferences` hidden `returnTo`; default `"/"`. */
   preferencesReturnTo?: string;
+  /** Passed to {@link PreferencesForm} when two menus exist (e.g. `-desktop`). */
+  preferencesControlIdSuffix?: string;
 };
 
 /**
- * Default site links for the right-hand nav column (theme/colour + links + sign-out). For a custom list, pass
- * it as the `navigation` prop on {@link AuthenticatedPageLayout} ({@link PageLayout} is main-only and has no
- * site nav). Sign-out: POST to `/auth/logout` with the session CSRF token.
+ * Right-hand site nav (theme/colour, links, sign-out). Rendered by {@link AuthenticatedPageLayout} (see
+ * {@link PageLayout} for unauthenticated shell with no site nav). Sign-out: POST to `/auth/logout` with CSRF.
  */
 export function NavigationMenu(props: NavigationMenuProps): JSX.Element {
   return (
@@ -27,7 +28,7 @@ export function NavigationMenu(props: NavigationMenuProps): JSX.Element {
           <Button href="/predictions">Predictions</Button>
         </li>
         <li>
-          <Button href="/seasons">Seasons</Button>
+          <Button href="/seasons">Results</Button>
         </li>
         <li>
           <Button href="/profile">Profile</Button>
@@ -40,6 +41,7 @@ export function NavigationMenu(props: NavigationMenuProps): JSX.Element {
           colorScheme={props.colorScheme}
           returnTo={props.preferencesReturnTo ?? "/"}
           csrfToken={props.auth.csrfToken}
+          controlIdSuffix={props.preferencesControlIdSuffix}
         />
         <form method="post" action="/auth/logout">
           <input type="hidden" name="_csrf" value={props.auth.csrfToken} />

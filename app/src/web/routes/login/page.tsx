@@ -15,18 +15,22 @@ export type LoginPageProps = {
 export function LoginPage(props: LoginPageProps): JSX.Element {
   return (
     <div class="[ center ]">
-      <h1>Sign in</h1>
-      <p>
-        NDB2 uses Discord to verify your identity. Continue to Discord when you are ready.
-      </p>
-      <PreferencesForm
-        theme={props.theme}
-        colorScheme={props.colorScheme}
-        returnTo={props.preferencesFormReturnTo}
-      />
-      <p>
-        <DiscordButton returnTo={props.returnTo} />
-      </p>
+      <div class="[ stack ] [ screen-element ]">
+
+        <h1>Sign in</h1>
+        <p>
+          NDB2 uses Discord to verify your identity. Continue to Discord when you are ready.
+        </p>
+        <p>Users of NDB2 must be paying members of the Off-Nominal Discord.</p>
+        <p>
+          <DiscordButton returnTo={props.returnTo} />
+        </p>
+        <PreferencesForm
+          theme={props.theme}
+          colorScheme={props.colorScheme}
+          returnTo={props.preferencesFormReturnTo}
+        />
+      </div>
     </div>
   );
 }

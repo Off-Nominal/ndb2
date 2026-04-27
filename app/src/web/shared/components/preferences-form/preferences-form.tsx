@@ -15,6 +15,8 @@ export type PreferencesFormProps = {
   /** When set, `POST /preferences` requires this CSRF token (signed-in nav). */
   csrfToken?: string;
   class?: string;
+  /** Appended to theme/colour control `id`s when two instances exist (e.g. compact + desktop nav). */
+  controlIdSuffix?: string;
 };
 
 const THEME_SELECT_ID = "preferences-form__theme";
@@ -37,6 +39,9 @@ const COLOR_SCHEME_SELECT_OPTIONS: readonly SelectOption[] = SCHEME_HUE_DEFS.map
  */
 export function PreferencesForm(props: PreferencesFormProps): JSX.Element {
   const hasCsrfToken = props.csrfToken != null && props.csrfToken !== "";
+  const idSfx = props.controlIdSuffix ?? "";
+  const themeFieldId = `${THEME_SELECT_ID}${idSfx}`;
+  const colourFieldId = `${COLOUR_SELECT_ID}${idSfx}`;
 
   return (
     <form
@@ -52,9 +57,9 @@ export function PreferencesForm(props: PreferencesFormProps): JSX.Element {
       )}
       <input type="hidden" name="returnTo" value={props.returnTo} />
 
-      <FormField label="Appearance" fieldId={THEME_SELECT_ID}>
+      <FormField label="Appearance" fieldId={themeFieldId}>
         <Select
-          id={THEME_SELECT_ID}
+          id={themeFieldId}
           name="theme"
           aria-label="Light, dark, or system appearance"
           value={props.theme}
@@ -62,9 +67,9 @@ export function PreferencesForm(props: PreferencesFormProps): JSX.Element {
         />
       </FormField>
 
-      <FormField label="Colour" fieldId={COLOUR_SELECT_ID}>
+      <FormField label="Colour" fieldId={colourFieldId}>
         <Select
-          id={COLOUR_SELECT_ID}
+          id={colourFieldId}
           name="colorScheme"
           aria-label="Accent palette"
           value={props.colorScheme}

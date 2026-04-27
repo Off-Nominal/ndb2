@@ -4,8 +4,8 @@ description: >-
   NDB2 web visual design: futuristic terminal / HUD, glassy screen-overlay feel, space-named
   colour palettes (Neptune, Aurora, etc.), how light/dark and accent schemes combine, and
   semantic tokens. Use when choosing colours, describing look and feel, or styling to match
-  the product personality—not for UX flows, accessibility rules, or CSS build mechanics (use
-  css-build).
+  the product personality—not for UX flows, accessibility rules, CSS build mechanics (use
+  css-build), or numeric viewport breakpoints (use web-breakpoints).
 ---
 
 # NDB2 web — visual design and theming
@@ -23,7 +23,7 @@ Deeper token history and hex tables (may lag named schemes): [`docs/frontend/des
 
 ## Layered glass (base screen vs content)
 
-- **`body`** + **`[ glass-background ]`** (see **`utilities.css`**) is the **base** display glass: gradient, grid, accent radials, **opaque** diagonal (no frosted `color-surface` in that stack). On **phone/tablet** the right nav reuses the same **`.glass-background`** (second sheet on top, same skin). On **wide/desktop** the **nav column** is not a second stack—**transparent**, side by side on the single body layer.
+- **`body`** + **`[ glass-background ]`** (see **`utilities.css`**) is the **base** display glass: gradient, grid, accent radials, **opaque** diagonal (no frosted `color-surface` in that stack). On **mobile and tablet** (see **`web-breakpoints`**) the right nav often reuses the same **`.glass-background`** (second sheet on top, same skin). From **desktop** upward, the **nav column** is typically not a second stack—**transparent**, side by side on the single body layer. Exact widths and CSS live in **`page-layout`** / **`site-nav`**; tier names and `rem` cut points are authoritative in **`web-breakpoints`**.
 - **Foreground UI** (inputs, cards, table chrome) still uses translucency via **`--color-surface*`** in **`globals.css`** where appropriate.
 - **Do not** stack another full-page opaque background on the main column—let the shell read as one continuous display. New blocks should default to translucent surfaces or borders-only until a solid is justified.
 
@@ -64,4 +64,5 @@ For **implementation** details (file paths, `Set-Cookie`, client script duplicat
 
 - **`css-build`** — `build:tokens` / `build:css`, `design-tokens.css` output, `HtmlHead` order, when to run builds.
 - **`cube-css-authoring`** — which stylesheet layer to extend; still use **semantic** `var(--color-*)` in hand-written CSS.
+- **`web-breakpoints`** — mobile / tablet / desktop / wide `rem` boundaries; pair with this skill when describing nav or glass by viewport.
 - **`kitajs-html-web`** — `PageLayout` / `AuthenticatedPageLayout` pass `theme` and `colorScheme` into the document; only the authenticated layout includes site nav.

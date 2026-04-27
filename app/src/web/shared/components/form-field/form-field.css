@@ -11,5 +11,10 @@
     font-weight: var(--weight-medium);
     /* color & surface */
     color: var(--color-text-muted);
+
+    /* layout */
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
   }
 }

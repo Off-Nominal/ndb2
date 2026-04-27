@@ -1,6 +1,6 @@
 # CUBE CSS summary (for ndb2)
 
-**Status:** The web build emits five stylesheets under `app/src/web/public/` (served at `/assets/`): `design-tokens.css` (generated from JSON), `globals.css`, `compositions.css`, `utilities.css` (copied from `app/src/web/styles/`), and `blocks.css` (concatenated from colocated `*.css` next to components). All are linked from `app/src/web/shared/components/html-head/html-head.tsx` (**`HtmlHead`**) in cascade order. For an agent-oriented summary of the full pipeline (scripts, pnpm, nodemon, CUBE mapping), see `.cursor/skills/css-build/SKILL.md`. For **where to put CSS when authoring** pages and components (globals vs compositions vs utilities vs colocated blocks), see `.cursor/skills/cube-css-authoring/SKILL.md`.
+**Status:** The web build emits five stylesheets under `app/src/web/public/` (served at `/assets/`): `design-tokens.css` (generated from JSON), `globals.css`, `compositions.css`, `utilities.css` (copied from `app/src/web/styles/`), and `blocks.css` (concatenated from colocated `*.css` next to components). All are linked from `app/src/web/shared/components/html-head/html-head.tsx` (**`HtmlHead`**) in cascade order. For an agent-oriented summary of the full pipeline (scripts, pnpm, nodemon, CUBE mapping), see `.cursor/skills/css-build/SKILL.md`. For **where to put CSS when authoring** pages and components (globals vs compositions vs utilities vs colocated blocks), see `.cursor/skills/cube-css-authoring/SKILL.md`. For **viewport tiers** (mobile, tablet, desktop, wide) and `@media` cut points in `rem`, see `.cursor/skills/web-breakpoints/SKILL.md`.
 
 This document summarizes the CUBE CSS methodology (Andy Bell) and captures how we intend to apply it in the ndb2 frontend.
 
@@ -154,6 +154,10 @@ Prefer predictable attribute keys:
 - **state**: `data-state="…"` (or `aria-*` for accessibility state)
 
 HTMX interactions should also use data attributes where they help document behavior.
+
+## Responsive breakpoints
+
+ndb2 uses **four named viewport tiers** — **mobile**, **tablet**, **desktop**, **wide** — with shared `rem` boundaries (e.g. tablet from `48rem`, desktop from `64rem`, wide from `80rem` at a 16px root). Use them in `@media` queries and comments so layout behavior stays consistent across blocks and routes. Full table, patterns, and shell/nav notes: `.cursor/skills/web-breakpoints/SKILL.md`.
 
 ## Practical checklist for new UI work
 

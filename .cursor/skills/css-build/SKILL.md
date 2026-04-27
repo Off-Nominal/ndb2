@@ -68,7 +68,7 @@ flowchart TB
 
 **Checklist for new UI:** Prefer globals → compositions → utilities; add colocated block CSS only when necessary; use **`data-variant`**, **`data-size`**, **`data-state`** (or `aria-*`) for exceptions; avoid new **`__`**-chain block names unless **`cube-css-authoring`**’s rare-exception criteria apply.
 
-Full methodology and roadmap: [`docs/frontend/cube-css.md`](docs/frontend/cube-css.md). Token values: [`docs/frontend/design.md`](docs/frontend/design.md).
+Full methodology and roadmap: [`docs/frontend/cube-css.md`](docs/frontend/cube-css.md). Token values: [`docs/frontend/design.md`](docs/frontend/design.md). Responsive **`@media`** cut points: **`web-breakpoints`**.
 
 ## `<head>` stylesheet order
 
@@ -94,7 +94,7 @@ Then HTMX (`htmx.min.js`).
 
 **Token item:** `name` (string), `value` (string), optional `description`. If `value` equals another token’s `name`, CSS emits **`var(--dotted-name-as-kebab)`**.
 
-**Name → variable:** `brand.500` → `--brand-500`; `text.2xl` → `--text-2xl`.
+**Name → variable:** `brand.500` → `--brand-500`; `text.2xl` → `--text-2xl`; `breakpoint.desktop` → `--breakpoint-desktop` (see **`breakpoints.json`**, **`web-breakpoints`**). Breakpoint vars are for **properties**, not **`@media`** conditions — use matching **`rem`** literals in media queries.
 
 **`colors.json`:** `brand.*`, `neutral.*`, per-scheme `scheme.*`, `color.semantic.*` → `--color-*`; `color.light.*` / `color.dark.*` → shared alias names in `:root` vs `html[data-theme="dark"]` (light/dark **pairs must match**). `html[data-color-scheme="…"]` remaps `--brand-*` and `--neutral-*` to the chosen **accent palette**; cookie **`ndb2_color_scheme`**, default **neptune**. **Why and how the product uses themes / palettes (feel, light vs dark, named schemes):** **`ndb2-web-design`**. **Implementation:** `data-theme` `light` | `dark` | `system`; cookie **`ndb2_theme`**; absent = **system** with `@media (prefers-color-scheme: dark)` for `html[data-theme="system"]`. **`build-client-js`** + `themePreferenceMiddleware` (rolling `Set-Cookie`): `app/src/web/middleware/theme-preference.ts`, `routes/home/page.client.js`.
 

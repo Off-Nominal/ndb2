@@ -3,7 +3,8 @@
 /* — Root — */
 .button {
   /* layout */
-  padding: var(--space-2) var(--space-3);
+  --screen-element-padding-x: var(--space-3);
+  --screen-element-padding-y: var(--space-2);
 
   /* type */
   text-decoration: none;

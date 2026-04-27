@@ -10,19 +10,18 @@ export type ErrorPageProps = {
   body: ErrorPageBody;
 };
 
-/** Main column content for user-facing error states (4xx/5xx, OAuth, 404). Wrap with {@link PageLayout} (no site nav) or, for the signed-in shell, {@link AuthenticatedPageLayout} (requires `auth` for the default nav). */
+/** Main column content for user-facing error states (4xx/5xx, OAuth, 404). Wrap with {@link PageLayout} (no site nav) or, for the signed-in shell, {@link AuthenticatedPageLayout} (requires `auth`). */
 export function ErrorPage(props: ErrorPageProps): JSX.Element {
   return (
-    <main>
-      <h1>{props.title}</h1>
-      {renderBody(props.body)}
-      <p>
-        <a href="/login?returnTo=%2F">Try again</a>
-      </p>
-      <p>
-        <a href="/">Home</a>
-      </p>
-    </main>
+    <div class="[ center ]">
+      <div class="[ stack ] [ screen-element ]">
+        <h1>{props.title}</h1>
+        {renderBody(props.body)}
+        <p>
+          <a href="/login?returnTo=%2F">Try again</a>
+        </p>
+      </div>
+    </div>
   );
 }
 

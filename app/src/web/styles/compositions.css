@@ -8,7 +8,6 @@
 /* Readable column: max width + horizontal centering in the viewport (block axis is unconstrained). */
 .center-inline {
   box-sizing: content-box;
-  max-inline-size: var(--center-column-max-width, 60ch);
   margin-inline: auto;
   padding-inline: var(--center-column-gutter-inline, var(--space-4));
 }

@@ -20,6 +20,7 @@ const OUT_FILE = path.join(APP_ROOT, "src/web/public/design-tokens.css");
 const TOKEN_FILES = [
   "colors.json",
   "space.json",
+  "breakpoints.json",
   "radius.json",
   "font-family.json",
   "font-size.json",

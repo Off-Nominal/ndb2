@@ -2,15 +2,14 @@ import type { WebAuthAuthenticated } from "../../../middleware/auth/session";
 import type { ColorScheme, ThemePreference } from "../../../middleware/theme-preference";
 import type { HtmlHeadProps } from "../html-head";
 import { HtmlHead } from "../html-head";
+import { NavDrawerToggle } from "./nav-drawer-toggle";
 import { NavigationMenu } from "../site-nav";
-
-const SITE_NAV_REVEAL_ID = "app-site-nav-reveal";
 
 /**
  * Full-document shell (markup-driven CUBE — see cube-css-authoring skill).
- * `app-shell__grid` + `page-layout`: main + right-nav grid; on wide/desktop see `page-layout.css` comments.
+ * Authenticated shell: `[ page-layout ]` + compact (`page-layout-nav-mobile`, under 64rem) vs desktop nav
+ * (`page-layout-nav-desktop`, 64rem+). See `page-layout.css`.
  */
-const SHELL_GRID_CLASSES = "[ app-shell__grid ] [ page-layout ]";
 
 /** Base document: `<html>`, `<head>`, `<body>`, and a single `main` column (no site navigation). */
 export type PageLayoutProps = HtmlHeadProps & {
@@ -23,19 +22,13 @@ export type PageLayoutProps = HtmlHeadProps & {
 };
 
 export type AuthenticatedPageLayoutProps = PageLayoutProps & {
-  /** Session (CSRF for default nav sign-out, etc.). */
+  /** Session (CSRF for sign-out, preferences form, etc.). */
   auth: WebAuthAuthenticated;
-  /** Right column / drawer; defaults to {@link NavigationMenu} with `auth`. */
-  navigation?: JSX.Element;
-  /** `POST /preferences` redirect target for the default nav form; default `"/"`. */
+  /** `POST /preferences` redirect target in the site nav; default `"/"`. */
   preferencesReturnTo?: string;
 };
 
-type DocumentFrameProps = Omit<PageLayoutProps, "children"> & {
-  body: JSX.Element;
-};
-
-function DocumentFrame(props: DocumentFrameProps): JSX.Element {
+function DocumentFrame(props: PageLayoutProps): JSX.Element {
   return (
     <html lang="en" data-theme={props.theme} data-color-scheme={props.colorScheme}>
       <head>
@@ -49,7 +42,9 @@ function DocumentFrame(props: DocumentFrameProps): JSX.Element {
         class="[ glass-background ]"
         {...(props.hxHeaders != null ? { "hx-headers": props.hxHeaders } : {})}
       >
-        {props.body}
+        <div class="[ center-inline ][ document-frame ]">
+          {props.children}
+        </div>
       </body>
     </html>
   );
@@ -68,12 +63,11 @@ export function PageLayout(props: PageLayoutProps): JSX.Element {
       clientScripts={props.clientScripts}
       csrfMetaToken={props.csrfMetaToken}
       hxHeaders={props.hxHeaders}
-      body={
-        <main>
-          <div class="[ center-inline ]">{props.children}</div>
-        </main>
-      }
-    />
+    >
+      <main>
+        <div class="[ center-inline ]">{props.children}</div>
+      </main>
+    </DocumentFrame>
   );
 }
 
@@ -82,14 +76,6 @@ export function PageLayout(props: PageLayoutProps): JSX.Element {
  * (and scrim, tab, HTMX `hx-headers` on `body` when provided).
  */
 export function AuthenticatedPageLayout(props: AuthenticatedPageLayoutProps): JSX.Element {
-  const navigation = props.navigation ?? (
-    <NavigationMenu
-      auth={props.auth}
-      theme={props.theme}
-      colorScheme={props.colorScheme}
-      preferencesReturnTo={props.preferencesReturnTo ?? "/"}
-    />
-  );
   return (
     <DocumentFrame
       theme={props.theme}
@@ -98,44 +84,38 @@ export function AuthenticatedPageLayout(props: AuthenticatedPageLayoutProps): JS
       clientScripts={props.clientScripts}
       csrfMetaToken={props.csrfMetaToken}
       hxHeaders={props.hxHeaders}
-      body={
-        <>
-          <input
-            class="[ app-nav__state ]"
-            type="checkbox"
-            id={SITE_NAV_REVEAL_ID}
-          />
-          <label
-            for={SITE_NAV_REVEAL_ID}
-            class="[ app-nav__scrim ]"
-            aria-hidden="true"
-          />
-          <div class={SHELL_GRID_CLASSES}>
-            <main class="[ app-shell__main ]" id="main">
-              <div class="[ center-inline ]">{props.children}</div>
-            </main>
-            <div class="[ app-nav-dock ]">
-              <div class="[ app-nav-drawer ]">
-                <aside class="[ app-nav ] [ glass-background ]" id="site-nav" aria-label="Site">
-                  {navigation}
-                </aside>
-                <label
-                  for={SITE_NAV_REVEAL_ID}
-                  class="[ app-nav__tab ] [ glass-background ]"
-                  aria-label="Open or close the site menu"
-                >
-                  <span class="[ app-nav__icon-open ]" aria-hidden="true">
-                    Menu
-                  </span>
-                  <span class="[ app-nav__icon-close ]" aria-hidden="true">
-                    Close
-                  </span>
-                </label>
+    >
+      <div>
+        <div class="[ page-layout ]">
+          <main id="main">
+            <div class="[ center-inline ]">{props.children}</div>
+          </main>
+          <aside class="[ page-layout-nav ] [ glass-background ]">
+            <div class="[ page-layout-nav-mobile ]">
+              <div class="[ page-layout-nav-toggle ] [ glass-background ]">
+                <NavDrawerToggle />
+              </div>
+              <div class="[ page-layout-nav-body ]">
+                <NavigationMenu
+                  auth={props.auth}
+                  theme={props.theme}
+                  colorScheme={props.colorScheme}
+                  preferencesReturnTo={props.preferencesReturnTo ?? "/"}
+                />
               </div>
             </div>
-          </div>
-        </>
-      }
-    />
+            <div class="[ page-layout-nav-desktop ]">
+              <NavigationMenu
+                auth={props.auth}
+                theme={props.theme}
+                colorScheme={props.colorScheme}
+                preferencesReturnTo={props.preferencesReturnTo ?? "/"}
+                preferencesControlIdSuffix="-desktop"
+              />
+            </div>
+          </aside>
+        </div>
+      </div>
+    </DocumentFrame>
   );
 }

@@ -9,11 +9,15 @@
  * `--center-min-height` when centering within a shorter region.
  * Typical page pattern: a `.center-inline` ancestor constrains line length; this utility handles
  * vertical (and any leftover horizontal) centering of the group.
+ * Flex (not grid + place-content) avoids macOS Chrome/Safari mis-anchoring native `<select>` popovers.
  */
 .center {
-  display: grid;
-  place-content: center;
   min-height: var(--center-min-height, 100dvh);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 /** Unstyled `ul` / `ol`: no markers, no UA margin or padding. Compose with e.g. `.stack` for gaps. */
@@ -73,6 +77,9 @@
  * Compose with block styles (e.g. `.button`); hover brightens the rim via `box-shadow` only.
  */
 .screen-element {
+  --screen-element-padding-x: var(--space-8);
+  --screen-element-padding-y: var(--space-4);
+  padding: var(--screen-element-padding-y) var(--screen-element-padding-x);
   background: transparent;
   border: 1px solid var(--color-primary);
   border-radius: var(--radius-sm);

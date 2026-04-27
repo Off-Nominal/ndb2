@@ -1,294 +1,138 @@
+/* Authenticated shell (see `AuthenticatedPageLayout`).
+   Compact (default): fixed drawer rail + checkbox; desktop and up: persistent column (`min-width: 64rem`).
+   See `web-breakpoints` / `breakpoints.json`. */
+
 .page-layout {
-  --center-column-max-width: 1200px;
-  --center-column-gutter-inline: var(--space-8);
-}
+  --page-layout-nav-width: 16rem;
 
-/**
- * App shell: right-hand site nav — drawer (mobile), collapsible column (tablet), static column (desktop).
- * Toggled with a single checkbox (no JS). Breakpoints: 48rem / 64rem.
- */
-
-/* ---- State input (one source of truth for open/expanded) ---- */
-.app-nav__state {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* Scrim: mobile only (full-screen tap to close). Use neutral black tint — not `color-text`, which is light
-   in dark mode and would read as a “white wash” over the main panel. */
-.app-nav__scrim {
-  position: fixed;
-  inset: 0;
-  z-index: 2;
-  display: block;
-  margin: 0;
-  cursor: pointer;
-  background: color-mix(in srgb, #000 42%, transparent);
-  opacity: 0;
-  pointer-events: none;
-}
-
-input.app-nav__state:checked + .app-nav__scrim {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* ---- Shell grid: main + nav dock ---- */
-.app-shell__grid {
-  min-height: 100dvh;
-}
-
-.app-shell__main {
-  min-width: 0;
-}
-
-/* Simple shell: one main column only (no site nav) — e.g. login, OAuth errors, 404, 5xx. */
-.app-shell__main--solo {
-  min-height: 100dvh;
-}
-
-/* ---- Default site nav (inside aside) — list reset: `list-plain` in utilities.css; links: `Button` ---- */
-
-/* ---- Drawer + tab: tab is the left edge of the panel (phone/tablet) ---- */
-.app-nav-drawer {
-  --app-nav-tab-size: 2.75rem;
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  min-width: 0;
-  min-height: 0;
-}
-
-/* Glass skin from utilities; full-height handle on the seam toward `main` */
-.app-nav__tab {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 var(--app-nav-tab-size, 2.75rem);
-  width: var(--app-nav-tab-size, 2.75rem);
-  box-sizing: border-box;
-  margin: 0;
-  padding: var(--space-2) var(--space-1);
-  cursor: pointer;
-  color: var(--color-text);
-  line-height: 1.2;
-  font-size: var(--text-xs);
-  font-weight: var(--weight-medium);
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  border: 1px solid var(--color-border);
-  /* [aside, tab] — tab is the right strip; round outer (viewport) edge */
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
-  border-inline-start: 0; /* meet aside */
-  user-select: none;
-  z-index: 1;
-  transition:
-    border-color 0.15s ease,
-    color 0.15s ease;
-}
-
-.app-nav__tab:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
-input.app-nav__state:checked ~ .app-shell__grid .app-nav__icon-open,
-input.app-nav__state:not(:checked) ~ .app-shell__grid .app-nav__icon-close {
-  display: none;
-}
-
-.app-nav__icon-close,
-.app-nav__icon-open {
-  user-select: none;
-}
-
-/* ---- Nav dock: drawer = tab + aside (phone/tablet) ---- */
-.app-nav-dock {
   position: relative;
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  min-width: 0;
-}
+  min-height: 100vh;
+  min-height: 100dvh;
 
-/* ---- Aside panel ---- */
-.app-nav {
-  box-sizing: border-box;
-  margin: 0;
-  min-width: 0;
-  /* filled per breakpoint */
-}
-
-/* ————————— Mobile: overlay drawer (right); tab + panel slide as one; tab peeks when closed ————————— */
-@media (max-width: 47.99rem) {
-  .app-shell__grid {
-    display: block;
-  }
-
-  .app-nav-dock {
-    position: static;
-  }
-
-  .app-nav-drawer {
-    position: fixed;
-    right: 0;
-    top: 0;
-    z-index: 3;
-    height: 100dvh;
-    max-height: 100dvh;
+  @media (min-width: 64rem) {
     display: flex;
     flex-direction: row;
     align-items: stretch;
-    isolation: isolate;
-    max-width: min(18rem, 86vw);
-    box-shadow: -8px 0 32px
-      color-mix(in srgb, var(--color-text) 16%, transparent);
-    /* closed: only tab strip stays on-screen; open: full tab + panel */
-    transform: translateX(calc(100% - var(--app-nav-tab-size)));
-    transition: transform 0.2s ease;
+    min-width: 0;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .app-nav-drawer {
-      transition: none;
+  & > main {
+    position: relative;
+    z-index: 0;
+    min-width: 0;
+
+    @media (min-width: 64rem) {
+      flex: 1 1 0%;
     }
   }
 
-  input.app-nav__state:checked ~ .app-shell__grid .app-nav-drawer {
-    transform: translateX(0);
+  & .page-layout-nav {
+    box-sizing: border-box;
+    border-left: 1px solid var(--color-primary);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-text) 4%, transparent);
+    position: fixed;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 2;
+    width: var(--page-layout-nav-width);
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-4);
+    min-width: 0;
+    min-height: 0;
+    transform: none;
+    transition: transform 0.3s ease;
+
+    @media (min-width: 64rem) {
+      position: relative;
+      top: auto;
+      right: auto;
+      bottom: auto;
+      z-index: auto;
+      flex: 0 0 var(--page-layout-nav-width);
+      width: var(--page-layout-nav-width);
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      padding: var(--space-4);
+    }
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      pointer-events: none;
+      z-index: 0;
+      box-shadow:
+        -1px 0 0 0 color-mix(in srgb, var(--color-primary) 12%, transparent),
+        -2px 0 10px 0 color-mix(in srgb, var(--color-primary) 17%, transparent),
+        -4px 0 24px 2px color-mix(in srgb, var(--color-primary) 7%, transparent);
+    }
+
+    & .page-layout-nav-toggle {
+      position: absolute;
+      top: var(--space-8);
+      left: calc(-1 * var(--space-8));
+      width: var(--space-8);
+      z-index: 2;
+    }
+
+    & .page-layout-nav-body {
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 0;
+      width: 100%;
+      overflow: visible;
+    }
   }
 
-  .app-nav {
-    /* [aside, tab] — main panel, seam with `main` on the left */
-    position: static;
-    flex: 0 0 min(15.25rem, calc(86vw - var(--app-nav-tab-size)));
-    width: min(15.25rem, calc(86vw - var(--app-nav-tab-size)));
+  & .page-layout-nav-mobile {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
     min-width: 0;
+    width: 100%;
     height: 100%;
-    max-height: 100dvh;
-    margin: 0;
-    padding: var(--space-4);
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
-    border: none;
-    border-inline-start: 1px solid var(--color-border);
+
+    @media (min-width: 64rem) {
+      display: none;
+    }
+  }
+
+  & .page-layout-nav-desktop {
+    display: none;
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+
+    @media (min-width: 64rem) {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+
+  &:has(#app-site-nav-reveal:not(:checked)) .page-layout-nav {
+    transform: translateX(100%);
+  }
+
+  @media (min-width: 64rem) {
+    &:has(#app-site-nav-reveal:not(:checked)) .page-layout-nav {
+      transform: none;
+    }
   }
 }
 
-/* ————————— Tablet: in-flow right column, collapsible ————————— */
-@media (min-width: 48rem) and (max-width: 63.99rem) {
-  .app-nav__scrim {
-    display: none;
-  }
+.document-frame {
+  max-width: 72rem;
 
-  .app-shell__grid {
-    display: grid;
-    grid-template-columns: 1fr minmax(0, auto);
-    align-items: stretch;
-  }
-
-  .app-nav-dock {
-    position: static;
-    border: none;
-    background: transparent;
-    min-width: 0;
-  }
-
-  .app-nav-drawer {
-    position: static;
-    display: flex;
-    flex-direction: row;
-    align-items: stretch;
-    height: 100dvh;
-    min-width: 0;
-    min-height: 0;
-  }
-
-  .app-nav {
-    position: static;
-    height: 100dvh;
-    min-height: 0;
-    flex: 0 0 0;
-    min-width: 0;
-    max-width: 0;
-    padding: 0;
-    overflow: hidden;
-    border: 0;
-    opacity: 0;
-    box-shadow: none;
-  }
-
-  input.app-nav__state:checked ~ .app-shell__grid .app-nav {
-    flex: 0 0 min(12.5rem, 28vw);
-    max-width: min(18rem, 40vw);
-    min-width: 0;
-    padding: var(--space-4);
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
-    opacity: 1;
-    border-inline-start: 1px solid var(--color-border);
-  }
-}
-
-/* ————————— Desktop: fixed-width column, no toggle, no scrim ————————— */
-@media (min-width: 64rem) {
-  .app-nav__scrim {
-    display: none;
-  }
-
-  .app-nav__state {
-    display: none;
-  }
-
-  .app-shell__grid {
-    display: grid;
-    grid-template-columns: 1fr 17.5rem;
-    align-items: stretch;
-  }
-
-  .app-nav-dock {
-    flex-direction: column;
-    min-height: 0;
-    /* One canvas with `main` — no extra glass fill; only a divider from body */
-    border-inline-start: 1px solid var(--color-border);
-    background: transparent;
-  }
-
-  .app-nav-drawer {
-    flex: 1 1 auto;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-  }
-
-  .app-nav {
-    /* Not a second sheet on wide: share the base layer with main */
-    position: static;
-    flex: 1 1 auto;
-    width: 100% !important;
-    max-width: none !important;
-    height: auto;
-    min-height: 0;
-    margin: 0;
-    padding: var(--space-4);
-    overflow: auto;
-    opacity: 1 !important;
-    border: 0;
-    box-shadow: none;
-    background: none !important;
-    background-color: transparent !important;
-    background-image: none !important;
-  }
-
-  .app-nav__tab {
-    display: none;
+  @media (min-width: 80rem) {
+    max-width: 96rem;
   }
 }
