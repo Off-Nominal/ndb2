@@ -160,6 +160,16 @@
 }
 
 /**
+ * Stretch to the containing block’s inline size. Uses `display: block` so `width: 100%` applies to
+ * inline-level elements (`span`, `a`, etc.); controls that must stay `flex` / `inline-flex` should
+ * use `width: 100%` in their block instead of this utility.
+ */
+.full-width {
+  display: block;
+  width: 100%;
+}
+
+/**
  * Use in regions that set `width: 100%` on broad selectors (e.g. nav sidebars) so a control
  * sizes to its content instead, without overflowing the container.
  */

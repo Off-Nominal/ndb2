@@ -34,7 +34,7 @@
     }
   }
 
-  & * {
+  & > * {
     /* layout */
     display: block;
     width: 100%;

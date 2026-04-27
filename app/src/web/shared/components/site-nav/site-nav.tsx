@@ -30,16 +30,16 @@ export function NavigationMenu(props: NavigationMenuProps): JSX.Element {
       </div>
       <ul class="[ stack ] [ list-plain ]">
         <li>
-          <Button href="/">Main Menu</Button>
+          <Button class="[ full-width ]" href="/">Main Menu</Button>
         </li>
         <li>
-          <Button href="/predictions">Predictions</Button>
+          <Button class="[ full-width ]" href="/predictions">Predictions</Button>
         </li>
         <li>
-          <Button href="/seasons">Results</Button>
+          <Button class="[ full-width ]" href="/seasons">Results</Button>
         </li>
         <li>
-          <Button href="/profile">Profile</Button>
+          <Button class="[ full-width ]" href="/profile">Profile</Button>
         </li>
       </ul>
 
@@ -51,7 +51,7 @@ export function NavigationMenu(props: NavigationMenuProps): JSX.Element {
         />
         <form method="post" action="/auth/logout">
           <input type="hidden" name="_csrf" value={props.auth.csrfToken} />
-          <Button type="submit">Sign out</Button>
+          <Button class="[ full-width ]" type="submit">Sign out</Button>
         </form>
       </div>
     </nav>
