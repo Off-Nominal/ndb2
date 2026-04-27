@@ -15,6 +15,9 @@
 /* ndb2:block: shared/components/form-field/form-field.css */
 @import "../shared/components/form-field/form-field.css";
 
+/* ndb2:block: shared/components/heading-screen-element/heading-screen-element.css */
+@import "../shared/components/heading-screen-element/heading-screen-element.css";
+
 /* ndb2:block: shared/components/page-layout/nav-drawer-toggle/nav-drawer-toggle.css */
 @import "../shared/components/page-layout/nav-drawer-toggle/nav-drawer-toggle.css";
 

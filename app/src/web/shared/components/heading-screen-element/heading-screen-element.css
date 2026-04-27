@@ -1,0 +1,17 @@
+/* Block: `screen-element` frame around a heading; type rhythm from global `h1`–`h6`. */
+
+.heading-screen-element {
+  --screen-element-padding-x: var(--space-4);
+  --screen-element-padding-y: var(--space-2);
+  text-transform: uppercase;
+
+  & h1,
+  & h2,
+  & h3,
+  & h4,
+  & h5,
+  & h6 {
+    letter-spacing: var(--tracking-wide);
+    margin: 0;
+  }
+}

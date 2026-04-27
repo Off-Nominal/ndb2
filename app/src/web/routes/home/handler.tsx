@@ -28,7 +28,7 @@ export const Home: Route = (router: Router) => {
           csrfMetaToken={auth.csrfToken}
           hxHeaders={csrfHeadersJson}
         >
-          <HomePage message="Welcome to the new ndb2 portal" auth={auth} />
+          <HomePage auth={auth} />
         </AuthenticatedPageLayout>,
       );
       res.type("html").send(html);

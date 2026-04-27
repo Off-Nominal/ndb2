@@ -1,7 +1,7 @@
 import type { WebAuthAuthenticated } from "../../middleware/auth/session";
+import { HeadingScreenElement } from "@web/shared/components/heading-screen-element";
 
 export type HomePageProps = {
-  message: string;
   auth: WebAuthAuthenticated;
 };
 
@@ -9,7 +9,10 @@ export type HomePageProps = {
 export function HomePage(props: HomePageProps): JSX.Element {
   return (
     <>
-      <p>{props.message}</p>
+      <HeadingScreenElement>
+        <h1>Main Menu</h1>
+      </HeadingScreenElement>
+
 
       <p>
         Signed in as Discord user <code>{props.auth.discordId}</code>. Have a nice day.
