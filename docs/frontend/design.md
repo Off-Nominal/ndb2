@@ -1,12 +1,14 @@
 # Design tokens (initial draft)
 
-**Status:** Token JSON lives under `app/src/web/tokens/`; `build:tokens` emits `design-tokens.css`. CUBE layer sources live under `app/src/web/styles/`; `build:css` copies them and bundles colocated block CSS into `blocks.css` (see `docs/frontend/cube-css.md`). All ship via **`HtmlHead`** (`html_head.tsx`).
+**Status:** Token JSON lives under `app/src/web/tokens/`; `build:tokens` emits `design-tokens.css`. CUBE layer sources live under `app/src/web/styles/`; `build:css` copies them and bundles colocated block CSS into `blocks.css` (see `docs/frontend/cube-css.md`). All ship via **`HtmlHead`** (`shared/components/html-head/html-head.tsx`).
 
 This document seeds our **base design tokens**. These values are a starting point and should be refined once we see real screens (tables, forms, detail pages).
 
 Token sources of truth will ultimately live as JSON and generate:
 - CSS custom properties
 - token utility classes
+
+**Viewport breakpoints:** `breakpoints.json` emits **`--breakpoint-tablet`**, **`--breakpoint-desktop`**, **`--breakpoint-wide`** on `:root`. Use those **`var(--breakpoint-*)`** in **property values** only; **`@media`** conditions must use the same **`rem`** literals as the JSON (`var()` is not valid in media queries). Tiers and patterns: `.cursor/skills/web-breakpoints/SKILL.md`.
 
 ## Design guidance (English)
 

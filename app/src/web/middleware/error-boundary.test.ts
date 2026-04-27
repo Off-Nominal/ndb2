@@ -25,7 +25,7 @@ describe("webErrorBoundary", () => {
 
     expect(res.headers["content-type"]).toMatch(/html/);
     expect(res.text).toContain("Something went wrong");
-    expect(res.text).toContain('href="/"');
+    expect(res.text).toContain('href="/login?returnTo=%2F"');
   });
 
   it("webErrorHandler returns a fragment when HX-Request is set", async () => {

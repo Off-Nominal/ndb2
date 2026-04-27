@@ -1,0 +1,227 @@
+/* Block: select — custom listbox + hidden native `<select>` (form / HTMX). */
+
+/* — Root — */
+.select {
+  /* layout */
+  position: relative;
+  min-width: 10rem;
+  max-width: 100%;
+  box-sizing: border-box;
+
+  /* — Native (visually hidden; kept for `name` / `change`) — */
+  & .select__native {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
+  }
+
+  /**
+   * **`.screen-element`** on the surface: one chrome around the **trigger** only.
+   * The list is **not** in flow: it is absolutely placed under the surface (`.select` / surface are `position: relative`)
+   * so the panel floats over page content. When open, the surface drops its bottom border + radii; the list carries the bottom corners.
+   */
+  & .select__surface {
+    --screen-element-padding-x: 0;
+    --screen-element-padding-y: 0;
+    /* layout */
+    position: relative;
+    display: block;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0;
+    /* opaque panel — frosted tokens show the page behind */
+    background: var(--color-bg);
+    overflow: visible;
+  }
+
+  /* — Trigger (no separate screen-element; chrome is on `select__surface`) — */
+  & .select__trigger {
+    --screen-element-padding-x: var(--space-3);
+    --screen-element-padding-y: var(--space-2);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    width: 100%;
+    box-sizing: border-box;
+    text-align: start;
+    border: 0;
+    border-radius: 0;
+    /* type */
+    font: inherit;
+    line-height: var(--leading-normal);
+    /* color & surface */
+    color: var(--color-text);
+    background: transparent;
+    /* interaction */
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    padding: var(--screen-element-padding-y) var(--screen-element-padding-x);
+    transition:
+      background 0.15s ease,
+      color 0.15s ease;
+
+    &:hover {
+      /* solid hover tint (not frosted `--color-surface-muted`) */
+      background: color-mix(in srgb, var(--color-text) 6%, var(--color-bg) 94%);
+      color: var(--color-primary);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-focus-ring);
+      outline-offset: 2px;
+    }
+
+    /* Parents like `.site-nav * { width: 100% }` make every descendant full-width. Two
+     * 100%-wide flex items in a row + `min-width: 0` on the label collapse the value to
+     * zero width, so the closed label is invisible. Reset width for direct children. */
+    & > * {
+      width: auto;
+      max-width: 100%;
+    }
+  }
+
+  & .select__value {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  & .select__chevron {
+    flex-shrink: 0;
+    width: auto;
+    max-width: none;
+    font-size: 0.65em;
+    line-height: 1;
+    opacity: 0.85;
+  }
+
+  /* — Listbox: floats under the button (out of document flow) — */
+  & .select__list {
+    position: absolute;
+    z-index: 50;
+    top: 100%;
+    /* Inset 1px each side: abspos `left:0;right:0` was to the *padding* box, so a 1px
+     * border on the list sat *inside* the surface and looked one border short of the trigger. */
+    left: -1px;
+    right: -1px;
+    width: auto;
+    /* max width from JS (viewport) overrides when set; fall back: */
+    max-height: 16rem;
+    margin: 0;
+    margin-top: 0; /* no gap: flush under trigger (below) */
+    padding: var(--space-1) 0;
+    list-style: none;
+    overflow-y: auto;
+    /* hide scroll chrome; touch / wheel / keyboard still scroll */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    box-sizing: border-box;
+    /* continuous frame: same border + opaque fill, bottom radii; top seam only */
+    border: 1px solid var(--color-primary);
+    border-top: 1px solid color-mix(in srgb, var(--color-primary) 22%, var(--color-bg) 78%);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: var(--radius-sm);
+    border-bottom-right-radius: var(--radius-sm);
+    /* align glow with screen-element (bottom segment of the same stack) */
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--color-primary) 12%, transparent),
+      0 0 10px 0 color-mix(in srgb, var(--color-primary) 17%, transparent),
+      0 0 16px 1px color-mix(in srgb, var(--color-primary) 7%, transparent),
+      inset 0 1px 0 color-mix(in srgb, var(--color-text) 3%, transparent);
+    color: var(--color-text);
+    background: var(--color-bg);
+
+    &[hidden] {
+      display: none !important;
+    }
+  }
+
+  /* list opens above the trigger: anchor to top edge, seam at bottom, rounded top */
+  &[data-select-placement="above"] .select__list {
+    top: auto;
+    bottom: 100%;
+    margin-top: 0;
+    margin-bottom: 0;
+    border: 1px solid var(--color-primary);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-primary) 22%, var(--color-bg) 78%);
+    border-top-left-radius: var(--radius-sm);
+    border-top-right-radius: var(--radius-sm);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--color-primary) 12%, transparent),
+      0 0 10px 0 color-mix(in srgb, var(--color-primary) 17%, transparent),
+      0 4px 16px 0 color-mix(in srgb, var(--color-primary) 7%, transparent),
+      inset 0 1px 0 color-mix(in srgb, var(--color-text) 3%, transparent);
+  }
+
+  /* open, panel below: bottom border “removed” in paint only — keep 1px transparent to avoid
+     layout shift (border:none shrinks the border box by 1px and moves the form-field / label). */
+  &.select--open:not([data-select-placement="above"]) .select__surface {
+    border-bottom: 1px solid transparent;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    /* trim bottom spread so the panel attach looks like one control */
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--color-primary) 12%, transparent),
+      0 0 10px 0 color-mix(in srgb, var(--color-primary) 17%, transparent),
+      0 0 20px 1px color-mix(in srgb, var(--color-primary) 5%, transparent),
+      inset 0 1px 0 color-mix(in srgb, var(--color-text) 4%, transparent);
+  }
+
+  /* open, panel above: same transparent 1px trick for the top edge */
+  &.select--open[data-select-placement="above"] .select__surface {
+    border-top: 1px solid transparent;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--color-primary) 12%, transparent),
+      0 0 10px 0 color-mix(in srgb, var(--color-primary) 17%, transparent),
+      0 0 20px 1px color-mix(in srgb, var(--color-primary) 5%, transparent),
+      inset 0 1px 0 color-mix(in srgb, var(--color-text) 4%, transparent);
+  }
+
+  /* — Options — */
+  & .select__option {
+    margin: 0;
+    padding: var(--space-2) var(--space-3);
+    cursor: pointer;
+    transition:
+      background 0.12s ease,
+      color 0.12s ease;
+
+    &:hover,
+    &[aria-selected="true"] {
+      background: color-mix(in srgb, var(--color-text) 5%, var(--color-bg) 95%);
+      color: var(--color-primary);
+    }
+  }
+
+  & .select__option[data-select-option-active="true"] {
+    background: color-mix(in srgb, var(--color-text) 5%, var(--color-bg) 95%);
+    color: var(--color-primary);
+    outline: 1px solid color-mix(in srgb, var(--color-primary) 35%, var(--color-bg) 65%);
+    outline-offset: -1px;
+  }
+}

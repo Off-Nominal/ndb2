@@ -9,7 +9,7 @@ export default defineConfig({
   resolve: vitestResolve,
   test: {
     name: "unit",
-    include: ["src/**/*.test.ts"],
+    include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
     exclude: ["src/**/*.integration.test.ts"],
     globals: true,
     environment: "node",

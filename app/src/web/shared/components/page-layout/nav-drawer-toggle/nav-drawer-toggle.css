@@ -1,0 +1,43 @@
+/* Chevron over native checkbox; unchecked → points left (scaleX) */
+
+.nav-drawer-toggle {
+  & input {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    aspect-ratio: 1;
+    margin: 0;
+    padding: 0;
+
+    cursor: pointer;
+    color: var(--color-text-muted);
+    background-color: var(--color-text-muted);
+    --nav-drawer-toggle-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='none' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M7.5 4.5L13.5 9.5L7.5 15.5'/%3E%3C/svg%3E");
+    -webkit-mask: var(--nav-drawer-toggle-chevron) no-repeat center / 1.25rem
+      1.25rem;
+    mask: var(--nav-drawer-toggle-chevron) no-repeat center / 1.25rem 1.25rem;
+    transform: scaleX(1);
+    transform-origin: center;
+    transition: transform 0.2s ease;
+
+    &:not(:checked) {
+      transform: scaleX(-1);
+    }
+
+    &:focus {
+      outline: none;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-focus-ring);
+      outline-offset: 2px;
+    }
+  }
+
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  border-left: 1px solid var(--color-primary);
+  border-bottom: 1px solid var(--color-primary);
+  border-top: 1px solid var(--color-primary);
+}

@@ -49,9 +49,9 @@ Example: `import { mapRoutes } from "@shared/routerMap";`
 
 ## Web naming and tests
 
-- **Kitajs components** use **PascalCase** for exported TypeScript names and props types (e.g. `export function LuckyNumber`, `LuckyNumberProps`) and **snake_case filenames** (e.g. `lucky_number.tsx`). For **async** children inside **`Suspense`**, use a **call** such as `{DelayedSnippet({ ... })}` (or JSX if you wrap the promise appropriately); the JSX transform treats **lowercase** tags as built-in HTML elements.
+- **Kitajs components** use **PascalCase** for exported TypeScript names and props types (e.g. `export function LuckyNumber`, `LuckyNumberProps`) and **kebab-case filenames in a component folder** (e.g. `components/lucky-number/lucky-number.tsx` with **`index.ts`** re-exporting the public API). For **async** children inside **`Suspense`**, use a **call** such as `{DelayedSnippet({ ... })}` (or JSX if you wrap the promise appropriately); the JSX transform treats **lowercase** tags as built-in HTML elements.
 - **Route-level tests:** each feature folder has a **`tests/`** directory next to `handler.tsx` (e.g. `routes/home/tests/home.test.ts`) for **page and HTTP handler** coverage (supertest against `mountWeb`, or focused router tests).
-- **Component tests:** colocated with the component — `components/banana.tsx` pairs with **`components/banana.test.ts`** (Vitest picks up `**/*.test.ts`).
+- **Component tests:** colocated in the same folder — e.g. **`components/banana/banana.test.ts`** or **`banana.test.tsx`** beside **`banana/banana.tsx`** (unit Vitest config includes `**/*.test.ts` and `**/*.test.tsx`).
 
 App-wide static wiring (e.g. `GET /assets/htmx.min.js`) stays in **`mountWeb.test.ts`** or a small `web/tests/` module if it grows.
 
@@ -69,8 +69,8 @@ High-level shape:
   - `validations/` (zod schemas)
   - `utils/` (**v2-specific** http/route utils only)
 - `app/src/web/` (HTML app: Kitajs HTML + HTMX)
-  - `routes/` — one folder per URL area (`home/`, `predictions/`, …): **`page.tsx`**, **`handler.tsx`**, **`tests/`** (route/page HTTP tests), **`components/`** (snake_case `.tsx` + colocated **`*.test.ts`**)
-  - `shared/components/` (cross-area Kitajs components; add when needed)
+  - `routes/` — one folder per URL area (`home/`, `predictions/`, …): **`page.tsx`**, **`handler.tsx`**, **`tests/`** (route/page HTTP tests), **`components/<name>/`** (kebab-case **`name/name.tsx`**, optional CSS, **`name.test.ts(x)`**, **`index.ts`**)
+  - `shared/components/<name>/` (cross-area Kitajs components; same folder + barrel pattern as feature `components/`)
   - `middleware/` (auth guards, etc.)
   - `viewModels/` (map domain objects → page-friendly props / view shapes)
   - `public/` (static assets: generated CSS, images)

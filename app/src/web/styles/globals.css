@@ -1,8 +1,18 @@
 /**
  * CUBE — global / baseline layer (element defaults, resets).
  * Loaded after design-tokens.css; use var(--…) for colors, space, and type.
- * Source of truth: copied to src/web/public/globals.css by build:css.
+ * Source of truth: emitted to dist/web/public/globals.css by build:css.
+ *
+ * Oxanium: self-hosted under /assets/ (CSP `font-src 'self'`), not Google Fonts.
  */
+
+@font-face {
+  font-family: Oxanium;
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("/assets/Oxanium-VariableFont_wght.ttf") format("truetype");
+}
 
 *,
 *::before,
@@ -11,14 +21,9 @@
 }
 
 html {
-  font-family:
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    Roboto,
-    "Helvetica Neue",
-    Arial,
-    sans-serif;
+  /* `--font-sans` from design tokens; Oxanium from @font-face + generic sans */
+  font-family: var(--font-sans);
+  font-optical-sizing: auto;
   font-size: var(--text-md);
   font-weight: var(--weight-regular);
   line-height: var(--leading-normal);
@@ -31,9 +36,44 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--color-bg);
+  /* Default shell: `.glass-background` on `<body>` (utilities.css); this backs non-layout HTML pages */
+  background-color: var(--color-bg);
   color: var(--color-text);
   text-rendering: optimizeLegibility;
+}
+
+/**
+ * Glass screen model: `.glass-background` on `body` is the far layer; UI uses **translucent**
+ * `--color-surface*` so the grid / glow shows through. Mirrors design-tokens theme selectors
+ * (light :root, dark, system + prefers dark). `neutral.*` still follow `data-color-scheme`.
+ */
+:root {
+  --color-surface: color-mix(in srgb, var(--neutral-0) 52%, transparent);
+  --color-surface-muted: color-mix(
+    in srgb,
+    var(--neutral-100) 48%,
+    transparent
+  );
+}
+
+html[data-theme="dark"] {
+  --color-surface: color-mix(in srgb, var(--neutral-800) 56%, transparent);
+  --color-surface-muted: color-mix(
+    in srgb,
+    var(--neutral-700) 50%,
+    transparent
+  );
+}
+
+@media (prefers-color-scheme: dark) {
+  html[data-theme="system"] {
+    --color-surface: color-mix(in srgb, var(--neutral-800) 56%, transparent);
+    --color-surface-muted: color-mix(
+      in srgb,
+      var(--neutral-700) 50%,
+      transparent
+    );
+  }
 }
 
 /* ——— Prose flow ——— */
@@ -152,12 +192,7 @@ hr {
 code,
 kbd {
   font-family:
-    ui-monospace,
-    "Cascadia Code",
-    "Source Code Pro",
-    Menlo,
-    Consolas,
-    monospace;
+    ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
   font-size: 0.925em;
   font-weight: var(--weight-medium);
   padding: var(--space-1) var(--space-2);
@@ -171,12 +206,7 @@ pre {
   padding: var(--space-4);
   overflow-x: auto;
   font-family:
-    ui-monospace,
-    "Cascadia Code",
-    "Source Code Pro",
-    Menlo,
-    Consolas,
-    monospace;
+    ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
   font-size: var(--text-sm);
   line-height: var(--leading-snug);
   border-radius: var(--radius-md);

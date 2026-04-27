@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Reads design token JSON under `src/web/tokens/` and writes
- * `src/web/public/design-tokens.css` (CSS custom properties).
+ * `dist/web/public/design-tokens.css` (CSS custom properties).
  *
  * If a token's `value` matches another token's `name`, the output uses
  * `var(--<name-with-dots-as-hyphens>)`.
@@ -14,15 +14,17 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const APP_ROOT = path.join(__dirname, "..");
 const TOKENS_DIR = path.join(APP_ROOT, "src/web/tokens");
-const OUT_FILE = path.join(APP_ROOT, "src/web/public/design-tokens.css");
+const OUT_FILE = path.join(APP_ROOT, "dist/web/public/design-tokens.css");
 
 /** Order is output order within :root (color primitives first, then scales). */
 const TOKEN_FILES = [
   "colors.json",
   "space.json",
+  "breakpoints.json",
   "radius.json",
-  "font-weight.json",
+  "font-family.json",
   "font-size.json",
+  "font-weight.json",
   "line-height.json",
   "letter-spacing.json",
 ];
@@ -107,6 +109,13 @@ function loadSchemeHueDefs() {
   return out;
 }
 
+/** Comma-separated `font-family` list (e.g. `Oxanium, sans-serif` or `"Droid Sans", sans-serif`). */
+function isFontFamilyList(value) {
+  return /^("[^"]+"|'[^']+'|[-A-Za-z0-9.]+)(\s*,\s*("[^"]+"|'[^']+'|[-A-Za-z0-9.]+))+\s*$/.test(
+    value.trim(),
+  );
+}
+
 /** True if `value` is another token's name or a literal CSS fragment we accept. */
 function isValidTokenValue(value, names) {
   if (names.has(value)) return true;
@@ -115,6 +124,7 @@ function isValidTokenValue(value, names) {
   if (value === "0") return true;
   if (/^-?\d+(\.\d+)?$/.test(value)) return true;
   if (value === "0em" || value === "0rem") return true;
+  if (isFontFamilyList(value)) return true;
   return false;
 }
 

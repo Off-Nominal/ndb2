@@ -1,0 +1,30 @@
+/* Block: theme-accent control; edge chrome from utility `.screen-element` (import order: utilities before blocks). */
+
+/* — Root — */
+.button {
+  /* layout */
+  --screen-element-padding-x: var(--space-3);
+  --screen-element-padding-y: var(--space-2);
+
+  /* type */
+  text-decoration: none;
+  font: inherit;
+  line-height: var(--leading-normal);
+
+  /* color & surface */
+  color: var(--color-text);
+
+  /* interaction */
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+
+  &:hover {
+    /* color & surface */
+    background: var(--color-surface-muted);
+    color: var(--color-primary);
+  }
+}

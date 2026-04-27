@@ -1,0 +1,14 @@
+/* ndb2:block:discord-button — Discord OAuth CTA (login route) */
+.discord-button {
+  display: inline-block;
+  padding: var(--space-s, 0.75rem) var(--space-l, 1.5rem);
+  border-radius: var(--radius-m, 0.375rem);
+  background: var(--color-accent, #5865f2);
+  color: var(--color-on-accent, #fff);
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    filter: brightness(1.08);
+  }
+}

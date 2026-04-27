@@ -1,0 +1,7 @@
+[
+  {
+    "name": "font.sans",
+    "value": "Oxanium, sans-serif",
+    "description": "Base UI: Oxanium (wght 200–800) + generic sans; self-host variable TTF under /assets/ + @font-face in globals.css (CSP-safe)."
+  }
+]

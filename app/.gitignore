@@ -2,7 +2,11 @@ node_modules
 .env
 dist
 
-# Vendored from htmx.org on postinstall (see package.json vendor-htmx)
+# Generated web assets (see scripts/build-*.mjs) — not written under src
+src/web/public/*.css
+src/web/public/**/*.css
+src/web/public/routes/
+# Legacy: htmx was previously vendored into src; output is now dist/web/public/htmx.min.js
 src/web/public/htmx.min.js
 
 db/dumps

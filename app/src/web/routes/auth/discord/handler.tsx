@@ -24,13 +24,13 @@ import {
 } from "../../../middleware/auth/session-cookie-utils";
 import { getColorScheme, getThemePreference } from "../../../middleware/theme-preference";
 import { wrapWebRouteWithErrorBoundary } from "../../../middleware/error-boundary";
-import type { ErrorPageProps } from "../../../shared/components/error_page";
-import { ErrorPage } from "../../../shared/components/error_page";
-import { PageLayout } from "../../../shared/components/page_layout";
+import type { ErrorPageProps } from "../../../shared/components/error-page/error-page";
+import { ErrorPage } from "../../../shared/components/error-page/error-page";
+import { PageLayout } from "../../../shared/components/page-layout";
 import {
   DiscordPortalRequiresAllowedRoleBody,
   DiscordPortalRequiresGuildMembershipBody,
-} from "./discord_oauth_error_partials";
+} from "./discord-oauth-error-partials";
 
 const OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 

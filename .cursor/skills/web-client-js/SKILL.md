@@ -1,61 +1,51 @@
 ---
 name: web-client-js
 description: >-
-  ndb2 route-colocated client scripts: `*.client.js` under app/src/web/routes,
-  build-client-js.mjs copy + generated routeClientScripts.ts, URLs under
-  /assets/routes/, HtmlHead wiring via clientScriptsForModule. Use when adding
-  or changing deferred browser scripts for the Kitajs HTML app, the static
-  asset pipeline, or public/routes output.
+  ndb2 browser client scripts: `*.client.ts` (preferred) or `*.client.js` under
+  app/src/web/routes or shared/components, esbuild via build-client-js.mjs, generated
+  routeClientScripts.ts, /assets/routes. Use when adding or changing deferred
+  browser scripts or the static asset pipeline.
 ---
-
-# Web route colocated client JS (ndb2)
+# Web colocated client JS (ndb2)
 
 ## Colocation
 
-- Put small **browser** scripts beside the feature that owns them: **`*.client.js`** anywhere under **`app/src/web/routes/`** (e.g. `routes/home/page.client.js`).
-- Naming: the **`*.client.js`** suffix is the only discovery rule; the build does not parse TS/JS imports or `page.tsx`.
-- Scripts are plain JS (no bundler). Keep them minimal (progressive enhancement, theme cookie, tiny HTMX helpers, etc.).
+- **Routes:** **`*.client.ts`** or **`*.client.js`** under **`app/src/web/routes/`** (e.g. `home/page.client.ts`).
+- **Shared components:** under **`app/src/web/shared/components/`**; output **`dist/web/public/routes/shared/components/.../file.client.js`**. Map key: POSIX **`dirname`**. The build lists them all in **`sharedComponentsClientScriptUrls`**; **`HtmlHead`** loads those by default, then any route **`clientScripts`**. Handlers only pass **`clientScripts`** for **route** colocated `*.client.*` (e.g. `clientScriptsForModule(__filename)`).
+- **Authoring in TypeScript:** use **`*.client.ts`**. The server **`tsc`** build **excludes** `**/*.client.ts` (see `tsconfig.json`); compile for the browser is **`esbuild`** in **`build-client-js.mjs`**. For DOM types and a clean check, use **`app/tsconfig.client.json`** and **`pnpm run typecheck:client`**. Each `*.client.ts` entry should be a **module** (e.g. `export {}` at the end) so globals in two files do not merge.
+- Plain **`*.client.js`** is still **copied** as-is (no esbuild) if you add one.
+- Keep scripts small (progressive enhancement, cookies, tiny HTMX helpers).
 
 ## Build (`build-client-js.mjs`)
 
 | Step | Behavior |
 |------|----------|
-| **Discover** | Recursively find all **`*.client.js`** under **`src/web/routes/`**, sort by path. |
-| **Clean** | Delete **`src/web/public/routes/`** so removed sources do not leave stale copies. |
-| **Copy** | Each file → **`src/web/public/routes/<same-relative-path-as-under-routes/>`**. |
-| **Generate** | Write **`src/web/generated/routeClientScripts.ts`** — a map from **route folder key** → **script URL list**. |
+| **Discover** | All **`*.client.ts`** and **`*.client.js`** under the two roots, sorted. |
+| **Clean** | Delete **`dist/web/public/routes/`**. |
+| **Emit** | **`*.client.ts`**: **esbuild** → **`dist/web/public/routes/.../same-name.client.js`** (browser, **`iife`**, `es2020`, no minify by default). **`*.client.js`**: copy. |
+| **Generate** | **`src/web/generated/routeClientScripts.ts`**: per-folder map, **`clientScriptsForRouteDir`**, and **`sharedComponentsClientScriptUrls`** (all shared-component scripts, for **`HtmlHead`**). |
 
-**Route folder key:** POSIX `dirname` of the path relative to `routes/`. Example: `home/page.client.js` → key **`"home"`**; `demo/suspense/page.client.js` → **`"demo/suspense"`**. Multiple `*.client.js` in the same folder are all listed for that key (order follows discovery sort).
+**Keys:** `dirname` of the path under `public/routes` (e.g. `home`, `shared/components/theme-selector`).
 
 ## URLs and static serving
 
-- [`mountWeb`](app/src/web/mountWeb.ts) serves **`express.static`** at **`/assets`** from **`public/`**.
-- A copied file **`public/routes/home/page.client.js`** is therefore **`/assets/routes/home/page.client.js`** (not `public/assets/...`).
+- **`mountWeb`** serves **`/assets`** from **`dist/web/public/`** (see **`mountWeb`**) → **`/assets/routes/.../file.client.js`**.
 
 ## Wiring pages
 
-1. Run **`pnpm run build:client-js`** (or full **`pnpm run build`** / **`postinstall`** — it runs after **`build:css`**).
-2. In **`page.tsx`**, pass into [`HtmlHead`](app/src/web/shared/components/html_head.tsx):
-
-   **`clientScripts: clientScriptsForModule(__filename)`**
-
-   from [`shared/clientScriptsForModule.ts`](app/src/web/shared/clientScriptsForModule.ts). That derives the route key from the directory containing the page module (works with the CJS compile output used today).
-
-3. Optional: **`clientScriptsForRouteDir("home")`** from the generated file if you want an explicit key.
-
-`HtmlHead` emits **`<script src="…" defer />`** for each URL **before** **`/assets/htmx.min.js`**.
+1. Run **`pnpm run build:client-js`** (or **`build`** / **`postinstall`** after **`build:css`**).
+2. **Route only:** **`clientScripts: clientScriptsForModule(__filename)`** when the page needs a route `*.client.js` (shared `shared/components` scripts are **not** passed here; **`HtmlHead`** adds them automatically).
+3. **`HtmlHead`**: **`<script src="…" defer />`**.
 
 ## pnpm / dev
 
-- **`package.json`:** script **`build:client-js`** → `node ./scripts/build-client-js.mjs`; chained from **`build`** and **`postinstall`** after **`build:css`**.
-- **`nodemon.json`:** ignore **`src/web/public/routes`** and **`src/web/generated/**`** so copies and the manifest do not restart the dev loop (see **`css-build`**).
+- **`typecheck:client`**: `tsc -p tsconfig.client.json` for **`*.client.ts`** only.
+- **`dev-watch-assets`**: watch **`**/*.client.ts`** and **`**/*.client.js`** under routes and shared components.
 
 ## Tests and CI
 
-- Commit or regenerate **`routeClientScripts.ts`** and **`public/routes/**`** as your team prefers for CI (same idea as generated CSS): **`mountWeb`** tests expect copied files to exist for served URLs.
+- Regenerate/check in **`routeClientScripts.ts`**; client bundles are emitted to **`dist/web/public/routes/**`**, not under **`src/web/public`**.
 
 ## Related
 
-- **`kitajs-html-web`** — `page.tsx`, `handler.tsx`, `HtmlHead`.
-- **`css-build`** — stylesheet pipeline and **`HtmlHead`** load order for CSS vs JS.
-- **`express-route-map`** — web router mount; static **`/assets`** is not behind JSON API auth.
+- **`kitajs-html-web`**, **`css-build`**, **`express-route-map`**.

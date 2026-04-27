@@ -24,7 +24,7 @@ flowchart TB
     BT[build-design-tokens.mjs]
     BW[build-web-css.mjs]
   end
-  subgraph public [app/src/web/public]
+  subgraph distPublic [app/dist/web/public]
     PT[design-tokens.css]
     PG[globals.css]
     PC[compositions.css]
@@ -48,9 +48,9 @@ flowchart TB
   MW --> HH
 ```
 
-- **Compile output:** `pnpm run build` runs **`build:tokens`** then **`build:css`** then **`build:client-js`**, then `tsc`, `vendor-htmx`, `transfer-web`. Static files under `src/web/public/` are copied to **`dist/web/public/`** for production.
-- **Dev:** `nodemon` watches `src` (including **`css`** and token **`json`**). Generated files in `public/*.css` and **`public/routes/**`** (copied `*.client.js`) are **ignored** in `nodemon.json` so rebuilds do not loop.
-- **Serving:** [`mountWeb`](app/src/web/mountWeb.ts) mounts **`express.static`** at **`/assets`** → `path.join(__dirname, "public")` (i.e. `dist/web/public` when running compiled output). [`HtmlHead`](app/src/web/shared/components/html_head.tsx) uses root-absolute URLs: **`/assets/<file>.css`**.
+- **Compile output:** `pnpm run build` runs **`vendor-htmx`**, **`build:tokens`**, **`build:css`**, **`build:client-js`**, then `tsc`, `tsc-alias`, `transfer-queries`, **`transfer-web`**. `build:*` and **`vendor-htmx`** write into **`app/dist/web/public/`**; hand-placed static (fonts, etc.) in **`app/src/web/public/`** is merged in by **`transfer-web`** and is not generated.
+- **Dev:** `nodemon` watches `src` (including **`css`** and token **`json`**). **`dev-watch-assets`** rebuilds tokens/css/client and re-runs **`transfer-web`**. The **`dist/`** tree is not watched by `nodemon` (see **`nodemon.json`**).
+- **Serving:** [`mountWeb`](app/src/web/mountWeb.ts) resolves **`express.static`** for **`/assets`** to **`dist/web/public`**, with a **fallback** when tests load the module from **`src/web`** (see `resolveWebPublicRoot`). [`HtmlHead`](app/src/web/shared/components/html-head/html-head.tsx) uses root-absolute URLs: **`/assets/<file>.css`**.
 - **API vs static:** [`mountJsonApi`](app/src/api/mountJsonApi.ts) is mounted at **`/api`** only, so JSON auth middleware never runs for **`/assets/*`** or HTML routes.
 
 ## CUBE CSS in ndb2
@@ -64,15 +64,15 @@ flowchart TB
 | **Utility** | `utilities.css` | `app/src/web/styles/utilities.css` |
 | **Block** + **Exception** | `blocks.css` | Colocated `*.css` next to components (variants/states via `data-*` in selectors) |
 
-**Markup convention:** group classes in order: **block** → **composition** → **utility** so intent stays readable.
+**Markup convention:** group classes in order: **compositions** → **utilities** → **blocks** → **exceptions** (see **`cube-css-authoring`**, *Class order in markup*). **Do not** add new BEM-style **`app-shell__grid`** / **`block__element`** class families for layout—use one **block** root + **composition** classes + nested **`&`** rules; **`app-shell__*`** in **`page-layout`** is legacy (see **`cube-css-authoring`**, *Nesting child and element rules*).
 
-**Checklist for new UI:** Prefer globals → compositions → utilities; add colocated block CSS only when necessary; use **`data-variant`**, **`data-size`**, **`data-state`** (or `aria-*`) for exceptions.
+**Checklist for new UI:** Prefer globals → compositions → utilities; add colocated block CSS only when necessary; use **`data-variant`**, **`data-size`**, **`data-state`** (or `aria-*`) for exceptions; avoid new **`__`**-chain block names unless **`cube-css-authoring`**’s rare-exception criteria apply.
 
-Full methodology and roadmap: [`docs/frontend/cube-css.md`](docs/frontend/cube-css.md). Token values: [`docs/frontend/design.md`](docs/frontend/design.md).
+Full methodology and roadmap: [`docs/frontend/cube-css.md`](docs/frontend/cube-css.md). Token values: [`docs/frontend/design.md`](docs/frontend/design.md). Responsive **`@media`** cut points: **`web-breakpoints`**.
 
 ## `<head>` stylesheet order
 
-In [`html_head.tsx`](app/src/web/shared/components/html_head.tsx) (component **`HtmlHead`**; after meta/title):
+In [`html-head/html-head.tsx`](app/src/web/shared/components/html-head/html-head.tsx) (component **`HtmlHead`**; after meta/title):
 
 1. `design-tokens.css` — custom properties
 2. `globals.css` — resets / element defaults (use `var(--…)`)
@@ -88,15 +88,15 @@ Then HTMX (`htmx.min.js`).
 |-------|----------|
 | Token sources | `app/src/web/tokens/*.json` (arrays; schema under `tokens/schema/`) |
 | Generator | `app/scripts/build-design-tokens.mjs` |
-| Output | `app/src/web/public/design-tokens.css` (do not edit by hand) |
+| Output | `app/dist/web/public/design-tokens.css` (do not edit by hand) |
 
 **pnpm:** `build:tokens` — also chained from `build` / `postinstall`.
 
 **Token item:** `name` (string), `value` (string), optional `description`. If `value` equals another token’s `name`, CSS emits **`var(--dotted-name-as-kebab)`**.
 
-**Name → variable:** `brand.500` → `--brand-500`; `text.2xl` → `--text-2xl`.
+**Name → variable:** `brand.500` → `--brand-500`; `text.2xl` → `--text-2xl`; `breakpoint.desktop` → `--breakpoint-desktop` (see **`breakpoints.json`**, **`web-breakpoints`**). Breakpoint vars are for **properties**, not **`@media`** conditions — use matching **`rem`** literals in media queries.
 
-**`colors.json`:** Palette (`brand.*`, `neutral.*`, …); `color.semantic.*` → `--color-<kebab>`; `color.light.*` / `color.dark.*` → shared `--color-*` in `:root` vs `html[data-theme="dark"]` (pairs must match). **`data-theme`:** `light` | `dark` | `system`. Cookie **`ndb2_theme`** (non-HttpOnly) stores `light`/`dark`; absent = **`system`** → dark when `prefers-color-scheme: dark` (generated `@media` on `html[data-theme="system"]`). Route colocated **`page.client.js`** (see **`build-client-js`**) + `themePreferenceMiddleware` (rolling **`Set-Cookie`** refresh for `light`/`dark`): see `app/src/web/middleware/theme-preference.ts` and `routes/home/page.client.js`.
+**`colors.json`:** `brand.*`, `neutral.*`, per-scheme `scheme.*`, `color.semantic.*` → `--color-*`; `color.light.*` / `color.dark.*` → shared alias names in `:root` vs `html[data-theme="dark"]` (light/dark **pairs must match**). `html[data-color-scheme="…"]` remaps `--brand-*` and `--neutral-*` to the chosen **accent palette**; cookie **`ndb2_color_scheme`**, default **neptune**. **Why and how the product uses themes / palettes (feel, light vs dark, named schemes):** **`ndb2-web-design`**. **Implementation:** `data-theme` `light` | `dark` | `system`; cookie **`ndb2_theme`**; absent = **system** with `@media (prefers-color-scheme: dark)` for `html[data-theme="system"]`. **`build-client-js`** + `themePreferenceMiddleware` (rolling `Set-Cookie`): `app/src/web/middleware/theme-preference.ts`, `routes/home/page.client.js`.
 
 **`TOKEN_FILES` order** in the script controls declaration order inside `:root`. **`meta.json`** is not part of token CSS unless added to `TOKEN_FILES`.
 
@@ -113,7 +113,9 @@ Then HTMX (`htmx.min.js`).
 
 **pnpm:** `build:css` — also chained from `build` / `postinstall`.
 
-**Block bundle order:** Lexicographic sort of file paths. Add block CSS beside `*.tsx`; run `build:css` or `build`; do not hand-edit `public/blocks.css`.
+**Block bundle order:** Lexicographic sort of file paths. Add block CSS beside `*.tsx`; run `build:css` or `build`; do not hand-edit `dist/web/public/blocks.css`.
+
+**Authoring style:** Layer and block sources may use **native CSS nesting** (`&` for pseudo-states, **and** for child/element rules under a single block root so related selectors are not split across many top-level stanzas). The script **copies** `globals.css` / `compositions.css` / `utilities.css` **verbatim** and **concatenates** block files without transforming CSS. See **`cube-css-authoring`**: **Nesting states in the parent**, **Nesting child and element rules under the block root**, and **Sectioning a block file**.
 
 ## Route colocated client JS
 
@@ -125,14 +127,15 @@ See **`web-client-js`** for colocation, `build-client-js.mjs`, generated **`rout
 - **New palette prefix:** extend color primitive detection in `build-design-tokens.mjs` (or refactor to a prefix list).
 - **New theme key:** add matching `color.light.<X>` and `color.dark.<X>` in `colors.json`.
 - **Dark selector:** change `html[data-theme="dark"]` in `build-design-tokens.mjs`; update tests if needed.
-- **New layer file:** uncommon; would require editing `build-web-css.mjs` and `html_head.tsx` (`HtmlHead`).
+- **New layer file:** uncommon; would require editing `build-web-css.mjs` and `html-head.tsx` (`HtmlHead`).
 - **New route client script:** add `*.client.js` under `routes/<area>/`, run **`build:client-js`**; `page.tsx` already uses **`clientScriptsForModule(__filename)`** so no key edit is needed.
 - **Asset URL base:** if the app is ever served under a subpath, root-absolute `/assets/...` links may need a configurable prefix (not implemented today).
 
 ## Related
 
+- **ndb2-web-design** — look and feel, space-palette naming, light/dark vs colour-scheme behaviour, semantic `var(--color-*)` (not UX or a11y policy).
 - **cube-css-authoring** — where to put new CSS (globals vs compositions vs utilities vs blocks) when building pages/components.
-- **kitajs-html-web** — `page.tsx`, `handler.tsx`, [`HtmlHead`](app/src/web/shared/components/html_head.tsx), HTMX.
+- **kitajs-html-web** — `page.tsx`, `handler.tsx`, [`HtmlHead`](app/src/web/shared/components/html-head/html-head.tsx), HTMX.
 - **web-client-js** — route colocated `*.client.js`, `build:client-js`, static script URLs.
 - **express-route-map** — web `Route` modules.
 

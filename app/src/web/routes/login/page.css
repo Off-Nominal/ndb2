@@ -1,0 +1,4 @@
+.login-page {
+  --screen-element-padding-x: var(--space-6);
+  --screen-element-padding-y: var(--space-8);
+}

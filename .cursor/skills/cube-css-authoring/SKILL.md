@@ -1,11 +1,12 @@
 ---
 name: cube-css-authoring
 description: >-
-  Guides where to put CSS when authoring ndb2 Kitajs pages and components using CUBE CSS:
-  globals vs compositions vs utilities vs colocated blocks, exceptions via data-*,
-  markup-driven composition with a fixed class order in markup, and token usage. Use when
-  adding or styling UI and deciding which stylesheet layer to extend. For build scripts and
-  file outputs, use css-build.
+  CUBE CSS authoring for ndb2: which layer (globals, compositions, utilities, colocated block).
+  Colocated block CSS must use one root selector (e.g. `.form-field`) and native `&` nesting for
+  children and states — not multiple parallel top-level `.block-*` stanzas for the same component, and not
+  new BEM `block__element` classes for routine structure. Use mergeClass and bracket groups in TSX, tokens,
+  section comments, in-rule property groups. Triggers: styling a component, block CSS, nesting,
+  form-field, site-nav, wrong layer. For build scripts and file outputs, use css-build.
 ---
 
 # CUBE CSS — authoring pages and components
@@ -25,7 +26,7 @@ description: >-
 
 **Design tokens** are JSON → `design-tokens.css`; use **`var(--…)`** in hand-written CSS instead of raw hex/spacing literals when a token exists.
 
-**Do not** edit `app/src/web/public/*.css` by hand except vendored assets like `htmx.min.js`; run **`pnpm run build:css`** (or **`build`**) after changing sources.
+**Do not** hand-edit generated CSS under **`app/dist/web/public/`**; run **`pnpm run build:css`** (or **`build`**) after changing sources. **`app/src/web/public/`** is static-only (merged into **`dist`** by **`transfer-web`**), not a token/CSS build output.
 
 ## Decision order (apply before writing block CSS)
 
@@ -42,6 +43,8 @@ If unsure between composition and block: **composition** should not care *which*
 
 Prefer **composing layout and tweaks in markup** (and in Kitajs `class` strings) from **reusable** composition and utility classes—not one bespoke class per screen. Avoid a single grab-bag “page layout” **block**; instead combine **one composition + one (behavior) utility** (e.g. `[ region ] [ content-column ]`) or tune a composition via **custom properties** from a block stylesheet.
 
+When **building `class` in TypeScript** (e.g. block tokens + `props.class`), use **`mergeClass`** from **`app/src/web/shared/utils/merge_class.ts`** so optional extras don’t add stray spaces; **`Button`** is the reference. See **`kitajs-html-web`**.
+
 Shared wrappers (e.g. **`PageLayout`** in TSX) should emit a **concatenation of existing layer classes** (documented in the component), not introduce a new monolithic selector for the same job.
 
 ## Utilities — purpose, not atoms
@@ -51,6 +54,68 @@ Shared wrappers (e.g. **`PageLayout`** in TSX) should emit a **concatenation of 
 **Good:** `.content-column` in stylesheets (center + measure + horizontal gutter); in markup often written **`[ content-column ]`** — see **Class order**. `.text-muted` (de-emphasized body text).
 
 **Avoid as default:** `.mx-auto` + `.px-4` + `.max-w-measure` as three utilities for one layout—unless those atoms are genuinely reused in different combinations everywhere.
+
+## Nesting states in the parent (native `&`)
+
+For a **single** block or utility, keep **base + interactive states** in **one** rule: use **native CSS nesting** with **`&`** (`&:hover`, `&:focus-visible`, `&:active`, etc.) instead of repeating a second top-level selector like `.my_block:hover` below `.my_block`.
+
+- **Why:** One place to read and edit; the component or utility stays **self-contained** (see e.g. **`.screen-element`** in **`utilities.css`**).
+- **When to split:** Rare — e.g. a state shared across many unrelated selectors, or a deliberate override file.
+- **Support:** Styles are **copied as-is** to **`/assets`** (no PostCSS flatten). Nesting targets **evergreen** browsers; see **`css-build`**.
+
+Example:
+
+```css
+.screen-element {
+  border: 1px solid var(--color-primary);
+  /* … */
+
+  &:hover {
+    box-shadow: /* … */;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+}
+```
+
+Same idea in **colocated block** CSS (e.g. `.button` + `&:hover` in **`button.css`**).
+
+## Nesting child and element rules under the block root
+
+Rules that only apply to **this** block’s **DOM subtree** should live **inside** the root class with **`&`**, not as **repeated top-level** selectors that share the same block prefix.
+
+- **Do:** one **`.my_block { … }`** and nest `& > form`, `& > li`, `& *`, `& .button` (when scoped to this block), `&[data-open]`, etc.
+- **Don’t (by default):** several parallel roots like `.my_block { }`, then `.my_block > form { }` further down the file, then `.my_block__footer .button { }` for the same component — that scatters one block and invites duplicate naming.
+- **Do not** introduce **BEM-style** class names of the form **`block__element`** or **`block__element--modifier`** for routine structure and layout (e.g. **`app-shell__grid`**, **`app-shell__main`**, **`app-shell__main--solo`**). That pattern duplicates “block + element + modifier” families instead of CUBE. **Prefer instead:** a **single block** root for the colocated component (e.g. **`.page-layout`** in **`page-layout.css`**), **child/region rules nested with `&`** under that root, **composition** classes from **`compositions.css`** for shared layout (flow, region, grid primitives), and **`data-*` / `data-variant`** (see **Exceptions**) for state and variants—not `--solo`-style class suffixes. **`app-shell__*`** in **`page-layout`** is **legacy**; new work should not copy that naming—extend the owning **block** and **compositions** above.
+- **BEM `__element` in markup** is reserved for **rare** cases: a **stable named** hook (multiple elements of the same kind, **variants** shared with tests/JS, or a hook you truly cannot express with **`&`** and structure). It is **not** the default way to name every inner node. If you have a **single** form, `& > form` nested under `.site-nav` is enough; you may **omit** a `site-nav__logout` class.
+- **Another host node** in the same file (e.g. **`.app-nav`** on `aside` and **`.site-nav`** on `nav`) is still **two** top-level rules when the DOM is two elements—fine; a one-line cross-reference comment in the file is enough.
+
+```css
+.site-nav {
+  display: flex;
+  flex-direction: column;
+  /* … */
+
+  & * {
+    display: block;
+    width: 100%;
+  }
+
+  & > form {
+    margin-block-start: auto;
+
+    & .button {
+      width: 100%;
+      box-sizing: border-box;
+    }
+  }
+}
+```
+
+**Pair with** **Nesting states in the parent** and **Sectioning a block file** (section headers for `@media` or truly separate concerns). For **viewport tiers**, use **mobile-first** **`@media (min-width: …)`** only—see **`web-breakpoints`** (do not use fractional **`max-width: 63.99rem`**-style breakpoint banding).
 
 ## Compositions and custom properties
 
@@ -88,7 +153,7 @@ Order tokens for human scanning: **compositions → utilities → blocks → exc
 
 Each group can be **three class tokens**: an opening bracket, the **real** class name (what your CSS targets), and a closing bracket — e.g. `[` + `region` + `]` so the attribute reads `[ region ]`.
 
-- **Selectors** in CSS stay **`.region`**, **`.content-column`**, **`.theme-switcher`** (the “middle” token only).
+- **Selectors** in CSS stay **`.region`**, **`.content-column`**, **`.theme-selector`** (the “middle” token only).
 - **`[` and `]`** are extra class tokens; leave them **unstyled** (they only help readability). HTML accepts them like any other class name.
 
 Plain classes without brackets are still allowed when you do not need the visual group (e.g. a small fragment).
@@ -97,13 +162,13 @@ Rough mapping:
 
 1. **Compositions** — `[ region ]`, `[ cluster ]`, `[ flow ]`, …; may read **`--*`** hooks.
 2. **Utilities** — `[ content-column ]`, `[ text-muted ]`, …
-3. **Blocks** — `[ theme-switcher ]`, `[ login__action ]` (or unbracketed BEM if preferred).
+3. **Blocks** — one **kebab-case** name per block (e.g. **`[ page-layout ]`**, **`[ theme-selector ]`**). **Do not** add **`block__child`**-style class tokens for normal inner layout; nest under the block in CSS (see *Nesting child and element rules* and the **BEM-style** note above). Older markup may still show **`[ login__action ]`**, **`login__action`**-style names—**new** blocks should not add more of that family.
 4. **Exceptions** — Prefer **`data-*`** / **`aria-*`**; extra classes only if needed.
 
 Example:
 
 ```html
-<div class="[ region ] [ content-column ] [ theme-switcher ]" data-variant="compact"></div>
+<div class="[ region ] [ content-column ] [ theme-selector ]" data-variant="compact"></div>
 ```
 
 Same idea in Kitajs:
@@ -122,6 +187,33 @@ A single feature area can have **multiple** colocated CSS files (`page.css`, `co
 
 **Bundle order** is lexicographic by path—avoid relying on cascade between two arbitrary components; keep selectors specific enough (e.g. a root class or id on the fragment).
 
+### Sectioning a block file (selectors + declaration groups)
+
+In **colocated** `*.css` (one component or one page’s blocks), use **short comments** in two ways:
+
+1. **Between selectors (file structure)**  
+   Banners `/* — Label — */` **above** a top-level rule when you really have a **separate** concern (another host element, a **@media** block, keyframes). For **one** block component, **nest** `&` rules under the root instead of many parallel top-level **`.block …`** stanzas — see **Nesting child and element rules under the block root**. Labels should be **specific** (e.g. `Aside: flex for nav height`, not “part 2”).
+
+2. **Inside a rule (declaration groups)**  
+   Within a single `{ … }` block, group **properties by what they do**, not at random. Typical buckets (add **inline** `/* layout */`, `/* type */`, `/* color & surface */`, `/* shape / border */`, `/* effects */`, `/* interaction */` — use the names that fit the rule):
+
+| Group | What goes here (examples) |
+|-------|----------------------------|
+| **Layout** | `display`, `position`, `inset`, `z-index`, `box-sizing`, width/height/min/max, **margin, padding**, **flex**, **grid**, `gap`, `align-*`, `justify-*`, `overflow` |
+| **Type** | `font`, `line-height`, `letter-spacing`, `text-align`, `text-decoration`, `white-space` |
+| **Color & surface** | `color`, `background`, `border-color` (or full `border` when it is mostly paint); **opacity** when it reads as “ink”/fill |
+| **Shape** | `border-width`, `border-style`, `border-radius`, `outline` (when mostly geometric) — or fold **shorthand** `border` with color in one place under “color & surface” if you prefer not to split |
+| **Effects** | `box-shadow`, `filter`, `backdrop-filter` (often paired with `screen-element`-style chrome) |
+| **Interaction** | `cursor`, `pointer-events`, `user-select`, `transition`, `appearance` / vendor resets, touch-action |
+
+**Order inside the rule (loose convention):** **layout** → **type** → **color & surface** → **shape** (if not merged) → **effects** → **interaction** — so **padding/margin/flex/grid** come before **colours** where both appear.
+
+**Small rules:** if a class only has a few properties, one group or no in-rule comments is fine; do not pad for the sake of it.
+
+**File lead** (`/* Block: … */` or `/* <Feature> page — … */`) stays at the very top. Put **@keyframes** and **print** at the **end** with their own header.
+
+This does not change the build; it is for authors and review.
+
 ## Exceptions (variants and states)
 
 Express variants and states with **attributes**, not extra bespoke classes when possible:
@@ -136,8 +228,8 @@ HTMX can toggle **`data-*`** or classes via swaps; keep hooks documented in the 
 
 ## Tokens and theme
 
-- Use **`var(--color-bg)`**, **`var(--space-4)`**, **`var(--text-sm)`**, etc., from generated **`design-tokens.css`**.
-- Theme switching uses **`html[data-theme="dark"]`** overrides for semantic colors—components should use **alias** variables like **`--color-bg`**, not hard-coded palette steps, unless there is a good reason.
+- Use **`var(--color-bg)`**, **`var(--space-4)`**, **`var(--text-sm)`**, etc., from **`design-tokens.css`**. Semantic **`--color-*`** are theme-aware; palette remapping for accent schemes uses **`data-color-scheme`** (see **`ndb2-web-design`** for intent; **`css-build`** for emission details).
+- Prefer **alias** tokens over raw **`--brand-*`** / **`--scheme-*`** in feature CSS unless you need a fixed step on purpose. For the glass-screen look, **`--color-surface`** / **`--color-surface-muted`** are translucent in **`globals.css`**; keep large areas on those (see **`ndb2-web-design`** / “Layered glass”) instead of opaque fills.
 
 ## Checklist before adding new CSS
 
@@ -147,8 +239,14 @@ HTMX can toggle **`data-*`** or classes via swaps; keep hooks documented in the 
 4. Otherwise → **colocated block** next to the **`tsx`**
 5. Are exceptions expressed with **`data-*`** / **`aria-*`** where appropriate?
 6. Does new markup follow **compositions → utilities → blocks → exceptions**, using **literal `[ name ]` groups** when you want bracket scanning?
+7. For new **`:hover` / `:focus` / `:focus-visible`** on one class, are they **nested under that class** with **`&`** instead of a separate top-level selector (unless there is a reason not to)?
+8. In colocated **block** CSS, are **comment headers** used to group **selectors** where helpful, and **in-rule groups** (layout, type, color & surface, …) when a rule is non-trivial (and is the file lead still accurate)?
+9. For **one** block, are **child/element** rules **nested** under the root with **`&`** (instead of many parallel top-level `.block …` / `.block__el` rules and extra markup classes where structure is enough)? **Have you avoided** new BEM-style **`app-shell__grid`**-style `__` chains in favor of that nesting + **compositions** (see the **BEM-style** callout in *Nesting child and element rules*)?
 
 ## Related
 
+- **`app/src/web/shared/utils/merge_class.ts`** — **`mergeClass`**, for TSX `class` when combining bracket groups; **`kitajs-html-web`**.
+- **`ndb2-web-design`** — visual mood, how light/dark and named colour schemes fit together.
+- **`web-breakpoints`** — canonical viewport tiers and `@media` cut points (`rem`).
 - **`css-build`** — scripts, `public/` outputs, nodemon, `<head>` link order.
 - **`kitajs-html-web`** — route structure, **`HtmlHead`**, HTMX, tests.

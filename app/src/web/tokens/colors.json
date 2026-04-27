@@ -1,15 +1,27 @@
 [
-  { "name": "scheme.neptune.50", "value": "#F2F8FC", "description": "Moonstone blue scale (tint) — default accent." },
+  {
+    "name": "scheme.neptune.50",
+    "value": "#F2F8FC",
+    "description": "Moonstone blue scale (tint) — default accent."
+  },
   { "name": "scheme.neptune.100", "value": "#DCECF6" },
   { "name": "scheme.neptune.200", "value": "#BFDCEC" },
   { "name": "scheme.neptune.300", "value": "#9CC7E0" },
   { "name": "scheme.neptune.400", "value": "#86B6D2" },
-  { "name": "scheme.neptune.500", "value": "#73A6C4", "description": "Primary (Moonstone Blue)." },
+  {
+    "name": "scheme.neptune.500",
+    "value": "#73A6C4",
+    "description": "Primary (Moonstone Blue)."
+  },
   { "name": "scheme.neptune.600", "value": "#5B8EAC" },
   { "name": "scheme.neptune.700", "value": "#477392" },
   { "name": "scheme.neptune.800", "value": "#345877" },
   { "name": "scheme.neptune.900", "value": "#233B52" },
-  { "name": "scheme.aurora.50", "value": "#ECFDF5", "description": "Emerald-tinted accent scale." },
+  {
+    "name": "scheme.aurora.50",
+    "value": "#ECFDF5",
+    "description": "Emerald-tinted accent scale."
+  },
   { "name": "scheme.aurora.100", "value": "#D1FAE5" },
   { "name": "scheme.aurora.200", "value": "#A7F3D0" },
   { "name": "scheme.aurora.300", "value": "#6EE7B7" },
@@ -59,7 +71,11 @@
   { "name": "scheme.helios.700", "value": "#B45309" },
   { "name": "scheme.helios.800", "value": "#92400E" },
   { "name": "scheme.helios.900", "value": "#78350F" },
-  { "name": "brand.50", "value": "scheme.neptune.50", "description": "Active accent scale; re-mapped by html data-color-scheme." },
+  {
+    "name": "brand.50",
+    "value": "scheme.neptune.50",
+    "description": "Active accent scale; re-mapped by html data-color-scheme."
+  },
   { "name": "brand.100", "value": "scheme.neptune.100" },
   { "name": "brand.200", "value": "scheme.neptune.200" },
   { "name": "brand.300", "value": "scheme.neptune.300" },
@@ -83,7 +99,11 @@
   { "name": "scheme.neptune.neutral.700", "value": "#334155" },
   { "name": "scheme.neptune.neutral.800", "value": "#1E293B" },
   { "name": "scheme.neptune.neutral.900", "value": "#0F172A" },
-  { "name": "scheme.aurora.neutral.50", "value": "#FAFAFA", "description": "Zinc (cool; with Aurora accent)." },
+  {
+    "name": "scheme.aurora.neutral.50",
+    "value": "#FAFAFA",
+    "description": "Zinc (cool; with Aurora accent)."
+  },
   { "name": "scheme.aurora.neutral.100", "value": "#F4F4F5" },
   { "name": "scheme.aurora.neutral.200", "value": "#E4E4E7" },
   { "name": "scheme.aurora.neutral.300", "value": "#D4D4D8" },
@@ -93,7 +113,11 @@
   { "name": "scheme.aurora.neutral.700", "value": "#3F3F46" },
   { "name": "scheme.aurora.neutral.800", "value": "#27272A" },
   { "name": "scheme.aurora.neutral.900", "value": "#18181B" },
-  { "name": "scheme.titan.neutral.50", "value": "#FAFAFA", "description": "True gray (with orange / amber accent)." },
+  {
+    "name": "scheme.titan.neutral.50",
+    "value": "#FAFAFA",
+    "description": "True gray (with orange / amber accent)."
+  },
   { "name": "scheme.titan.neutral.100", "value": "#F5F5F5" },
   { "name": "scheme.titan.neutral.200", "value": "#E5E5E5" },
   { "name": "scheme.titan.neutral.300", "value": "#D4D4D4" },
@@ -103,7 +127,11 @@
   { "name": "scheme.titan.neutral.700", "value": "#404040" },
   { "name": "scheme.titan.neutral.800", "value": "#262626" },
   { "name": "scheme.titan.neutral.900", "value": "#171717" },
-  { "name": "scheme.nebula.neutral.50", "value": "#FAF8FC", "description": "Violet-leaning gray (with purple accent)." },
+  {
+    "name": "scheme.nebula.neutral.50",
+    "value": "#FAF8FC",
+    "description": "Violet-leaning gray (with purple accent)."
+  },
   { "name": "scheme.nebula.neutral.100", "value": "#F2EEF5" },
   { "name": "scheme.nebula.neutral.200", "value": "#E2D8E8" },
   { "name": "scheme.nebula.neutral.300", "value": "#C9B8D0" },
@@ -113,7 +141,11 @@
   { "name": "scheme.nebula.neutral.700", "value": "#4A425E" },
   { "name": "scheme.nebula.neutral.800", "value": "#352E48" },
   { "name": "scheme.nebula.neutral.900", "value": "#1F1A2E" },
-  { "name": "scheme.redshift.neutral.50", "value": "#FAF9F9", "description": "Stone (warm, with red / rose accent)." },
+  {
+    "name": "scheme.redshift.neutral.50",
+    "value": "#FAF9F9",
+    "description": "Stone (warm, with red / rose accent)."
+  },
   { "name": "scheme.redshift.neutral.100", "value": "#F5F4F2" },
   { "name": "scheme.redshift.neutral.200", "value": "#E8E3DF" },
   { "name": "scheme.redshift.neutral.300", "value": "#D4CCC4" },
@@ -123,7 +155,11 @@
   { "name": "scheme.redshift.neutral.700", "value": "#433D3A" },
   { "name": "scheme.redshift.neutral.800", "value": "#2D2925" },
   { "name": "scheme.redshift.neutral.900", "value": "#1C1916" },
-  { "name": "scheme.helios.neutral.50", "value": "#F9FAFB", "description": "Gray (balanced, with yellow / amber accent)." },
+  {
+    "name": "scheme.helios.neutral.50",
+    "value": "#F9FAFB",
+    "description": "Gray (balanced, with yellow / amber accent)."
+  },
   { "name": "scheme.helios.neutral.100", "value": "#F3F4F6" },
   { "name": "scheme.helios.neutral.200", "value": "#E5E7EB" },
   { "name": "scheme.helios.neutral.300", "value": "#D1D5DB" },
@@ -166,14 +202,14 @@
   { "name": "info.700", "value": "#1D4ED8" },
   {
     "name": "color.light.bg",
-    "value": "neutral.50",
+    "value": "neutral.100",
     "description": "Light theme: page background. Value references a palette token name."
   },
   { "name": "color.light.surface", "value": "neutral.0" },
-  { "name": "color.light.surfaceMuted", "value": "neutral.100" },
-  { "name": "color.light.border", "value": "neutral.200" },
-  { "name": "color.light.text", "value": "neutral.900" },
-  { "name": "color.light.textMuted", "value": "neutral.600" },
+  { "name": "color.light.surfaceMuted", "value": "neutral.200" },
+  { "name": "color.light.border", "value": "neutral.300" },
+  { "name": "color.light.text", "value": "brand.900" },
+  { "name": "color.light.textMuted", "value": "brand.600" },
   { "name": "color.light.link", "value": "brand.700" },
   { "name": "color.light.focusRing", "value": "brand.500" },
   { "name": "color.light.primary", "value": "brand.500" },
@@ -187,8 +223,8 @@
   { "name": "color.dark.surface", "value": "neutral.800" },
   { "name": "color.dark.surfaceMuted", "value": "neutral.700" },
   { "name": "color.dark.border", "value": "neutral.600" },
-  { "name": "color.dark.text", "value": "neutral.50" },
-  { "name": "color.dark.textMuted", "value": "neutral.300" },
+  { "name": "color.dark.text", "value": "brand.100" },
+  { "name": "color.dark.textMuted", "value": "brand.300" },
   { "name": "color.dark.link", "value": "brand.300" },
   { "name": "color.dark.focusRing", "value": "brand.400" },
   { "name": "color.dark.primary", "value": "brand.400" },

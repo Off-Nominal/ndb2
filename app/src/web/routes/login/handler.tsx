@@ -4,7 +4,7 @@ import { safeReturnTo } from "../../auth/safeReturnTo";
 import { getWebAuth } from "../../middleware/auth/session";
 import { getColorScheme, getThemePreference } from "../../middleware/theme-preference";
 import { wrapWebRouteWithErrorBoundary } from "../../middleware/error-boundary";
-import { PageLayout } from "../../shared/components/page_layout";
+import { PageLayout } from "../../shared/components/page-layout";
 import { LoginPage } from "./page";
 
 /** Public `GET /login` with explicit control to start Discord OAuth. */
@@ -24,8 +24,16 @@ export const Login: Route = (router: Router) => {
       }
 
       const html = await Promise.resolve(
-        <PageLayout theme={getThemePreference()} colorScheme={getColorScheme()} title="Sign in">
-          <LoginPage returnTo={returnTo} />
+        <PageLayout
+          theme={getThemePreference()}
+          colorScheme={getColorScheme()}
+          title="Sign in"
+        >
+          <LoginPage
+            returnTo={returnTo}
+            theme={getThemePreference()}
+            colorScheme={getColorScheme()}
+          />
         </PageLayout>,
       );
       res.type("html").send(html);
