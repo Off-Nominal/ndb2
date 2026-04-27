@@ -16,6 +16,7 @@ export async function createApp(): Promise<Express> {
 
   if (isDev()) {
     const { createServer } = await import("vite");
+    const { viteDevAssetWatchPlugin } = await import("./vite-dev-asset-watch.js");
     const vite = await createServer({
       configFile: false,
       root: appRootDir,
@@ -24,6 +25,7 @@ export async function createApp(): Promise<Express> {
       resolve: {
         alias: { "@web": path.join(appRootDir, "src/web") },
       },
+      plugins: [viteDevAssetWatchPlugin(appRootDir)],
     });
     app.use(vite.middlewares);
     const morgan = (await import("morgan")).default;

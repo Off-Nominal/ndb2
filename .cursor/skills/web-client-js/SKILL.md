@@ -40,9 +40,9 @@ description: >-
 ## pnpm / dev
 
 - **`typecheck:client`**: `tsc -p tsconfig.client.json` for **`*.client.ts`** only.
-- **`dev-watch-assets`**: watch **`**/*.client.ts`** and **`**/*.client.js`** under routes and shared components.
+- **Dev asset watch:** **`vite-dev-asset-watch`** (Vite plugin in **`createApp`**) watches **`**/*.client.ts`** / **`.js`**, token JSON, and source CSS (not **`generated/`**): runs **`build:tokens`** / **`build:web-assets`**, **`generate-cube-blocks-manifest.mjs`** + **`build:web-assets`**, or **`build:client-js`** + touches **`src/index.ts`** so **`tsx watch`** reloads when **`routeClientScripts.ts`** changes.
 - **HMR (`NODE_ENV=dev`):** Express mounts **Vite middleware** (`createApp`) before **`/assets`** static. **`HtmlHead`** injects **`/@vite/client`** and serves colocated **`*.client.ts`** as **`type="module"`** from **`/src/web/...`** (see **`vite-dev-client-src.ts`**). Helmet **CSP is off** in dev so Vite’s client can run. Production still uses built **`/assets/routes/*.client.js`** and strict CSP.
-- **CUBE CSS:** Styles ship as one entry (**`cube-entry.css`** in dev via Vite middleware, **`/assets/cube.css`** in prod). **`dev-watch-assets`** regenerates **`cube-blocks.css`** on source changes; Vite provides **CSS HMR** without a separate full-reload plugin.
+- **CUBE CSS:** Styles ship as one entry (**`cube-entry.css`** in dev via Vite middleware, **`/assets/cube.css`** in prod). The plugin regenerates **`cube-blocks.css`** on source CSS changes; Vite provides **CSS HMR** without a separate full-reload plugin.
 
 ## Tests and CI
 

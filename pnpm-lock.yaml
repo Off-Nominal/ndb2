@@ -81,9 +81,6 @@ importers:
       chokidar:
         specifier: ^3.6.0
         version: 3.6.0
-      concurrently:
-        specifier: ^9.1.0
-        version: 9.2.1
       dbmate:
         specifier: ^2.27.0
         version: 2.32.0
