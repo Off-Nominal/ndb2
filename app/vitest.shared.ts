@@ -9,5 +9,6 @@ export const vitestResolve = {
     "@shared": path.join(appRoot, "src/shared"),
     "@data": path.join(appRoot, "src/data"),
     "@domain": path.join(appRoot, "src/domain"),
+    "@web": path.join(appRoot, "src/web"),
   },
 };

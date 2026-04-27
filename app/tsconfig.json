@@ -19,7 +19,8 @@
       "@config": ["src/config.ts"],
       "@shared/*": ["src/shared/*"],
       "@data/*": ["src/data/*"],
-      "@domain/*": ["src/domain/*"]
+      "@domain/*": ["src/domain/*"],
+      "@web/*": ["src/web/*"]
     },
     "types": ["node", "vitest/globals"]
   },
