@@ -1,39 +1,20 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import type { RequestHandler } from "express";
 import {
+  COLOR_SCHEME_COOKIE_CONFIG,
+  THEME_COOKIE_CONFIG,
+} from "../theme-cookie-constants.js";
+import {
   type ColorScheme,
   SCHEME_HUE_DEFS,
 } from "../tokens/scheme-hue-defs.js";
 
 export type { ColorScheme } from "../tokens/scheme-hue-defs.js";
 export { SCHEME_HUE_DEFS };
+export { COLOR_SCHEME_COOKIE_CONFIG, THEME_COOKIE_CONFIG };
 
 const ALL_SCHEMES: readonly ColorScheme[] = SCHEME_HUE_DEFS.map((h) => h.id);
 export const COLOR_SCHEME_VALUES: readonly ColorScheme[] = SCHEME_HUE_DEFS.map((h) => h.id);
-
-/**
- * Theme persistence cookie. Set on the server from `POST /preferences` (see `routes/preferences/handler`).
- * Rolling `Max-Age` is refreshed on each HTML request when preference is `light`/`dark`.
- */
-export const THEME_COOKIE_CONFIG = {
-  /** Persisted `light` | `dark`; absent ⇒ `system` (OS). */
-  name: "ndb2_theme",
-  path: "/",
-  /** Rolling window seconds (browser caps apply; ~400d is a common upper bound). */
-  maxAgeSec: 60 * 60 * 24 * 400,
-  sameSite: "Lax",
-} as const;
-
-/**
- * Accent / palette cookie. Set on the server from `POST /preferences`.
- * Values are `id` in `src/web/tokens/scheme-hue-defs.ts`; when absent, default is `neptune` without `Set-Cookie`.
- */
-export const COLOR_SCHEME_COOKIE_CONFIG = {
-  name: "ndb2_color_scheme",
-  path: "/",
-  maxAgeSec: 60 * 60 * 24 * 400,
-  sameSite: "Lax",
-} as const;
 
 const LEGACY_COLOR_SCHEME: Record<string, ColorScheme> = {
   red: "redshift",

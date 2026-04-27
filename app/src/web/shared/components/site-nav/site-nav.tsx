@@ -7,15 +7,14 @@ export type NavigationMenuProps = {
   auth: WebAuthAuthenticated;
   theme: ThemePreference;
   colorScheme: ColorScheme;
-  /** `POST /preferences` hidden `returnTo`; default `"/"`. */
-  preferencesReturnTo?: string;
-  /** Passed to {@link PreferencesForm} when two menus exist (e.g. `-desktop`). */
+  /** Suffix for control `id`s when two menus exist (e.g. `-desktop`). */
   preferencesControlIdSuffix?: string;
 };
 
 /**
  * Right-hand site nav (theme/colour, links, sign-out). Rendered by {@link AuthenticatedPageLayout} (see
- * {@link PageLayout} for unauthenticated shell with no site nav). Sign-out: POST to `/auth/logout` with CSRF.
+ * {@link PageLayout} for unauthenticated shell with no site nav). Sign-out: POST to `/auth/logout` with CSRF;
+ * theme and palette use client-side cookies (see `preferences-form.client`).
  */
 export function NavigationMenu(props: NavigationMenuProps): JSX.Element {
   return (
@@ -39,8 +38,6 @@ export function NavigationMenu(props: NavigationMenuProps): JSX.Element {
         <PreferencesForm
           theme={props.theme}
           colorScheme={props.colorScheme}
-          returnTo={props.preferencesReturnTo ?? "/"}
-          csrfToken={props.auth.csrfToken}
           controlIdSuffix={props.preferencesControlIdSuffix}
         />
         <form method="post" action="/auth/logout">

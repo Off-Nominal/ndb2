@@ -28,7 +28,6 @@ export const Home: Route = (router: Router) => {
           auth={auth}
           csrfMetaToken={auth.csrfToken}
           hxHeaders={csrfHeadersJson}
-          preferencesReturnTo={req.originalUrl.split("#")[0] || "/"}
         >
           <HomePage message="welcome to the new ndb2 portal" auth={auth} />
         </AuthenticatedPageLayout>,

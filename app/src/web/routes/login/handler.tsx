@@ -23,7 +23,6 @@ export const Login: Route = (router: Router) => {
         return;
       }
 
-      const preferencesFormReturnTo = req.originalUrl.split("#")[0] || "/";
       const html = await Promise.resolve(
         <PageLayout
           theme={getThemePreference()}
@@ -34,7 +33,6 @@ export const Login: Route = (router: Router) => {
             returnTo={returnTo}
             theme={getThemePreference()}
             colorScheme={getColorScheme()}
-            preferencesFormReturnTo={preferencesFormReturnTo}
           />
         </PageLayout>,
       );

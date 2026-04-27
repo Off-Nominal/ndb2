@@ -22,10 +22,8 @@ export type PageLayoutProps = HtmlHeadProps & {
 };
 
 export type AuthenticatedPageLayoutProps = PageLayoutProps & {
-  /** Session (CSRF for sign-out, preferences form, etc.). */
+  /** Session (CSRF for sign-out, etc.). */
   auth: WebAuthAuthenticated;
-  /** `POST /preferences` redirect target in the site nav; default `"/"`. */
-  preferencesReturnTo?: string;
 };
 
 function DocumentFrame(props: PageLayoutProps): JSX.Element {
@@ -100,7 +98,6 @@ export function AuthenticatedPageLayout(props: AuthenticatedPageLayoutProps): JS
                   auth={props.auth}
                   theme={props.theme}
                   colorScheme={props.colorScheme}
-                  preferencesReturnTo={props.preferencesReturnTo ?? "/"}
                 />
               </div>
             </div>
@@ -109,7 +106,6 @@ export function AuthenticatedPageLayout(props: AuthenticatedPageLayoutProps): JS
                 auth={props.auth}
                 theme={props.theme}
                 colorScheme={props.colorScheme}
-                preferencesReturnTo={props.preferencesReturnTo ?? "/"}
                 preferencesControlIdSuffix="-desktop"
               />
             </div>

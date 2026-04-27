@@ -1,5 +1,36 @@
 "use strict";
 (() => {
+  // src/web/shared/components/select/select-display-sync.ts
+  function optionDisplayLabelForNativeSelect(native) {
+    const v = native.value;
+    for (let i = 0; i < native.options.length; i++) {
+      const o = native.options[i];
+      if (o.value === v) {
+        return (o.textContent?.trim() || o.label?.trim() || o.value).trim() || o.value;
+      }
+    }
+    if (native.selectedIndex >= 0) {
+      const o = native.options[native.selectedIndex];
+      return (o.textContent?.trim() || o.label?.trim() || o.value).trim() || v;
+    }
+    return v;
+  }
+  function syncUIFromNative(root) {
+    const native = root.querySelector("[data-select-native]");
+    const valueEl = root.querySelector("[data-select-value]");
+    if (native == null || valueEl == null) {
+      return;
+    }
+    const display = optionDisplayLabelForNativeSelect(native);
+    if (display !== "") {
+      valueEl.textContent = display;
+    }
+    for (const li of root.querySelectorAll("[data-select-option]")) {
+      const optVal = li.dataset.value ?? "";
+      li.setAttribute("aria-selected", optVal === native.value ? "true" : "false");
+    }
+  }
+
   // src/web/shared/components/select/select.client.ts
   var LIST_MAX_HEIGHT_REM = 16;
   var VIEWPORT_EDGE = 8;
@@ -66,35 +97,6 @@
     listEl.style.maxHeight = "";
     listEl.style.removeProperty("transform");
     delete root.dataset.selectPlacement;
-  }
-  function optionDisplayLabelForNativeSelect(native) {
-    const v = native.value;
-    for (let i = 0; i < native.options.length; i++) {
-      const o = native.options[i];
-      if (o.value === v) {
-        return (o.textContent?.trim() || o.label?.trim() || o.value).trim() || o.value;
-      }
-    }
-    if (native.selectedIndex >= 0) {
-      const o = native.options[native.selectedIndex];
-      return (o.textContent?.trim() || o.label?.trim() || o.value).trim() || v;
-    }
-    return v;
-  }
-  function syncUIFromNative(root) {
-    const native = root.querySelector("[data-select-native]");
-    const valueEl = root.querySelector("[data-select-value]");
-    if (native == null || valueEl == null) {
-      return;
-    }
-    const display = optionDisplayLabelForNativeSelect(native);
-    if (display !== "") {
-      valueEl.textContent = display;
-    }
-    for (const li of root.querySelectorAll("[data-select-option]")) {
-      const optVal = li.dataset.value ?? "";
-      li.setAttribute("aria-selected", optVal === native.value ? "true" : "false");
-    }
   }
   function initSelect(root) {
     if (root.dataset.selectInit === "1") {

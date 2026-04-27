@@ -1,5 +1,7 @@
+import { syncUIFromNative } from "./select-display-sync.js";
+
 /**
- * Custom select: toggle listbox, sync hidden native `<select>` for forms + HTMX `change`.
+ * Custom select: toggle listbox, sync hidden native `<select>` for forms + bubbling `change`.
  * Panel placement: flips above/below from viewport + caps `max-height` so the list stays on-screen.
  */
 
@@ -91,41 +93,6 @@ function clearSelectPlacement(listEl: HTMLElement, root: HTMLElement): void {
   listEl.style.maxHeight = "";
   listEl.style.removeProperty("transform");
   delete root.dataset.selectPlacement;
-}
-
-/**
- * Resolves the visible label for the current `native.value` (prefer `value` over `selectedIndex`,
- * and `textContent` / `label` over legacy `.text`, which can be empty in some DOM states).
- */
-function optionDisplayLabelForNativeSelect(native: HTMLSelectElement): string {
-  const v = native.value;
-  for (let i = 0; i < native.options.length; i++) {
-    const o = native.options[i]!;
-    if (o.value === v) {
-      return (o.textContent?.trim() || o.label?.trim() || o.value).trim() || o.value;
-    }
-  }
-  if (native.selectedIndex >= 0) {
-    const o = native.options[native.selectedIndex]!;
-    return (o.textContent?.trim() || o.label?.trim() || o.value).trim() || v;
-  }
-  return v;
-}
-
-function syncUIFromNative(root: HTMLElement): void {
-  const native = root.querySelector<HTMLSelectElement>("[data-select-native]");
-  const valueEl = root.querySelector("[data-select-value]");
-  if (native == null || valueEl == null) {
-    return;
-  }
-  const display = optionDisplayLabelForNativeSelect(native);
-  if (display !== "") {
-    valueEl.textContent = display;
-  }
-  for (const li of root.querySelectorAll<HTMLElement>("[data-select-option]")) {
-    const optVal = li.dataset.value ?? "";
-    li.setAttribute("aria-selected", optVal === native.value ? "true" : "false");
-  }
 }
 
 function initSelect(root: HTMLElement): void {

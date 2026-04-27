@@ -4,6 +4,7 @@
  */
 
 export const routeClientScripts = {
+  "shared/components/preferences-form": ["/assets/routes/shared/components/preferences-form/preferences-form.client.js"] as const,
   "shared/components/select": ["/assets/routes/shared/components/select/select.client.js"] as const,
 } as const;
 
@@ -12,6 +13,7 @@ export const routeClientScripts = {
  * `HtmlHead` prepends these before optional route `clientScripts`.
  */
 export const sharedComponentsClientScriptUrls = [
+  "/assets/routes/shared/components/preferences-form/preferences-form.client.js",
   "/assets/routes/shared/components/select/select.client.js",
 ] as const;
 

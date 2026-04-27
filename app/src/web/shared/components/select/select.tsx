@@ -15,7 +15,7 @@ type NativeSelect = Omit<
 
 /**
  * Custom dropdown: a single **`.select__surface` + `.screen-element`** wraps trigger and list; a hidden native **`<select>`** keeps
- * **`<form>`** / **HTMX** behaviour (`name`, **`change`**). **`class`** is merged with
+ * **`<form>`** / **`change`** events (`name`, bubbling). **`class`** is merged with
  * **`[ constrain-to-parent ] [ select ]`**. Most native pass-throughs target the hidden
  * **`<select>`**; **`id`** and **`aria-label`** target the focusable **trigger** (see **form-field**).
  */

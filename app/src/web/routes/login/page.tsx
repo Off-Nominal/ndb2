@@ -5,8 +5,6 @@ import { DiscordButton } from "./components/discord-button";
 export type LoginPageProps = {
   /** Post-login destination (path only, validated). */
   returnTo: string;
-  /** Current URL (path + query) for `POST /preferences` redirect so query params (e.g. `returnTo`) are preserved. */
-  preferencesFormReturnTo: string;
   theme: ThemePreference;
   colorScheme: ColorScheme;
 };
@@ -25,11 +23,7 @@ export function LoginPage(props: LoginPageProps): JSX.Element {
         <p>
           <DiscordButton returnTo={props.returnTo} />
         </p>
-        <PreferencesForm
-          theme={props.theme}
-          colorScheme={props.colorScheme}
-          returnTo={props.preferencesFormReturnTo}
-        />
+        <PreferencesForm theme={props.theme} colorScheme={props.colorScheme} />
       </div>
     </div>
   );

@@ -63,10 +63,7 @@ describe("AuthenticatedPageLayout", () => {
     expect(html).toContain('action="/auth/logout"');
     expect(html).toContain('name="_csrf"');
     expect(html).toContain("test-csrf-token");
-    expect(html).toContain('action="/preferences"');
     expect(html).toContain("form-field");
-    expect(html).toContain('hx-post="/preferences"');
-    expect(html).toContain('hx-trigger="change from:select"');
-    expect(html).toContain('hx-sync="this:replace"');
+    expect(html).toContain("data-preferences-form");
   });
 });
