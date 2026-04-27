@@ -62,7 +62,7 @@ For **implementation** details (file paths, `Set-Cookie`, client script duplicat
 
 ## Related
 
-- **`css-build`** — `build:tokens` / `build:css`, `design-tokens.css` output, `HtmlHead` order, when to run builds.
+- **`css-build`** — `build:tokens` / `build:css`, `generated/design-tokens.css`, `cube.css`, `HtmlHead` single link, when to run builds.
 - **`cube-css-authoring`** — which stylesheet layer to extend; still use **semantic** `var(--color-*)` in hand-written CSS.
 - **`web-breakpoints`** — mobile / tablet / desktop / wide `rem` boundaries; pair with this skill when describing nav or glass by viewport.
 - **`kitajs-html-web`** — `PageLayout` / `AuthenticatedPageLayout` pass `theme` and `colorScheme` into the document; only the authenticated layout includes site nav.

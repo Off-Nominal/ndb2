@@ -2,10 +2,9 @@
 /**
  * Dev-only watcher: rebuild static assets without restarting the API process.
  * - Token JSON → build:tokens + transfer-web (merge static from src/web/public)
- * - Colocated / layer CSS (excluding src public) → build:css + transfer-web
+ * - Colocated / layer CSS → regenerate cube-blocks manifest + transfer-web (Vite serves / HMR CSS in dev)
  * - *.client.ts|js under routes or shared/components → build:client-js, then bump
- *   src/index.ts mtime so
- *   nodemon (ts/tsx only) restarts and picks up generated routeClientScripts.ts.
+ *   src/index.ts mtime so tsx watch restarts and picks up generated routeClientScripts.ts.
  */
 
 import { spawnSync } from "node:child_process";
@@ -56,8 +55,13 @@ const onTokens = debounce(() => {
 }, 150);
 
 const onCss = debounce(() => {
-  console.error("[dev-watch-assets] CSS changed → build:css, transfer-web");
-  pnpm(["run", "build:css"]);
+  console.error("[dev-watch-assets] CSS changed → cube-blocks manifest, transfer-web");
+  const r = spawnSync(process.execPath, [path.join(__dirname, "generate-cube-blocks-manifest.mjs")], {
+    cwd: APP_ROOT,
+    stdio: "inherit",
+    env: process.env,
+  });
+  if (r.status !== 0) process.exit(r.status ?? 1);
   pnpm(["run", "transfer-web"]);
 }, 150);
 
@@ -74,7 +78,7 @@ const tokenWatcher = chokidar.watch("src/web/tokens/**/*.json", {
 
 const cssWatcher = chokidar.watch("src/web/**/*.css", {
   cwd: APP_ROOT,
-  ignored: ["**/public/**"],
+  ignored: ["**/public/**", "**/generated/**"],
   ignoreInitial: true,
 });
 

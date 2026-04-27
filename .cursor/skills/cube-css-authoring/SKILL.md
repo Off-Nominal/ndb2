@@ -22,11 +22,11 @@ description: >-
 | Baseline / resets / element defaults | **Globals** | `app/src/web/styles/globals.css` |
 | Layout primitives (stack, cluster, wrapper, grid); may expose **`--*` hooks** (see below) | **Composition** | `app/src/web/styles/compositions.css` |
 | Single-purpose **behaviors** (often several properties); not Tailwind-style one-prop atoms | **Utility** | `app/src/web/styles/utilities.css` |
-| Component identity + structure + **exceptions** | **Block** | Colocated **`*.css`** next to the **`*.tsx`** (bundled into `blocks.css`) |
+| Component identity + structure + **exceptions** | **Block** | Colocated **`*.css`** next to the **`*.tsx`** (bundled into **`cube.css`** via `cube-blocks.css`) |
 
 **Design tokens** are JSON → `design-tokens.css`; use **`var(--…)`** in hand-written CSS instead of raw hex/spacing literals when a token exists.
 
-**Do not** hand-edit generated CSS under **`app/dist/web/public/`**; run **`pnpm run build:css`** (or **`build`**) after changing sources. **`app/src/web/public/`** is static-only (merged into **`dist`** by **`transfer-web`**), not a token/CSS build output.
+**Do not** hand-edit **`app/src/web/generated/cube-blocks.css`** or **`design-tokens.css`**; run **`pnpm run build:css`** / **`build:tokens`** (or **`build`**) after changing sources. **`app/dist/web/public/cube.css`** is the prod bundle. **`app/src/web/public/`** is static-only (fonts, etc.; merged by **`transfer-web`**).
 
 ## Decision order (apply before writing block CSS)
 
@@ -248,5 +248,5 @@ HTMX can toggle **`data-*`** or classes via swaps; keep hooks documented in the 
 - **`app/src/web/shared/utils/merge_class.ts`** — **`mergeClass`**, for TSX `class` when combining bracket groups; **`kitajs-html-web`**.
 - **`ndb2-web-design`** — visual mood, how light/dark and named colour schemes fit together.
 - **`web-breakpoints`** — canonical viewport tiers and `@media` cut points (`rem`).
-- **`css-build`** — scripts, `public/` outputs, nodemon, `<head>` link order.
+- **`css-build`** — scripts, `public/` outputs, tsx watch, `<head>` link order.
 - **`kitajs-html-web`** — route structure, **`HtmlHead`**, HTMX, tests.

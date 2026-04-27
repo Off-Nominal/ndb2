@@ -1,6 +1,6 @@
 # CUBE CSS summary (for ndb2)
 
-**Status:** The web build emits five stylesheets under `app/src/web/public/` (served at `/assets/`): `design-tokens.css` (generated from JSON), `globals.css`, `compositions.css`, `utilities.css` (copied from `app/src/web/styles/`), and `blocks.css` (concatenated from colocated `*.css` next to components). All are linked from `app/src/web/shared/components/html-head/html-head.tsx` (**`HtmlHead`**) in cascade order. For an agent-oriented summary of the full pipeline (scripts, pnpm, nodemon, CUBE mapping), see `.cursor/skills/css-build/SKILL.md`. For **where to put CSS when authoring** pages and components (globals vs compositions vs utilities vs colocated blocks), see `.cursor/skills/cube-css-authoring/SKILL.md`. For **viewport tiers** (mobile, tablet, desktop, wide) and `@media` cut points in `rem`, see `.cursor/skills/web-breakpoints/SKILL.md`.
+**Status:** The web build emits one bundled stylesheet **`cube.css`** under `app/dist/web/public/` (served at `/assets/cube.css` in production). Sources: token JSON → `src/web/generated/design-tokens.css`; layers from `app/src/web/styles/`; colocated blocks via `src/web/generated/cube-blocks.css` (`@import` list from `generate-cube-blocks-manifest.mjs`); Vite bundles `styles/cube-entry.css` (`build-cube-css.mjs`). **`HtmlHead`** uses **`cubeStylesheetHref()`**: in dev, `/src/web/styles/cube-entry.css` (Vite CSS HMR). For the full pipeline, see `.cursor/skills/css-build/SKILL.md`. For **authoring** (globals vs compositions vs utilities vs blocks), see `.cursor/skills/cube-css-authoring/SKILL.md`. For **viewport tiers**, see `.cursor/skills/web-breakpoints/SKILL.md`.
 
 This document summarizes the CUBE CSS methodology (Andy Bell) and captures how we intend to apply it in the ndb2 frontend.
 
@@ -109,17 +109,17 @@ Then implement utilities that apply those tokens (or apply them directly in bloc
 
 ### Stylesheet pipeline (implemented)
 
-| Role | Author under | Build output | `<head>` order |
-|------|----------------|--------------|----------------|
-| Tokens (custom properties) | `app/src/web/tokens/*.json` | `public/design-tokens.css` | 1 |
-| Globals (baseline / elements) | `app/src/web/styles/globals.css` | `public/globals.css` | 2 |
-| Compositions (layout) | `app/src/web/styles/compositions.css` | `public/compositions.css` | 3 |
-| Utilities | `app/src/web/styles/utilities.css` | `public/utilities.css` | 4 |
-| Blocks + exceptions | Colocated `*.css` under `app/src/web/` (not `public/`, `tokens/`, or `styles/`)—including **`page.css`** beside **`page.tsx`** for route-only UI | `public/blocks.css` | 5 |
+| Role | Author under | In bundle | Cascade order inside `cube.css` |
+|------|----------------|-----------|--------------------------------|
+| Tokens (custom properties) | `app/src/web/tokens/*.json` | Via `generated/design-tokens.css` | 1 |
+| Globals (baseline / elements) | `app/src/web/styles/globals.css` | Imported by `cube-entry.css` | 2 |
+| Compositions (layout) | `app/src/web/styles/compositions.css` | Imported by `cube-entry.css` | 3 |
+| Utilities | `app/src/web/styles/utilities.css` | Imported by `cube-entry.css` | 4 |
+| Blocks + exceptions | Colocated `*.css` (not `public/`, `tokens/`, `styles/`, `generated/`) | Via `generated/cube-blocks.css` | 5 |
 
-**Build:** `pnpm run build:css` runs `app/scripts/build-web-css.mjs` (layer copy + block bundle). `pnpm run build` runs `build:tokens` then `build:css`. **`public/` copies are generated**—edit the `styles/` sources or colocated block files, then rebuild.
+**Build:** `pnpm run build:tokens` writes `src/web/generated/design-tokens.css`. `pnpm run build:css` runs `generate-cube-blocks-manifest.mjs` and `build-cube-css.mjs` (Vite) → `dist/web/public/cube.css`.
 
-**Colocation:** Place one stylesheet next to the Kitajs component (e.g. `routes/home/components/lucky-number.css` beside `lucky-number.tsx`). Files are concatenated in **lexicographic path order**; each section is prefixed with `/* ndb2:block: relative/path.css */` in the bundle.
+**Colocation:** Same as before; block files are listed in **lexicographic path order** in `cube-blocks.css`, each with `/* ndb2:block: relative/path */` before its `@import`; Vite inlines them into `cube.css`.
 
 ### Theme (light / dark / system)
 

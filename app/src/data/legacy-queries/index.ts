@@ -1,29 +1,54 @@
 import fs from "fs";
 import path from "path";
 
+/** `app/` package root — works from `src/data/legacy-queries` (tsx) or `dist/data/legacy-queries` (compiled). */
+function packageRootFromLegacyQueriesDir(): string {
+  return path.join(__dirname, "..", "..", "..");
+}
+
+function resolveLegacySqlDir(): string {
+  const besideModule = path.join(__dirname, "sql");
+  if (fs.existsSync(besideModule)) {
+    return besideModule;
+  }
+  const fromDist = path.join(
+    packageRootFromLegacyQueriesDir(),
+    "dist",
+    "data",
+    "legacy-queries",
+    "sql",
+  );
+  if (fs.existsSync(fromDist)) {
+    return fromDist;
+  }
+  throw new Error(
+    "Legacy SQL bundle missing. From the `app` package, run: pnpm run transfer-queries " +
+      "(or `pnpm run build` / `pnpm run compile:dev`) so `dist/data/legacy-queries/sql` exists.",
+  );
+}
+
 class SqlFileLoader {
+  private readonly sqlDir: string;
   private queries: Record<string, string> = {};
 
   constructor() {
+    this.sqlDir = resolveLegacySqlDir();
     const files = this.getFiles();
     this.mapFilesToQueries(files);
   }
 
   private getFiles() {
-    // grabs a list of all the .sql files inside the sql directory
-    return fs.readdirSync(path.join(__dirname, "./sql"));
+    return fs.readdirSync(this.sqlDir);
   }
 
   private mapFilesToQueries(files: string[]) {
-    // reads the contents of each file and stores it in
-    // the queries object with the file name as the key
     for (const file of files) {
       if (!file.endsWith(".sql")) {
         continue;
       }
 
       const key = file.replace(".sql", "");
-      const query = fs.readFileSync(path.join(__dirname, "sql", file), "utf-8");
+      const query = fs.readFileSync(path.join(this.sqlDir, file), "utf-8");
       this.queries[key] = query;
     }
   }

@@ -96,5 +96,5 @@ Author hand-written CSS with these **`rem`** semantics so zoom and user font set
 - **`cube-css-authoring`** — which stylesheet layer owns responsive rules; nesting **`@media`** under a block root.
 - **`ndb2-web-design`** — glass / nav *appearance* by coarse viewport (references this skill for tier boundaries).
 - **`kitajs-html-web`** — **`PageLayout`** / **`AuthenticatedPageLayout`** markup; nav chrome is TSX + colocated CSS.
-- **`css-build`** — how colocated **`*.css`** reaches **`blocks.css`**.
+- **`css-build`** — how colocated **`*.css`** reaches **`cube.css`** (via **`cube-blocks.css`**).
 - **`docs/frontend/cube-css.md`** — CUBE summary; links here for responsive authoring.

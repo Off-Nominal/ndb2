@@ -1,0 +1,9 @@
+/**
+ * CUBE cascade entry — bundled by Vite to `dist/web/public/cube.css` (prod) or served from `/src/web/styles/cube-entry.css` (dev).
+ * Order: tokens → globals → compositions → utilities → colocated blocks.
+ */
+@import "../generated/design-tokens.css";
+@import "./globals.css";
+@import "./compositions.css";
+@import "./utilities.css";
+@import "../generated/cube-blocks.css";

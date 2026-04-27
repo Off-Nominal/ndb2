@@ -1,4 +1,6 @@
+import { isDev } from "@shared/utils";
 import { sharedComponentsClientScriptUrls } from "../../../generated/routeClientScripts";
+import { browserClientScriptTagProps, cubeStylesheetHref } from "../../../vite-dev-client-src";
 
 export type HtmlHeadProps = {
   title: string;
@@ -22,14 +24,16 @@ export function HtmlHead(props: HtmlHeadProps): JSX.Element {
         <meta name="csrf-token" content={props.csrfMetaToken} />
       ) : null}
       <title>{props.title}</title>
-      <link rel="stylesheet" href="/assets/design-tokens.css" />
-      <link rel="stylesheet" href="/assets/globals.css" />
-      <link rel="stylesheet" href="/assets/compositions.css" />
-      <link rel="stylesheet" href="/assets/utilities.css" />
-      <link rel="stylesheet" href="/assets/blocks.css" />
-      {scripts.map((src) => (
-        <script src={src} defer />
-      ))}
+      <link rel="stylesheet" href={cubeStylesheetHref()} />
+      {isDev() ? <script type="module" src="/@vite/client" /> : null}
+      {scripts.map((assetUrl) => {
+        const { src, typeModule } = browserClientScriptTagProps(assetUrl);
+        return typeModule ? (
+          <script type="module" src={src} />
+        ) : (
+          <script src={src} defer />
+        );
+      })}
       <script src="/assets/htmx.min.js" defer />
     </>
   );

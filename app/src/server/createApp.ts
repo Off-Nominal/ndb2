@@ -1,20 +1,33 @@
+import path from "node:path";
 import express, { type Express } from "express";
 import { isDev } from "@shared/utils";
 import { mountJsonApi } from "../api/mountJsonApi";
 import { mountWeb } from "../web/mountWeb";
 import { configureTrustProxy, installSecurityHeaders } from "./securityHeaders";
 
-export function createApp(): Express {
+/** Package root (`ndb2/app`). Requires dev/prod commands to run with cwd = this package (pnpm scripts do). */
+const appRootDir = process.cwd();
+
+export async function createApp(): Promise<Express> {
   const app = express();
 
   configureTrustProxy(app);
   installSecurityHeaders(app);
 
   if (isDev()) {
-    void (async () => {
-      const morgan = (await import("morgan")).default;
-      app.use(morgan("dev"));
-    })();
+    const { createServer } = await import("vite");
+    const vite = await createServer({
+      configFile: false,
+      root: appRootDir,
+      server: { middlewareMode: true },
+      appType: "custom",
+      resolve: {
+        alias: { "@web": path.join(appRootDir, "src/web") },
+      },
+    });
+    app.use(vite.middlewares);
+    const morgan = (await import("morgan")).default;
+    app.use(morgan("dev"));
   }
 
   app.use(express.json());
@@ -34,3 +47,4 @@ export function createApp(): Express {
 
   return app;
 }
+
