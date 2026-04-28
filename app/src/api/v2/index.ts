@@ -1,5 +1,6 @@
 import express from "express";
 import { getAllSeasons } from "./routes/seasons/get";
+import { getSeason } from "./routes/seasons/get_seasons_{id}";
 import { getPredictionsSearch } from "./routes/predictions/get_predictions_search";
 import { getPredictionById } from "./routes/predictions/get_predictions_{predictionId}";
 import { untriggerPredictionById } from "./routes/predictions/delete_predictions_{predictionId}_trigger";
@@ -17,7 +18,7 @@ import "@domain/webhooks/config"; // Initialize webhook event listeners
 
 export const apiV2Router = express.Router();
 
-apiV2Router.use("/seasons", mapRoutes([getAllSeasons]));
+apiV2Router.use("/seasons", mapRoutes([getAllSeasons, getSeason]));
 apiV2Router.use(
   "/predictions",
   mapRoutes([

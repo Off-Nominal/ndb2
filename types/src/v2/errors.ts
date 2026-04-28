@@ -38,6 +38,7 @@ export const Errors = {
   // 03 Scores
 
   // 04 Seasons
+  SEASON_NOT_FOUND: 90400,
 
   // 05 Bets
   BETS_NO_CHANGE: 90501,

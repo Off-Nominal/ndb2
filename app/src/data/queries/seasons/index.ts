@@ -4,6 +4,7 @@ import {
   getAllSeasons,
   getSeasonById,
   getSeasonResultsById,
+  IGetSeasonByIdResult,
 } from "./seasons.queries";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { PoolClient } from "pg";
@@ -24,7 +25,27 @@ const getIdentifier = (
   return "current";
 };
 
-export default {
+const mapSeasonDetailRow = (
+  row: IGetSeasonByIdResult,
+): API.Entities.Seasons.SeasonDetail => ({
+  id: row.id,
+  name: row.name,
+  start: row.start.toISOString(),
+  end: row.end.toISOString(),
+  wager_cap: row.wager_cap,
+  closed: row.closed,
+  identifier: getIdentifier(new Date(row.start), new Date(row.end)),
+  predictions: {
+    checking: row.predictions_checking ?? 0,
+    closed: row.predictions_closed ?? 0,
+    failed: row.predictions_failed ?? 0,
+    open: row.predictions_open ?? 0,
+    retired: row.predictions_retired ?? 0,
+    successful: row.predictions_successful ?? 0,
+  },
+});
+
+const seasonsQueries = {
   getAll: (dbClient: PoolClient) => async () => {
     const result = await getAllSeasons.run(undefined, dbClient);
 
@@ -45,13 +66,22 @@ export default {
       return null;
     }
 
-    return {
-      ...season,
-      start: season.start.toISOString(),
-      end: season.end.toISOString(),
-      identifier: getIdentifier(new Date(season.start), new Date(season.end)),
-    };
+    return mapSeasonDetailRow(season);
   },
+  getSeasonIdByIdentifier:
+    (dbClient: PoolClient) =>
+    async (
+      identifier: API.Entities.Seasons.Identifier,
+    ): Promise<number | null> => {
+      const rows = await getAllSeasons.run(undefined, dbClient);
+      for (const row of rows) {
+        const computed = getIdentifier(new Date(row.start), new Date(row.end));
+        if (computed === identifier) {
+          return row.id;
+        }
+      }
+      return null;
+    },
   closeById: (dbClient: PoolClient) => async (id: number) => {
     await closeSeasonById.run({ id }, dbClient);
     return null;
@@ -113,3 +143,5 @@ export default {
     };
   },
 };
+
+export default seasonsQueries;

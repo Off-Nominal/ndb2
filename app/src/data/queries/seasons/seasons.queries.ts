@@ -50,6 +50,12 @@ export interface IGetSeasonByIdResult {
   end: Date;
   id: number;
   name: string;
+  predictions_checking: number | null;
+  predictions_closed: number | null;
+  predictions_failed: number | null;
+  predictions_open: number | null;
+  predictions_retired: number | null;
+  predictions_successful: number | null;
   start: Date;
   wager_cap: number;
 }
@@ -60,20 +66,38 @@ export interface IGetSeasonByIdQuery {
   result: IGetSeasonByIdResult;
 }
 
-const getSeasonByIdIR: any = {"usedParamSet":{"id":true},"params":[{"name":"id","required":true,"transform":{"type":"scalar"},"locs":[{"a":85,"b":88}]}],"statement":"SELECT\n  id,\n  name,\n  start,\n  \"end\",\n  wager_cap,\n  closed\nFROM seasons\nWHERE id = :id!"};
+const getSeasonByIdIR: any = {"usedParamSet":{"id":true},"params":[{"name":"id","required":true,"transform":{"type":"scalar"},"locs":[{"a":968,"b":971}]}],"statement":"SELECT\n  s.id,\n  s.name,\n  s.start,\n  s.\"end\",\n  s.wager_cap,\n  s.closed,\n  COALESCE(pred_agg.successful, 0)::int AS predictions_successful,\n  COALESCE(pred_agg.failed, 0)::int AS predictions_failed,\n  COALESCE(pred_agg.retired, 0)::int AS predictions_retired,\n  COALESCE(pred_agg.closed, 0)::int AS predictions_closed,\n  COALESCE(pred_agg.checking, 0)::int AS predictions_checking,\n  COALESCE(pred_agg.open, 0)::int AS predictions_open\nFROM seasons AS s\nLEFT JOIN (\n  SELECT\n    season_id,\n    COUNT(*) FILTER (WHERE status = 'successful')::int AS successful,\n    COUNT(*) FILTER (WHERE status = 'failed')::int AS failed,\n    COUNT(*) FILTER (WHERE status = 'retired')::int AS retired,\n    COUNT(*) FILTER (WHERE status = 'closed')::int AS closed,\n    COUNT(*) FILTER (WHERE status = 'checking')::int AS checking,\n    COUNT(*) FILTER (WHERE status = 'open')::int AS open\n  FROM predictions\n  GROUP BY season_id\n) AS pred_agg ON pred_agg.season_id = s.id\nWHERE s.id = :id!"};
 
 /**
  * Query generated from SQL:
  * ```
  * SELECT
- *   id,
- *   name,
- *   start,
- *   "end",
- *   wager_cap,
- *   closed
- * FROM seasons
- * WHERE id = :id!
+ *   s.id,
+ *   s.name,
+ *   s.start,
+ *   s."end",
+ *   s.wager_cap,
+ *   s.closed,
+ *   COALESCE(pred_agg.successful, 0)::int AS predictions_successful,
+ *   COALESCE(pred_agg.failed, 0)::int AS predictions_failed,
+ *   COALESCE(pred_agg.retired, 0)::int AS predictions_retired,
+ *   COALESCE(pred_agg.closed, 0)::int AS predictions_closed,
+ *   COALESCE(pred_agg.checking, 0)::int AS predictions_checking,
+ *   COALESCE(pred_agg.open, 0)::int AS predictions_open
+ * FROM seasons AS s
+ * LEFT JOIN (
+ *   SELECT
+ *     season_id,
+ *     COUNT(*) FILTER (WHERE status = 'successful')::int AS successful,
+ *     COUNT(*) FILTER (WHERE status = 'failed')::int AS failed,
+ *     COUNT(*) FILTER (WHERE status = 'retired')::int AS retired,
+ *     COUNT(*) FILTER (WHERE status = 'closed')::int AS closed,
+ *     COUNT(*) FILTER (WHERE status = 'checking')::int AS checking,
+ *     COUNT(*) FILTER (WHERE status = 'open')::int AS open
+ *   FROM predictions
+ *   GROUP BY season_id
+ * ) AS pred_agg ON pred_agg.season_id = s.id
+ * WHERE s.id = :id!
  * ```
  */
 export const getSeasonById = new PreparedQuery<IGetSeasonByIdParams,IGetSeasonByIdResult>(getSeasonByIdIR);
