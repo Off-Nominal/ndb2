@@ -3,6 +3,9 @@
  * Do not edit by hand.
  */
 
+/* ndb2:block: routes/home/components/season-card/season-card.css */
+@import "../routes/home/components/season-card/season-card.css";
+
 /* ndb2:block: routes/home/page.css */
 @import "../routes/home/page.css";
 
@@ -23,6 +26,9 @@
 
 /* ndb2:block: shared/components/heading-screen-element/heading-screen-element.css */
 @import "../shared/components/heading-screen-element/heading-screen-element.css";
+
+/* ndb2:block: shared/components/horizontal-divider/horizontal-divider.css */
+@import "../shared/components/horizontal-divider/horizontal-divider.css";
 
 /* ndb2:block: shared/components/page-layout/nav-drawer-toggle/nav-drawer-toggle.css */
 @import "../shared/components/page-layout/nav-drawer-toggle/nav-drawer-toggle.css";

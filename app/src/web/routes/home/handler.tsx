@@ -1,4 +1,7 @@
 import { Router } from "express";
+import * as API from "@offnominal/ndb2-api-types/v2";
+import seasons from "@data/queries/seasons";
+import { getDbClient } from "@data/db/getDbClient";
 import { Route } from "@shared/routerMap";
 import { getWebAuth } from "../../middleware/auth/session";
 import { requireWebAuth } from "../../middleware/auth/require-auth";
@@ -19,6 +22,16 @@ export const Home: Route = (router: Router) => {
         return;
       }
       const csrfHeadersJson = JSON.stringify({ "X-CSRF-Token": auth.csrfToken });
+
+      const dbClient = await getDbClient(res);
+      let season: API.Entities.Seasons.SeasonDetail | null = null;
+      const currentSeasonId = await seasons.getSeasonIdByIdentifier(dbClient)(
+        "current",
+      );
+      if (currentSeasonId !== null) {
+        season = await seasons.getById(dbClient)(currentSeasonId);
+      }
+
       const html = await Promise.resolve(
         <AuthenticatedPageLayout
           theme={getThemePreference()}
@@ -28,7 +41,7 @@ export const Home: Route = (router: Router) => {
           csrfMetaToken={auth.csrfToken}
           hxHeaders={csrfHeadersJson}
         >
-          <HomePage auth={auth} />
+          <HomePage discordId={auth.discordId} season={season} />
         </AuthenticatedPageLayout>,
       );
       res.type("html").send(html);

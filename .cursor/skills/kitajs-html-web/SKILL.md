@@ -5,8 +5,9 @@ description: >-
   component files in one folder per component (name/name.tsx, name.css, name.test.tsx, index.ts), feature
   folders (page.tsx, handler.tsx, tests/), HTMX. Component props: use dot access (props.title) only; do
   not destructure the props object at the start of a component (no const { x } = props) except the
-  documented rest-and-forward pattern — see Component props. mergeClass, Suspense + renderToStream. Use
-  when adding or changing server-rendered UI under app/src/web; not for React client apps or EJS.
+  documented rest-and-forward pattern — see Component props. Prefer narrow local props interfaces (no
+  Entities.* in markup); see Props types. mergeClass, Suspense + renderToStream. Use when adding or
+  changing server-rendered UI under app/src/web; not for React client apps or EJS.
   Triggers: PreferencesForm, Button, PageLayout, props, destructuring.
 ---
 
@@ -20,6 +21,8 @@ description: >-
 - **`handler.tsx`** — Express **`Route`**; export name stays **PascalCase** (`Home`, `SuspenseDemo`). Use **JSX** for page/components (`<HomePage … />`, `<LoginPage … />`) so this file is TSX.
 - **`tests/`** — **route/page-level** tests (e.g. supertest on `mountWeb` for that feature’s paths).
 - **`components/<name>/`** — area-local Kitajs modules: **`lucky-number/lucky-number.tsx`**, colocated **`.css`**, optional **`lucky-number.test.tsx`**, and **`index.ts`** re-exporting the public API so importers can use **`import { LuckyNumber } from "./components/lucky-number"`** (PascalCase export **`LuckyNumber`**).
+
+**Data fetching:** Perform database (and other server-side IO) work in **`handler.tsx`** only: obtain **`PoolClient`** with **`getDbClient(res)`**, call **`@data/queries/**`** or other server APIs, then pass results into **`page.tsx`** and route-local components via props. **`page.tsx`** and Kitajs presentation components should remain **pure markup from props** — do not query the database or call HTTP APIs from them.
 
 Cross-cutting UI → **`app/src/web/shared/components/<name>/`** (same **folder-per-component** pattern: **`button/button.tsx`**, **`page-layout/page-layout.css`**, **`index.ts`**). Small **TypeScript** helpers (no JSX) that support markup/Kita components live in **`app/src/web/shared/utils/`** — e.g. **`mergeClass`** in **`merge_class.ts`** to concatenate a block’s **`[ bracket ]`** **`class`** with optional extra groups from props (used by **`Button`**; see also **`cube-css-authoring`**). **Path alias:** import from **`@web/...`** for anything under **`app/src/web`** (e.g. **`import { Button } from "@web/shared/components/button"`**); **`@web/*` → `src/web/*`** in **`tsconfig.json`**, with Vitest mirroring in **`vitest.shared.ts`**.
 
@@ -44,6 +47,25 @@ Official concepts: [Async components and Suspense](https://html.kitajs.org/guide
 **Exception — one destructuring to forward `...rest`:** When you must **peel** a few known fields and **pass the rest** to an intrinsic element **`{...rest}`**, use a **single** destructure, e.g. **`const { class: className, children, href, type, ...rest } = props`**, then spread **`rest`**. **Do not** use that pattern when you are only *reading* props with no rest spread. **`Button`** is the reference.
 
 - Other **“split for composition”** cases (e.g. pass a subset to a child) may use **minimal** destructuring only when **`...rest` or an equivalent** is required; use **`props.*`** for everything else.
+
+## Props types (narrow, decoupled interfaces)
+
+Presentation layers (**`page.tsx`**, route-local **`components/**`**, **`shared/components/**`**) should **define their own** **`interface`** / **`export type`** for props — tailored **only** to what that component or screen renders. **Minimize imports** of **`@offnominal/ndb2-api-types`** **`Entities.*`**, Express/session wrapper types, or other domain packages in JSX modules.
+
+**Components**
+
+- Export **`SeasonCardProps`** (etc.) beside the component with **exactly** the fields needed — e.g. **`name: string`**, **`predictions: SeasonCardPredictionCounts | null`** where **`SeasonCardPredictionCounts`** is a **local interface** listing the six numeric buckets the UI shows.
+- Do **not** thread **`Entities.Seasons.SeasonDetail`** through props when a smaller snapshot suffices; duplicated shapes are acceptable so markup stays stable when API entities evolve.
+
+**Pages**
+
+- **`HomePageProps`** (etc.) should list **only** props **`HomePage`** reads — typically **primitives** and small snapshots (**`discordId: string`**, **`season: HomePageSeasonSnapshot | null`**).
+- **Narrow aggressively:** if the page only needs one session field, pass **`discordId`** (or **`csrfToken`**, etc.) — **do not** wrap **`auth: WebAuthAuthenticated`** when the page never touches **`userId`**, **`sessionId`**, etc. Shared shells (**`AuthenticatedPageLayout`**) may still receive full **`auth`** from the **handler** for nav/chrome.
+- Snapshot interfaces (**`HomePageSeasonSnapshot`**) may **duplicate** nested shapes (e.g. six prediction counts) already declared on a child component — intentional **decoupling** between page contract and card contract.
+
+**Handlers**
+
+- Keep loading **domain / query types** (`SeasonDetail`, sessions rows, …), then pass props that **structurally satisfy** the page and child interfaces (**`<HomePage discordId={auth.discordId} season={season} />`**).
 
 ## Tests
 
