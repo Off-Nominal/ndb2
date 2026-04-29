@@ -1,0 +1,81 @@
+/* Block: tick row in `.progress-bar-ticks__shell` (`.screen-element`); optional tab renders below that frame. */
+
+.progress-bar-ticks {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 0;
+  width: 100%;
+
+  /* Room under the dangling tab drop-shadow once it sits outside the HUD border. */
+  &.progress-bar-ticks--with-figure {
+    padding-block-end: var(--space-3);
+  }
+
+  /*
+   * Bordered HUD shell — ticks only — so the caption tab sits fully below `screen-element` rim/border.
+   */
+  & .progress-bar-ticks__shell {
+    --screen-element-padding-x: var(--space-3);
+    --screen-element-padding-y: var(--space-2);
+
+    /* Static readout: avoid `.screen-element` hover brightening. */
+    &:hover {
+      box-shadow: var(--hud-shadow-screen-element);
+      border-color: var(--color-primary);
+    }
+  }
+
+  & .progress-bar-ticks__track {
+    display: flex;
+    align-items: stretch;
+    gap: var(--space-1);
+    min-height: var(--space-5);
+    min-width: 0;
+  }
+
+  & .progress-bar-ticks__segment {
+    flex: 1 1 0;
+    min-width: 0;
+    background: color-mix(in srgb, var(--color-border) 50%, var(--color-bg));
+    box-shadow: none;
+
+    &[data-filled="true"] {
+      background: var(--color-primary);
+      box-shadow: 0 0 10px 0 var(--hud-glow-mid);
+    }
+  }
+
+  & .progress-bar-ticks__figure-mount {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  /*
+   * Filled tab: primary diagonal — tab face; knockout on inner span via `.canvas-knockout-text`.
+   */
+  & .progress-bar-ticks__figure {
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: var(--space-1) var(--space-6);
+    clip-path: polygon(0 0, 100% 0, 92% 100%, 8% 100%);
+    text-align: center;
+    filter: drop-shadow(0 var(--space-1) var(--space-3) var(--hud-glow-mid));
+  }
+
+  /* Typography; knockout: `.canvas-knockout-text` */
+  & .progress-bar-ticks__figure-label {
+    margin: 0;
+    padding: 0;
+    font-size: var(--text-xl);
+    font-weight: var(--weight-semibold);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--tracking-wide);
+    line-height: var(--leading-tight);
+    text-transform: uppercase;
+  }
+}

@@ -149,6 +149,21 @@
 }
 
 /**
+ * Knockout HUD labels: glyphs reveal `--color-bg` through ribbons and overlays (`primary-specular-gradient`,
+ * glass layers, etc.). Compose with block or element styles for size and weight.
+ */
+.canvas-knockout-text {
+  color: transparent;
+  background-image: linear-gradient(
+    to bottom,
+    var(--color-bg) 0%,
+    var(--color-bg) 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+/**
  * Thin frosted overlay: nearly transparent with a faint `--color-primary` wash plus backdrop blur so
  * whatever sits beneath reads through softly. Unlike `.glass-background` (opaque HUD layers), this is
  * for panels/chips atop existing chrome — compose with borders or `.screen-element` as needed.

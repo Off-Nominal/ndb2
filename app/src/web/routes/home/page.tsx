@@ -16,6 +16,8 @@ export interface HomePageSeasonPredictionCounts {
 export interface HomePageSeasonSnapshot {
   name: string;
   predictions: HomePageSeasonPredictionCounts;
+  start: string;
+  end: string;
 }
 
 export interface HomePageProps {
@@ -28,13 +30,15 @@ export function HomePage(props: HomePageProps): JSX.Element {
   return (
     <div class="[ stack ] [ main-menu ]">
       <HeadingScreenElement>
-        <h1>Main Menu</h1>
+        <h1 class="[ canvas-knockout-text ]">Main Menu</h1>
       </HeadingScreenElement>
 
       <div class="[ grid ]">
         <SeasonCard
           name={props.season?.name ?? ""}
           predictions={props.season?.predictions ?? null}
+          startDate={props.season?.start ?? ""}
+          endDate={props.season?.end ?? ""}
         />
         <CardScreenElement headingElement="h2" heading="Performance">
           <p>

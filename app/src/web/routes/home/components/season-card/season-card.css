@@ -3,19 +3,19 @@
   font-size: var(--text-xl);
 
   & .season-card__empty {
+    --center-min-height: 12rem;
     margin: 0;
   }
 
   & .season-card__meta {
     font-weight: var(--weight-bold);
     text-align: center;
+    font-size: var(--text-2xl);
   }
 
   & .season-card__stats {
     --stack-space: var(--space-4);
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    column-gap: var(--space-4);
+    columns: 2;
   }
 
   & .season-card__row :last-child {

@@ -24,13 +24,7 @@
       flex: 0 0 auto;
       display: inline-block;
       width: auto;
-      background-image: linear-gradient(
-        to bottom,
-        var(--color-bg) 0%,
-        var(--color-bg) 100%
-      );
-      background-clip: text;
-      -webkit-background-clip: text;
+      /* knockout: `.canvas-knockout-text` */
     }
   }
 

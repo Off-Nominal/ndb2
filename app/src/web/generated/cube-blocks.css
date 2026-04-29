@@ -39,6 +39,9 @@
 /* ndb2:block: shared/components/preferences-form/preferences-form.css */
 @import "../shared/components/preferences-form/preferences-form.css";
 
+/* ndb2:block: shared/components/progress-bar-ticks/progress-bar-ticks.css */
+@import "../shared/components/progress-bar-ticks/progress-bar-ticks.css";
+
 /* ndb2:block: shared/components/select/select.css */
 @import "../shared/components/select/select.css";
 

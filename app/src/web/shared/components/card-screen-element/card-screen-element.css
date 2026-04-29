@@ -30,22 +30,12 @@
   }
 
   & .card-screen-element__heading {
-    /* type (match heading strip + global scale from element tag h1–h6) */
+    /* type (match heading strip + global scale from element tag h1–h6); knockout: `.canvas-knockout-text` */
     margin: 0;
     text-transform: uppercase;
     letter-spacing: var(--tracking-wide);
     font-weight: var(--weight-semibold);
     font-size: var(--text-md);
-
-    /* Knockout: glyph fill matches canvas */
-    background-image: linear-gradient(
-      to bottom,
-      var(--color-bg) 0%,
-      var(--color-bg) 100%
-    );
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
   }
 
   & .card-screen-element__body {
