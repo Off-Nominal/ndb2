@@ -1,3 +1,5 @@
+import type { PredictionLifeCycle } from "./predictions";
+
 export type Identifier = "current" | "past" | "future";
 
 export type Season = {
@@ -8,6 +10,14 @@ export type Season = {
   wager_cap: number;
   closed: boolean;
   identifier: Identifier;
+};
+
+/** Prediction counts by lifecycle status for GET /seasons/:id. */
+export type SeasonPredictionCounts = Record<PredictionLifeCycle, number>;
+
+/** Season detail from GET /seasons/:id (numeric id or current | past | future). */
+export type SeasonDetail = Season & {
+  predictions: SeasonPredictionCounts;
 };
 
 export type SeasonResults = {

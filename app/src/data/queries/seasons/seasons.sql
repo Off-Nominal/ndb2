@@ -11,14 +11,32 @@ ORDER BY "end" DESC;
 
 /* @name getSeasonById */
 SELECT
-  id,
-  name,
-  start,
-  "end",
-  wager_cap,
-  closed
-FROM seasons
-WHERE id = :id!;
+  s.id,
+  s.name,
+  s.start,
+  s."end",
+  s.wager_cap,
+  s.closed,
+  COALESCE(pred_agg.successful, 0)::int AS predictions_successful,
+  COALESCE(pred_agg.failed, 0)::int AS predictions_failed,
+  COALESCE(pred_agg.retired, 0)::int AS predictions_retired,
+  COALESCE(pred_agg.closed, 0)::int AS predictions_closed,
+  COALESCE(pred_agg.checking, 0)::int AS predictions_checking,
+  COALESCE(pred_agg.open, 0)::int AS predictions_open
+FROM seasons AS s
+LEFT JOIN (
+  SELECT
+    season_id,
+    COUNT(*) FILTER (WHERE status = 'successful')::int AS successful,
+    COUNT(*) FILTER (WHERE status = 'failed')::int AS failed,
+    COUNT(*) FILTER (WHERE status = 'retired')::int AS retired,
+    COUNT(*) FILTER (WHERE status = 'closed')::int AS closed,
+    COUNT(*) FILTER (WHERE status = 'checking')::int AS checking,
+    COUNT(*) FILTER (WHERE status = 'open')::int AS open
+  FROM predictions
+  GROUP BY season_id
+) AS pred_agg ON pred_agg.season_id = s.id
+WHERE s.id = :id!;
 
 /* @name closeSeasonById */
 UPDATE seasons

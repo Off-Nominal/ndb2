@@ -1,0 +1,116 @@
+/* Block: tick row in `.progress-bar-ticks__shell` (`.screen-element`); optional tab renders below that frame. */
+
+.progress-bar-ticks {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 0;
+  width: 100%;
+
+  /*
+   * Room under the caption row (percent tab drop-shadow and/or end labels) outside the bordered shell.
+   */
+  &.progress-bar-ticks--with-caption {
+    padding-block-end: var(--space-3);
+  }
+
+  /*
+   * Bordered HUD shell — ticks only — so the caption tab sits fully below `screen-element` rim/border.
+   */
+  & .progress-bar-ticks__shell {
+    --screen-element-padding-x: var(--space-3);
+    --screen-element-padding-y: var(--space-2);
+
+    /* Static readout: avoid `.screen-element` hover brightening. */
+    &:hover {
+      box-shadow: var(--hud-shadow-screen-element);
+      border-color: var(--color-primary);
+    }
+  }
+
+  & .progress-bar-ticks__track {
+    display: flex;
+    align-items: stretch;
+    gap: var(--space-1);
+    min-height: var(--space-5);
+    min-width: 0;
+  }
+
+  & .progress-bar-ticks__segment {
+    flex: 1 1 0;
+    min-width: 0;
+    background: color-mix(in srgb, var(--color-border) 50%, var(--color-bg));
+    box-shadow: none;
+
+    &[data-filled="true"] {
+      background: var(--color-primary);
+      box-shadow: 0 0 10px 0 var(--hud-glow-mid);
+    }
+  }
+
+  /*
+   * One row below the HUD shell: min (start) | centered percent tab | max (end).
+   */
+  & .progress-bar-ticks__figure-mount {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: var(--space-3);
+    width: 100%;
+    padding-inline: 2px;
+  }
+
+  & .progress-bar-ticks__caption-min,
+  & .progress-bar-ticks__caption-max {
+    margin: 0;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-regular);
+    line-height: var(--leading-normal);
+    align-self: end;
+    min-width: 0;
+  }
+
+  & .progress-bar-ticks__caption-min {
+    justify-self: start;
+    text-align: start;
+  }
+
+  & .progress-bar-ticks__caption-max {
+    justify-self: end;
+    text-align: end;
+  }
+
+  & .progress-bar-ticks__caption-center {
+    display: flex;
+    justify-content: center;
+    justify-self: center;
+    min-width: 0;
+  }
+
+  /*
+   * Filled tab: primary diagonal — tab face; knockout on inner span via `.canvas-knockout-text`.
+   */
+  & .progress-bar-ticks__figure {
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: var(--space-1) var(--space-6);
+    clip-path: polygon(0 0, 100% 0, 92% 100%, 8% 100%);
+    text-align: center;
+    filter: drop-shadow(0 var(--space-1) var(--space-3) var(--hud-glow-mid));
+  }
+
+  /* Typography; knockout: `.canvas-knockout-text` */
+  & .progress-bar-ticks__figure-label {
+    margin: 0;
+    padding: 0;
+    font-size: var(--text-xl);
+    font-weight: var(--weight-semibold);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--tracking-wide);
+    line-height: var(--leading-tight);
+    text-transform: uppercase;
+  }
+}

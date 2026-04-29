@@ -1,0 +1,15 @@
+/* Block: full-width HUD line — mirrors `.screen-element` border + `--hud-shadow-screen-element`. */
+
+.horizontal-divider {
+  display: block;
+  width: 100%;
+  height: 0;
+  margin-inline: 0;
+  margin-block: var(--horizontal-divider-margin-block, 0);
+  padding: 0;
+  border: none;
+  border-top: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--hud-shadow-screen-element);
+  background: transparent;
+}

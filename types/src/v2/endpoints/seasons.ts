@@ -6,3 +6,9 @@ export namespace GET {
   export type Data = Entities.Seasons.Season[];
   export type Response = APIResponse<Data>;
 }
+
+// GET /seasons/:id (positive integer id or current | past | future)
+export namespace GET_ById {
+  export type Data = Entities.Seasons.SeasonDetail;
+  export type Response = APIResponse<Data>;
+}

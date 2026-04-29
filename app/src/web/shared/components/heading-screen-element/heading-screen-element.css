@@ -59,18 +59,9 @@
   & .heading-screen-element__bar h4,
   & .heading-screen-element__bar h5,
   & .heading-screen-element__bar h6 {
+    /* Knockout: `.canvas-knockout-text` on the heading element */
     letter-spacing: var(--tracking-wide);
     margin: 0;
     text-transform: uppercase;
-
-    /* Knockout: glyph fill matches canvas */
-    background-image: linear-gradient(
-      to bottom,
-      var(--color-bg) 0%,
-      var(--color-bg) 100%
-    );
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
   }
 }

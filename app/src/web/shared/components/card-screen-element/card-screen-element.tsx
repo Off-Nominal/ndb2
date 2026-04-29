@@ -21,7 +21,7 @@ export type CardScreenElementProps = {
 export function CardScreenElement(props: CardScreenElementProps): JSX.Element {
   const title = createElement(
     props.headingElement,
-    { class: "[ card-screen-element__heading ]" },
+    { class: mergeClass("[ card-screen-element__heading ]", "[ canvas-knockout-text ]") },
     props.heading,
   );
 

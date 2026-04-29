@@ -197,3 +197,24 @@ export const snoozeCheckIdSchema = createPostgresIntSchema({
 export const seasonIdSchema = createPostgresIntSchema({
   propName: "season_id",
 });
+
+/**
+ * GET /seasons/:id — numeric season id or identifier `current` | `past` | `future`.
+ */
+export const seasonLookupParamSchema = z.union([
+  z.enum(["current", "past", "future"]).transform(
+    (
+      identifier,
+    ): {
+      kind: "identifier";
+      identifier: Entities.Seasons.Identifier;
+    } => ({
+      kind: "identifier",
+      identifier,
+    }),
+  ),
+  createPostgresIntSchema({ propName: "id" }).transform((id) => ({
+    kind: "id" as const,
+    id,
+  })),
+]);
