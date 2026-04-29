@@ -23,7 +23,7 @@ export function NavigationMenu(props: NavigationMenuProps): JSX.Element {
     <nav class="[ site-nav ]">
       <div class="[ site-nav__title ]" aria-label={SITE_NAV_TITLE}>
         {SITE_NAV_TITLE.split("").map((ch) => (
-          <span class="[ site-nav__title-char ] [ canvas-knockout-text ]" aria-hidden="true">
+          <span class="[ site-nav__title-char ]" aria-hidden="true">
             {ch}
           </span>
         ))}

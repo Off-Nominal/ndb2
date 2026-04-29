@@ -12,7 +12,8 @@
    * Floating list: `data-select-placement` (from JS) swaps “start” vs “end” edge — seam toward the
    * trigger, radii on the outer edge, anchor `top`/`bottom`, and a slightly different drop shadow.
    */
-  --select-list-seam: 1px solid color-mix(in srgb, var(--color-primary) 22%, var(--color-bg) 78%);
+  --select-list-seam: 1px solid
+    color-mix(in srgb, var(--color-primary) 22%, var(--color-bg) 78%);
   --select-list-border-start: var(--select-list-seam);
   --select-list-border-end: 1px solid var(--color-primary);
   --select-list-top: 100%;
@@ -134,7 +135,7 @@
     margin: 0;
     margin-top: 0; /* no gap: flush under trigger (below) */
     margin-bottom: 0;
-    padding: var(--space-1) 0;
+    padding: 0;
     list-style: none;
     overflow-y: auto;
 
@@ -192,18 +193,34 @@
       background 0.12s ease,
       color 0.12s ease;
 
-    &:hover,
+    &:hover:not([aria-selected="true"]) {
+      background: color-mix(in srgb, var(--color-primary) 26%, var(--color-bg));
+      color: var(--color-text);
+    }
+
+    /* Selected row: stronger tint + body text for max contrast vs mid accent hues. */
     &[aria-selected="true"] {
-      background: color-mix(in srgb, var(--color-text) 5%, var(--color-bg) 95%);
-      color: var(--color-primary);
+      background: color-mix(in srgb, var(--color-primary) 38%, var(--color-bg));
+      color: var(--color-text);
+    }
+
+    &[aria-selected="true"]:hover {
+      background: color-mix(in srgb, var(--color-primary) 46%, var(--color-bg));
+      color: var(--color-text);
     }
   }
 
   & .select__option[data-select-option-active="true"] {
-    background: color-mix(in srgb, var(--color-text) 5%, var(--color-bg) 95%);
-    color: var(--color-primary);
-    outline: 1px solid
-      color-mix(in srgb, var(--color-primary) 35%, var(--color-bg) 65%);
-    outline-offset: -1px;
+    background: color-mix(in srgb, var(--color-primary) 38%, var(--color-bg));
+    color: var(--color-text);
+    /* Top/bottom only: full inset outline sat flush with the list border and read as double-wide sides. */
+    outline: none;
+    box-shadow:
+      inset 0 1px 0 0 var(--color-primary),
+      inset 0 -1px 0 0 var(--color-primary);
+  }
+
+  & .select__option[data-select-option-active="true"]:hover {
+    background: color-mix(in srgb, var(--color-primary) 46%, var(--color-bg));
   }
 }

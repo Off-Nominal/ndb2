@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Reads design token JSON under `src/web/tokens/` and writes
+ * Reads design token JSON under `src/web/tokens/` plus `colour-schemes.json` and writes
  * `src/web/generated/design-tokens.css` (CSS custom properties; imported by CUBE entry + Vite).
  *
  * If a token's `value` matches another token's `name`, the output uses
@@ -109,6 +109,248 @@ function loadSchemeHueDefs() {
   return out;
 }
 
+const COLOUR_SCHEMES_FILE = "colour-schemes.json";
+
+/** @typedef {{ upTo200: number; upTo400: number; from500: number }} BrandNeutralMixTiers */
+
+/**
+ * @param {number} step
+ * @param {BrandNeutralMixTiers} tiers
+ */
+function mixPercentForBrandStep(step, tiers) {
+  if (step <= 200) return tiers.upTo200;
+  if (step <= 400) return tiers.upTo400;
+  return tiers.from500;
+}
+
+/**
+ * @param {Record<string, unknown>} obj
+ * @param {string} context
+ * @returns {BrandNeutralMixTiers}
+ */
+function readMixTiersObject(obj, context) {
+  const keys = /** @type {const} */ (["upTo200", "upTo400", "from500"]);
+  /** @type {BrandNeutralMixTiers} */
+  const out = { upTo200: 0, upTo400: 0, from500: 0 };
+  for (const k of keys) {
+    const v = obj[k];
+    if (typeof v !== "number" || !Number.isInteger(v)) {
+      die(`${COLOUR_SCHEMES_FILE}: ${context}.${k} must be an integer`);
+    }
+    if (v < 0 || v > 100) die(`${COLOUR_SCHEMES_FILE}: ${context}.${k} must be between 0 and 100`);
+    out[k] = v;
+  }
+  return out;
+}
+
+/**
+ * @param {BrandNeutralMixTiers | null} tiers
+ */
+function tiersHaveEffect(tiers) {
+  if (tiers == null) return false;
+  return tiers.upTo200 > 0 || tiers.upTo400 > 0 || tiers.from500 > 0;
+}
+
+/**
+ * @param {unknown} rawApp
+ * @param {BrandNeutralMixTiers} defaultTiers
+ * @param {string} schemeId
+ * @param {string} appearanceName
+ * @returns {BrandNeutralMixTiers | null}
+ */
+function resolveAppearanceMix(rawApp, defaultTiers, schemeId, appearanceName) {
+  if (rawApp === 0) return null;
+  if (typeof rawApp !== "object" || rawApp === null) {
+    die(
+      `${COLOUR_SCHEMES_FILE}: "${schemeId}"."${appearanceName}" must be 0 or an object (see mixTiers / inherit).`,
+    );
+  }
+  /** @type {Record<string, unknown>} */
+  const o = /** @type {Record<string, unknown>} */ (rawApp);
+  const allowed = new Set(["inherit", "upTo200", "upTo400", "from500", "description"]);
+  for (const k of Object.keys(o)) {
+    if (!allowed.has(k)) {
+      die(
+        `${COLOUR_SCHEMES_FILE}: "${schemeId}"."${appearanceName}" unknown key "${k}" (allowed: inherit, upTo200, upTo400, from500, description).`,
+      );
+    }
+  }
+  if (o.description != null && typeof o.description !== "string") {
+    die(`${COLOUR_SCHEMES_FILE}: "${schemeId}"."${appearanceName}".description must be a string when present`);
+  }
+
+  const inherit = o.inherit === true;
+  const explicit = ["upTo200", "upTo400", "from500"].map((k) => o[k]).filter((v) => v !== undefined);
+  if (inherit && explicit.length > 0) {
+    die(
+      `${COLOUR_SCHEMES_FILE}: "${schemeId}"."${appearanceName}" cannot set inherit:true together with tier percentages.`,
+    );
+  }
+  if (inherit) {
+    return { ...defaultTiers };
+  }
+  if (explicit.length === 3) {
+    return readMixTiersObject(o, `"${schemeId}"."${appearanceName}"`);
+  }
+  if (explicit.length === 0 && !inherit) {
+    die(
+      `${COLOUR_SCHEMES_FILE}: "${schemeId}"."${appearanceName}" must use { \"inherit\": true } or set upTo200, upTo400, and from500.`,
+    );
+  }
+  die(
+    `${COLOUR_SCHEMES_FILE}: "${schemeId}"."${appearanceName}" must set all three of upTo200, upTo400, from500 when not using inherit.`,
+  );
+}
+
+/**
+ * @param {{ id: string; label: string }[]} schemeHueDefs
+ * @returns {Map<string, { label: string; description: string; light: BrandNeutralMixTiers | null; dark: BrandNeutralMixTiers | null }>}
+ */
+function loadColourSchemeMixes(schemeHueDefs) {
+  const p = path.join(TOKENS_DIR, COLOUR_SCHEMES_FILE);
+  if (!fs.existsSync(p)) {
+    die(`Missing ${COLOUR_SCHEMES_FILE} (expected next to other tokens)`);
+  }
+  const raw = JSON.parse(fs.readFileSync(p, "utf8"));
+  if (!raw || typeof raw !== "object" || !Array.isArray(raw.schemes)) {
+    die(`${COLOUR_SCHEMES_FILE}: root must be an object with a "schemes" array`);
+  }
+
+  const rootKeys = new Set(Object.keys(raw));
+  const allowedRoot = new Set(["description", "mixTiers", "schemes"]);
+  for (const k of rootKeys) {
+    if (!allowedRoot.has(k)) {
+      die(`${COLOUR_SCHEMES_FILE}: unknown root key "${k}" (allowed: description, mixTiers, schemes)`);
+    }
+  }
+  if (raw.description != null && typeof raw.description !== "string") {
+    die(`${COLOUR_SCHEMES_FILE}: root "description" must be a string when present`);
+  }
+  if (!raw.mixTiers || typeof raw.mixTiers !== "object") {
+    die(`${COLOUR_SCHEMES_FILE}: root "mixTiers" is required (object with upTo200, upTo400, from500)`);
+  }
+  const mt = /** @type {Record<string, unknown>} */ (raw.mixTiers);
+  for (const k of Object.keys(mt)) {
+    if (!["description", "upTo200", "upTo400", "from500"].includes(k)) {
+      die(`${COLOUR_SCHEMES_FILE}: mixTiers unknown key "${k}"`);
+    }
+  }
+  if (mt.description != null && typeof mt.description !== "string") {
+    die(`${COLOUR_SCHEMES_FILE}: mixTiers.description must be a string when present`);
+  }
+  const defaultMixTiers = readMixTiersObject(mt, "mixTiers");
+
+  const allowed = new Set(schemeHueDefs.map((h) => h.id));
+  const seen = new Set();
+  /** @type {Map<string, { label: string; description: string; light: BrandNeutralMixTiers | null; dark: BrandNeutralMixTiers | null }>} */
+  const out = new Map();
+
+  for (const row of raw.schemes) {
+    if (!row || typeof row !== "object") die(`${COLOUR_SCHEMES_FILE}: invalid schemes[] entry`);
+    const allowedRow = new Set(["id", "label", "description", "light", "dark"]);
+    for (const k of Object.keys(row)) {
+      if (!allowedRow.has(k)) {
+        die(`${COLOUR_SCHEMES_FILE}: unknown key on scheme row "${k}"`);
+      }
+    }
+    const { id, label, description, light, dark } = row;
+    if (typeof id !== "string" || id === "") die(`${COLOUR_SCHEMES_FILE}: each scheme needs string "id"`);
+    if (typeof label !== "string" || label.trim() === "") {
+      die(`${COLOUR_SCHEMES_FILE}: "${id}" needs non-empty string "label" (human-readable, e.g. Neptune — blue).`);
+    }
+    if (typeof description !== "string" || description.trim() === "") {
+      die(`${COLOUR_SCHEMES_FILE}: "${id}" needs non-empty string "description" for developers.`);
+    }
+    if (!allowed.has(id)) die(`${COLOUR_SCHEMES_FILE}: unknown scheme id "${id}" (not in scheme-hue-defs.ts)`);
+    if (seen.has(id)) die(`${COLOUR_SCHEMES_FILE}: duplicate id "${id}"`);
+    seen.add(id);
+
+    const lightTiers = resolveAppearanceMix(light, defaultMixTiers, id, "light");
+    const darkTiers = resolveAppearanceMix(dark, defaultMixTiers, id, "dark");
+
+    out.set(id, { label, description, light: lightTiers, dark: darkTiers });
+  }
+
+  for (const id of allowed) {
+    if (!seen.has(id)) die(`${COLOUR_SCHEMES_FILE}: missing scheme "${id}"`);
+  }
+
+  return out;
+}
+
+/**
+ * @param {string[]} lines
+ * @param {{ id: string; label: string }[]} schemeHueDefs
+ * @param {number[]} brandSteps
+ * @param {Map<string, { label: string; description: string; light: BrandNeutralMixTiers | null; dark: BrandNeutralMixTiers | null }>} mixBySchemeId
+ */
+function emitBrandNeutralMixRules(lines, schemeHueDefs, brandSteps, mixBySchemeId) {
+  /** @param {BrandNeutralMixTiers | null} tiers */
+  function brandStepLines(schemeId, tiers) {
+    if (tiers == null || !tiersHaveEffect(tiers)) return [];
+    return brandSteps.map((step) => {
+      const n = mixPercentForBrandStep(step, tiers);
+      const accentVar = tokenNameToVar(`scheme.${schemeId}.${step}`);
+      const neutralVar = tokenNameToVar(`scheme.${schemeId}.neutral.500`);
+      return `  --brand-${step}: color-mix(in srgb, var(${accentVar}) ${100 - n}%, var(${neutralVar}) ${n}%);`;
+    });
+  }
+
+  const anyLight = [...mixBySchemeId.values()].some((m) => tiersHaveEffect(m.light));
+  const anyDark = [...mixBySchemeId.values()].some((m) => tiersHaveEffect(m.dark));
+  if (!anyLight && !anyDark) return;
+
+  lines.push("/* ———————————————————————————————————————————————————— */");
+  lines.push(`/* Brand ramp × neutral-500 mix — data: tokens/${COLOUR_SCHEMES_FILE}. */`);
+  lines.push("/* ———————————————————————————————————————————————————— */");
+  lines.push("");
+
+  for (const { id } of schemeHueDefs) {
+    const cfg = mixBySchemeId.get(id);
+    if (cfg == null) continue;
+
+    if (tiersHaveEffect(cfg.light)) {
+      const t = /** @type {BrandNeutralMixTiers} */ (cfg.light);
+      lines.push(`/* ${escapeComment(cfg.label)} — ${escapeComment(cfg.description)} */`);
+      lines.push(
+        `/* light: neutral-500 mix (%) — brand ≤200: ${t.upTo200}, ≤400: ${t.upTo400}, ≥500: ${t.from500} */`,
+      );
+      const body = brandStepLines(id, cfg.light);
+      if (body.length === 0) continue;
+      lines.push(`html[data-theme="light"][data-color-scheme="${id}"] {`);
+      lines.push(...body);
+      lines.push("}");
+      lines.push("");
+      lines.push("@media (prefers-color-scheme: light) {");
+      lines.push(`  html[data-theme="system"][data-color-scheme="${id}"] {`);
+      lines.push(...body.map((line) => `  ${line}`));
+      lines.push("  }");
+      lines.push("}");
+      lines.push("");
+    }
+
+    if (tiersHaveEffect(cfg.dark)) {
+      const t = /** @type {BrandNeutralMixTiers} */ (cfg.dark);
+      lines.push(`/* ${escapeComment(cfg.label)} — ${escapeComment(cfg.description)} */`);
+      lines.push(
+        `/* dark: neutral-500 mix (%) — brand ≤200: ${t.upTo200}, ≤400: ${t.upTo400}, ≥500: ${t.from500} */`,
+      );
+      const body = brandStepLines(id, cfg.dark);
+      if (body.length === 0) continue;
+      lines.push(`html[data-theme="dark"][data-color-scheme="${id}"] {`);
+      lines.push(...body);
+      lines.push("}");
+      lines.push("");
+      lines.push("@media (prefers-color-scheme: dark) {");
+      lines.push(`  html[data-theme="system"][data-color-scheme="${id}"] {`);
+      lines.push(...body.map((line) => `  ${line}`));
+      lines.push("  }");
+      lines.push("}");
+      lines.push("");
+    }
+  }
+}
+
 /** Comma-separated `font-family` list (e.g. `Oxanium, sans-serif` or `"Droid Sans", sans-serif`). */
 function isFontFamilyList(value) {
   return /^("[^"]+"|'[^']+'|[-A-Za-z0-9.]+)(\s*,\s*("[^"]+"|'[^']+'|[-A-Za-z0-9.]+))+\s*$/.test(
@@ -186,6 +428,7 @@ function main() {
   }
 
   const SCHEME_HUE_DEFS = loadSchemeHueDefs();
+  const colourSchemeMixes = loadColourSchemeMixes(SCHEME_HUE_DEFS);
   const BRAND_STEPS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
   const NEUTRAL_STEPS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
 
@@ -206,7 +449,8 @@ function main() {
       .map((t) => [t.name, t]),
   );
   for (const { id, label } of SCHEME_HUE_DEFS) {
-    lines.push(`  /* – ${label}: accent (brand) – */`);
+    const docLabel = colourSchemeMixes.get(id)?.label ?? label;
+    lines.push(`  /* – ${docLabel}: accent (brand) – */`);
     for (const step of BRAND_STEPS) {
       const name = `scheme.${id}.${step}`;
       const t = tokenByName.get(name);
@@ -214,7 +458,7 @@ function main() {
       if (t.description) lines.push(`  /* ${escapeComment(t.description)} */`);
       lines.push(`  ${tokenNameToVar(t.name)}: ${resolveValue(t.value)};`);
     }
-    lines.push(`  /* – ${label}: surface neutrals – */`);
+    lines.push(`  /* – ${docLabel}: surface neutrals – */`);
     for (const step of NEUTRAL_STEPS) {
       const name = `scheme.${id}.neutral.${step}`;
       const t = tokenByName.get(name);
@@ -283,7 +527,10 @@ function main() {
   lines.push("");
 
   for (const { id, label } of SCHEME_HUE_DEFS) {
-    lines.push(`/* [${label}] :root tokens → --brand-* / --neutral-* when data-color-scheme=\"${id}\" */`);
+    const docLabel = colourSchemeMixes.get(id)?.label ?? label;
+    lines.push(
+      `/* [${escapeComment(docLabel)}] :root tokens → --brand-* / --neutral-* when data-color-scheme=\"${id}\" */`,
+    );
     lines.push(`html[data-color-scheme="${id}"] {`);
     for (const step of BRAND_STEPS) {
       const from = `scheme.${id}.${step}`;
@@ -298,6 +545,8 @@ function main() {
     lines.push("}");
     lines.push("");
   }
+
+  emitBrandNeutralMixRules(lines, SCHEME_HUE_DEFS, BRAND_STEPS, colourSchemeMixes);
 
   fs.mkdirSync(path.dirname(OUT_FILE), { recursive: true });
   fs.writeFileSync(OUT_FILE, `${lines.join("\n")}\n`, "utf8");

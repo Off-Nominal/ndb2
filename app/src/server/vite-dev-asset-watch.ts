@@ -74,10 +74,14 @@ export function viteDevAssetWatchPlugin(appRoot: string) {
         touchApiEntry();
       }, 150);
 
-      const tokenWatcher = chokidar.watch("src/web/tokens/**/*.json", {
-        cwd: appRoot,
-        ignoreInitial: true,
-      });
+      // Also watch `*.json` at tokens root: some glob engines treat `**/…` as subdirs-only.
+      const tokenWatcher = chokidar.watch(
+        ["src/web/tokens/*.json", "src/web/tokens/**/*.json", "src/web/tokens/scheme-hue-defs.ts"],
+        {
+          cwd: appRoot,
+          ignoreInitial: true,
+        },
+      );
 
       const cssWatcher = chokidar.watch("src/web/**/*.css", {
         cwd: appRoot,

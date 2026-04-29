@@ -39,7 +39,12 @@
   & .progress-bar-ticks__segment {
     flex: 1 1 0;
     min-width: 0;
-    background: color-mix(in srgb, var(--color-border) 50%, var(--color-bg));
+    /* Unfilled: stronger than 50/50 border+bg so ticks read on light glass; `--color-text-muted` keeps contrast in both themes. */
+    background: color-mix(
+      in srgb,
+      var(--color-text-muted) 20%,
+      color-mix(in srgb, var(--color-border) 72%, var(--color-bg))
+    );
     box-shadow: none;
 
     &[data-filled="true"] {

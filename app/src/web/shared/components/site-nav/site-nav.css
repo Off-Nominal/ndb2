@@ -24,7 +24,7 @@
       flex: 0 0 auto;
       display: inline-block;
       width: auto;
-      /* knockout: `.canvas-knockout-text` */
+      color: var(--color-text);
     }
   }
 
