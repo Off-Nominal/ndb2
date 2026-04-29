@@ -11,9 +11,9 @@ interface SeasonCardPredictionRowProps {
 
 function SeasonCardPredictionRow(props: SeasonCardPredictionRowProps): JSX.Element {
   return (
-    <div class="season-card__row">
-      <span class="season-card__label">{props.label}</span>
-      <span class="season-card__value">{props.count}</span>
+    <div class={"[ split-pair ] [ season-card__row ]"}>
+      <span>{props.label}</span>
+      <span>{props.count}</span>
     </div>
   );
 }
@@ -51,16 +51,16 @@ export function SeasonCard(props: SeasonCardProps): JSX.Element {
       ) : (
         <>
           <p class="season-card__meta">
-            {(marked.parseInline(props.name) as string) as "safe"}
+            {marked.parseInline(props.name)}
           </p>
           <div class="season-card__stats">
-            <div class="season-card__group">
+            <div class="[ stack ]">
               <SeasonCardPredictionRow label="[Open]" count={predictions.open} />
               <SeasonCardPredictionRow label="[Checking]" count={predictions.checking} />
               <SeasonCardPredictionRow label="[Voting]" count={predictions.closed} />
             </div>
-            <HorizontalDivider class="season-card__stats-divider" />
-            <div class="season-card__group">
+            {/* <HorizontalDivider class="season-card__stats-divider" /> */}
+            <div class="[ stack ]">
               <SeasonCardPredictionRow label="[Successful]" count={predictions.successful} />
               <SeasonCardPredictionRow label="[Failed]" count={predictions.failed} />
               <SeasonCardPredictionRow label="[Retired]" count={predictions.retired} />

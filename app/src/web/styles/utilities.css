@@ -178,3 +178,15 @@
   width: auto;
   max-width: 100%;
 }
+
+/**
+ * Two-cell row: first child fills remaining inline space (`minmax(0, 1fr)`); second stays content-sized
+ * at inline-end. Baseline-aligned for label + figure pairs (counts, amounts). Tune gaps with custom props.
+ */
+.split-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: var(--split-pair-gap-inline, var(--space-4));
+  row-gap: var(--split-pair-gap-block, var(--space-1));
+}
