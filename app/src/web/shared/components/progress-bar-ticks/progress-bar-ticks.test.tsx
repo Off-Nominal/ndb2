@@ -26,15 +26,29 @@ describe("ProgressBarTicks", () => {
     expect(html).toContain('aria-valuenow="5"');
   });
 
-  it("shows a percentage caption and reflects it in aria-valuetext when enabled", () => {
+  it("shows a percentage caption and reflects it in aria-valuetext when showPercentLabel is set", () => {
     const html = ProgressBarTicks({
       value: 3,
       min: 0,
       max: 10,
-      showPercentage: true,
+      showPercentLabel: true,
       "aria-label": "Season",
     });
     expect(html).toContain('aria-valuetext="30%"');
     expect(html).toContain(">30%</");
+  });
+
+  it("renders the caption row when only min/max labels are set (no percent tab)", () => {
+    const html = ProgressBarTicks({
+      value: 50,
+      minLabel: "Start",
+      maxLabel: "End",
+      "aria-label": "Range",
+    });
+    expect(html).toContain('progress-bar-ticks__caption-min');
+    expect(html).toContain(">Start<");
+    expect(html).toContain(">End<");
+    expect(html).not.toContain("aria-valuetext");
+    expect(html).not.toContain("progress-bar-ticks__figure-label");
   });
 });

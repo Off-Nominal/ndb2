@@ -10,8 +10,12 @@ export type ProgressBarTicksProps = {
   max?: number;
   /** Number of discrete vertical segments (default `40`). */
   segmentCount?: number;
-  /** When true, shows normalized completion as a percentage on a centered tab below the ticks. */
-  showPercentage?: boolean;
+  /** When true, renders normalized completion as a percentage in the centered HUD tab below the ticks. */
+  showPercentLabel?: boolean;
+  /** Caption aligned to the inline-start of the caption row below the ticks (muted body text). */
+  minLabel?: string;
+  /** Caption aligned to the inline-end of the caption row below the ticks (muted body text). */
+  maxLabel?: string;
   /** Exposed to assistive technologies when there is no visible label. */
   "aria-label": string;
 };
@@ -21,9 +25,8 @@ const DEFAULT_MAX = 100;
 const DEFAULT_SEGMENTS = 40;
 
 /**
- * Segmented HUD progress: vertical ticks in a `.screen-element` frame, filled segments use the theme
- * primary colour; unfilled segments stay dimmed. Optional `showPercentage` adds a primary-gradient tab
- * below the `.screen-element` HUD frame (outside the bordered shell) with the normalized percentage.
+ * Segmented HUD progress: vertical ticks in a `.screen-element` frame; optional caption row below the shell
+ * shows any combination of `showPercentLabel` (knockout tab), `minLabel`, and `maxLabel`.
  */
 export function ProgressBarTicks(props: ProgressBarTicksProps): JSX.Element {
   const min = props.min ?? DEFAULT_MIN;
@@ -39,6 +42,11 @@ export function ProgressBarTicks(props: ProgressBarTicksProps): JSX.Element {
   const ariaNow = Math.round(clamped);
   const pctNormalized = safeSpan <= 0 ? 0 : ((clamped - min) / safeSpan) * 100;
   const pctLabel = `${Math.round(pctNormalized)}%`;
+
+  const showCaptionRow =
+    props.showPercentLabel === true ||
+    props.minLabel !== undefined ||
+    props.maxLabel !== undefined;
 
   const segments: JSX.Element[] = [];
   for (let i = 0; i < segmentCount; i += 1) {
@@ -57,7 +65,7 @@ export function ProgressBarTicks(props: ProgressBarTicksProps): JSX.Element {
       class={mergeClass(
         mergeClass(
           "[ progress-bar-ticks ]",
-          props.showPercentage ? "[ progress-bar-ticks--with-figure ]" : undefined,
+          showCaptionRow ? "[ progress-bar-ticks--with-caption ]" : undefined,
         ),
         props.class,
       )}
@@ -65,20 +73,26 @@ export function ProgressBarTicks(props: ProgressBarTicksProps): JSX.Element {
       aria-valuemin={min}
       aria-valuemax={max}
       aria-valuenow={ariaNow}
-      aria-valuetext={props.showPercentage ? pctLabel : undefined}
+      aria-valuetext={props.showPercentLabel ? pctLabel : undefined}
       aria-label={props["aria-label"]}
     >
       <div class="[ screen-element ] [ progress-bar-ticks__shell ]">
         <div class="[ progress-bar-ticks__track ]">{segments}</div>
       </div>
-      {props.showPercentage ? (
+      {showCaptionRow ? (
         <div class="[ progress-bar-ticks__figure-mount ]">
-          <span
-            class="[ progress-bar-ticks__figure ] [ primary-specular-gradient ]"
-            aria-hidden="true"
-          >
-            <span class="[ progress-bar-ticks__figure-label ] [ canvas-knockout-text ]">{pctLabel}</span>
-          </span>
+          <span class="[ progress-bar-ticks__caption-min ]">{props.minLabel ?? ""}</span>
+          <div class="[ progress-bar-ticks__caption-center ]">
+            {props.showPercentLabel ? (
+              <span
+                class="[ progress-bar-ticks__figure ] [ primary-specular-gradient ]"
+                aria-hidden="true"
+              >
+                <span class="[ progress-bar-ticks__figure-label ] [ canvas-knockout-text ]">{pctLabel}</span>
+              </span>
+            ) : null}
+          </div>
+          <span class="[ progress-bar-ticks__caption-max ]">{props.maxLabel ?? ""}</span>
         </div>
       ) : null}
     </div>

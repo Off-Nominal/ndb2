@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { marked } from "marked";
 import { CardScreenElement } from "@web/shared/components/card-screen-element";
 import { HorizontalDivider } from "@web/shared/components/horizontal-divider";
@@ -45,8 +46,8 @@ export function SeasonCard(props: SeasonCardProps): JSX.Element {
 
   // Progress in resolving predictions for this season
   const totalPredictions = predictions ? predictions.open + predictions.checking + predictions.closed + predictions.successful + predictions.failed + predictions.retired : 0;
-  const unresolvedPredictions = predictions ? predictions.open + predictions.checking + predictions.closed : 0;
-  const predictionProgress = (unresolvedPredictions / totalPredictions) * 100;
+  const resolvedPredictions = predictions ? predictions.successful + predictions.failed + predictions.retired : 0;
+  const predictionProgress = (resolvedPredictions / totalPredictions) * 100;
 
   // Temporal progress for this season
   const MS_PER_DAY = 86_400_000;
@@ -66,6 +67,9 @@ export function SeasonCard(props: SeasonCardProps): JSX.Element {
     Math.max(0, Math.floor(elapsedMs / MS_PER_DAY)),
   );
 
+  const seasonStartLabel = format(startDate, "yyyy-MMM-dd");
+  const seasonEndLabel = format(endDate, "yyyy-MMM-dd");
+
   return (
     <CardScreenElement
       headingElement="h2"
@@ -81,14 +85,14 @@ export function SeasonCard(props: SeasonCardProps): JSX.Element {
           </p>
           <div class="[ season-card__stats ]">
             <div class="[ stack ]">
-              <SeasonCardPredictionRow label="[Open]" count={predictions.open} />
-              <SeasonCardPredictionRow label="[Checking]" count={predictions.checking} />
-              <SeasonCardPredictionRow label="[Voting]" count={predictions.closed} />
+              <SeasonCardPredictionRow label="[ Open ]" count={predictions.open} />
+              <SeasonCardPredictionRow label="[ Checking ]" count={predictions.checking} />
+              <SeasonCardPredictionRow label="[ Voting ]" count={predictions.closed} />
             </div>
             <div class="[ stack ]">
-              <SeasonCardPredictionRow label="[Successful]" count={predictions.successful} />
-              <SeasonCardPredictionRow label="[Failed]" count={predictions.failed} />
-              <SeasonCardPredictionRow label="[Retired]" count={predictions.retired} />
+              <SeasonCardPredictionRow label="[ Success ]" count={predictions.successful} />
+              <SeasonCardPredictionRow label="[ Failure ]" count={predictions.failed} />
+              <SeasonCardPredictionRow label="[ Retired ]" count={predictions.retired} />
             </div>
           </div>
 
@@ -97,9 +101,9 @@ export function SeasonCard(props: SeasonCardProps): JSX.Element {
             <div class="[ split-pair ]">
 
               <h3>Predictions Resolved</h3>
-              <span>{unresolvedPredictions} / {totalPredictions}</span>
+              <span>{resolvedPredictions} / {totalPredictions}</span>
             </div>
-            <ProgressBarTicks value={predictionProgress} aria-label="Progress" showPercentage={true} />
+            <ProgressBarTicks value={predictionProgress} aria-label="Progress" showPercentLabel />
           </div>
           <div>
             <div class="[ split-pair ]">
@@ -109,7 +113,13 @@ export function SeasonCard(props: SeasonCardProps): JSX.Element {
                 {elapsedDays} / {totalDays}
               </span>
             </div>
-            <ProgressBarTicks value={temporalProgress} aria-label="Progress" showPercentage={true} />
+            <ProgressBarTicks
+              value={temporalProgress}
+              aria-label="Progress"
+              showPercentLabel
+              minLabel={seasonStartLabel}
+              maxLabel={seasonEndLabel}
+            />
           </div>
         </div>
       )}

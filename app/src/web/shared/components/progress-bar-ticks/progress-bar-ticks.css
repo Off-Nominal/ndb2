@@ -7,8 +7,10 @@
   min-width: 0;
   width: 100%;
 
-  /* Room under the dangling tab drop-shadow once it sits outside the HUD border. */
-  &.progress-bar-ticks--with-figure {
+  /*
+   * Room under the caption row (percent tab drop-shadow and/or end labels) outside the bordered shell.
+   */
+  &.progress-bar-ticks--with-caption {
     padding-block-end: var(--space-3);
   }
 
@@ -46,10 +48,43 @@
     }
   }
 
+  /*
+   * One row below the HUD shell: min (start) | centered percent tab | max (end).
+   */
   & .progress-bar-ticks__figure-mount {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: var(--space-3);
+    width: 100%;
+    padding-inline: 2px;
+  }
+
+  & .progress-bar-ticks__caption-min,
+  & .progress-bar-ticks__caption-max {
+    margin: 0;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-regular);
+    line-height: var(--leading-normal);
+    align-self: end;
+    min-width: 0;
+  }
+
+  & .progress-bar-ticks__caption-min {
+    justify-self: start;
+    text-align: start;
+  }
+
+  & .progress-bar-ticks__caption-max {
+    justify-self: end;
+    text-align: end;
+  }
+
+  & .progress-bar-ticks__caption-center {
     display: flex;
     justify-content: center;
-    width: 100%;
+    justify-self: center;
+    min-width: 0;
   }
 
   /*
