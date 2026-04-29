@@ -90,7 +90,7 @@
     "value": "#F8FAFC",
     "description": "Hue-matched surface/text neutrals: Tailwind slate (cool; pairs with Neptune accent)."
   },
-  { "name": "scheme.neptune.neutral.100", "value": "#F1F5F9" },
+  { "name": "scheme.neptune.neutral.100", "value": "#EDF1F6" },
   { "name": "scheme.neptune.neutral.200", "value": "#E2E8F0" },
   { "name": "scheme.neptune.neutral.300", "value": "#CBD5E1" },
   { "name": "scheme.neptune.neutral.400", "value": "#94A3B8" },
@@ -104,7 +104,7 @@
     "value": "#FAFAFA",
     "description": "Zinc (cool; with Aurora accent)."
   },
-  { "name": "scheme.aurora.neutral.100", "value": "#F4F4F5" },
+  { "name": "scheme.aurora.neutral.100", "value": "#EFEFEF" },
   { "name": "scheme.aurora.neutral.200", "value": "#E4E4E7" },
   { "name": "scheme.aurora.neutral.300", "value": "#D4D4D8" },
   { "name": "scheme.aurora.neutral.400", "value": "#A1A1AA" },
@@ -118,7 +118,7 @@
     "value": "#FAFAFA",
     "description": "True gray (with orange / amber accent)."
   },
-  { "name": "scheme.titan.neutral.100", "value": "#F5F5F5" },
+  { "name": "scheme.titan.neutral.100", "value": "#F1F1F1" },
   { "name": "scheme.titan.neutral.200", "value": "#E5E5E5" },
   { "name": "scheme.titan.neutral.300", "value": "#D4D4D4" },
   { "name": "scheme.titan.neutral.400", "value": "#A3A3A3" },
@@ -132,7 +132,7 @@
     "value": "#FAF8FC",
     "description": "Violet-leaning gray (with purple accent)."
   },
-  { "name": "scheme.nebula.neutral.100", "value": "#F2EEF5" },
+  { "name": "scheme.nebula.neutral.100", "value": "#EDE9ED" },
   { "name": "scheme.nebula.neutral.200", "value": "#E2D8E8" },
   { "name": "scheme.nebula.neutral.300", "value": "#C9B8D0" },
   { "name": "scheme.nebula.neutral.400", "value": "#A896B5" },
@@ -146,7 +146,7 @@
     "value": "#FAF9F9",
     "description": "Stone (warm, with red / rose accent)."
   },
-  { "name": "scheme.redshift.neutral.100", "value": "#F5F4F2" },
+  { "name": "scheme.redshift.neutral.100", "value": "#F0EEEB" },
   { "name": "scheme.redshift.neutral.200", "value": "#E8E3DF" },
   { "name": "scheme.redshift.neutral.300", "value": "#D4CCC4" },
   { "name": "scheme.redshift.neutral.400", "value": "#A89B94" },
@@ -160,7 +160,7 @@
     "value": "#F9FAFB",
     "description": "Gray (balanced, with yellow / amber accent)."
   },
-  { "name": "scheme.helios.neutral.100", "value": "#F3F4F6" },
+  { "name": "scheme.helios.neutral.100", "value": "#EFF1F3" },
   { "name": "scheme.helios.neutral.200", "value": "#E5E7EB" },
   { "name": "scheme.helios.neutral.300", "value": "#D1D5DB" },
   { "name": "scheme.helios.neutral.400", "value": "#9CA3AF" },

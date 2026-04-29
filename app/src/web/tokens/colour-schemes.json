@@ -1,0 +1,58 @@
+{
+  "description": "Accent palette metadata and optional brand softening for light/dark appearance. Each scheme id matches data-color-scheme and scheme-hue-defs.ts. light/dark: use 0 to skip CSS overrides; otherwise an object with inherit:true (use mixTiers below) or explicit upTo200, upTo400, from500 (integers 0–100: share of that palette’s neutral-500 mixed into brand steps 50–200, 300–400, 500–900 in srgb).",
+  "mixTiers": {
+    "description": "Default neutral-500 mix percentages per brand step band when a scheme sets light or dark to { \"inherit\": true }.",
+    "upTo200": 10,
+    "upTo400": 14,
+    "from500": 18
+  },
+  "schemes": [
+    {
+      "id": "neptune",
+      "label": "Neptune — moonstone blue",
+      "description": "Cool blue accent (default). Pairs with slate-tinted neutrals in colors.json.",
+      "light": 0,
+      "dark": 0
+    },
+    {
+      "id": "aurora",
+      "label": "Aurora — emerald green",
+      "description": "Green / teal accent from the Aurora scale; calmer on light backgrounds than warm hues.",
+      "light": { "inherit": true },
+      "dark": 0
+    },
+    {
+      "id": "helios",
+      "label": "Helios — amber / gold",
+      "description": "Warm yellow–amber accent (Helios scale). Often softened in light mode so HUD chrome is less loud.",
+      "light": { "inherit": true },
+      "dark": 0
+    },
+    {
+      "id": "nebula",
+      "label": "Nebula — violet / purple",
+      "description": "Purple accent (Nebula scale) with violet-leaning neutrals.",
+      "light": {
+        "description": "Slightly stronger neutral mix than default — purple reads harsh on light gray.",
+        "upTo200": 13,
+        "upTo400": 18,
+        "from500": 23
+      },
+      "dark": 0
+    },
+    {
+      "id": "redshift",
+      "label": "Redshift — rose / red",
+      "description": "Red / rose accent (Redshift scale) with stone-tinted warm neutrals.",
+      "light": { "inherit": true },
+      "dark": 0
+    },
+    {
+      "id": "titan",
+      "label": "Titan — orange",
+      "description": "Orange accent (Titan scale) with neutral grays.",
+      "light": { "inherit": true },
+      "dark": 0
+    }
+  ]
+}

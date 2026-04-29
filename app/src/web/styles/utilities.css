@@ -169,7 +169,7 @@
  * for panels/chips atop existing chrome — compose with borders or `.screen-element` as needed.
  */
 .glass-primary-frost {
-  background-color: color-mix(in srgb, var(--color-primary) 4%, transparent);
+  background-color: color-mix(in srgb, var(--color-primary) 2%, transparent);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }

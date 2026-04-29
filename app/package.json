@@ -80,6 +80,8 @@
       "command": "node ./scripts/build-design-tokens.mjs",
       "files": [
         "scripts/build-design-tokens.mjs",
+        "src/web/tokens/scheme-hue-defs.ts",
+        "src/web/tokens/*.json",
         "src/web/tokens/**/*.json"
       ],
       "output": [

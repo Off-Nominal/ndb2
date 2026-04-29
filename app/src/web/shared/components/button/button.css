@@ -27,9 +27,11 @@
     background 0.15s ease,
     color 0.15s ease;
 
+  background: var(--color-surface-muted);
+
   &:hover {
     /* color & surface */
-    background: var(--color-surface-muted);
     color: var(--color-primary);
+    /* background: transparent; */
   }
 }
