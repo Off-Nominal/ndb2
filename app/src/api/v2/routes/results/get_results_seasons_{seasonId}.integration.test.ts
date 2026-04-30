@@ -4,6 +4,7 @@ import { describe, beforeAll, it, expect } from "vitest";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { getAllSeasons } from "../seasons/get";
 import { getResultsSeasonsBySeasonId } from "./get_results_seasons_{seasonId}";
+import { mapRoutes } from "@shared/routerMap";
 import { useEphemeralDb } from "../../../../test/with-ephemeral-db";
 import { defaultUsers } from "../../../../test/factories/users";
 import { defaultPastCurrentFutureSeasons } from "../../../../test/factories/seasons";
@@ -28,8 +29,8 @@ describe("GET /results/seasons/:seasonId", () => {
 
   beforeAll(async () => {
     app = express();
-    getAllSeasons(app);
-    getResultsSeasonsBySeasonId(app);
+    app.use("/seasons", mapRoutes([getAllSeasons]));
+    app.use("/results", mapRoutes([getResultsSeasonsBySeasonId]));
   });
 
   it("returns 400 for invalid season path segment", async () => {
@@ -75,6 +76,13 @@ describe("GET /results/seasons/:seasonId", () => {
     expect(u1!.bets.rank).toBeGreaterThanOrEqual(1);
     expect("total_participants" in u1!).toBe(false);
     expect(typeof u1!.predictions.open).toBe("number");
+  });
+
+  it("resolves season path lookup current and last", async () => {
+    const byCurrent = await request(app).get("/results/seasons/current");
+    expect(byCurrent.status).toBe(200);
+    const byLast = await request(app).get("/results/seasons/last");
+    expect(byLast.status).toBe(200);
   });
 
   it("accepts sort_by and per_page query params", async () => {

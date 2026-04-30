@@ -2,14 +2,10 @@ import { Client } from "pg";
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { createHash, randomBytes } from "node:crypto";
 
-/** api package root (parent of `src` / `dist`), so migrations resolve in both vitest and compiled runs */
-const apiRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "../.."
-);
+/** App package root (`app/`). Integration tests and global setup run with `process.cwd()` here. */
+const apiRoot = path.resolve(process.cwd());
 
 /** Schema-only template cloned for each integration test file. */
 export const TEST_TEMPLATE_DB = "ndb2_test_schema_template";

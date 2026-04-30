@@ -2,8 +2,8 @@ import express from "express";
 import request from "supertest";
 import { describe, beforeAll, it, expect } from "vitest";
 import * as API from "@offnominal/ndb2-api-types/v2";
-import { getAllSeasons } from "../seasons/get";
 import { getResultsAllTime } from "./get_results_all_time";
+import { mapRoutes } from "@shared/routerMap";
 import { useEphemeralDb } from "../../../../test/with-ephemeral-db";
 import { defaultUsers } from "../../../../test/factories/users";
 import { defaultPastCurrentFutureSeasons } from "../../../../test/factories/seasons";
@@ -28,8 +28,7 @@ describe("GET /results/all-time", () => {
 
   beforeAll(async () => {
     app = express();
-    getAllSeasons(app);
-    getResultsAllTime(app);
+    app.use("/results", mapRoutes([getResultsAllTime]));
   });
 
   it("returns 400 for invalid query", async () => {

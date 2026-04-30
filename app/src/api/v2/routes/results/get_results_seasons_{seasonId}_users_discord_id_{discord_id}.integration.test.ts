@@ -4,6 +4,7 @@ import { describe, beforeAll, it, expect } from "vitest";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { getAllSeasons } from "../seasons/get";
 import { getResultsSeasonUserResult } from "./get_results_seasons_{seasonId}_users_discord_id_{discord_id}";
+import { mapRoutes } from "@shared/routerMap";
 import { useEphemeralDb } from "../../../../test/with-ephemeral-db";
 import { defaultUsers } from "../../../../test/factories/users";
 import { defaultPastCurrentFutureSeasons } from "../../../../test/factories/seasons";
@@ -28,8 +29,8 @@ describe("GET /results/seasons/:seasonId/users/discord_id/:discord_id", () => {
 
   beforeAll(async () => {
     app = express();
-    getAllSeasons(app);
-    getResultsSeasonUserResult(app);
+    app.use("/seasons", mapRoutes([getAllSeasons]));
+    app.use("/results", mapRoutes([getResultsSeasonUserResult]));
   });
 
   it("returns 404 USER_NOT_FOUND for unknown Discord id", async () => {

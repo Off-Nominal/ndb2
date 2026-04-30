@@ -3,7 +3,8 @@ import request from "supertest";
 import { describe, beforeAll, it, expect } from "vitest";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { getResultsUserAllTime } from "./get_results_users_discord_id_{discord_id}_all_time";
-import { getResultsUserSeasonsList } from "./get_results_users_discord_id_{discord_id}_seasons";
+import { getResultsUserSeasonsList } from "./get_results_users_discord_id_{discord_id}";
+import { mapRoutes } from "@shared/routerMap";
 import { useEphemeralDb } from "../../../../test/with-ephemeral-db";
 import { defaultUsers } from "../../../../test/factories/users";
 import { defaultPastCurrentFutureSeasons } from "../../../../test/factories/seasons";
@@ -28,7 +29,7 @@ describe("GET /results/users/discord_id/:discord_id/all-time", () => {
 
   beforeAll(async () => {
     app = express();
-    getResultsUserAllTime(app);
+    app.use("/results", mapRoutes([getResultsUserAllTime]));
   });
 
   it("returns 404 for unknown Discord id", async () => {
@@ -79,7 +80,7 @@ describe("GET /results/users/discord_id/:discord_id/seasons", () => {
 
   beforeAll(async () => {
     app = express();
-    getResultsUserSeasonsList(app);
+    app.use("/results", mapRoutes([getResultsUserSeasonsList]));
   });
 
   it("returns 404 for unknown Discord id", async () => {
