@@ -1,5 +1,6 @@
 import type { PredictionLifeCycle } from "./predictions";
 
+/** Computed from season date range relative to now (not the GET /seasons/:id path token). */
 export type Identifier = "current" | "past" | "future";
 
 export type Season = {
@@ -15,7 +16,7 @@ export type Season = {
 /** Prediction counts by lifecycle status for GET /seasons/:id. */
 export type SeasonPredictionCounts = Record<PredictionLifeCycle, number>;
 
-/** Season detail from GET /seasons/:id (numeric id or current | past | future). */
+/** Season detail from GET /seasons/:id (numeric id or path lookup `current` | `last`). */
 export type SeasonDetail = Season & {
   predictions: SeasonPredictionCounts;
 };

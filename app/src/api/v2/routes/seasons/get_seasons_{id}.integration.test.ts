@@ -74,22 +74,39 @@ describe("GET /seasons/:id", () => {
     }
   });
 
-  it("resolves current past and future identifiers to the same rows as list identifiers", async () => {
+  it("resolves current and last path segments to the same rows as list identifiers", async () => {
     const listRes = await request(app).get("/");
     expect(listRes.status).toBe(200);
 
-    for (const identifier of ["past", "current", "future"] as const) {
+    const cases = [
+      { path: "current" as const, entityIdentifier: "current" as const },
+      { path: "last" as const, entityIdentifier: "past" as const },
+    ] as const;
+
+    for (const { path, entityIdentifier } of cases) {
       const fromList = listRes.body.data.find(
-        (s: API.Entities.Seasons.Season) => s.identifier === identifier,
+        (s: API.Entities.Seasons.Season) => s.identifier === entityIdentifier,
       );
       expect(fromList).toBeDefined();
 
-      const res = await request(app).get(`/${identifier}`);
+      const res = await request(app).get(`/${path}`);
       expect(res.status).toBe(200);
       expect(res.body.data).toMatchObject({
         id: fromList!.id,
-        identifier,
+        identifier: entityIdentifier,
       });
+    }
+  });
+
+  it("returns 400 for entity identifier path segments past and future (not valid URL lookup tokens)", async () => {
+    for (const segment of ["past", "future"] as const) {
+      const res = await request(app).get(`/${segment}`);
+      expect(res.status).toBe(400);
+      expect(
+        res.body.errors.some(
+          (e: API.Utils.ErrorInfo) => e.code === API.Errors.MALFORMED_URL_PARAMS,
+        ),
+      ).toBe(true);
     }
   });
 

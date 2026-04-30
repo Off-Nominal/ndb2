@@ -254,18 +254,21 @@ export const seasonIdSchema = createPostgresIntSchema({
 });
 
 /**
- * GET /seasons/:id — numeric season id or identifier `current` | `past` | `future`.
+ * Path segments allowed for `GET /seasons/:id` (and nested routes). Distinct from
+ * {@link Entities.Seasons.Identifier} on season rows (`current` | `past` | `future`).
+ */
+export const SEASON_LOOKUP_PATH_VALUES = ["current", "last"] as const;
+
+export type SeasonLookupPathValue = (typeof SEASON_LOOKUP_PATH_VALUES)[number];
+
+/**
+ * `GET /seasons/:id` — positive integer id or lookup token `current` | `last`.
  */
 export const seasonLookupParamSchema = z.union([
-  z.enum(["current", "past", "future"]).transform(
-    (
-      identifier,
-    ): {
-      kind: "identifier";
-      identifier: Entities.Seasons.Identifier;
-    } => ({
-      kind: "identifier",
-      identifier,
+  z.enum(SEASON_LOOKUP_PATH_VALUES).transform(
+    (lookup): { kind: "lookup"; lookup: SeasonLookupPathValue } => ({
+      kind: "lookup",
+      lookup,
     }),
   ),
   createPostgresIntSchema({ propName: "id" }).transform((id) => ({
@@ -273,3 +276,12 @@ export const seasonLookupParamSchema = z.union([
     id,
   })),
 ]);
+
+export type SeasonLookupParam = z.infer<typeof seasonLookupParamSchema>;
+
+/** Resolves URL lookup token to computed season {@link Entities.Seasons.Identifier} for DB resolution. */
+export function seasonLookupPathToEntityIdentifier(
+  lookup: Extract<SeasonLookupParam, { kind: "lookup" }>,
+): Entities.Seasons.Identifier {
+  return lookup.lookup === "last" ? "past" : "current";
+}

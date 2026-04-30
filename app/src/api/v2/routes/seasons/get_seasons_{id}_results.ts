@@ -8,6 +8,7 @@ import { getDbClient } from "@data/db/getDbClient";
 import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
 import {
   seasonLookupParamSchema,
+  seasonLookupPathToEntityIdentifier,
   seasonResultsLeaderboardQuerySchema,
 } from "../../validations";
 import seasons from "@data/queries/seasons";
@@ -29,7 +30,9 @@ export const getSeasonResults: Route = (router: Router) => {
       const seasonId =
         lookup.kind === "id"
           ? lookup.id
-          : await seasons.getSeasonIdByIdentifier(dbClient)(lookup.identifier);
+          : await seasons.getSeasonIdByIdentifier(dbClient)(
+              seasonLookupPathToEntityIdentifier(lookup),
+            );
 
       if (seasonId === null) {
         return res.status(404).json(
