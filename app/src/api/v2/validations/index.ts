@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Entities } from "@offnominal/ndb2-api-types/v2";
+import { Entities, Endpoints } from "@offnominal/ndb2-api-types/v2";
 import { POSTGRES_MAX_INT } from "./constants";
 
 const [
@@ -125,20 +125,6 @@ export const userIdUuidSchema = z.uuid({
   error: "Property 'user_id' must be a valid UUID",
 });
 
-const SEASON_RESULTS_LEADERBOARD_SORT_VALUES = [
-  "points_net-desc",
-  "points_net-asc",
-  "predictions_successful-desc",
-  "predictions_successful-asc",
-  "bets_successful-desc",
-  "bets_successful-asc",
-] as const;
-
-const USER_SEASON_RESULTS_LIST_SORT_VALUES = [
-  "season_end-desc",
-  "season_end-asc",
-] as const;
-
 const resultsPerPageCoerce = z.coerce
   .number()
   .int()
@@ -147,11 +133,11 @@ const resultsPerPageCoerce = z.coerce
 
 const resultsPageCoerce = z.coerce.number().int().positive();
 
-/** GET /seasons/:id/results */
-export const seasonResultsLeaderboardQuerySchema = z.object({
+/** GET /results/all-time and GET /results/seasons/:seasonId */
+export const resultsCrossScopeListQuerySchema = z.object({
   sort_by: queryParamScalar(
     z
-      .enum(SEASON_RESULTS_LEADERBOARD_SORT_VALUES)
+      .enum(Endpoints.Results.CROSS_SCOPE_RESULTS_SORT_VALUES)
       .optional()
       .default("points_net-desc"),
   ),
@@ -161,11 +147,14 @@ export const seasonResultsLeaderboardQuerySchema = z.object({
   ),
 });
 
-/** GET /users/discord_id/:discord_id/results */
+/** @deprecated Use {@link resultsCrossScopeListQuerySchema}. */
+export const seasonResultsLeaderboardQuerySchema = resultsCrossScopeListQuerySchema;
+
+/** GET /results/users/discord_id/:discord_id/seasons */
 export const userSeasonResultsListQuerySchema = z.object({
   sort_by: queryParamScalar(
     z
-      .enum(USER_SEASON_RESULTS_LIST_SORT_VALUES)
+      .enum(Endpoints.Results.USER_SEASONS_SCOPE_SORT_VALUES)
       .optional()
       .default("season_end-desc"),
   ),

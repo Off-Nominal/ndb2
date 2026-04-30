@@ -28,23 +28,22 @@ Legacy reference: v1 leaderboards in `app/src/data/legacy-queries/scores.ts` and
 
 ## REST shape (resource-oriented)
 
-Treat **results** as a first-class read model:
+Treat **results** as a first-class read model under **`/v2/results`**:
 
-| Goal | Suggested route |
-|------|------------------|
-| Paginated leaderboard / all results in a season | `GET /v2/seasons/{season_id}/results?sort=&order=&page=` |
-| Paginated **per-season** results for one user | `GET /v2/users/discord_id/{discord_id}/results?…` |
-| Single “cell” (profile, widget) | `GET /v2/seasons/{season_id}/users/discord_id/{discord_id}/result` |
+| Goal | Route |
+|------|--------|
+| Paginated all-time cross-user list | `GET /v2/results/all-time?sort_by=&page=&per_page=` |
+| Paginated results list for one season | `GET /v2/results/seasons/{season_id}?…` (`season_id`: numeric or `current` / `last`) |
+| Paginated per-season rows for one user | `GET /v2/results/users/discord_id/{discord_id}/seasons?…` |
+| Single season cell (profile, widget) | `GET /v2/results/seasons/{season_id}/users/discord_id/{discord_id}` |
+| Single all-time row for one user | `GET /v2/results/users/discord_id/{discord_id}/all-time` |
 
 **Query parameters (examples):**
 
-- **`sort`** — enum aligned to metrics: `points_net`, `predictions_successful`, `bets_won`, `votes_yes`, etc.
-- **`order`** — `asc` | `desc`
-- **`include_all_time`** on user collections, **or** a dedicated **`GET /v2/users/discord_id/{discord_id}/results/all-time`** so `seasons` semantics stay clean.
+- **`sort_by`** — for cross-user lists: `points_net-desc` / `asc`, `predictions_successful-desc` / `asc`, `bets_successful-desc` / `asc`. For user multi-season list: `season_end-desc` / `season_end-asc`.
+- **`page`**, **`per_page`** — pagination (cap 100 for `per_page` on list routes).
 
-**All-time** should be explicit in the API contract (dedicated path or `season_id=all` with documented behavior).
-
-**Types:** define a **flat** result DTO in `@offnominal/ndb2-api-types` (list + pagination meta + sort enum).
+**Types:** flat result DTOs in `Entities.Results`; route contracts in `Endpoints.Results`.
 
 ---
 
@@ -92,9 +91,9 @@ After stubbing queries, **`EXPLAIN (ANALYZE, BUFFERS)`** on realistic volumes. L
 
 1. **Define** the flat **result row** and **list response** (pagination + sort enum) in **api-types**.
 2. **One PgTyped SQL** module for **single-season** scope: CTEs + **`participants`**, no JSON aggregation.
-3. **Wire** `GET /seasons/:id/results` (and optionally **singleton** user row).
-4. **Add** user-centric **`GET /users/discord_id/:discord_id/results`** (v2; aligns with v1 **`/api/users/discord_id/...`**) reusing the same SQL shapes or inverted access pattern.
-5. **Add** **all-time** variant (separate query or composed from season snapshots + current).
+3. **Wire** `GET /results/seasons/:seasonId` (and singleton user row under `/results/…`).
+4. **Add** `GET /results/users/discord_id/:discord_id/seasons` reusing the same SQL shapes.
+5. **Add** **all-time** list (`GET /results/all-time`) and per-user singleton (`GET /results/users/discord_id/:id/all-time`); SQL uses **`bets.payout`** for points (see **`scoring.md`**).
 6. **Introduce** **`season_user_results`** (or MV) when **closed-season** read path needs predictable latency; **backfill** using the same SQL at **season close**.
 
 ---
@@ -116,12 +115,13 @@ None of the above are required for the initial dynamic API.
 
 | Method & path | Purpose |
 | --- | --- |
-| `GET /v2/seasons/:seasonId/results` | Paginated season leaderboard. `:seasonId` is numeric or path lookup `current` / `last` (same as other season routes). **Query:** `sort_by` (e.g. `points_net-desc`, `predictions_successful-desc`, `bets_successful-desc`, each with `-asc` / `-desc`), `page`, `per_page` (max 100). **Tie-break order** in SQL matches the plan: after the chosen primary sort, **`points_net`**, **`predictions_successful`**, **`bets_successful`**, then **`user_id` ASC**. |
-| `GET /v2/seasons/:seasonId/users/discord_id/:discord_id/result` | One user’s season aggregate; **`discord_id`** (Discord snowflake) is resolved to internal **`users.id`** before PgTyped. Same **`discord_id`** path prefix as v1 **`/api/users/discord_id/...`**. **404** `USER_NOT_FOUND`, `RESULT_NOT_FOUND` (no participation), or `SEASON_NOT_FOUND` as applicable. |
-| `GET /v2/users/discord_id/:discord_id/results` | Paginated **per-season** result rows for that user. **Query:** `sort_by` defaults to `season_end-desc` / `season_end-asc`, plus `page` / `per_page`. |
-| `GET /v2/users/discord_id/:discord_id/results/all-time` | Single **all-time** aggregate row (**`bets.payout`** for points). Registered **before** `.../results` so `all-time` is not captured as a param. |
+| `GET /v2/results/all-time` | Paginated **cross-user** all-time results list (same row shape as season list; **`bets.payout`** for points). **Query:** same `sort_by` / `page` / `per_page` as season scope. |
+| `GET /v2/results/seasons/:seasonId` | Paginated season results list. `:seasonId` is numeric or path lookup `current` / `last`. **Query:** `sort_by` (e.g. `points_net-desc`, `predictions_successful-desc`, `bets_successful-desc`, each with `-asc` / `-desc`), `page`, `per_page` (max 100). **Tie-break order** in SQL: after the chosen primary sort, **`points_net`**, **`predictions_successful`**, **`bets_successful`**, then **`user_id` ASC**. |
+| `GET /v2/results/seasons/:seasonId/users/discord_id/:discord_id` | One user’s season aggregate; **`discord_id`** resolved to internal **`users.id`**. **404** `USER_NOT_FOUND`, `RESULT_NOT_FOUND`, or `SEASON_NOT_FOUND` as applicable. |
+| `GET /v2/results/users/discord_id/:discord_id/seasons` | Paginated **per-season** result rows for that user. **Query:** `sort_by` defaults to `season_end-desc` / `season_end-asc`, plus `page` / `per_page`. |
+| `GET /v2/results/users/discord_id/:discord_id/all-time` | Single **all-time** aggregate row for one user. Routed before the `…/seasons` list pattern where relevant. |
 
-**Code:** routes under `app/src/api/v2/routes/`, shared types in `@offnominal/ndb2-api-types/v2` (`Entities.Results`; season result routes: `Endpoints.Seasons`, user result routes: `Endpoints.Users`), PgTyped SQL in `app/src/data/queries/results/`.
+**Code:** routes under `app/src/api/v2/routes/results/`, shared types in `@offnominal/ndb2-api-types/v2` (`Entities.Results`, `Endpoints.Results`), PgTyped SQL in `app/src/data/queries/results/`.
 
 ---
 

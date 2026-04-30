@@ -1,10 +1,11 @@
 import express from "express";
 import { getAllSeasons } from "./routes/seasons/get";
 import { getSeason } from "./routes/seasons/get_seasons_{id}";
-import { getSeasonResults } from "./routes/seasons/get_seasons_{id}_results";
-import { getSeasonResultForDiscordUser } from "./routes/seasons/get_seasons_{id}_users_discord_id_{discord_id}_result";
-import { getUserAllTimeResult } from "./routes/users/get_discord_id_{discord_id}_results_all_time";
-import { getUserSeasonResultsList } from "./routes/users/get_discord_id_{discord_id}_results";
+import { getResultsAllTime } from "./routes/results/get_results_all_time";
+import { getResultsSeasonsBySeasonId } from "./routes/results/get_results_seasons_{seasonId}";
+import { getResultsSeasonUserResult } from "./routes/results/get_results_seasons_{seasonId}_users_discord_id_{discord_id}";
+import { getResultsUserSeasonsList } from "./routes/results/get_results_users_discord_id_{discord_id}";
+import { getResultsUserAllTime } from "./routes/results/get_results_users_discord_id_{discord_id}_all_time";
 import { getPredictionsSearch } from "./routes/predictions/get_predictions_search";
 import { getPredictionById } from "./routes/predictions/get_predictions_{predictionId}";
 import { untriggerPredictionById } from "./routes/predictions/delete_predictions_{predictionId}_trigger";
@@ -22,18 +23,16 @@ import "@domain/webhooks/config"; // Initialize webhook event listeners
 
 export const apiV2Router = express.Router();
 
+apiV2Router.use("/seasons", mapRoutes([getAllSeasons, getSeason]));
 apiV2Router.use(
-  "/seasons",
+  "/results",
   mapRoutes([
-    getAllSeasons,
-    getSeasonResults,
-    getSeasonResultForDiscordUser,
-    getSeason,
+    getResultsAllTime,
+    getResultsSeasonUserResult,
+    getResultsSeasonsBySeasonId,
+    getResultsUserAllTime,
+    getResultsUserSeasonsList,
   ]),
-);
-apiV2Router.use(
-  "/users",
-  mapRoutes([getUserAllTimeResult, getUserSeasonResultsList]),
 );
 apiV2Router.use(
   "/predictions",

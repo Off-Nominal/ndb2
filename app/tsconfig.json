@@ -22,15 +22,13 @@
       "@domain/*": ["src/domain/*"],
       "@web/*": ["src/web/*"]
     },
-    "types": ["node", "vitest/globals"]
+    "types": ["node", "vitest/globals"],
+    "noEmit": true
   },
   "include": ["src/**/*"],
   "exclude": [
     "node_modules",
-    "**/*.test.ts",
-    "**/*.test.tsx",
     "**/*.client.ts",
-    "src/test/**",
     "src/web/styles/cube-bundle.ts"
   ]
 }

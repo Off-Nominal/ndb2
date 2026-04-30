@@ -10,9 +10,9 @@ import { discordIdSchema } from "../../validations";
 import results from "@data/queries/results";
 import { getUserByDiscordId } from "@data/queries/users/users.queries";
 
-export const getUserAllTimeResult: Route = (router: Router) => {
+export const getResultsUserAllTime: Route = (router: Router) => {
   router.get(
-    "/discord_id/:discord_id/results/all-time",
+    "/users/discord_id/:discord_id/all-time",
     validate({
       params: z.object({
         discord_id: discordIdSchema,
@@ -50,7 +50,7 @@ export const getUserAllTimeResult: Route = (router: Router) => {
       return res.json(
         responseUtils.writeSuccess(
           data,
-          "All-time results fetched successfully.",
+          "All-time user results fetched successfully.",
         ),
       );
     }),

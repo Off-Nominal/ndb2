@@ -15,17 +15,17 @@ import seasons from "@data/queries/seasons";
 import results from "@data/queries/results";
 import { getUserByDiscordId } from "@data/queries/users/users.queries";
 
-export const getSeasonResultForDiscordUser: Route = (router: Router) => {
+export const getResultsSeasonUserResult: Route = (router: Router) => {
   router.get(
-    "/:id/users/discord_id/:discord_id/result",
+    "/seasons/:seasonId/users/discord_id/:discord_id",
     validate({
       params: z.object({
-        id: seasonLookupParamSchema,
+        seasonId: seasonLookupParamSchema,
         discord_id: discordIdSchema,
       }),
     }),
     wrapRouteWithErrorBoundary(async (req, res) => {
-      const lookup = req.params.id;
+      const lookup = req.params.seasonId;
       const { discord_id } = req.params;
 
       const dbClient = await getDbClient(res);
@@ -90,7 +90,10 @@ export const getSeasonResultForDiscordUser: Route = (router: Router) => {
       }
 
       return res.json(
-        responseUtils.writeSuccess(data, "Season result fetched successfully."),
+        responseUtils.writeSuccess(
+          data,
+          "Season result fetched successfully.",
+        ),
       );
     }),
   );
