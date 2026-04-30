@@ -49,7 +49,7 @@ describe("GET /users/discord_id/:discord_id/results/all-time", () => {
     );
     expect(response.status).toBe(200);
     const data = response.body
-      .data as API.Endpoints.Results.GET_Users_ByDiscordId_results_all_time.Data;
+      .data as API.Endpoints.Users.GET_ByDiscordId_results_all_time.Data;
     expect(data.user.discord_id).toBe(C.DISCORD_1);
     expect(data.points.rank).toBeGreaterThanOrEqual(1);
     expect(data.predictions.rank).toBeGreaterThanOrEqual(1);
@@ -63,7 +63,7 @@ describe("GET /users/discord_id/:discord_id/results/all-time", () => {
     );
     expect(response.status).toBe(200);
     const data = response.body
-      .data as API.Endpoints.Results.GET_Users_ByDiscordId_results_all_time.Data;
+      .data as API.Endpoints.Users.GET_ByDiscordId_results_all_time.Data;
     expect(data.user.discord_id).toBe(C.DISCORD_2);
     expect(data.predictions.successful).toBe(0);
     expect(data.points.net).toBe(0);
@@ -100,7 +100,7 @@ describe("GET /users/discord_id/:discord_id/results", () => {
     );
     expect(response.status).toBe(200);
     const data = response.body
-      .data as API.Endpoints.Results.GET_Users_ByDiscordId_results.Data;
+      .data as API.Endpoints.Users.GET_ByDiscordId_results.Data;
     expect(data.meta.total_count).toBeGreaterThanOrEqual(1);
     expect(data.results.length).toBeGreaterThanOrEqual(1);
     expect(data.results[0].season.name).toBeDefined();
@@ -118,7 +118,7 @@ describe("GET /users/discord_id/:discord_id/results", () => {
     );
     expect(response.status).toBe(200);
     const data = response.body
-      .data as API.Endpoints.Results.GET_Users_ByDiscordId_results.Data;
+      .data as API.Endpoints.Users.GET_ByDiscordId_results.Data;
     expect(data.meta.total_count).toBe(0);
     expect(data.results).toEqual([]);
   });

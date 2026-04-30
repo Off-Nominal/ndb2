@@ -27,8 +27,15 @@ export type ResultBets = {
 };
 
 export type ResultVotes = {
+  /** Raw ballot: vote is yes. */
   yes: number;
+  /** Raw ballot: vote is no. */
   no: number;
+  /** Vote matches resolved outcome (yes on successful, no on failed). */
+  affirmative: number;
+  /** Vote opposes resolved outcome (no on successful, yes on failed). */
+  negative: number;
+  /** Votes on predictions still `closed` (success/failure not known yet for affirmative vs negative). */
   pending: number;
 };
 

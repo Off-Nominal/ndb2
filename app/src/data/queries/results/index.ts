@@ -42,6 +42,8 @@ type ResultBreakdownRow = Pick<
   | "bets_invalid"
   | "votes_yes"
   | "votes_no"
+  | "votes_affirmative"
+  | "votes_negative"
   | "votes_pending"
   | "points_rewards"
   | "points_penalties"
@@ -78,6 +80,8 @@ function mapFlatToBreakdowns(
     votes: {
       yes: Number(row.votes_yes),
       no: Number(row.votes_no),
+      affirmative: Number(row.votes_affirmative),
+      negative: Number(row.votes_negative),
       pending: Number(row.votes_pending),
     },
     points: {
@@ -140,14 +144,14 @@ function mapUserSeasonRow(
 
 export type SeasonLeaderboardInput = {
   season_id: number;
-  sort_by: API.Endpoints.Results.SeasonLeaderboardSortBy;
+  sort_by: API.Endpoints.Seasons.SeasonLeaderboardSortBy;
   page: number;
   per_page: number;
 };
 
 export type UserSeasonResultsListInput = {
   user_id: string;
-  sort_by: API.Endpoints.Results.UserSeasonsResultsSortBy;
+  sort_by: API.Endpoints.Users.UserSeasonsResultsSortBy;
   page: number;
   per_page: number;
 };

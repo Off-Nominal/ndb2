@@ -62,7 +62,7 @@ describe("GET /seasons/:id/results", () => {
 
     const response = await request(app).get(`/${current!.id}/results`);
     expect(response.status).toBe(200);
-    const data = response.body.data as API.Endpoints.Results.GET_Seasons_ById_results.Data;
+    const data = response.body.data as API.Endpoints.Seasons.GET_ById_results.Data;
     expect(data.meta.page).toBe(1);
     expect(data.meta.per_page).toBe(25);
     expect(data.meta.total_count).toBeGreaterThanOrEqual(1);
@@ -85,7 +85,7 @@ describe("GET /seasons/:id/results", () => {
       `/${current!.id}/results?sort_by=predictions_successful-desc&page=1&per_page=5`,
     );
     expect(response.status).toBe(200);
-    const data = response.body.data as API.Endpoints.Results.GET_Seasons_ById_results.Data;
+    const data = response.body.data as API.Endpoints.Seasons.GET_ById_results.Data;
     expect(data.meta.per_page).toBe(5);
     expect(data.results.length).toBeLessThanOrEqual(5);
   });
