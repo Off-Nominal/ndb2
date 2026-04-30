@@ -15,7 +15,7 @@ import { getUserByDiscordId } from "@data/queries/users/users.queries";
 
 export const getResultsUserSeasonsList: Route = (router: Router) => {
   router.get(
-    "/users/discord_id/:discord_id/seasons",
+    "/users/discord_id/:discord_id",
     validate({
       params: z.object({
         discord_id: discordIdSchema,
@@ -32,8 +32,7 @@ export const getResultsUserSeasonsList: Route = (router: Router) => {
           responseUtils.writeErrors([
             {
               code: API.Errors.USER_NOT_FOUND,
-              message:
-                "User does not exist or has never interacted with NDB2.",
+              message: "User does not exist or has never interacted with NDB2.",
             },
           ]),
         );
