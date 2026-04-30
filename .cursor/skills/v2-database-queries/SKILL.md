@@ -53,3 +53,9 @@ description: >-
 2. Ensure `sql-watch` (or a one-off `pgtyped` run) has generated `<entity>.queries.ts`.
 3. Add `index.ts` with the default-export object of `(dbClient) => …` wrappers.
 4. Keep business logic and DTO assembly in `index.ts`; keep SQL in `.sql` only.
+
+## Related skills (domain + triggers)
+
+- **`ndb2-game-mechanics`** — prediction lifecycle, drivers, snoozes, monitors.
+- **`ndb2-scoring-seasons`** — wagers, ratios, payouts, seasons, `valid` / `season_applicable`.
+- **`ndb2-denormalized-data`** — trigger graph for derived columns; required when migrations touch `predictions` / `bets` / `seasons`.
