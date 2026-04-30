@@ -71,6 +71,14 @@ vote_stats AS (
     v.user_id,
     COUNT(*) FILTER (WHERE v.vote IS TRUE)::int AS votes_yes,
     COUNT(*) FILTER (WHERE v.vote IS FALSE)::int AS votes_no,
+    COUNT(*) FILTER (
+      WHERE ((p.status)::text = 'successful' AND v.vote IS TRUE)
+        OR ((p.status)::text = 'failed' AND v.vote IS FALSE)
+    )::int AS votes_affirmative,
+    COUNT(*) FILTER (
+      WHERE ((p.status)::text = 'successful' AND v.vote IS FALSE)
+        OR ((p.status)::text = 'failed' AND v.vote IS TRUE)
+    )::int AS votes_negative,
     COUNT(*) FILTER (WHERE (p.status)::text = 'closed')::int AS votes_pending
   FROM votes v
   INNER JOIN predictions p ON p.id = v.prediction_id
@@ -105,6 +113,8 @@ joined AS (
     COALESCE(be.bets_invalid, 0) AS bets_invalid,
     COALESCE(vo.votes_yes, 0) AS votes_yes,
     COALESCE(vo.votes_no, 0) AS votes_no,
+    COALESCE(vo.votes_affirmative, 0) AS votes_affirmative,
+    COALESCE(vo.votes_negative, 0) AS votes_negative,
     COALESCE(vo.votes_pending, 0) AS votes_pending,
     COALESCE(po.points_rewards, 0) AS points_rewards,
     COALESCE(po.points_penalties, 0) AS points_penalties,
@@ -133,6 +143,8 @@ ranked AS (
     j.bets_invalid,
     j.votes_yes,
     j.votes_no,
+    j.votes_affirmative,
+    j.votes_negative,
     j.votes_pending,
     j.points_rewards,
     j.points_penalties,
@@ -164,6 +176,8 @@ SELECT
   r.bets_invalid,
   r.votes_yes,
   r.votes_no,
+  r.votes_affirmative,
+  r.votes_negative,
   r.votes_pending,
   r.points_rewards,
   r.points_penalties,
@@ -259,6 +273,14 @@ vote_stats AS (
     v.user_id,
     COUNT(*) FILTER (WHERE v.vote IS TRUE)::int AS votes_yes,
     COUNT(*) FILTER (WHERE v.vote IS FALSE)::int AS votes_no,
+    COUNT(*) FILTER (
+      WHERE ((p.status)::text = 'successful' AND v.vote IS TRUE)
+        OR ((p.status)::text = 'failed' AND v.vote IS FALSE)
+    )::int AS votes_affirmative,
+    COUNT(*) FILTER (
+      WHERE ((p.status)::text = 'successful' AND v.vote IS FALSE)
+        OR ((p.status)::text = 'failed' AND v.vote IS TRUE)
+    )::int AS votes_negative,
     COUNT(*) FILTER (WHERE (p.status)::text = 'closed')::int AS votes_pending
   FROM votes v
   INNER JOIN predictions p ON p.id = v.prediction_id
@@ -293,6 +315,8 @@ joined AS (
     COALESCE(be.bets_invalid, 0) AS bets_invalid,
     COALESCE(vo.votes_yes, 0) AS votes_yes,
     COALESCE(vo.votes_no, 0) AS votes_no,
+    COALESCE(vo.votes_affirmative, 0) AS votes_affirmative,
+    COALESCE(vo.votes_negative, 0) AS votes_negative,
     COALESCE(vo.votes_pending, 0) AS votes_pending,
     COALESCE(po.points_rewards, 0) AS points_rewards,
     COALESCE(po.points_penalties, 0) AS points_penalties,
@@ -321,6 +345,8 @@ ranked AS (
     j.bets_invalid,
     j.votes_yes,
     j.votes_no,
+    j.votes_affirmative,
+    j.votes_negative,
     j.votes_pending,
     j.points_rewards,
     j.points_penalties,
@@ -353,6 +379,8 @@ SELECT
   r.bets_invalid,
   r.votes_yes,
   r.votes_no,
+  r.votes_affirmative,
+  r.votes_negative,
   r.votes_pending,
   r.points_rewards,
   r.points_penalties,
@@ -470,6 +498,14 @@ vote_stats_all AS (
     v.user_id,
     COUNT(*) FILTER (WHERE v.vote IS TRUE)::int AS votes_yes,
     COUNT(*) FILTER (WHERE v.vote IS FALSE)::int AS votes_no,
+    COUNT(*) FILTER (
+      WHERE ((p.status)::text = 'successful' AND v.vote IS TRUE)
+        OR ((p.status)::text = 'failed' AND v.vote IS FALSE)
+    )::int AS votes_affirmative,
+    COUNT(*) FILTER (
+      WHERE ((p.status)::text = 'successful' AND v.vote IS FALSE)
+        OR ((p.status)::text = 'failed' AND v.vote IS TRUE)
+    )::int AS votes_negative,
     COUNT(*) FILTER (WHERE (p.status)::text = 'closed')::int AS votes_pending
   FROM votes v
   INNER JOIN predictions p ON p.id = v.prediction_id
@@ -506,6 +542,8 @@ joined_all AS (
     COALESCE(be.bets_invalid, 0) AS bets_invalid,
     COALESCE(vo.votes_yes, 0) AS votes_yes,
     COALESCE(vo.votes_no, 0) AS votes_no,
+    COALESCE(vo.votes_affirmative, 0) AS votes_affirmative,
+    COALESCE(vo.votes_negative, 0) AS votes_negative,
     COALESCE(vo.votes_pending, 0) AS votes_pending,
     COALESCE(po.points_rewards, 0) AS points_rewards,
     COALESCE(po.points_penalties, 0) AS points_penalties,
@@ -535,6 +573,8 @@ ranked_all AS (
     ja.bets_invalid,
     ja.votes_yes,
     ja.votes_no,
+    ja.votes_affirmative,
+    ja.votes_negative,
     ja.votes_pending,
     ja.points_rewards,
     ja.points_penalties,
@@ -570,6 +610,8 @@ SELECT
   ra.bets_invalid,
   ra.votes_yes,
   ra.votes_no,
+  ra.votes_affirmative,
+  ra.votes_negative,
   ra.votes_pending,
   ra.points_rewards,
   ra.points_penalties,
@@ -635,6 +677,14 @@ vote_stats AS (
     v.user_id,
     COUNT(*) FILTER (WHERE v.vote IS TRUE)::int AS votes_yes,
     COUNT(*) FILTER (WHERE v.vote IS FALSE)::int AS votes_no,
+    COUNT(*) FILTER (
+      WHERE ((p.status)::text = 'successful' AND v.vote IS TRUE)
+        OR ((p.status)::text = 'failed' AND v.vote IS FALSE)
+    )::int AS votes_affirmative,
+    COUNT(*) FILTER (
+      WHERE ((p.status)::text = 'successful' AND v.vote IS FALSE)
+        OR ((p.status)::text = 'failed' AND v.vote IS TRUE)
+    )::int AS votes_negative,
     COUNT(*) FILTER (WHERE (p.status)::text = 'closed')::int AS votes_pending
   FROM votes v
   INNER JOIN predictions p ON p.id = v.prediction_id
@@ -666,6 +716,8 @@ joined AS (
     COALESCE(be.bets_invalid, 0) AS bets_invalid,
     COALESCE(vo.votes_yes, 0) AS votes_yes,
     COALESCE(vo.votes_no, 0) AS votes_no,
+    COALESCE(vo.votes_affirmative, 0) AS votes_affirmative,
+    COALESCE(vo.votes_negative, 0) AS votes_negative,
     COALESCE(vo.votes_pending, 0) AS votes_pending,
     COALESCE(po.points_rewards, 0) AS points_rewards,
     COALESCE(po.points_penalties, 0) AS points_penalties,
@@ -694,6 +746,8 @@ ranked AS (
     j.bets_invalid,
     j.votes_yes,
     j.votes_no,
+    j.votes_affirmative,
+    j.votes_negative,
     j.votes_pending,
     j.points_rewards,
     j.points_penalties,
@@ -725,6 +779,8 @@ SELECT
   COALESCE(rk.bets_invalid, 0) AS bets_invalid,
   COALESCE(rk.votes_yes, 0) AS votes_yes,
   COALESCE(rk.votes_no, 0) AS votes_no,
+  COALESCE(rk.votes_affirmative, 0) AS votes_affirmative,
+  COALESCE(rk.votes_negative, 0) AS votes_negative,
   COALESCE(rk.votes_pending, 0) AS votes_pending,
   COALESCE(rk.points_rewards, 0) AS points_rewards,
   COALESCE(rk.points_penalties, 0) AS points_penalties,

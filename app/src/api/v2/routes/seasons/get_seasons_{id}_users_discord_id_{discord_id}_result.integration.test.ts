@@ -74,7 +74,7 @@ describe("GET /seasons/:id/users/discord_id/:discord_id/result", () => {
     );
     expect(response.status).toBe(200);
     const data = response.body
-      .data as API.Endpoints.Results.GET_Seasons_ById_users_ByDiscordId_result.Data;
+      .data as API.Endpoints.Seasons.GET_ById_users_ByDiscordId_result.Data;
     expect(data.user.discord_id).toBe(C.DISCORD_1);
     expect(data.points.rank).toBeGreaterThanOrEqual(1);
     expect(data.predictions.rank).toBeGreaterThanOrEqual(1);

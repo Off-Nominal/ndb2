@@ -121,7 +121,7 @@ None of the above are required for the initial dynamic API.
 | `GET /v2/users/discord_id/:discord_id/results` | Paginated **per-season** result rows for that user. **Query:** `sort_by` defaults to `season_end-desc` / `season_end-asc`, plus `page` / `per_page`. |
 | `GET /v2/users/discord_id/:discord_id/results/all-time` | Single **all-time** aggregate row (**`bets.payout`** for points). Registered **before** `.../results` so `all-time` is not captured as a param. |
 
-**Code:** routes under `app/src/api/v2/routes/`, shared types in `@offnominal/ndb2-api-types/v2` (`Entities.Results`, `Endpoints.Results`), PgTyped SQL in `app/src/data/queries/results/`.
+**Code:** routes under `app/src/api/v2/routes/`, shared types in `@offnominal/ndb2-api-types/v2` (`Entities.Results`; season result routes: `Endpoints.Seasons`, user result routes: `Endpoints.Users`), PgTyped SQL in `app/src/data/queries/results/`.
 
 ---
 
