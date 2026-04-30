@@ -120,6 +120,61 @@ export const discordIdSchema = z
   .min(17, "Property 'discord_id' must be at least 17 characters")
   .regex(/^[0-9]+$/, "Property 'discord_id' must be a numeric string");
 
+/** Internal `users.id` (UUID) for handlers that already resolved a Discord id. */
+export const userIdUuidSchema = z.uuid({
+  error: "Property 'user_id' must be a valid UUID",
+});
+
+const SEASON_RESULTS_LEADERBOARD_SORT_VALUES = [
+  "points_net-desc",
+  "points_net-asc",
+  "predictions_successful-desc",
+  "predictions_successful-asc",
+  "bets_successful-desc",
+  "bets_successful-asc",
+] as const;
+
+const USER_SEASON_RESULTS_LIST_SORT_VALUES = [
+  "season_end-desc",
+  "season_end-asc",
+] as const;
+
+const resultsPerPageCoerce = z.coerce
+  .number()
+  .int()
+  .positive()
+  .max(100, "Property 'per_page' must be at most 100");
+
+const resultsPageCoerce = z.coerce.number().int().positive();
+
+/** GET /seasons/:id/results */
+export const seasonResultsLeaderboardQuerySchema = z.object({
+  sort_by: queryParamScalar(
+    z
+      .enum(SEASON_RESULTS_LEADERBOARD_SORT_VALUES)
+      .optional()
+      .default("points_net-desc"),
+  ),
+  page: queryParamScalar(resultsPageCoerce.optional().default(1)),
+  per_page: queryParamScalar(
+    resultsPerPageCoerce.optional().default(25),
+  ),
+});
+
+/** GET /users/discord_id/:discord_id/results */
+export const userSeasonResultsListQuerySchema = z.object({
+  sort_by: queryParamScalar(
+    z
+      .enum(USER_SEASON_RESULTS_LIST_SORT_VALUES)
+      .optional()
+      .default("season_end-desc"),
+  ),
+  page: queryParamScalar(resultsPageCoerce.optional().default(1)),
+  per_page: queryParamScalar(
+    resultsPerPageCoerce.optional().default(25),
+  ),
+});
+
 /**
  * Schema for validating future dates.
  * Validates that a value is a non-empty date that is in the future.

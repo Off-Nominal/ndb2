@@ -35,8 +35,8 @@ export const Errors = {
   INVALID_PREDICTION_DRIVER: 90208,
   INVALID_PREDICTION_CLOSED_DATE: 90209,
 
-  // 03 Scores
-
+  // 03 Scores / Results
+  RESULT_NOT_FOUND: 90300,
   // 04 Seasons
   SEASON_NOT_FOUND: 90400,
 
