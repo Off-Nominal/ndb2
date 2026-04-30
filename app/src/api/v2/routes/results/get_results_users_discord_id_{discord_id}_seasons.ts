@@ -13,9 +13,9 @@ import {
 import results from "@data/queries/results";
 import { getUserByDiscordId } from "@data/queries/users/users.queries";
 
-export const getUserSeasonResultsList: Route = (router: Router) => {
+export const getResultsUserSeasonsList: Route = (router: Router) => {
   router.get(
-    "/discord_id/:discord_id/results",
+    "/users/discord_id/:discord_id/seasons",
     validate({
       params: z.object({
         discord_id: discordIdSchema,

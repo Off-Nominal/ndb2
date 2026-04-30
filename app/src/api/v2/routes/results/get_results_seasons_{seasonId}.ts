@@ -9,22 +9,22 @@ import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
 import {
   seasonLookupParamSchema,
   seasonLookupPathToEntityIdentifier,
-  seasonResultsLeaderboardQuerySchema,
+  resultsCrossScopeListQuerySchema,
 } from "../../validations";
 import seasons from "@data/queries/seasons";
 import results from "@data/queries/results";
 
-export const getSeasonResults: Route = (router: Router) => {
+export const getResultsSeasonsBySeasonId: Route = (router: Router) => {
   router.get(
-    "/:id/results",
+    "/seasons/:seasonId",
     validate({
       params: z.object({
-        id: seasonLookupParamSchema,
+        seasonId: seasonLookupParamSchema,
       }),
-      query: seasonResultsLeaderboardQuerySchema,
+      query: resultsCrossScopeListQuerySchema,
     }),
     wrapRouteWithErrorBoundary(async (req, res) => {
-      const lookup = req.params.id;
+      const lookup = req.params.seasonId;
       const dbClient = await getDbClient(res);
 
       const seasonId =
@@ -57,7 +57,7 @@ export const getSeasonResults: Route = (router: Router) => {
         );
       }
 
-      const q = req.query as z.infer<typeof seasonResultsLeaderboardQuerySchema>;
+      const q = req.query as z.infer<typeof resultsCrossScopeListQuerySchema>;
       const payload = await results.getSeasonLeaderboard(dbClient)({
         season_id: seasonId,
         sort_by: q.sort_by,

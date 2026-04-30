@@ -2,8 +2,8 @@ import express from "express";
 import request from "supertest";
 import { describe, beforeAll, it, expect } from "vitest";
 import * as API from "@offnominal/ndb2-api-types/v2";
-import { getUserAllTimeResult } from "./get_discord_id_{discord_id}_results_all_time";
-import { getUserSeasonResultsList } from "./get_discord_id_{discord_id}_results";
+import { getResultsUserAllTime } from "./get_results_users_discord_id_{discord_id}_all_time";
+import { getResultsUserSeasonsList } from "./get_results_users_discord_id_{discord_id}_seasons";
 import { useEphemeralDb } from "../../../../test/with-ephemeral-db";
 import { defaultUsers } from "../../../../test/factories/users";
 import { defaultPastCurrentFutureSeasons } from "../../../../test/factories/seasons";
@@ -23,17 +23,17 @@ useEphemeralDb({
   ],
 });
 
-describe("GET /users/discord_id/:discord_id/results/all-time", () => {
+describe("GET /results/users/discord_id/:discord_id/all-time", () => {
   let app: express.Application;
 
   beforeAll(async () => {
     app = express();
-    getUserAllTimeResult(app);
+    getResultsUserAllTime(app);
   });
 
   it("returns 404 for unknown Discord id", async () => {
     const response = await request(app).get(
-      "/discord_id/999999999999999999/results/all-time",
+      "/results/users/discord_id/999999999999999999/all-time",
     );
     expect(response.status).toBe(404);
     expect(
@@ -45,11 +45,11 @@ describe("GET /users/discord_id/:discord_id/results/all-time", () => {
 
   it("returns all-time row for known user", async () => {
     const response = await request(app).get(
-      `/discord_id/${C.DISCORD_1}/results/all-time`,
+      `/results/users/discord_id/${C.DISCORD_1}/all-time`,
     );
     expect(response.status).toBe(200);
     const data = response.body
-      .data as API.Endpoints.Users.GET_ByDiscordId_results_all_time.Data;
+      .data as API.Endpoints.Results.GET_users_ByDiscordId_all_time.Data;
     expect(data.user.discord_id).toBe(C.DISCORD_1);
     expect(data.points.rank).toBeGreaterThanOrEqual(1);
     expect(data.predictions.rank).toBeGreaterThanOrEqual(1);
@@ -59,11 +59,11 @@ describe("GET /users/discord_id/:discord_id/results/all-time", () => {
 
   it("returns all-time row with zero aggregates for user with no activity", async () => {
     const response = await request(app).get(
-      `/discord_id/${C.DISCORD_2}/results/all-time`,
+      `/results/users/discord_id/${C.DISCORD_2}/all-time`,
     );
     expect(response.status).toBe(200);
     const data = response.body
-      .data as API.Endpoints.Users.GET_ByDiscordId_results_all_time.Data;
+      .data as API.Endpoints.Results.GET_users_ByDiscordId_all_time.Data;
     expect(data.user.discord_id).toBe(C.DISCORD_2);
     expect(data.predictions.successful).toBe(0);
     expect(data.points.net).toBe(0);
@@ -74,17 +74,17 @@ describe("GET /users/discord_id/:discord_id/results/all-time", () => {
   });
 });
 
-describe("GET /users/discord_id/:discord_id/results", () => {
+describe("GET /results/users/discord_id/:discord_id/seasons", () => {
   let app: express.Application;
 
   beforeAll(async () => {
     app = express();
-    getUserSeasonResultsList(app);
+    getResultsUserSeasonsList(app);
   });
 
   it("returns 404 for unknown Discord id", async () => {
     const response = await request(app).get(
-      "/discord_id/999999999999999999/results",
+      "/results/users/discord_id/999999999999999999/seasons",
     );
     expect(response.status).toBe(404);
     expect(
@@ -96,11 +96,11 @@ describe("GET /users/discord_id/:discord_id/results", () => {
 
   it("returns per-season rows for user with activity", async () => {
     const response = await request(app).get(
-      `/discord_id/${C.DISCORD_1}/results`,
+      `/results/users/discord_id/${C.DISCORD_1}/seasons`,
     );
     expect(response.status).toBe(200);
     const data = response.body
-      .data as API.Endpoints.Users.GET_ByDiscordId_results.Data;
+      .data as API.Endpoints.Results.GET_users_ByDiscordId_seasons.Data;
     expect(data.meta.total_count).toBeGreaterThanOrEqual(1);
     expect(data.results.length).toBeGreaterThanOrEqual(1);
     expect(data.results[0].season.name).toBeDefined();
@@ -114,11 +114,11 @@ describe("GET /users/discord_id/:discord_id/results", () => {
 
   it("returns empty list for user with no season activity", async () => {
     const response = await request(app).get(
-      `/discord_id/${C.DISCORD_2}/results`,
+      `/results/users/discord_id/${C.DISCORD_2}/seasons`,
     );
     expect(response.status).toBe(200);
     const data = response.body
-      .data as API.Endpoints.Users.GET_ByDiscordId_results.Data;
+      .data as API.Endpoints.Results.GET_users_ByDiscordId_seasons.Data;
     expect(data.meta.total_count).toBe(0);
     expect(data.results).toEqual([]);
   });

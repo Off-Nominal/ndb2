@@ -8,10 +8,13 @@ import {
   countUserSeasonsForResults,
   getUserSeasonResultsPage,
   getAllTimeResultForUser as getAllTimeResultForUserQuery,
+  getAllTimeResultsLeaderboard,
+  countAllTimeLeaderboardParticipants,
   type IGetSeasonResultsLeaderboardResult,
   type IGetSeasonResultForUserResult,
   type IGetUserSeasonResultsPageResult,
   type IGetAllTimeResultForUserResult,
+  type IGetAllTimeResultsLeaderboardResult,
 } from "./results.queries";
 
 export const RESULTS_MAX_PER_PAGE = 100;
@@ -109,7 +112,9 @@ function userFromSeasonOrLeaderboardRow(
 }
 
 function mapToSeasonLeaderboardRow(
-  row: IGetSeasonResultsLeaderboardResult,
+  row:
+    | IGetSeasonResultsLeaderboardResult
+    | IGetAllTimeResultsLeaderboardResult,
 ): API.Entities.Results.UserSeasonLeaderboardRow {
   return {
     user: userFromSeasonOrLeaderboardRow(row),
@@ -144,14 +149,20 @@ function mapUserSeasonRow(
 
 export type SeasonLeaderboardInput = {
   season_id: number;
-  sort_by: API.Endpoints.Seasons.SeasonLeaderboardSortBy;
+  sort_by: API.Endpoints.Results.CrossScopeResultsSortBy;
+  page: number;
+  per_page: number;
+};
+
+export type AllTimeLeaderboardInput = {
+  sort_by: API.Endpoints.Results.CrossScopeResultsSortBy;
   page: number;
   per_page: number;
 };
 
 export type UserSeasonResultsListInput = {
   user_id: string;
-  sort_by: API.Endpoints.Users.UserSeasonsResultsSortBy;
+  sort_by: API.Endpoints.Results.UserSeasonsScopeSortBy;
   page: number;
   per_page: number;
 };
@@ -183,6 +194,33 @@ export default {
       const rows = await getSeasonResultsLeaderboard.run(
         {
           season_id: input.season_id,
+          sort_by: input.sort_by,
+          limit: per_page,
+          row_offset,
+        },
+        dbClient,
+      );
+
+      return {
+        meta: { page, per_page, total_count },
+        results: rows.map((r) => mapToSeasonLeaderboardRow(r)),
+      };
+    },
+
+  getAllTimeLeaderboard:
+    (dbClient: PoolClient) => async (input: AllTimeLeaderboardInput) => {
+      const per_page = clampPerPage(input.per_page);
+      const page = Math.max(1, input.page);
+      const row_offset = (page - 1) * per_page;
+
+      const [countRow] = await countAllTimeLeaderboardParticipants.run(
+        undefined,
+        dbClient,
+      );
+      const total_count = countRow?.total_count ?? 0;
+
+      const rows = await getAllTimeResultsLeaderboard.run(
+        {
           sort_by: input.sort_by,
           limit: per_page,
           row_offset,

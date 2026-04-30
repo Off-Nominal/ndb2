@@ -56,11 +56,11 @@ export type UserSeasonResult = {
   bets: ResultBets;
   votes: ResultVotes;
   points: ResultPoints;
-  /** Distinct users with activity in this season or globally (all-time). Not repeated on season leaderboard rows; see {@link UserSeasonLeaderboardRow} and `meta.total_count`. */
+  /** Distinct users with activity in this season or globally (all-time). Not repeated on cross-user result list rows; see {@link UserSeasonLeaderboardRow} and `meta.total_count`. */
   total_participants: number;
 };
 
-/** One entry of `GET /seasons/:id/results` — same as {@link UserSeasonResult} without `total_participants` (`meta.total_count` is the season participant count). */
+/** One entry of `GET /results/seasons/:seasonId` or `GET /results/all-time` — same as {@link UserSeasonResult} without `total_participants` (`meta.total_count` is the participant count). */
 export type UserSeasonLeaderboardRow = Omit<UserSeasonResult, "total_participants">;
 
 export type SeasonResultSummary = {
@@ -70,7 +70,7 @@ export type SeasonResultSummary = {
   end: string;
 };
 
-/** One row of `GET /users/discord_id/:discord_id/results` — result for a single season. */
+/** One row of `GET /results/users/discord_id/:discord_id/seasons` — result for a single season. */
 export type UserSeasonResultRow = {
   season: SeasonResultSummary;
   /** Distinct users with activity in this season (same basis as season leaderboard `meta.total_count`). */

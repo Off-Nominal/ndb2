@@ -2,8 +2,8 @@ import express from "express";
 import request from "supertest";
 import { describe, beforeAll, it, expect } from "vitest";
 import * as API from "@offnominal/ndb2-api-types/v2";
-import { getAllSeasons } from "./get";
-import { getSeasonResults } from "./get_seasons_{id}_results";
+import { getAllSeasons } from "../seasons/get";
+import { getResultsSeasonsBySeasonId } from "./get_results_seasons_{seasonId}";
 import { useEphemeralDb } from "../../../../test/with-ephemeral-db";
 import { defaultUsers } from "../../../../test/factories/users";
 import { defaultPastCurrentFutureSeasons } from "../../../../test/factories/seasons";
@@ -23,17 +23,17 @@ useEphemeralDb({
   ],
 });
 
-describe("GET /seasons/:id/results", () => {
+describe("GET /results/seasons/:seasonId", () => {
   let app: express.Application;
 
   beforeAll(async () => {
     app = express();
     getAllSeasons(app);
-    getSeasonResults(app);
+    getResultsSeasonsBySeasonId(app);
   });
 
   it("returns 400 for invalid season path segment", async () => {
-    const response = await request(app).get("/nope/results");
+    const response = await request(app).get("/results/seasons/nope");
     expect(response.status).toBe(400);
     expect(
       response.body.errors.some(
@@ -43,7 +43,7 @@ describe("GET /seasons/:id/results", () => {
   });
 
   it("returns 404 when season does not exist", async () => {
-    const response = await request(app).get("/2147483646/results");
+    const response = await request(app).get("/results/seasons/2147483646");
     expect(response.status).toBe(404);
     expect(
       response.body.errors.some(
@@ -52,17 +52,18 @@ describe("GET /seasons/:id/results", () => {
     ).toBe(true);
   });
 
-  it("returns paginated leaderboard for current season", async () => {
-    const listRes = await request(app).get("/");
+  it("returns paginated results list for current season", async () => {
+    const listRes = await request(app).get("/seasons/");
     expect(listRes.status).toBe(200);
     const current = listRes.body.data.find(
       (s: API.Entities.Seasons.Season) => s.identifier === "current",
     );
     expect(current).toBeDefined();
 
-    const response = await request(app).get(`/${current!.id}/results`);
+    const response = await request(app).get(`/results/seasons/${current!.id}`);
     expect(response.status).toBe(200);
-    const data = response.body.data as API.Endpoints.Seasons.GET_ById_results.Data;
+    const data = response.body
+      .data as API.Endpoints.Results.GET_seasons_BySeasonId.Data;
     expect(data.meta.page).toBe(1);
     expect(data.meta.per_page).toBe(25);
     expect(data.meta.total_count).toBeGreaterThanOrEqual(1);
@@ -77,15 +78,16 @@ describe("GET /seasons/:id/results", () => {
   });
 
   it("accepts sort_by and per_page query params", async () => {
-    const listRes = await request(app).get("/");
+    const listRes = await request(app).get("/seasons/");
     const current = listRes.body.data.find(
       (s: API.Entities.Seasons.Season) => s.identifier === "current",
     );
     const response = await request(app).get(
-      `/${current!.id}/results?sort_by=predictions_successful-desc&page=1&per_page=5`,
+      `/results/seasons/${current!.id}?sort_by=predictions_successful-desc&page=1&per_page=5`,
     );
     expect(response.status).toBe(200);
-    const data = response.body.data as API.Endpoints.Seasons.GET_ById_results.Data;
+    const data = response.body
+      .data as API.Endpoints.Results.GET_seasons_BySeasonId.Data;
     expect(data.meta.per_page).toBe(5);
     expect(data.results.length).toBeLessThanOrEqual(5);
   });

@@ -4,6 +4,7 @@ import request from "supertest";
 import { useEphemeralDb } from "../../../../test/with-ephemeral-db";
 import { defaultUsers } from "../../../../test/factories/users";
 import { defaultPastCurrentFutureSeasons } from "../../../../test/factories/seasons";
+import { describe, beforeAll, it, expect } from "vitest";
 
 useEphemeralDb({
   users: defaultUsers(),

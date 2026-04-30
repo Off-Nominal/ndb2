@@ -1071,3 +1071,263 @@ const getAllTimeResultForUserIR: any = {"usedParamSet":{"user_id":true},"params"
 export const getAllTimeResultForUser = new PreparedQuery<IGetAllTimeResultForUserParams,IGetAllTimeResultForUserResult>(getAllTimeResultForUserIR);
 
 
+/** 'CountAllTimeLeaderboardParticipants' parameters type */
+export type ICountAllTimeLeaderboardParticipantsParams = void;
+
+/** 'CountAllTimeLeaderboardParticipants' return type */
+export interface ICountAllTimeLeaderboardParticipantsResult {
+  total_count: number | null;
+}
+
+/** 'CountAllTimeLeaderboardParticipants' query type */
+export interface ICountAllTimeLeaderboardParticipantsQuery {
+  params: ICountAllTimeLeaderboardParticipantsParams;
+  result: ICountAllTimeLeaderboardParticipantsResult;
+}
+
+const countAllTimeLeaderboardParticipantsIR: any = {"usedParamSet":{},"params":[],"statement":"SELECT CAST(COUNT(*) AS integer) AS total_count\nFROM (\n  SELECT DISTINCT uid FROM (\n    SELECT user_id AS uid FROM predictions\n    UNION\n    SELECT user_id FROM bets\n    UNION\n    SELECT user_id FROM votes\n  ) x\n) y"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * SELECT CAST(COUNT(*) AS integer) AS total_count
+ * FROM (
+ *   SELECT DISTINCT uid FROM (
+ *     SELECT user_id AS uid FROM predictions
+ *     UNION
+ *     SELECT user_id FROM bets
+ *     UNION
+ *     SELECT user_id FROM votes
+ *   ) x
+ * ) y
+ * ```
+ */
+export const countAllTimeLeaderboardParticipants = new PreparedQuery<ICountAllTimeLeaderboardParticipantsParams,ICountAllTimeLeaderboardParticipantsResult>(countAllTimeLeaderboardParticipantsIR);
+
+
+/** 'GetAllTimeResultsLeaderboard' parameters type */
+export interface IGetAllTimeResultsLeaderboardParams {
+  limit: NumberOrString;
+  row_offset: NumberOrString;
+  sort_by?: string | null | void;
+}
+
+/** 'GetAllTimeResultsLeaderboard' return type */
+export interface IGetAllTimeResultsLeaderboardResult {
+  bets_failed: number | null;
+  bets_invalid: number | null;
+  bets_pending: number | null;
+  bets_retired: number | null;
+  bets_successful: number | null;
+  discord_id: string;
+  points_net: number | null;
+  points_penalties: number | null;
+  points_rewards: number | null;
+  predictions_checking: number | null;
+  predictions_closed: number | null;
+  predictions_failed: number | null;
+  predictions_open: number | null;
+  predictions_retired: number | null;
+  predictions_successful: number | null;
+  rank_bets_successful: number | null;
+  rank_points_net: number | null;
+  rank_predictions_successful: number | null;
+  user_id: string | null;
+  votes_affirmative: number | null;
+  votes_negative: number | null;
+  votes_no: number | null;
+  votes_pending: number | null;
+  votes_yes: number | null;
+}
+
+/** 'GetAllTimeResultsLeaderboard' query type */
+export interface IGetAllTimeResultsLeaderboardQuery {
+  params: IGetAllTimeResultsLeaderboardParams;
+  result: IGetAllTimeResultsLeaderboardResult;
+}
+
+const getAllTimeResultsLeaderboardIR: any = {"usedParamSet":{"sort_by":true,"limit":true,"row_offset":true},"params":[{"name":"sort_by","required":false,"transform":{"type":"scalar"},"locs":[{"a":5463,"b":5470},{"a":5551,"b":5558},{"a":5637,"b":5644},{"a":5749,"b":5756},{"a":5859,"b":5866},{"a":5957,"b":5964}]},{"name":"limit","required":true,"transform":{"type":"scalar"},"locs":[{"a":6142,"b":6148}]},{"name":"row_offset","required":true,"transform":{"type":"scalar"},"locs":[{"a":6157,"b":6168}]}],"statement":"WITH participants AS (\n  SELECT DISTINCT uid AS user_id FROM (\n    SELECT user_id AS uid FROM predictions\n    UNION\n    SELECT user_id FROM bets\n    UNION\n    SELECT user_id FROM votes\n  ) x\n),\npred_stats AS (\n  SELECT\n    p.user_id,\n    COUNT(*) FILTER (WHERE (p.status)::text = 'successful')::int AS predictions_successful,\n    COUNT(*) FILTER (WHERE (p.status)::text = 'failed')::int AS predictions_failed,\n    COUNT(*) FILTER (WHERE (p.status)::text = 'open')::int AS predictions_open,\n    COUNT(*) FILTER (WHERE (p.status)::text = 'closed')::int AS predictions_closed,\n    COUNT(*) FILTER (WHERE (p.status)::text = 'checking')::int AS predictions_checking,\n    COUNT(*) FILTER (WHERE (p.status)::text = 'retired')::int AS predictions_retired\n  FROM predictions p\n  GROUP BY p.user_id\n),\nbet_stats AS (\n  SELECT\n    b.user_id,\n    COUNT(*) FILTER (\n      WHERE (\n        ((p.status)::text = 'successful' AND b.endorsed IS TRUE) OR\n        ((p.status)::text = 'failed' AND b.endorsed IS FALSE)\n      ) AND b.valid IS TRUE\n    )::int AS bets_successful,\n    COUNT(*) FILTER (\n      WHERE (\n        ((p.status)::text = 'successful' AND b.endorsed IS FALSE) OR\n        ((p.status)::text = 'failed' AND b.endorsed IS TRUE)\n      ) AND b.valid IS TRUE\n    )::int AS bets_failed,\n    COUNT(*) FILTER (\n      WHERE ((p.status)::text IN ('open', 'closed', 'checking')) AND b.valid IS TRUE\n    )::int AS bets_pending,\n    COUNT(*) FILTER (WHERE (p.status)::text = 'retired' AND b.valid IS TRUE)::int AS bets_retired,\n    COUNT(*) FILTER (WHERE b.valid IS FALSE)::int AS bets_invalid\n  FROM bets b\n  INNER JOIN predictions p ON p.id = b.prediction_id\n  GROUP BY b.user_id\n),\nvote_stats AS (\n  SELECT\n    v.user_id,\n    COUNT(*) FILTER (WHERE v.vote IS TRUE)::int AS votes_yes,\n    COUNT(*) FILTER (WHERE v.vote IS FALSE)::int AS votes_no,\n    COUNT(*) FILTER (\n      WHERE ((p.status)::text = 'successful' AND v.vote IS TRUE)\n        OR ((p.status)::text = 'failed' AND v.vote IS FALSE)\n    )::int AS votes_affirmative,\n    COUNT(*) FILTER (\n      WHERE ((p.status)::text = 'successful' AND v.vote IS FALSE)\n        OR ((p.status)::text = 'failed' AND v.vote IS TRUE)\n    )::int AS votes_negative,\n    COUNT(*) FILTER (WHERE (p.status)::text = 'closed')::int AS votes_pending\n  FROM votes v\n  INNER JOIN predictions p ON p.id = v.prediction_id\n  GROUP BY v.user_id\n),\npoint_stats AS (\n  SELECT\n    b.user_id,\n    COALESCE(SUM(b.payout) FILTER (WHERE b.payout > 0), 0)::int AS points_rewards,\n    COALESCE(SUM(b.payout) FILTER (WHERE b.payout < 0), 0)::int AS points_penalties,\n    COALESCE(SUM(b.payout), 0)::int AS points_net\n  FROM bets b\n  GROUP BY b.user_id\n),\njoined AS (\n  SELECT\n    pt.user_id,\n    u.discord_id,\n    COALESCE(pr.predictions_successful, 0) AS predictions_successful,\n    COALESCE(pr.predictions_failed, 0) AS predictions_failed,\n    COALESCE(pr.predictions_open, 0) AS predictions_open,\n    COALESCE(pr.predictions_closed, 0) AS predictions_closed,\n    COALESCE(pr.predictions_checking, 0) AS predictions_checking,\n    COALESCE(pr.predictions_retired, 0) AS predictions_retired,\n    COALESCE(be.bets_successful, 0) AS bets_successful,\n    COALESCE(be.bets_failed, 0) AS bets_failed,\n    COALESCE(be.bets_pending, 0) AS bets_pending,\n    COALESCE(be.bets_retired, 0) AS bets_retired,\n    COALESCE(be.bets_invalid, 0) AS bets_invalid,\n    COALESCE(vo.votes_yes, 0) AS votes_yes,\n    COALESCE(vo.votes_no, 0) AS votes_no,\n    COALESCE(vo.votes_affirmative, 0) AS votes_affirmative,\n    COALESCE(vo.votes_negative, 0) AS votes_negative,\n    COALESCE(vo.votes_pending, 0) AS votes_pending,\n    COALESCE(po.points_rewards, 0) AS points_rewards,\n    COALESCE(po.points_penalties, 0) AS points_penalties,\n    COALESCE(po.points_net, 0) AS points_net\n  FROM participants pt\n  INNER JOIN users u ON u.id = pt.user_id\n  LEFT JOIN pred_stats pr ON pr.user_id = pt.user_id\n  LEFT JOIN bet_stats be ON be.user_id = pt.user_id\n  LEFT JOIN vote_stats vo ON vo.user_id = pt.user_id\n  LEFT JOIN point_stats po ON po.user_id = pt.user_id\n),\nranked AS (\n  SELECT\n    j.user_id,\n    j.discord_id,\n    j.predictions_successful,\n    j.predictions_failed,\n    j.predictions_open,\n    j.predictions_closed,\n    j.predictions_checking,\n    j.predictions_retired,\n    j.bets_successful,\n    j.bets_failed,\n    j.bets_pending,\n    j.bets_retired,\n    j.bets_invalid,\n    j.votes_yes,\n    j.votes_no,\n    j.votes_affirmative,\n    j.votes_negative,\n    j.votes_pending,\n    j.points_rewards,\n    j.points_penalties,\n    j.points_net,\n    CAST((ROW_NUMBER() OVER (\n      ORDER BY j.points_net DESC, j.user_id ASC\n    )) AS integer) AS rank_points_net,\n    CAST((ROW_NUMBER() OVER (\n      ORDER BY j.predictions_successful DESC, j.user_id ASC\n    )) AS integer) AS rank_predictions_successful,\n    CAST((ROW_NUMBER() OVER (\n      ORDER BY j.bets_successful DESC, j.user_id ASC\n    )) AS integer) AS rank_bets_successful\n  FROM joined j\n)\nSELECT\n  r.user_id,\n  r.discord_id,\n  r.predictions_successful,\n  r.predictions_failed,\n  r.predictions_open,\n  r.predictions_closed,\n  r.predictions_checking,\n  r.predictions_retired,\n  r.bets_successful,\n  r.bets_failed,\n  r.bets_pending,\n  r.bets_retired,\n  r.bets_invalid,\n  r.votes_yes,\n  r.votes_no,\n  r.votes_affirmative,\n  r.votes_negative,\n  r.votes_pending,\n  r.points_rewards,\n  r.points_penalties,\n  r.points_net,\n  r.rank_points_net,\n  r.rank_predictions_successful,\n  r.rank_bets_successful\nFROM ranked r\nORDER BY\n  (CASE WHEN :sort_by::text = 'points_net-desc' THEN r.points_net END) DESC NULLS LAST,\n  (CASE WHEN :sort_by::text = 'points_net-asc' THEN r.points_net END) ASC NULLS LAST,\n  (CASE WHEN :sort_by::text = 'predictions_successful-desc' THEN r.predictions_successful END) DESC NULLS LAST,\n  (CASE WHEN :sort_by::text = 'predictions_successful-asc' THEN r.predictions_successful END) ASC NULLS LAST,\n  (CASE WHEN :sort_by::text = 'bets_successful-desc' THEN r.bets_successful END) DESC NULLS LAST,\n  (CASE WHEN :sort_by::text = 'bets_successful-asc' THEN r.bets_successful END) ASC NULLS LAST,\n  r.points_net DESC,\n  r.predictions_successful DESC,\n  r.bets_successful DESC,\n  r.user_id ASC\nLIMIT :limit!\nOFFSET :row_offset!"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * WITH participants AS (
+ *   SELECT DISTINCT uid AS user_id FROM (
+ *     SELECT user_id AS uid FROM predictions
+ *     UNION
+ *     SELECT user_id FROM bets
+ *     UNION
+ *     SELECT user_id FROM votes
+ *   ) x
+ * ),
+ * pred_stats AS (
+ *   SELECT
+ *     p.user_id,
+ *     COUNT(*) FILTER (WHERE (p.status)::text = 'successful')::int AS predictions_successful,
+ *     COUNT(*) FILTER (WHERE (p.status)::text = 'failed')::int AS predictions_failed,
+ *     COUNT(*) FILTER (WHERE (p.status)::text = 'open')::int AS predictions_open,
+ *     COUNT(*) FILTER (WHERE (p.status)::text = 'closed')::int AS predictions_closed,
+ *     COUNT(*) FILTER (WHERE (p.status)::text = 'checking')::int AS predictions_checking,
+ *     COUNT(*) FILTER (WHERE (p.status)::text = 'retired')::int AS predictions_retired
+ *   FROM predictions p
+ *   GROUP BY p.user_id
+ * ),
+ * bet_stats AS (
+ *   SELECT
+ *     b.user_id,
+ *     COUNT(*) FILTER (
+ *       WHERE (
+ *         ((p.status)::text = 'successful' AND b.endorsed IS TRUE) OR
+ *         ((p.status)::text = 'failed' AND b.endorsed IS FALSE)
+ *       ) AND b.valid IS TRUE
+ *     )::int AS bets_successful,
+ *     COUNT(*) FILTER (
+ *       WHERE (
+ *         ((p.status)::text = 'successful' AND b.endorsed IS FALSE) OR
+ *         ((p.status)::text = 'failed' AND b.endorsed IS TRUE)
+ *       ) AND b.valid IS TRUE
+ *     )::int AS bets_failed,
+ *     COUNT(*) FILTER (
+ *       WHERE ((p.status)::text IN ('open', 'closed', 'checking')) AND b.valid IS TRUE
+ *     )::int AS bets_pending,
+ *     COUNT(*) FILTER (WHERE (p.status)::text = 'retired' AND b.valid IS TRUE)::int AS bets_retired,
+ *     COUNT(*) FILTER (WHERE b.valid IS FALSE)::int AS bets_invalid
+ *   FROM bets b
+ *   INNER JOIN predictions p ON p.id = b.prediction_id
+ *   GROUP BY b.user_id
+ * ),
+ * vote_stats AS (
+ *   SELECT
+ *     v.user_id,
+ *     COUNT(*) FILTER (WHERE v.vote IS TRUE)::int AS votes_yes,
+ *     COUNT(*) FILTER (WHERE v.vote IS FALSE)::int AS votes_no,
+ *     COUNT(*) FILTER (
+ *       WHERE ((p.status)::text = 'successful' AND v.vote IS TRUE)
+ *         OR ((p.status)::text = 'failed' AND v.vote IS FALSE)
+ *     )::int AS votes_affirmative,
+ *     COUNT(*) FILTER (
+ *       WHERE ((p.status)::text = 'successful' AND v.vote IS FALSE)
+ *         OR ((p.status)::text = 'failed' AND v.vote IS TRUE)
+ *     )::int AS votes_negative,
+ *     COUNT(*) FILTER (WHERE (p.status)::text = 'closed')::int AS votes_pending
+ *   FROM votes v
+ *   INNER JOIN predictions p ON p.id = v.prediction_id
+ *   GROUP BY v.user_id
+ * ),
+ * point_stats AS (
+ *   SELECT
+ *     b.user_id,
+ *     COALESCE(SUM(b.payout) FILTER (WHERE b.payout > 0), 0)::int AS points_rewards,
+ *     COALESCE(SUM(b.payout) FILTER (WHERE b.payout < 0), 0)::int AS points_penalties,
+ *     COALESCE(SUM(b.payout), 0)::int AS points_net
+ *   FROM bets b
+ *   GROUP BY b.user_id
+ * ),
+ * joined AS (
+ *   SELECT
+ *     pt.user_id,
+ *     u.discord_id,
+ *     COALESCE(pr.predictions_successful, 0) AS predictions_successful,
+ *     COALESCE(pr.predictions_failed, 0) AS predictions_failed,
+ *     COALESCE(pr.predictions_open, 0) AS predictions_open,
+ *     COALESCE(pr.predictions_closed, 0) AS predictions_closed,
+ *     COALESCE(pr.predictions_checking, 0) AS predictions_checking,
+ *     COALESCE(pr.predictions_retired, 0) AS predictions_retired,
+ *     COALESCE(be.bets_successful, 0) AS bets_successful,
+ *     COALESCE(be.bets_failed, 0) AS bets_failed,
+ *     COALESCE(be.bets_pending, 0) AS bets_pending,
+ *     COALESCE(be.bets_retired, 0) AS bets_retired,
+ *     COALESCE(be.bets_invalid, 0) AS bets_invalid,
+ *     COALESCE(vo.votes_yes, 0) AS votes_yes,
+ *     COALESCE(vo.votes_no, 0) AS votes_no,
+ *     COALESCE(vo.votes_affirmative, 0) AS votes_affirmative,
+ *     COALESCE(vo.votes_negative, 0) AS votes_negative,
+ *     COALESCE(vo.votes_pending, 0) AS votes_pending,
+ *     COALESCE(po.points_rewards, 0) AS points_rewards,
+ *     COALESCE(po.points_penalties, 0) AS points_penalties,
+ *     COALESCE(po.points_net, 0) AS points_net
+ *   FROM participants pt
+ *   INNER JOIN users u ON u.id = pt.user_id
+ *   LEFT JOIN pred_stats pr ON pr.user_id = pt.user_id
+ *   LEFT JOIN bet_stats be ON be.user_id = pt.user_id
+ *   LEFT JOIN vote_stats vo ON vo.user_id = pt.user_id
+ *   LEFT JOIN point_stats po ON po.user_id = pt.user_id
+ * ),
+ * ranked AS (
+ *   SELECT
+ *     j.user_id,
+ *     j.discord_id,
+ *     j.predictions_successful,
+ *     j.predictions_failed,
+ *     j.predictions_open,
+ *     j.predictions_closed,
+ *     j.predictions_checking,
+ *     j.predictions_retired,
+ *     j.bets_successful,
+ *     j.bets_failed,
+ *     j.bets_pending,
+ *     j.bets_retired,
+ *     j.bets_invalid,
+ *     j.votes_yes,
+ *     j.votes_no,
+ *     j.votes_affirmative,
+ *     j.votes_negative,
+ *     j.votes_pending,
+ *     j.points_rewards,
+ *     j.points_penalties,
+ *     j.points_net,
+ *     CAST((ROW_NUMBER() OVER (
+ *       ORDER BY j.points_net DESC, j.user_id ASC
+ *     )) AS integer) AS rank_points_net,
+ *     CAST((ROW_NUMBER() OVER (
+ *       ORDER BY j.predictions_successful DESC, j.user_id ASC
+ *     )) AS integer) AS rank_predictions_successful,
+ *     CAST((ROW_NUMBER() OVER (
+ *       ORDER BY j.bets_successful DESC, j.user_id ASC
+ *     )) AS integer) AS rank_bets_successful
+ *   FROM joined j
+ * )
+ * SELECT
+ *   r.user_id,
+ *   r.discord_id,
+ *   r.predictions_successful,
+ *   r.predictions_failed,
+ *   r.predictions_open,
+ *   r.predictions_closed,
+ *   r.predictions_checking,
+ *   r.predictions_retired,
+ *   r.bets_successful,
+ *   r.bets_failed,
+ *   r.bets_pending,
+ *   r.bets_retired,
+ *   r.bets_invalid,
+ *   r.votes_yes,
+ *   r.votes_no,
+ *   r.votes_affirmative,
+ *   r.votes_negative,
+ *   r.votes_pending,
+ *   r.points_rewards,
+ *   r.points_penalties,
+ *   r.points_net,
+ *   r.rank_points_net,
+ *   r.rank_predictions_successful,
+ *   r.rank_bets_successful
+ * FROM ranked r
+ * ORDER BY
+ *   (CASE WHEN :sort_by::text = 'points_net-desc' THEN r.points_net END) DESC NULLS LAST,
+ *   (CASE WHEN :sort_by::text = 'points_net-asc' THEN r.points_net END) ASC NULLS LAST,
+ *   (CASE WHEN :sort_by::text = 'predictions_successful-desc' THEN r.predictions_successful END) DESC NULLS LAST,
+ *   (CASE WHEN :sort_by::text = 'predictions_successful-asc' THEN r.predictions_successful END) ASC NULLS LAST,
+ *   (CASE WHEN :sort_by::text = 'bets_successful-desc' THEN r.bets_successful END) DESC NULLS LAST,
+ *   (CASE WHEN :sort_by::text = 'bets_successful-asc' THEN r.bets_successful END) ASC NULLS LAST,
+ *   r.points_net DESC,
+ *   r.predictions_successful DESC,
+ *   r.bets_successful DESC,
+ *   r.user_id ASC
+ * LIMIT :limit!
+ * OFFSET :row_offset!
+ * ```
+ */
+export const getAllTimeResultsLeaderboard = new PreparedQuery<IGetAllTimeResultsLeaderboardParams,IGetAllTimeResultsLeaderboardResult>(getAllTimeResultsLeaderboardIR);
+
+
