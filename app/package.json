@@ -33,6 +33,7 @@
     "@pgtyped/runtime": "^2.4.2",
     "@types/morgan": "^1.9.10",
     "date-fns": "^3.6.0",
+    "discord.js": "^14.26.3",
     "express": "^4.21.2",
     "helmet": "^8.1.0",
     "htmx.org": "^2.0.8",

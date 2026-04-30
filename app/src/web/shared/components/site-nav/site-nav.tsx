@@ -1,5 +1,6 @@
 import type { WebAuthAuthenticated } from "../../../middleware/auth/session";
 import type { ColorScheme, ThemePreference } from "../../../middleware/theme-preference";
+import type { DiscordMemberProfile } from "@domain/discord";
 import { Button } from "../button";
 import { PreferencesForm } from "../preferences-form";
 
@@ -9,6 +10,8 @@ export type NavigationMenuProps = {
   auth: WebAuthAuthenticated;
   theme: ThemePreference;
   colorScheme: ColorScheme;
+  /** Guild display name + avatar from discord.js cache. */
+  discordProfile: DiscordMemberProfile;
   /** Suffix for control `id`s when two menus exist (e.g. `-desktop`). */
   preferencesControlIdSuffix?: string;
 };
@@ -44,11 +47,24 @@ export function NavigationMenu(props: NavigationMenuProps): JSX.Element {
       </ul>
 
       <div class="[ stack ]">
+        <div class="[ split-pair ]">
+
+          <img
+
+            src={props.discordProfile.avatarUrl}
+            alt=""
+            width={40}
+            height={40}
+            loading="lazy"
+          />
+          <span>{props.discordProfile.displayName}</span>
+        </div>
         <PreferencesForm
           theme={props.theme}
           colorScheme={props.colorScheme}
           controlIdSuffix={props.preferencesControlIdSuffix}
         />
+
         <form method="post" action="/auth/logout">
           <input type="hidden" name="_csrf" value={props.auth.csrfToken} />
           <Button class="[ full-width ]" type="submit">Sign out</Button>

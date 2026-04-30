@@ -34,3 +34,53 @@ export async function fetchGuildMember(
   const json = (await res.json()) as { roles?: string[] };
   return { roles: json.roles ?? [] };
 }
+
+/** Default user avatar index (Discord CDN) for new-username users. */
+function defaultAvatarIndexFromSnowflake(userId: string): number {
+  return Number((BigInt(userId) >> 22n) % 6n);
+}
+
+function discordAvatarUrl(userId: string, avatarHash: string | null | undefined): string {
+  if (!avatarHash) {
+    const i = defaultAvatarIndexFromSnowflake(userId);
+    return `https://cdn.discordapp.com/embed/avatars/${i}.png`;
+  }
+  const ext = avatarHash.startsWith("a_") ? "gif" : "png";
+  return `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}.${ext}?size=128`;
+}
+
+/**
+ * `GET /users/{id}` — global display name + avatar (works for users not in the portal guild).
+ * Returns `null` on 404 or non-OK response (no throw).
+ */
+export async function fetchDiscordUserProfileRest(
+  botToken: string,
+  discordUserId: string,
+): Promise<{ displayName: string; avatarUrl: string } | null> {
+  const url = `${DISCORD_API_V10}/users/${encodeURIComponent(discordUserId)}`;
+  const res = await fetch(url, {
+    headers: { Authorization: `Bot ${botToken}` },
+  });
+
+  if (!res.ok) {
+    return null;
+  }
+
+  const json = (await res.json()) as {
+    id?: string;
+    username?: string;
+    global_name?: string | null;
+    avatar?: string | null;
+  };
+
+  if (!json.id || typeof json.username !== "string") {
+    return null;
+  }
+
+  const displayName = json.global_name?.trim() || json.username;
+
+  return {
+    displayName,
+    avatarUrl: discordAvatarUrl(json.id, json.avatar),
+  };
+}
