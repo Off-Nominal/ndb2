@@ -1,6 +1,5 @@
 export {
   fetchGuildMember,
-  fetchDiscordUserProfileRest,
   type GuildMemberSummary,
 } from "./discord-gateway";
 export {

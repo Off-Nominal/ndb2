@@ -1,6 +1,5 @@
 import type { Client, Guild, GuildMember } from "discord.js";
 import { config } from "@config";
-import { fetchDiscordUserProfileRest } from "./discord-gateway";
 import { getDiscordGatewayClient } from "./discord-js-client";
 
 export type DiscordMemberProfile = {
@@ -37,21 +36,20 @@ export function userToProfile(user: UserProfileSource): DiscordMemberProfile {
   };
 }
 
-/** When the user is not in the portal guild (e.g. leaderboard row), resolve global user. */
+/** When the user is not in the portal guild (e.g. leaderboard row), resolve global user via discord.js (User cache + REST inside the library). */
 export async function resolveUserProfileFallback(
   client: Client,
   discordId: string,
 ): Promise<DiscordMemberProfile | null> {
   try {
-    const user = await client.users.fetch(discordId, { force: true });
+    const user = await client.users.fetch(discordId);
     const displayName = user.globalName?.trim() || user.username || user.id;
     return userToProfile({
       displayName,
       displayAvatarURL: (options) => user.displayAvatarURL(options),
     });
   } catch {
-    // Same Bot REST as guild lookups — avoids stale/partial User cache issues.
-    return fetchDiscordUserProfileRest(config.discord.webPortal.botToken, discordId);
+    return null;
   }
 }
 
@@ -100,7 +98,7 @@ export async function getMemberProfile(discordId: string): Promise<DiscordMember
 
 /**
  * Resolves display metadata for many ids. Prefer guild nicknames/avatars; if the user is not a
- * guild member, falls back to {@link User} (global name + avatar) via `client.users.fetch`.
+ * guild member, falls back to discord.js {@link Client#users} (`fetch` + in-library REST + User cache).
  * Dedupes input ids.
  */
 export async function getMemberProfiles(

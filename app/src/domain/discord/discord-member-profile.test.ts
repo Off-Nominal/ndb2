@@ -43,7 +43,7 @@ vi.mock("./discord-js-client.js", () => ({
 vi.mock("@config", () => ({
   config: {
     discord: {
-      webPortal: { guildId: "g-test", botToken: "test-bot-token" },
+      webPortal: { guildId: "g-test" },
     },
   },
 }));
@@ -120,36 +120,18 @@ describe("getMemberProfiles", () => {
 
     expect(ctx.fetchMember).toHaveBeenCalled();
     expect(ctx.fetchUser).toHaveBeenCalledTimes(1);
-    expect(ctx.fetchUser).toHaveBeenCalledWith("22", { force: true });
+    expect(ctx.fetchUser).toHaveBeenCalledWith("22");
     expect(map.get("22")?.displayName).toBe("global-22");
     expect(map.get("22")?.avatarUrl).toContain("global.example/22");
     expect(map.get("22")?.avatarUrl).toContain("s=128");
   });
 
-  it("uses Bot REST /users when discord.js users.fetch fails", async () => {
+  it("returns null when guild member and users.fetch both fail", async () => {
     ctx.fetchMember.mockRejectedValue(new Error("Unknown Member"));
     ctx.fetchUser.mockRejectedValue(new Error("UserManager.fetch failed"));
 
-    const nativeFetch = globalThis.fetch;
-    globalThis.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        id: "55",
-        username: "from_rest",
-        global_name: "REST Display",
-        avatar: null,
-      }),
-    }) as typeof fetch;
+    const map = await getMemberProfiles(["55"]);
 
-    try {
-      const map = await getMemberProfiles(["55"]);
-      expect(map.get("55")?.displayName).toBe("REST Display");
-      expect(map.get("55")?.avatarUrl).toMatch(
-        /^https:\/\/cdn\.discordapp\.com\/embed\/avatars\/[0-5]\.png$/,
-      );
-      expect(globalThis.fetch).toHaveBeenCalled();
-    } finally {
-      globalThis.fetch = nativeFetch;
-    }
+    expect(map.get("55")).toBeNull();
   });
 });
