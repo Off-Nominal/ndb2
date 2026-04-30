@@ -7,7 +7,7 @@ export namespace GET {
   export type Response = APIResponse<Data>;
 }
 
-// GET /seasons/:id (positive integer id or current | past | future)
+// GET /seasons/:id (positive integer id or path lookup current | last)
 export namespace GET_ById {
   export type Data = Entities.Seasons.SeasonDetail;
   export type Response = APIResponse<Data>;
@@ -28,7 +28,7 @@ export type SeasonLeaderboardSortBy = (typeof SEASON_LEADERBOARD_SORT_VALUES)[nu
 // GET /seasons/:id/results
 export namespace GET_ById_results {
   export type Params = {
-    /** Path: numeric id or `current` | `past` | `future` — resolved to integer in the handler. */
+    /** Resolved season id after routing: path was numeric id or lookup `current` | `last`. */
     season_id: number;
   };
 

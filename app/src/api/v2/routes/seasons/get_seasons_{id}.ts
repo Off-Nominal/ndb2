@@ -7,7 +7,10 @@ import * as API from "@offnominal/ndb2-api-types/v2";
 import { validate } from "../../middleware/validate";
 import { getDbClient } from "@data/db/getDbClient";
 import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
-import { seasonLookupParamSchema } from "../../validations";
+import {
+  seasonLookupParamSchema,
+  seasonLookupPathToEntityIdentifier,
+} from "../../validations";
 
 export const getSeason: Route = (router: Router) => {
   router.get(
@@ -25,7 +28,9 @@ export const getSeason: Route = (router: Router) => {
       const seasonId =
         lookup.kind === "id"
           ? lookup.id
-          : await seasons.getSeasonIdByIdentifier(dbClient)(lookup.identifier);
+          : await seasons.getSeasonIdByIdentifier(dbClient)(
+              seasonLookupPathToEntityIdentifier(lookup),
+            );
 
       if (seasonId === null) {
         return res.status(404).json(

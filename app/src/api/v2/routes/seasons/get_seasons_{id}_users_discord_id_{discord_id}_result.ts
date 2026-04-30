@@ -6,7 +6,11 @@ import responseUtils from "../../utils/response";
 import { validate } from "../../middleware/validate";
 import { getDbClient } from "@data/db/getDbClient";
 import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
-import { seasonLookupParamSchema, discordIdSchema } from "../../validations";
+import {
+  discordIdSchema,
+  seasonLookupParamSchema,
+  seasonLookupPathToEntityIdentifier,
+} from "../../validations";
 import seasons from "@data/queries/seasons";
 import results from "@data/queries/results";
 import { getUserByDiscordId } from "@data/queries/users/users.queries";
@@ -42,7 +46,9 @@ export const getSeasonResultForDiscordUser: Route = (router: Router) => {
       const seasonId =
         lookup.kind === "id"
           ? lookup.id
-          : await seasons.getSeasonIdByIdentifier(dbClient)(lookup.identifier);
+          : await seasons.getSeasonIdByIdentifier(dbClient)(
+              seasonLookupPathToEntityIdentifier(lookup),
+            );
 
       if (seasonId === null) {
         return res.status(404).json(
