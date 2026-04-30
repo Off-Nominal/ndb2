@@ -3,7 +3,7 @@ import { APIScores } from "../../api/v1/types/scores";
 import { seasonsManager } from "@domain/seasons/season-manager";
 
 export const generate_GET_USER_SCORE_SUMMARY_with_SEASON = (
-  parameterizedSeasonId?: string
+  parameterizedSeasonId?: string,
 ) => {
   const seasonFilter = parameterizedSeasonId
     ? ` FILTER (WHERE p.season_id = ${parameterizedSeasonId})`
@@ -31,7 +31,7 @@ export const generate_GET_USER_SCORE_SUMMARY_with_SEASON = (
 };
 
 export const generate_GET_USER_PREDICTION_SUMMARY_with_SEASON = (
-  parameterizedSeasonId?: string
+  parameterizedSeasonId?: string,
 ) => {
   const whereClause = parameterizedSeasonId
     ? ` AND p.season_id = ${parameterizedSeasonId}`
@@ -62,7 +62,7 @@ export const generate_GET_USER_PREDICTION_SUMMARY_with_SEASON = (
 };
 
 export const generate_GET_USER_BET_SUMMARY_with_SEASON = (
-  parameterizedSeasonId?: string
+  parameterizedSeasonId?: string,
 ) => {
   const whereClause = parameterizedSeasonId
     ? ` AND p.season_id = ${parameterizedSeasonId}`
@@ -114,7 +114,7 @@ export const generate_GET_USER_BET_SUMMARY_with_SEASON = (
 };
 
 export const generate_GET_USER_VOTE_SUMMARY_with_SEASON = (
-  parameterizedSeasonId?: string
+  parameterizedSeasonId?: string,
 ) => {
   const whereClause = parameterizedSeasonId
     ? ` AND ev.season_id = ${parameterizedSeasonId}`
@@ -138,7 +138,7 @@ export const generate_GET_USER_VOTE_SUMMARY_with_SEASON = (
 
 const generate_GET_LEADERBOARD_with_SEASON = (
   type: "points" | "predictions" | "bets",
-  seasonId?: string | number
+  seasonId?: string | number,
 ): [string, string[]] => {
   const params = [];
 
@@ -157,7 +157,7 @@ const generate_GET_LEADERBOARD_with_SEASON = (
           WITH 
           users_scores_summary AS 
           (${generate_GET_USER_SCORE_SUMMARY_with_SEASON(
-            hasSelectedSeason ? parameterizedSeasonId : undefined
+            hasSelectedSeason ? parameterizedSeasonId : undefined,
           )})
         SELECT
           better_id as id,
@@ -176,7 +176,7 @@ const generate_GET_LEADERBOARD_with_SEASON = (
           WITH
           users_predictions_summary AS 
             (${generate_GET_USER_PREDICTION_SUMMARY_with_SEASON(
-              hasSelectedSeason ? parameterizedSeasonId : undefined
+              hasSelectedSeason ? parameterizedSeasonId : undefined,
             )})
         SELECT
           id,
@@ -200,7 +200,7 @@ const generate_GET_LEADERBOARD_with_SEASON = (
           WITH
           users_bets_summary 
             AS (${generate_GET_USER_BET_SUMMARY_with_SEASON(
-              hasSelectedSeason ? parameterizedSeasonId : undefined
+              hasSelectedSeason ? parameterizedSeasonId : undefined,
             )})
         SELECT
           id,
@@ -240,7 +240,7 @@ const getLeaderboard =
   (client: PoolClient) =>
   (
     type: "points" | "predictions" | "bets",
-    seasonIdentifier?: "current" | "last" | number
+    seasonIdentifier?: "current" | "last" | number,
   ) => {
     let seasonId: number | undefined = undefined;
 
@@ -265,29 +265,29 @@ const getLeaderboard =
     if (type === "points") {
       const [parameterizedQuery, params] = generate_GET_LEADERBOARD_with_SEASON(
         type,
-        seasonId
+        seasonId,
       );
       query = client.query<APIScores.GetPointsLeaderboard>(
         parameterizedQuery,
-        params
+        params,
       );
     } else if (type === "predictions") {
       const [parameterizedQuery, params] = generate_GET_LEADERBOARD_with_SEASON(
         type,
-        seasonId
+        seasonId,
       );
       query = client.query<APIScores.GetPredictionsLeaderboard>(
         parameterizedQuery,
-        params
+        params,
       );
     } else if (type === "bets") {
       const [parameterizedQuery, params] = generate_GET_LEADERBOARD_with_SEASON(
         type,
-        seasonId
+        seasonId,
       );
       query = client.query<APIScores.GetBetsLeaderboard>(
         parameterizedQuery,
-        params
+        params,
       );
     } else {
       throw new Error("Invalid leaderboard type");
