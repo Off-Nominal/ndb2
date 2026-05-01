@@ -1,0 +1,112 @@
+/* Block: Table — `screen-element` wraps `<table>` so `<caption>` sits inside the HUD border. */
+
+.table-shell {
+  --screen-element-padding-x: 0;
+  --screen-element-padding-y: 0;
+  --table-scroll-padding-inline: var(--space-2);
+
+  min-width: 0;
+  box-sizing: border-box;
+
+  /* Horizontal scroll on narrow viewports; caption scrolls with the grid. */
+  & > .table-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    padding-inline: var(--table-scroll-padding-inline);
+  }
+
+  & > .table-scroll > table {
+    width: max-content;
+    min-width: 100%;
+    /* `separate` avoids sticky + `collapse` overlap glitches between adjacent cols. */
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    font-size: var(--text-md);
+  }
+
+  & > .table-scroll > table :is(th, td) {
+    padding: var(--space-1) var(--space-1);
+    border: none;
+  }
+
+  & > .table-scroll > table :is(th, td).table-cell--align-start {
+    text-align: start;
+  }
+
+  & > .table-scroll > table :is(th, td).table-cell--align-end {
+    text-align: end;
+  }
+
+  /*
+    Sticky Player col: `left` is 0 on the scrollport — do not duplicate `.table-scroll` padding here
+    or the cell shifts right and overlaps column 2.
+  */
+  & > .table-scroll > table thead tr:first-child > th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: var(--color-surface);
+  }
+
+  & > .table-scroll > table tbody td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+  }
+
+  & > .table-scroll > table tbody tr:nth-child(odd) td:first-child {
+    background: var(--color-surface);
+  }
+
+  & > .table-scroll > table tbody tr:nth-child(even) td:first-child {
+    background: color-mix(
+      in srgb,
+      var(--color-primary) 6%,
+      var(--color-surface)
+    );
+  }
+
+  /* Subtle stripe: tint only body rows so multi-row headers stay uniform. */
+  & > .table-scroll > table tbody tr:nth-child(even) {
+    background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+  }
+}
+
+.table-shell > .table-shell-caption {
+  margin: 0;
+  padding: 0;
+  text-align: start;
+
+  & .table-caption-bar {
+    /* Same trapezoid ribbon as `.card-screen-element__bar` (card-screen-element.css). */
+    --bar-trapezoid-run: calc(tan(20deg) * (1lh + 2 * var(--space-1)));
+
+    display: block;
+    width: fit-content;
+    max-width: calc(100% - var(--space-4));
+    box-sizing: border-box;
+    padding: var(--space-1) calc(var(--space-2) + var(--bar-trapezoid-run))
+      var(--space-1) var(--space-2);
+    clip-path: polygon(
+      0% 0%,
+      100% 0%,
+      calc(100% - var(--bar-trapezoid-run)) 100%,
+      0% 100%
+    );
+  }
+
+  & .table-caption-heading {
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    font-weight: var(--weight-semibold);
+    font-size: var(--text-md);
+  }
+}

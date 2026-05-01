@@ -100,7 +100,69 @@ export async function getMemberProfile(discordId: string): Promise<DiscordMember
  * Resolves display metadata for many ids. Prefer guild nicknames/avatars; if the user is not a
  * guild member, falls back to discord.js {@link Client#users} (`fetch` + in-library REST + User cache).
  * Dedupes input ids.
+ *
+ * Uses `guild.members.fetch({ user: ids })` in batches (Discord caps bulk member requests; app data
+ * max is 100 rows). Falls back to per-id fetches if a batch fails; user lookups stay concurrency-limited.
  */
+const PROFILE_BATCH_CACHE_TTL_MS = 5 * 60 * 1000;
+const PROFILE_BATCH_CACHE_MAX = 500;
+const PROFILE_FETCH_CONCURRENCY = 5;
+/** Discord bulk guild-member lookup limit (aligned with leaderboard `per_page` max). */
+const GUILD_MEMBERS_FETCH_BY_USERS_LIMIT = 100;
+
+type CachedBatchProfile = DiscordMemberProfile | null;
+
+const memberProfilesBatchCache = new Map<
+  string,
+  { expires: number; profile: CachedBatchProfile }
+>();
+
+function batchCacheDisabledForTests(): boolean {
+  return process.env.VITEST === "true";
+}
+
+function batchCacheGet(discordId: string): CachedBatchProfile | undefined {
+  if (batchCacheDisabledForTests()) return undefined;
+  const row = memberProfilesBatchCache.get(discordId);
+  if (row === undefined) return undefined;
+  if (Date.now() > row.expires) {
+    memberProfilesBatchCache.delete(discordId);
+    return undefined;
+  }
+  return row.profile;
+}
+
+function batchCacheSet(discordId: string, profile: CachedBatchProfile): void {
+  if (batchCacheDisabledForTests()) return;
+  if (memberProfilesBatchCache.size >= PROFILE_BATCH_CACHE_MAX) {
+    const oldestKey = memberProfilesBatchCache.keys().next().value as string | undefined;
+    if (oldestKey !== undefined) memberProfilesBatchCache.delete(oldestKey);
+  }
+  memberProfilesBatchCache.set(discordId, {
+    expires: Date.now() + PROFILE_BATCH_CACHE_TTL_MS,
+    profile,
+  });
+}
+
+async function forEachWithConcurrencyLimit<T>(
+  items: readonly T[],
+  limit: number,
+  fn: (item: T) => Promise<void>,
+): Promise<void> {
+  if (items.length === 0) return;
+  const n = Math.min(Math.max(1, limit), items.length);
+  let next = 0;
+  async function worker() {
+    while (true) {
+      const i = next;
+      if (i >= items.length) return;
+      next += 1;
+      await fn(items[i]!);
+    }
+  }
+  await Promise.all(Array.from({ length: n }, () => worker()));
+}
+
 export async function getMemberProfiles(
   discordIds: string[],
 ): Promise<Map<string, DiscordMemberProfile | null>> {
@@ -110,16 +172,59 @@ export async function getMemberProfiles(
   const deduped = [...new Set(discordIds)];
   const out = new Map<string, DiscordMemberProfile | null>();
 
-  await Promise.all(
-    deduped.map(async (id) => {
-      const member = await resolveGuildMember(guild, id);
-      if (member) {
-        out.set(id, guildMemberToProfile(member));
-        return;
+  const needsGuildResolve: string[] = [];
+  for (const id of deduped) {
+    const hit = batchCacheGet(id);
+    if (hit !== undefined) {
+      out.set(id, hit);
+    } else {
+      needsGuildResolve.push(id);
+    }
+  }
+
+  for (let i = 0; i < needsGuildResolve.length; i += GUILD_MEMBERS_FETCH_BY_USERS_LIMIT) {
+    const chunk = needsGuildResolve.slice(i, i + GUILD_MEMBERS_FETCH_BY_USERS_LIMIT);
+    try {
+      const collection = await guild.members.fetch({ user: chunk });
+      const needUserFallback: string[] = [];
+      for (const id of chunk) {
+        const member = collection.get(id);
+        if (member) {
+          const profile = guildMemberToProfile(member);
+          batchCacheSet(id, profile);
+          out.set(id, profile);
+        } else {
+          needUserFallback.push(id);
+        }
       }
-      out.set(id, await resolveUserProfileFallback(client, id));
-    }),
-  );
+      await forEachWithConcurrencyLimit(
+        needUserFallback,
+        PROFILE_FETCH_CONCURRENCY,
+        async (id) => {
+          const profile = await resolveUserProfileFallback(client, id);
+          batchCacheSet(id, profile);
+          out.set(id, profile);
+        },
+      );
+    } catch {
+      await forEachWithConcurrencyLimit(chunk, PROFILE_FETCH_CONCURRENCY, async (id) => {
+        const hit = batchCacheGet(id);
+        if (hit !== undefined) {
+          out.set(id, hit);
+          return;
+        }
+        const member = await resolveGuildMember(guild, id);
+        let profile: CachedBatchProfile;
+        if (member) {
+          profile = guildMemberToProfile(member);
+        } else {
+          profile = await resolveUserProfileFallback(client, id);
+        }
+        batchCacheSet(id, profile);
+        out.set(id, profile);
+      });
+    }
+  }
 
   return out;
 }

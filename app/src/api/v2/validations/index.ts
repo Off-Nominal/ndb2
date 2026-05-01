@@ -139,7 +139,7 @@ export const resultsCrossScopeListQuerySchema = z.object({
     z
       .enum(Endpoints.Results.CROSS_SCOPE_RESULTS_SORT_VALUES)
       .optional()
-      .default("points_net-desc"),
+      .default("rank_points_net-desc"),
   ),
   page: queryParamScalar(resultsPageCoerce.optional().default(1)),
   per_page: queryParamScalar(

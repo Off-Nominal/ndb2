@@ -112,9 +112,7 @@ function userFromSeasonOrLeaderboardRow(
 }
 
 function mapToSeasonLeaderboardRow(
-  row:
-    | IGetSeasonResultsLeaderboardResult
-    | IGetAllTimeResultsLeaderboardResult,
+  row: IGetSeasonResultsLeaderboardResult | IGetAllTimeResultsLeaderboardResult,
 ): API.Entities.Results.UserSeasonLeaderboardRow {
   return {
     user: userFromSeasonOrLeaderboardRow(row),
@@ -178,7 +176,6 @@ export default {
       const [row] = await userParticipatesInSeasonQuery.run(params, dbClient);
       return Boolean(row?.participates);
     },
-
   getSeasonLeaderboard:
     (dbClient: PoolClient) => async (input: SeasonLeaderboardInput) => {
       const per_page = clampPerPage(input.per_page);
@@ -206,7 +203,6 @@ export default {
         results: rows.map((r) => mapToSeasonLeaderboardRow(r)),
       };
     },
-
   getAllTimeLeaderboard:
     (dbClient: PoolClient) => async (input: AllTimeLeaderboardInput) => {
       const per_page = clampPerPage(input.per_page);
@@ -233,10 +229,8 @@ export default {
         results: rows.map((r) => mapToSeasonLeaderboardRow(r)),
       };
     },
-
   getSeasonResultForUser:
-    (dbClient: PoolClient) =>
-    async (season_id: number, user_id: string) => {
+    (dbClient: PoolClient) => async (season_id: number, user_id: string) => {
       const [row] = await getSeasonResultForUserQuery.run(
         { season_id, user_id },
         dbClient,
@@ -244,7 +238,6 @@ export default {
       if (!row) return null;
       return mapToUserSeasonResult(row);
     },
-
   getUserSeasonResults:
     (dbClient: PoolClient) => async (input: UserSeasonResultsListInput) => {
       const per_page = clampPerPage(input.per_page);
@@ -272,7 +265,6 @@ export default {
         results: rows.map(mapUserSeasonRow),
       };
     },
-
   getAllTimeResultForUser:
     (dbClient: PoolClient) => async (user_id: string) => {
       const [row] = await getAllTimeResultForUserQuery.run(
