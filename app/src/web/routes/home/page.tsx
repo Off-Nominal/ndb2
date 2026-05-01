@@ -57,8 +57,11 @@ export function HomePage(props: HomePageProps): JSX.Element {
             </span>
           </p>
         </CardScreenElement>
-
       </div>
+
+      <CardScreenElement headingElement="h2" heading="Leaderboard">
+        <div />
+      </CardScreenElement>
     </div>
   );
 }
