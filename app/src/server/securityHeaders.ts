@@ -47,7 +47,7 @@ export function installSecurityHeaders(app: Express): void {
               fontSrc: ["'self'", "data:"],
               formAction: ["'self'"],
               frameAncestors: ["'none'"],
-              imgSrc: ["'self'", "data:"],
+              imgSrc: ["'self'", "data:", "https://cdn.discordapp.com"],
               objectSrc: ["'none'"],
               scriptSrc: ["'self'"],
               scriptSrcAttr: ["'none'"],

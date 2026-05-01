@@ -23,6 +23,7 @@ describe("securityHeaders", () => {
     expect(csp).toBeDefined();
     expect(csp).toContain("frame-ancestors 'none'");
     expect(csp).toContain("default-src 'self'");
+    expect(csp).toContain("https://cdn.discordapp.com");
     expect(res.headers["x-frame-options"]).toBe("DENY");
     expect(res.headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
   });
