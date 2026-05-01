@@ -1,3 +1,4 @@
+import type { DiscordMemberProfile } from "@domain/discord";
 import { CardScreenElement } from "@web/shared/components/card-screen-element";
 import { HeadingScreenElement } from "@web/shared/components/heading-screen-element";
 import { SeasonCard } from "./components/season-card";
@@ -21,7 +22,7 @@ export interface HomePageSeasonSnapshot {
 }
 
 export interface HomePageProps {
-  discordId: string;
+  discordProfile: DiscordMemberProfile;
   season: HomePageSeasonSnapshot | null;
 }
 
@@ -41,8 +42,19 @@ export function HomePage(props: HomePageProps): JSX.Element {
           endDate={props.season?.end ?? ""}
         />
         <CardScreenElement headingElement="h2" heading="Performance">
-          <p>
-            Signed in as Discord user <code>{props.discordId}</code>. Have a nice day.
+          <p class="[ stack ]">
+            <span>
+              <img
+                src={props.discordProfile.avatarUrl}
+                alt=""
+                width={36}
+                height={36}
+                loading="lazy"
+              />
+              <span>
+                Signed in as <strong>{props.discordProfile.displayName}</strong>. Have a nice day.
+              </span>
+            </span>
           </p>
         </CardScreenElement>
 

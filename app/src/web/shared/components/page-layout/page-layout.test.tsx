@@ -40,6 +40,11 @@ describe("PageLayout", () => {
   });
 });
 
+const testProfile = {
+  displayName: "Nav User",
+  avatarUrl: "https://cdn.discordapp.com/embed/avatars/0.png",
+};
+
 describe("AuthenticatedPageLayout", () => {
   it("renders main plus right nav shell, drawer, and centered content", () => {
     const html = AuthenticatedPageLayout({
@@ -47,6 +52,7 @@ describe("AuthenticatedPageLayout", () => {
       colorScheme: "nebula",
       title: "Auth",
       auth: testAuth,
+      discordProfile: testProfile,
       children: createElement("p", null, "hello"),
     });
     expect(html).toContain('<html lang="en" data-theme="dark" data-color-scheme="nebula">');
@@ -60,5 +66,6 @@ describe("AuthenticatedPageLayout", () => {
     expect(html).toContain('name="_csrf"');
     expect(html).toContain("test-csrf-token");
     expect(html).toContain("data-preferences-form");
+    expect(html).toContain("Nav User");
   });
 });

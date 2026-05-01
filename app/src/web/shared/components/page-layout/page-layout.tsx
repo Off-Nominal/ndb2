@@ -1,5 +1,6 @@
 import type { WebAuthAuthenticated } from "../../../middleware/auth/session";
 import type { ColorScheme, ThemePreference } from "../../../middleware/theme-preference";
+import type { DiscordMemberProfile } from "@domain/discord";
 import type { HtmlHeadProps } from "../html-head";
 import { HtmlHead } from "../html-head";
 import { NavDrawerToggle } from "./nav-drawer-toggle";
@@ -24,6 +25,8 @@ export type PageLayoutProps = HtmlHeadProps & {
 export type AuthenticatedPageLayoutProps = PageLayoutProps & {
   /** Session (CSRF for sign-out, etc.). */
   auth: WebAuthAuthenticated;
+  /** Resolved from discord.js guild member cache for nav display. */
+  discordProfile: DiscordMemberProfile;
 };
 
 function DocumentFrame(props: PageLayoutProps): JSX.Element {
@@ -96,6 +99,7 @@ export function AuthenticatedPageLayout(props: AuthenticatedPageLayoutProps): JS
               <div class="[ page-layout-nav-body ]">
                 <NavigationMenu
                   auth={props.auth}
+                  discordProfile={props.discordProfile}
                   theme={props.theme}
                   colorScheme={props.colorScheme}
                 />
@@ -104,6 +108,7 @@ export function AuthenticatedPageLayout(props: AuthenticatedPageLayoutProps): JS
             <div class="[ page-layout-nav-desktop ]">
               <NavigationMenu
                 auth={props.auth}
+                discordProfile={props.discordProfile}
                 theme={props.theme}
                 colorScheme={props.colorScheme}
                 preferencesControlIdSuffix="-desktop"

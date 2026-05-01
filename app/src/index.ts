@@ -1,5 +1,9 @@
 import { config } from "@config";
 import { createLogger } from "@mendahu/utilities";
+import {
+  startDiscordGatewayClient,
+  stopDiscordGatewayClient,
+} from "@domain/discord";
 import PredictionMonitor from "@domain/predictions/prediction-monitor";
 import { monitors } from "@domain/predictions/config";
 import SeasonMonitor from "@domain/seasons/season-monitor";
@@ -30,6 +34,11 @@ pool
 
 async function bootstrap() {
   const app = await createApp();
+  const portal = config.discord.webPortal;
+  await startDiscordGatewayClient({
+    token: portal.botToken,
+    guildId: portal.guildId,
+  });
 
   app.listen(PORT, () => {
     logger.log(`Application listening on port: ${PORT}`);
@@ -42,6 +51,12 @@ async function bootstrap() {
 
   const seasonMonitor = new SeasonMonitor(seasonMonitors);
   seasonMonitor.initiate();
+
+  const shutdownDiscord = () => {
+    void stopDiscordGatewayClient();
+  };
+  process.once("SIGINT", shutdownDiscord);
+  process.once("SIGTERM", shutdownDiscord);
 }
 
 bootstrap().catch((err) => {
