@@ -35,6 +35,7 @@ export interface NDBEvents {
     edited_fields: API.Webhooks.PredictionEditChangedFields,
   ) => void;
   new_snooze_vote: (prediction: API.Entities.Predictions.Prediction) => void;
+  new_snooze_check: (snooze_check: API.Entities.Predictions.Prediction) => void;
   snoozed_prediction: (prediction: API.Entities.Predictions.Prediction) => void;
   season_start: (season: API.Entities.Seasons.Season) => void;
   season_end: (results: API.Entities.Seasons.SeasonResults) => void;
