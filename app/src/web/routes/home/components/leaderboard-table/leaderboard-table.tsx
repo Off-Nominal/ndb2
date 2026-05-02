@@ -1,11 +1,13 @@
 import type { Children } from "@kitajs/html";
 import { CardScreenElement } from "@web/shared/components/card-screen-element";
 import { Table, Th, ThSortButton } from "@web/shared/components/table";
+import { formatNumber } from "@web/shared/utils/format_number";
 import {
   homeLeaderboardFragmentUrl,
   homeLeaderboardPageUrl,
   type HomeLeaderboardSortBy,
 } from "../../leaderboard-sort.js";
+import { formatRank, predictionOpenPipeline } from "./helpers";
 
 export interface HomePageLeaderboardMeta {
   page: number;
@@ -69,6 +71,7 @@ const EMPTY_COLSPAN = 13;
 
 /** Home leaderboard wiring for {@link Th} (HTMX targets, sort labels). */
 function LeaderboardSortTh(props: {
+  class?: string;
   label: string;
   asc: HomeLeaderboardSortBy;
   desc: HomeLeaderboardSortBy;
@@ -91,7 +94,7 @@ function LeaderboardSortTh(props: {
       : `Highest ${props.metricLabel} first`;
 
   return (
-    <Th label={props.label} sortGroupAriaLabel={groupLabel}>
+    <Th label={props.label} sortGroupAriaLabel={groupLabel} class={props.class}>
       <ThSortButton
         direction="asc"
         hx-get={homeLeaderboardFragmentUrl(props.asc)}
@@ -112,21 +115,6 @@ function LeaderboardSortTh(props: {
       />
     </Th>
   );
-}
-
-function formatNumber(value: number): string {
-  return value.toLocaleString("en-US", {
-    maximumFractionDigits: Number.isInteger(value) ? 0 : 2,
-  });
-}
-
-function formatRank(value: number | null): string {
-  return value != null ? String(value) : "—";
-}
-
-/** Unresolved prediction pipeline: open + closed + checking. */
-function predictionOpenPipeline(p: HomePageLeaderboardPredictions): number {
-  return p.open + p.closed + p.checking;
 }
 
 function LeaderboardRoot(props: { children: JSX.Element }): JSX.Element {
@@ -155,19 +143,29 @@ function LeaderboardTableThead(props: {
         <th rowspan={2} scope="col">
           Player
         </th>
-        <th colspan={4} scope="colgroup">
+        <th colspan={2} scope="colgroup" class="[ hide-desktop-up ]">
           Points
         </th>
-        <th colspan={4} scope="colgroup">
+        <th colspan={4} scope="colgroup" class="[ show-desktop-up ]">
+          Points
+        </th>
+        <th colspan={2} scope="colgroup" class="[ show-mobile-up hide-desktop-up ]">
           Predictions
         </th>
-        <th colspan={4} scope="colgroup">
+        <th colspan={4} scope="colgroup" class="[ show-desktop-up ]">
+          Predictions
+        </th>
+        <th colspan={2} scope="colgroup" class="[ show-tablet-up hide-desktop-up ]">
+          Bets
+        </th>
+        <th colspan={4} scope="colgroup" class="[ show-desktop-up ]">
           Bets
         </th>
       </tr>
       <tr>
+        {/* Points */}
         <LeaderboardSortTh
-          label="Rnk"
+          label="Rank"
           asc="rank_points_net-asc"
           desc="rank_points_net-desc"
           sortBy={props.sortBy}
@@ -183,28 +181,32 @@ function LeaderboardTableThead(props: {
           metricLabel="net points"
         />
         <LeaderboardSortTh
-          label="+"
+          label="Gain"
           asc="points_rewards-asc"
           desc="points_rewards-desc"
           sortBy={props.sortBy}
           sortMode="value"
           metricLabel="point rewards"
+          class="[ show-desktop-up ]"
         />
         <LeaderboardSortTh
-          label="-"
+          label="Loss"
           asc="points_penalties-asc"
           desc="points_penalties-desc"
           sortBy={props.sortBy}
           sortMode="value"
           metricLabel="point penalties"
+          class="[ show-desktop-up ]"
         />
+        {/* Predictions */}
         <LeaderboardSortTh
-          label="Rnk"
+          label="Rank"
           asc="rank_predictions_successful-asc"
           desc="rank_predictions_successful-desc"
           sortBy={props.sortBy}
           sortMode="rank"
           metricLabel="successful predictions"
+          class="[ show-mobile-up ]"
         />
         <LeaderboardSortTh
           label="Won"
@@ -213,33 +215,35 @@ function LeaderboardTableThead(props: {
           sortBy={props.sortBy}
           sortMode="value"
           metricLabel="successful predictions"
+          class="[ show-mobile-up ]"
         />
         <LeaderboardSortTh
-          label="Los"
+          label="Lost"
           asc="predictions_failed-asc"
           desc="predictions_failed-desc"
           sortBy={props.sortBy}
           sortMode="value"
           metricLabel="failed predictions"
+          class="[ show-desktop-up ]"
         />
-        {/*
-          Cell = open + closed + checking; sort uses `predictions_open` only (no combined API key).
-        */}
         <LeaderboardSortTh
-          label="Opn"
+          label="Open"
           asc="predictions_open-asc"
           desc="predictions_open-desc"
           sortBy={props.sortBy}
           sortMode="value"
           metricLabel="predictions in open status"
+          class="[ show-desktop-up ]"
         />
+        {/* Bets */}
         <LeaderboardSortTh
-          label="Rnk"
+          label="Rank"
           asc="rank_bets_successful-asc"
           desc="rank_bets_successful-desc"
           sortBy={props.sortBy}
           sortMode="rank"
           metricLabel="successful bets"
+          class="[ show-tablet-up ]"
         />
         <LeaderboardSortTh
           label="Won"
@@ -248,22 +252,25 @@ function LeaderboardTableThead(props: {
           sortBy={props.sortBy}
           sortMode="value"
           metricLabel="successful bets"
+          class="[ show-tablet-up ]"
         />
         <LeaderboardSortTh
-          label="Los"
+          label="Lost"
           asc="bets_failed-asc"
           desc="bets_failed-desc"
           sortBy={props.sortBy}
           sortMode="value"
           metricLabel="failed bets"
+          class="[ show-desktop-up ]"
         />
         <LeaderboardSortTh
-          label="Opn"
+          label="Open"
           asc="bets_pending-asc"
           desc="bets_pending-desc"
           sortBy={props.sortBy}
           sortMode="value"
           metricLabel="pending bets"
+          class="[ show-desktop-up ]"
         />
       </tr>
     </thead>
@@ -342,21 +349,21 @@ export function LeaderboardTable(props: LeaderboardTableProps): JSX.Element {
                       {row.displayName.trim().slice(0, 1).toUpperCase() || "?"}
                     </span>
                   )}
-                  <span>{row.displayName}</span>
+                  <span class="[ leaderboard-player-name ]">{row.displayName}</span>
                 </span>
               </td>
-              <td class="[ table-cell--align-start ]">{formatRank(row.points.rank)}</td>
-              <td class="[ table-cell--align-end ]">{formatNumber(row.points.net)}</td>
-              <td class="[ table-cell--align-end ]">{formatNumber(row.points.rewards)}</td>
-              <td class="[ table-cell--align-end ]">{formatNumber(row.points.penalties)}</td>
-              <td class="[ table-cell--align-start ]">{formatRank(row.predictions.rank)}</td>
-              <td class="[ table-cell--align-end ]">{formatNumber(row.predictions.successful)}</td>
-              <td class="[ table-cell--align-end ]">{formatNumber(row.predictions.failed)}</td>
-              <td class="[ table-cell--align-end ]">{formatNumber(predictionOpenPipeline(row.predictions))}</td>
-              <td class="[ table-cell--align-start ]">{formatRank(row.bets.rank)}</td>
-              <td class="[ table-cell--align-end ]">{formatNumber(row.bets.successful)}</td>
-              <td class="[ table-cell--align-end ]">{formatNumber(row.bets.failed)}</td>
-              <td class="[ table-cell--align-end ]">{formatNumber(row.bets.pending)}</td>
+              <td class="[ table-cell--align-center ]">{formatRank(row.points.rank)}</td>
+              <td class="[ table-cell--align-center ]">{formatNumber(row.points.net)}</td>
+              <td class="[ show-desktop-up ][ table-cell--align-center ]">{formatNumber(row.points.rewards)}</td>
+              <td class="[ show-desktop-up ][ table-cell--align-center ]">{formatNumber(row.points.penalties)}</td>
+              <td class="[ show-mobile-up ][ table-cell--align-center ]">{formatRank(row.predictions.rank)}</td>
+              <td class="[ show-mobile-up ][ table-cell--align-center ]">{formatNumber(row.predictions.successful)}</td>
+              <td class="[ show-desktop-up ][ table-cell--align-center ]">{formatNumber(row.predictions.failed)}</td>
+              <td class="[ show-desktop-up ][ table-cell--align-center ]">{formatNumber(predictionOpenPipeline(row.predictions))}</td>
+              <td class="[ show-tablet-up ][ table-cell--align-center ]">{formatRank(row.bets.rank)}</td>
+              <td class="[ show-tablet-up ][ table-cell--align-center ]">{formatNumber(row.bets.successful)}</td>
+              <td class="[ show-desktop-up ][ table-cell--align-center ]">{formatNumber(row.bets.failed)}</td>
+              <td class="[ show-desktop-up ][ table-cell--align-center ]">{formatNumber(row.bets.pending)}</td>
             </tr>
           ))}
         </tbody>

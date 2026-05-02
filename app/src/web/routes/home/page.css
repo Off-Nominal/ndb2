@@ -1,11 +1,15 @@
 /* Home page — main menu */
 
-.grid {
+.home-grid {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-4);
 }
 
-.grid > * {
+.home-grid > * {
   flex: 1 1 18rem;
+}
+
+.main-menu {
+  padding-block-end: var(--space-8);
 }

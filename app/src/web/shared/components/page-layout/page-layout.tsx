@@ -8,8 +8,7 @@ import { NavigationMenu } from "../site-nav";
 
 /**
  * Full-document shell (markup-driven CUBE — see cube-css-authoring skill).
- * Authenticated shell: `[ page-layout ]` + compact (`page-layout-nav-mobile`, under 64rem) vs desktop nav
- * (`page-layout-nav-desktop`, 64rem+). See `page-layout.css`.
+ * Authenticated shell: `[ page-layout ]` + drawer (`page-layout-nav-mobile`, under **wide** **`80rem`**) vs persistent column nav (`page-layout-nav-desktop`, **`≥ 80rem`**). See `page-layout.css`.
  */
 
 /** Base document: `<html>`, `<head>`, `<body>`, and a single `main` column (no site navigation). */

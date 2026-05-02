@@ -51,7 +51,7 @@ export function HomePage(props: HomePageProps): JSX.Element {
         <h1 class="[ canvas-knockout-text ]">Main Menu</h1>
       </HeadingScreenElement>
 
-      <div class="[ grid ]">
+      <div class="[ home-grid ]">
         <SeasonCard
           name={props.season?.name ?? ""}
           predictions={props.season?.predictions ?? null}

@@ -192,6 +192,8 @@
 
   /* Min viewport width for desktop tier and up (1024px at 16px root). */
   --breakpoint-desktop: 64rem;
+  /* Min viewport width for the larger-phone band (576px at 16px root). Narrower viewports stack below this; tablet still starts at breakpoint.tablet. */
+  --breakpoint-mobile: 36rem;
   /* Min viewport width for tablet tier and up (768px at 16px root). Pair with web-breakpoints skill. */
   --breakpoint-tablet: 48rem;
   /* Min viewport width for wide tier and up (1280px at 16px root). */

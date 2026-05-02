@@ -1,9 +1,5 @@
 /* Block: home leaderboard — table root, player cell, column sort (HTMX). */
 
-.leaderboard-table-root {
-  min-width: 0;
-}
-
 /* Center every leaderboard header cell (beats `.table-cell--align-*` on `<th>` via higher specificity). */
 .leaderboard-table-root .table thead :is(th, td) {
   text-align: center;
@@ -26,6 +22,34 @@
   display: inline-flex;
   align-items: center;
   column-gap: var(--space-2);
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Cap player column on narrow viewports; relax from breakpoint.mobile upward. */
+
+.leaderboard-table-root .table tbody td:first-child {
+  max-width: min(11rem, 46vw);
+}
+
+.leaderboard-player-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* = breakpoint.mobile in breakpoints.json */
+@media (min-width: 36rem) {
+  .leaderboard-table-root .table tbody td:first-child {
+    max-width: none;
+  }
+
+  .leaderboard-player-name {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+  }
 }
 
 .leaderboard-player > img {

@@ -18,7 +18,7 @@ export function ThSortButton(props: ThSortButtonProps): JSX.Element {
   const glyph = direction === "asc" ? "▲" : "▼";
 
   return (
-    <button type={type} class={mergeClass("[ table-col-sort__btn ]", className)} {...rest}>
+    <button type={type} class={mergeClass("[ table-th-sort-button ]", className)} {...rest}>
       {glyph}
     </button>
   );
@@ -33,8 +33,6 @@ export type ThProps = {
   children: Children;
   /** Extra classes on `<th>` (e.g. `.table-cell--align-*`). */
   class?: string;
-  /** Extra classes on the ▲▼ container (route-specific modifiers). */
-  sortControlsClass?: string;
 };
 
 /**
@@ -46,7 +44,7 @@ export function Th(props: ThProps): JSX.Element {
       <div>
         <span>{props.label}</span>
         <div
-          class={mergeClass("[ table-th__controls ]", props.sortControlsClass)}
+          class="[ table-th__controls ]"
           role="group"
           aria-label={props.sortGroupAriaLabel}
         >
