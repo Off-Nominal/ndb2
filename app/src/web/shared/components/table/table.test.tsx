@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { Table } from "./table";
 
 describe("Table", () => {
-  it("renders table with screen-element class and forwards attributes", () => {
+  it("renders native table with table styling hook and forwards attributes", () => {
     const html = Table({
       "aria-label": "Scores",
       children: (
@@ -15,7 +15,8 @@ describe("Table", () => {
     });
 
     expect(html).toContain("<table");
-    expect(html).toContain("screen-element");
+    expect(html).toContain("[ table ]");
+    expect(html).not.toContain("screen-element");
     expect(html).toContain('aria-label="Scores"');
     expect(html).toContain("<tbody");
   });

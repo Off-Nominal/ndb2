@@ -32,7 +32,9 @@ export function parseHomeLeaderboardSortFromQuery(
   return parsed.data.sort_by;
 }
 
-export function homeLeaderboardFragmentUrl(sortBy: HomeLeaderboardSortBy): string {
+export function homeLeaderboardFragmentUrl(
+  sortBy: HomeLeaderboardSortBy,
+): string {
   const q = new URLSearchParams({ sort_by: sortBy });
   return `${HOME_LEADERBOARD_HTMX_PATH}?${q.toString()}`;
 }

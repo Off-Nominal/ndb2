@@ -51,5 +51,8 @@
 /* ndb2:block: shared/components/site-nav/site-nav.css */
 @import "../shared/components/site-nav/site-nav.css";
 
+/* ndb2:block: shared/components/table/components/th/th.css */
+@import "../shared/components/table/components/th/th.css";
+
 /* ndb2:block: shared/components/table/table.css */
 @import "../shared/components/table/table.css";

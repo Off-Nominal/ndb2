@@ -1,4 +1,6 @@
-import { Table, TableCaption } from "@web/shared/components/table";
+import type { Children } from "@kitajs/html";
+import { CardScreenElement } from "@web/shared/components/card-screen-element";
+import { Table, Th } from "@web/shared/components/table";
 import {
   homeLeaderboardFragmentUrl,
   homeLeaderboardPageUrl,
@@ -69,7 +71,8 @@ const EMPTY_COLSPAN = 13;
 const CELL_ALIGN_START = "[ table-cell--align-start ]";
 const CELL_ALIGN_END = "[ table-cell--align-end ]";
 
-function ColumnSortTh(props: {
+/** Home leaderboard wiring for {@link Th} (HTMX targets, sort labels). */
+function LeaderboardSortTh(props: {
   label: string;
   asc: HomeLeaderboardSortBy;
   desc: HomeLeaderboardSortBy;
@@ -78,9 +81,6 @@ function ColumnSortTh(props: {
   /** Short phrase for ARIA, e.g. “net points” or “successful bets”. */
   metricLabel: string;
 }): JSX.Element {
-  const headClass = "[ leaderboard-col-head ]";
-  const ascActive = props.sortBy === props.asc;
-  const descActive = props.sortBy === props.desc;
   const groupLabel =
     props.sortMode === "rank"
       ? `Sort by ${props.metricLabel} rank`
@@ -95,41 +95,26 @@ function ColumnSortTh(props: {
       : `Highest ${props.metricLabel} first`;
 
   return (
-    <th scope="col">
-      <span class={headClass}>
-        <span class="[ leaderboard-col-head__label ]">{props.label}</span>
-        <span
-          class="[ leaderboard-col-head__sort ]"
-          role="group"
-          aria-label={groupLabel}
-        >
-          <button
-            type="button"
-            class="[ leaderboard-sort-dir ]"
-            hx-get={homeLeaderboardFragmentUrl(props.asc)}
-            hx-target="#leaderboard-root"
-            hx-swap="outerHTML"
-            hx-push-url={homeLeaderboardPageUrl(props.asc)}
-            aria-label={ascLabel}
-            aria-pressed={ascActive ? "true" : "false"}
-          >
-            ▲
-          </button>
-          <button
-            type="button"
-            class="[ leaderboard-sort-dir ]"
-            hx-get={homeLeaderboardFragmentUrl(props.desc)}
-            hx-target="#leaderboard-root"
-            hx-swap="outerHTML"
-            hx-push-url={homeLeaderboardPageUrl(props.desc)}
-            aria-label={descLabel}
-            aria-pressed={descActive ? "true" : "false"}
-          >
-            ▼
-          </button>
-        </span>
-      </span>
-    </th>
+    <Th
+      label={props.label}
+      sortGroupAriaLabel={groupLabel}
+      ascending={{
+        "hx-get": homeLeaderboardFragmentUrl(props.asc),
+        "hx-target": "#leaderboard-root",
+        "hx-swap": "outerHTML",
+        "hx-push-url": homeLeaderboardPageUrl(props.asc),
+        "aria-label": ascLabel,
+        "aria-pressed": props.sortBy === props.asc ? "true" : "false",
+      }}
+      descending={{
+        "hx-get": homeLeaderboardFragmentUrl(props.desc),
+        "hx-target": "#leaderboard-root",
+        "hx-swap": "outerHTML",
+        "hx-push-url": homeLeaderboardPageUrl(props.desc),
+        "aria-label": descLabel,
+        "aria-pressed": props.sortBy === props.desc ? "true" : "false",
+      }}
+    />
   );
 }
 
@@ -156,6 +141,15 @@ function LeaderboardRoot(props: { children: JSX.Element }): JSX.Element {
   );
 }
 
+/** Leaderboard headline + HUD card; {@link Table} is the direct child of the card body. */
+function LeaderboardTableInCard(props: { ariaLabel: string; children: Children }): JSX.Element {
+  return (
+    <CardScreenElement heading="Leaderboard" headingElement="h2">
+      <Table aria-label={props.ariaLabel}>{props.children}</Table>
+    </CardScreenElement>
+  );
+}
+
 function LeaderboardTableThead(props: {
   sortBy: HomeLeaderboardSortBy;
 }): JSX.Element {
@@ -176,7 +170,7 @@ function LeaderboardTableThead(props: {
         </th>
       </tr>
       <tr>
-        <ColumnSortTh
+        <LeaderboardSortTh
           label="Rank"
           asc="rank_points_net-asc"
           desc="rank_points_net-desc"
@@ -184,7 +178,7 @@ function LeaderboardTableThead(props: {
           sortMode="rank"
           metricLabel="net points"
         />
-        <ColumnSortTh
+        <LeaderboardSortTh
           label="Net"
           asc="points_net-asc"
           desc="points_net-desc"
@@ -192,7 +186,7 @@ function LeaderboardTableThead(props: {
           sortMode="value"
           metricLabel="net points"
         />
-        <ColumnSortTh
+        <LeaderboardSortTh
           label="Rewards"
           asc="points_rewards-asc"
           desc="points_rewards-desc"
@@ -200,7 +194,7 @@ function LeaderboardTableThead(props: {
           sortMode="value"
           metricLabel="point rewards"
         />
-        <ColumnSortTh
+        <LeaderboardSortTh
           label="Penalties"
           asc="points_penalties-asc"
           desc="points_penalties-desc"
@@ -208,7 +202,7 @@ function LeaderboardTableThead(props: {
           sortMode="value"
           metricLabel="point penalties"
         />
-        <ColumnSortTh
+        <LeaderboardSortTh
           label="Rank"
           asc="rank_predictions_successful-asc"
           desc="rank_predictions_successful-desc"
@@ -216,7 +210,7 @@ function LeaderboardTableThead(props: {
           sortMode="rank"
           metricLabel="successful predictions"
         />
-        <ColumnSortTh
+        <LeaderboardSortTh
           label="Succ"
           asc="predictions_successful-asc"
           desc="predictions_successful-desc"
@@ -224,7 +218,7 @@ function LeaderboardTableThead(props: {
           sortMode="value"
           metricLabel="successful predictions"
         />
-        <ColumnSortTh
+        <LeaderboardSortTh
           label="Fail"
           asc="predictions_failed-asc"
           desc="predictions_failed-desc"
@@ -235,7 +229,7 @@ function LeaderboardTableThead(props: {
         {/*
           Cell = open + closed + checking; sort uses `predictions_open` only (no combined API key).
         */}
-        <ColumnSortTh
+        <LeaderboardSortTh
           label="Open"
           asc="predictions_open-asc"
           desc="predictions_open-desc"
@@ -243,7 +237,7 @@ function LeaderboardTableThead(props: {
           sortMode="value"
           metricLabel="predictions in open status"
         />
-        <ColumnSortTh
+        <LeaderboardSortTh
           label="Rank"
           asc="rank_bets_successful-asc"
           desc="rank_bets_successful-desc"
@@ -251,7 +245,7 @@ function LeaderboardTableThead(props: {
           sortMode="rank"
           metricLabel="successful bets"
         />
-        <ColumnSortTh
+        <LeaderboardSortTh
           label="Succ"
           asc="bets_successful-asc"
           desc="bets_successful-desc"
@@ -259,7 +253,7 @@ function LeaderboardTableThead(props: {
           sortMode="value"
           metricLabel="successful bets"
         />
-        <ColumnSortTh
+        <LeaderboardSortTh
           label="Fail"
           asc="bets_failed-asc"
           desc="bets_failed-desc"
@@ -267,7 +261,7 @@ function LeaderboardTableThead(props: {
           sortMode="value"
           metricLabel="failed bets"
         />
-        <ColumnSortTh
+        <LeaderboardSortTh
           label="Pend"
           asc="bets_pending-asc"
           desc="bets_pending-desc"
@@ -280,7 +274,7 @@ function LeaderboardTableThead(props: {
   );
 }
 
-/** Current-season leaderboard; root uses {@link Table} for `.screen-element` chrome. */
+/** Current-season leaderboard; {@link CardScreenElement} + {@link Table}. */
 export function LeaderboardTable(props: LeaderboardTableProps): JSX.Element {
   /* HTMX swaps only after the full response; defer fetch so `/` isn’t blocked on DB + Discord. */
   if (props.leaderboard === undefined) {
@@ -302,7 +296,7 @@ export function LeaderboardTable(props: LeaderboardTableProps): JSX.Element {
   if (props.leaderboard == null) {
     return (
       <LeaderboardRoot>
-        <Table aria-label="Leaderboard" caption={<TableCaption>Leaderboard</TableCaption>}>
+        <LeaderboardTableInCard ariaLabel="Leaderboard">
           <tbody>
             <tr>
               <td colspan={EMPTY_COLSPAN}>
@@ -310,7 +304,7 @@ export function LeaderboardTable(props: LeaderboardTableProps): JSX.Element {
               </td>
             </tr>
           </tbody>
-        </Table>
+        </LeaderboardTableInCard>
       </LeaderboardRoot>
     );
   }
@@ -318,27 +312,21 @@ export function LeaderboardTable(props: LeaderboardTableProps): JSX.Element {
   if (props.leaderboard.rows.length === 0) {
     return (
       <LeaderboardRoot>
-        <Table
-          aria-label="Current season leaderboard"
-          caption={<TableCaption>Leaderboard</TableCaption>}
-        >
+        <LeaderboardTableInCard ariaLabel="Current season leaderboard">
           <LeaderboardTableThead sortBy={props.sortBy} />
           <tbody>
             <tr>
               <td colspan={EMPTY_COLSPAN}>No participants in the current season yet.</td>
             </tr>
           </tbody>
-        </Table>
+        </LeaderboardTableInCard>
       </LeaderboardRoot>
     );
   }
 
   return (
     <LeaderboardRoot>
-      <Table
-        aria-label="Current season leaderboard"
-        caption={<TableCaption>Leaderboard</TableCaption>}
-      >
+      <LeaderboardTableInCard ariaLabel="Current season leaderboard">
         <LeaderboardTableThead sortBy={props.sortBy} />
         <tbody>
           {props.leaderboard.rows.map((row) => (
@@ -376,7 +364,7 @@ export function LeaderboardTable(props: LeaderboardTableProps): JSX.Element {
             </tr>
           ))}
         </tbody>
-      </Table>
+      </LeaderboardTableInCard>
     </LeaderboardRoot>
   );
 }
