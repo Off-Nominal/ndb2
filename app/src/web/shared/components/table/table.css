@@ -1,26 +1,17 @@
 /* Block: Table (`Table` adds bracket class `table`). Wide grids: parent should scroll (e.g. card body `:has(> .table)`). */
 
 .table {
-  --table-padding-inline: var(--space-2);
+  --table-font-size: var(--text-md);
+  --table-cell-padding: var(--space-1);
 
-  box-sizing: border-box;
   width: max-content;
   min-width: 100%;
-  padding-inline: var(--table-padding-inline);
-  /* `separate` avoids sticky + `collapse` overlap glitches between adjacent cols. */
-  border-collapse: separate;
   border-spacing: 0;
-  margin: 0;
-  padding-block: 0;
-  border: none;
-  background: transparent;
-  box-shadow: none;
-  font-size: var(--text-md);
+  font-size: var(--table-font-size);
 }
 
 .table :is(th, td) {
-  padding: var(--space-1) var(--space-1);
-  border: none;
+  padding: var(--table-cell-padding);
 }
 
 .table :is(th, td).table-cell--align-start {
@@ -29,35 +20,6 @@
 
 .table :is(th, td).table-cell--align-end {
   text-align: end;
-}
-
-/*
-  Sticky first column: `left` is 0 on the scrollport — avoid extra horizontal padding on `.table`
-  beyond `--table-padding-inline` or the cell shifts and overlaps column 2.
-*/
-.table thead tr:first-child > th:first-child {
-  position: sticky;
-  left: 0;
-  z-index: 2;
-  background: var(--color-surface);
-}
-
-.table tbody td:first-child {
-  position: sticky;
-  left: 0;
-  z-index: 1;
-}
-
-.table tbody tr:nth-child(odd) td:first-child {
-  background: var(--color-surface);
-}
-
-.table tbody tr:nth-child(even) td:first-child {
-  background: color-mix(
-    in srgb,
-    var(--color-primary) 6%,
-    var(--color-surface)
-  );
 }
 
 /* Subtle stripe: tint only body rows so multi-row headers stay uniform. */
