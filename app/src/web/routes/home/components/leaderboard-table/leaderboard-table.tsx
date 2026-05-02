@@ -1,6 +1,6 @@
 import type { Children } from "@kitajs/html";
 import { CardScreenElement } from "@web/shared/components/card-screen-element";
-import { Table, Th } from "@web/shared/components/table";
+import { Table, Th, ThSortButton } from "@web/shared/components/table";
 import {
   homeLeaderboardFragmentUrl,
   homeLeaderboardPageUrl,
@@ -67,10 +67,6 @@ export type LeaderboardTableProps = {
 
 const EMPTY_COLSPAN = 13;
 
-/** Shared {@link Table} column alignment (logical start/end). */
-const CELL_ALIGN_START = "[ table-cell--align-start ]";
-const CELL_ALIGN_END = "[ table-cell--align-end ]";
-
 /** Home leaderboard wiring for {@link Th} (HTMX targets, sort labels). */
 function LeaderboardSortTh(props: {
   label: string;
@@ -95,26 +91,26 @@ function LeaderboardSortTh(props: {
       : `Highest ${props.metricLabel} first`;
 
   return (
-    <Th
-      label={props.label}
-      sortGroupAriaLabel={groupLabel}
-      ascending={{
-        "hx-get": homeLeaderboardFragmentUrl(props.asc),
-        "hx-target": "#leaderboard-root",
-        "hx-swap": "outerHTML",
-        "hx-push-url": homeLeaderboardPageUrl(props.asc),
-        "aria-label": ascLabel,
-        "aria-pressed": props.sortBy === props.asc ? "true" : "false",
-      }}
-      descending={{
-        "hx-get": homeLeaderboardFragmentUrl(props.desc),
-        "hx-target": "#leaderboard-root",
-        "hx-swap": "outerHTML",
-        "hx-push-url": homeLeaderboardPageUrl(props.desc),
-        "aria-label": descLabel,
-        "aria-pressed": props.sortBy === props.desc ? "true" : "false",
-      }}
-    />
+    <Th label={props.label} sortGroupAriaLabel={groupLabel}>
+      <ThSortButton
+        direction="asc"
+        hx-get={homeLeaderboardFragmentUrl(props.asc)}
+        hx-target="#leaderboard-root"
+        hx-swap="outerHTML"
+        hx-push-url={homeLeaderboardPageUrl(props.asc)}
+        aria-label={ascLabel}
+        aria-pressed={props.sortBy === props.asc ? "true" : "false"}
+      />
+      <ThSortButton
+        direction="desc"
+        hx-get={homeLeaderboardFragmentUrl(props.desc)}
+        hx-target="#leaderboard-root"
+        hx-swap="outerHTML"
+        hx-push-url={homeLeaderboardPageUrl(props.desc)}
+        aria-label={descLabel}
+        aria-pressed={props.sortBy === props.desc ? "true" : "false"}
+      />
+    </Th>
   );
 }
 
@@ -171,7 +167,7 @@ function LeaderboardTableThead(props: {
       </tr>
       <tr>
         <LeaderboardSortTh
-          label="Rank"
+          label="Rnk"
           asc="rank_points_net-asc"
           desc="rank_points_net-desc"
           sortBy={props.sortBy}
@@ -187,7 +183,7 @@ function LeaderboardTableThead(props: {
           metricLabel="net points"
         />
         <LeaderboardSortTh
-          label="Rewards"
+          label="+"
           asc="points_rewards-asc"
           desc="points_rewards-desc"
           sortBy={props.sortBy}
@@ -195,7 +191,7 @@ function LeaderboardTableThead(props: {
           metricLabel="point rewards"
         />
         <LeaderboardSortTh
-          label="Penalties"
+          label="-"
           asc="points_penalties-asc"
           desc="points_penalties-desc"
           sortBy={props.sortBy}
@@ -203,7 +199,7 @@ function LeaderboardTableThead(props: {
           metricLabel="point penalties"
         />
         <LeaderboardSortTh
-          label="Rank"
+          label="Rnk"
           asc="rank_predictions_successful-asc"
           desc="rank_predictions_successful-desc"
           sortBy={props.sortBy}
@@ -211,7 +207,7 @@ function LeaderboardTableThead(props: {
           metricLabel="successful predictions"
         />
         <LeaderboardSortTh
-          label="Succ"
+          label="Won"
           asc="predictions_successful-asc"
           desc="predictions_successful-desc"
           sortBy={props.sortBy}
@@ -219,7 +215,7 @@ function LeaderboardTableThead(props: {
           metricLabel="successful predictions"
         />
         <LeaderboardSortTh
-          label="Fail"
+          label="Los"
           asc="predictions_failed-asc"
           desc="predictions_failed-desc"
           sortBy={props.sortBy}
@@ -230,7 +226,7 @@ function LeaderboardTableThead(props: {
           Cell = open + closed + checking; sort uses `predictions_open` only (no combined API key).
         */}
         <LeaderboardSortTh
-          label="Open"
+          label="Opn"
           asc="predictions_open-asc"
           desc="predictions_open-desc"
           sortBy={props.sortBy}
@@ -238,7 +234,7 @@ function LeaderboardTableThead(props: {
           metricLabel="predictions in open status"
         />
         <LeaderboardSortTh
-          label="Rank"
+          label="Rnk"
           asc="rank_bets_successful-asc"
           desc="rank_bets_successful-desc"
           sortBy={props.sortBy}
@@ -246,7 +242,7 @@ function LeaderboardTableThead(props: {
           metricLabel="successful bets"
         />
         <LeaderboardSortTh
-          label="Succ"
+          label="Won"
           asc="bets_successful-asc"
           desc="bets_successful-desc"
           sortBy={props.sortBy}
@@ -254,7 +250,7 @@ function LeaderboardTableThead(props: {
           metricLabel="successful bets"
         />
         <LeaderboardSortTh
-          label="Fail"
+          label="Los"
           asc="bets_failed-asc"
           desc="bets_failed-desc"
           sortBy={props.sortBy}
@@ -262,7 +258,7 @@ function LeaderboardTableThead(props: {
           metricLabel="failed bets"
         />
         <LeaderboardSortTh
-          label="Pend"
+          label="Opn"
           asc="bets_pending-asc"
           desc="bets_pending-desc"
           sortBy={props.sortBy}
@@ -331,7 +327,7 @@ export function LeaderboardTable(props: LeaderboardTableProps): JSX.Element {
         <tbody>
           {props.leaderboard.rows.map((row) => (
             <tr>
-              <td class={CELL_ALIGN_START}>
+              <td class="[ table-cell--align-start ]">
                 <span class="[ leaderboard-player ]">
                   {row.avatarUrl != null ? (
                     <img
@@ -349,18 +345,18 @@ export function LeaderboardTable(props: LeaderboardTableProps): JSX.Element {
                   <span>{row.displayName}</span>
                 </span>
               </td>
-              <td class={CELL_ALIGN_START}>{formatRank(row.points.rank)}</td>
-              <td class={CELL_ALIGN_END}>{formatNumber(row.points.net)}</td>
-              <td class={CELL_ALIGN_END}>{formatNumber(row.points.rewards)}</td>
-              <td class={CELL_ALIGN_END}>{formatNumber(row.points.penalties)}</td>
-              <td class={CELL_ALIGN_START}>{formatRank(row.predictions.rank)}</td>
-              <td class={CELL_ALIGN_END}>{formatNumber(row.predictions.successful)}</td>
-              <td class={CELL_ALIGN_END}>{formatNumber(row.predictions.failed)}</td>
-              <td class={CELL_ALIGN_END}>{formatNumber(predictionOpenPipeline(row.predictions))}</td>
-              <td class={CELL_ALIGN_START}>{formatRank(row.bets.rank)}</td>
-              <td class={CELL_ALIGN_END}>{formatNumber(row.bets.successful)}</td>
-              <td class={CELL_ALIGN_END}>{formatNumber(row.bets.failed)}</td>
-              <td class={CELL_ALIGN_END}>{formatNumber(row.bets.pending)}</td>
+              <td class="[ table-cell--align-start ]">{formatRank(row.points.rank)}</td>
+              <td class="[ table-cell--align-end ]">{formatNumber(row.points.net)}</td>
+              <td class="[ table-cell--align-end ]">{formatNumber(row.points.rewards)}</td>
+              <td class="[ table-cell--align-end ]">{formatNumber(row.points.penalties)}</td>
+              <td class="[ table-cell--align-start ]">{formatRank(row.predictions.rank)}</td>
+              <td class="[ table-cell--align-end ]">{formatNumber(row.predictions.successful)}</td>
+              <td class="[ table-cell--align-end ]">{formatNumber(row.predictions.failed)}</td>
+              <td class="[ table-cell--align-end ]">{formatNumber(predictionOpenPipeline(row.predictions))}</td>
+              <td class="[ table-cell--align-start ]">{formatRank(row.bets.rank)}</td>
+              <td class="[ table-cell--align-end ]">{formatNumber(row.bets.successful)}</td>
+              <td class="[ table-cell--align-end ]">{formatNumber(row.bets.failed)}</td>
+              <td class="[ table-cell--align-end ]">{formatNumber(row.bets.pending)}</td>
             </tr>
           ))}
         </tbody>

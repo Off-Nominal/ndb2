@@ -22,6 +22,10 @@
   text-align: end;
 }
 
+.table :is(th, td).table-cell--align-center {
+  text-align: center;
+}
+
 /* Subtle stripe: tint only body rows so multi-row headers stay uniform. */
 .table tbody tr:nth-child(even) {
   background: color-mix(in srgb, var(--color-primary) 6%, transparent);
