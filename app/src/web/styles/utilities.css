@@ -175,6 +175,18 @@
 }
 
 /**
+ * Translucent fill from `--color-primary` blended with transparency. Tune mix weight per appearance
+ * with `--primary-fill-subtle-mix-pct` in `globals.css` (light surfaces use a heavier wash).
+ */
+.primary-fill-subtle {
+  background: color-mix(
+    in srgb,
+    var(--color-primary) var(--primary-fill-subtle-mix-pct),
+    transparent
+  );
+}
+
+/**
  * Stretch to the containing block’s inline size. Uses `display: block` so `width: 100%` applies to
  * inline-level elements (`span`, `a`, etc.); controls that must stay `flex` / `inline-flex` should
  * use `width: 100%` in their block instead of this utility.

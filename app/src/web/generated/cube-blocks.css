@@ -18,6 +18,9 @@
 /* ndb2:block: routes/login/page.css */
 @import "../routes/login/page.css";
 
+/* ndb2:block: shared/components/avatar/avatar.css */
+@import "../shared/components/avatar/avatar.css";
+
 /* ndb2:block: shared/components/button/button.css */
 @import "../shared/components/button/button.css";
 

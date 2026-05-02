@@ -1,3 +1,4 @@
+import { renderToStream } from "@kitajs/html/suspense";
 import { Router } from "express";
 import type { PoolClient } from "pg";
 import * as API from "@offnominal/ndb2-api-types/v2";
@@ -22,18 +23,14 @@ import {
   type HomeLeaderboardSortBy,
 } from "./leaderboard-sort.js";
 
-async function loadHomePageLeaderboard(
+async function loadHomePageLeaderboardForSeasonId(
   dbClient: PoolClient,
-  currentSeasonId: number | null,
+  seasonId: number,
   sortBy: HomeLeaderboardSortBy,
-): Promise<HomePageLeaderboard | null> {
-  if (currentSeasonId === null) {
-    return null;
-  }
-
+): Promise<HomePageLeaderboard> {
   const { meta, results: leaderboardRows } =
     await resultsQueries.getSeasonLeaderboard(dbClient)({
-      season_id: currentSeasonId,
+      season_id: seasonId,
       sort_by: sortBy,
       page: 1,
       per_page: RESULTS_DEFAULT_PER_PAGE,
@@ -57,6 +54,17 @@ async function loadHomePageLeaderboard(
   };
 }
 
+async function loadHomePageLeaderboard(
+  dbClient: PoolClient,
+  currentSeasonId: number | null,
+  sortBy: HomeLeaderboardSortBy,
+): Promise<HomePageLeaderboard | null> {
+  if (currentSeasonId === null) {
+    return null;
+  }
+  return loadHomePageLeaderboardForSeasonId(dbClient, currentSeasonId, sortBy);
+}
+
 /** Registers `/`, `GET /home/leaderboard` (HTMX partial), and related home routes. */
 export const Home: Route = (router: Router) => {
   const homePageHandler = wrapWebRouteWithErrorBoundary(
@@ -78,12 +86,21 @@ export const Home: Route = (router: Router) => {
         season = await seasons.getById(dbClient)(currentSeasonId);
       }
 
-      const leaderboard =
-        currentSeasonId === null ? null : undefined;
+      const leaderboardState =
+        currentSeasonId === null
+          ? ({ kind: "static" as const, leaderboard: null })
+          : {
+              kind: "stream" as const,
+              load: loadHomePageLeaderboardForSeasonId(
+                dbClient,
+                currentSeasonId,
+                sortBy,
+              ),
+            };
 
       const discordProfile = await getMemberProfile(auth.discordId);
 
-      const html = await Promise.resolve(
+      const stream = renderToStream((suspenseRid) => (
         <AuthenticatedPageLayout
           theme={getThemePreference()}
           colorScheme={getColorScheme()}
@@ -97,11 +114,24 @@ export const Home: Route = (router: Router) => {
             discordProfile={discordProfile}
             sortBy={sortBy}
             season={season}
-            leaderboard={leaderboard}
+            suspenseRid={suspenseRid}
+            leaderboard={leaderboardState}
           />
-        </AuthenticatedPageLayout>,
-      );
-      res.type("html").send(html);
+        </AuthenticatedPageLayout>
+      ));
+
+      stream.on("error", (streamError) => {
+        if (!res.headersSent) {
+          next(
+            streamError instanceof Error
+              ? streamError
+              : new Error(String(streamError)),
+          );
+        }
+      });
+
+      res.type("html");
+      stream.pipe(res);
     },
   );
 

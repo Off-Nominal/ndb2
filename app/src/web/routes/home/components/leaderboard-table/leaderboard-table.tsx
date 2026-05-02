@@ -1,4 +1,5 @@
 import type { Children } from "@kitajs/html";
+import { Avatar } from "@web/shared/components/avatar";
 import { CardScreenElement } from "@web/shared/components/card-screen-element";
 import { Loading } from "@web/shared/components/loading";
 import { Table, Th, ThSortButton } from "@web/shared/components/table";
@@ -63,13 +64,28 @@ export interface HomePageLeaderboard {
 export type { HomeLeaderboardSortBy } from "../../leaderboard-sort.js";
 
 export type LeaderboardTableProps = {
-  /**
-   * Leaderboard rows from the DB, or `null` when there is no current season.
-   * **`undefined`**: season exists but data is loaded asynchronously (see `hx-trigger="load"` shell).
-   */
-  leaderboard: HomePageLeaderboard | null | undefined;
+  /** Leaderboard rows from the DB, or `null` when there is no current season. */
+  leaderboard: HomePageLeaderboard | null;
   sortBy: HomeLeaderboardSortBy;
 };
+
+/** Initial-stream fallback shell (matches former deferred HTMX load markup: root + loading card only). */
+export function HomeLeaderboardStreamFallback(): JSX.Element {
+  return (
+    <div id="leaderboard-root" class="[ leaderboard-table-root ]">
+      <LeaderboardLoadingCard />
+    </div>
+  );
+}
+
+/** Full leaderboard section replacement when the streamed leaderboard promise rejects. */
+export function HomeLeaderboardStreamErrorFallback(): JSX.Element {
+  return (
+    <LeaderboardRoot>
+      <LeaderboardMessageCard message="Something went wrong loading the leaderboard." />
+    </LeaderboardRoot>
+  );
+}
 
 /** Home leaderboard wiring for {@link Th} (HTMX targets, sort labels). */
 function LeaderboardSortTh(props: {
@@ -139,7 +155,7 @@ function LeaderboardRoot(props: { children: JSX.Element }): JSX.Element {
 function LeaderboardLoadingBody(): JSX.Element {
   return (
     <div
-      class="[ leaderboard-loading ]"
+      class="[ leaderboard-loading ][ primary-fill-subtle ]"
       aria-busy="true"
       aria-live="polite"
       aria-label="Loading leaderboard"
@@ -318,23 +334,8 @@ function LeaderboardTableThead(props: {
   );
 }
 
-/** Current-season leaderboard; initial load + sort (`hx-indicator`) use {@link Loading}; data uses {@link Table}; empty states use card + message. */
+/** Current-season leaderboard; sort swaps use HTMX (`hx-indicator`); data uses {@link Table}; empty states use card + message. */
 export function LeaderboardTable(props: LeaderboardTableProps): JSX.Element {
-  /* HTMX swaps only after the full response; defer fetch so `/` isn’t blocked on DB + Discord. */
-  if (props.leaderboard === undefined) {
-    return (
-      <div
-        id="leaderboard-root"
-        class="[ leaderboard-table-root ]"
-        hx-get={homeLeaderboardFragmentUrl(props.sortBy)}
-        hx-trigger="load"
-        hx-swap="outerHTML"
-      >
-        <LeaderboardLoadingCard />
-      </div>
-    );
-  }
-
   if (props.leaderboard == null) {
     return (
       <LeaderboardRoot>
@@ -360,19 +361,7 @@ export function LeaderboardTable(props: LeaderboardTableProps): JSX.Element {
             <tr>
               <td class="[ table-cell--align-start ]">
                 <span class="[ leaderboard-player ]">
-                  {row.avatarUrl != null ? (
-                    <img
-                      src={row.avatarUrl}
-                      alt=""
-                      width={20}
-                      height={20}
-                      loading="lazy"
-                    />
-                  ) : (
-                    <span class="[ leaderboard-player-fallback ]" aria-hidden="true">
-                      {row.displayName.trim().slice(0, 1).toUpperCase() || "?"}
-                    </span>
-                  )}
+                  <Avatar url={row.avatarUrl} label={row.displayName} />
                   <span class="[ leaderboard-player-name ]">{row.displayName}</span>
                 </span>
               </td>

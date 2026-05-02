@@ -1,8 +1,11 @@
 import type { DiscordMemberProfile } from "@domain/discord";
+import { Suspense } from "@kitajs/html/suspense";
 import { HeadingScreenElement } from "@web/shared/components/heading-screen-element";
 import { HomePerformanceCard } from "./components/home-performance-card";
 import {
   LeaderboardTable,
+  HomeLeaderboardStreamErrorFallback,
+  HomeLeaderboardStreamFallback,
   type HomePageLeaderboard,
 } from "./components/leaderboard-table";
 import { SeasonCard } from "./components/season-card";
@@ -35,16 +38,40 @@ export interface HomePageSeasonSnapshot {
   end: string;
 }
 
+/** Static snapshot for SSR, or a promise resolved under {@link Suspense} for streamed first paint. */
+export type HomePageLeaderboardState =
+  | { kind: "static"; leaderboard: HomePageLeaderboard | null }
+  | { kind: "stream"; load: Promise<HomePageLeaderboard> };
+
 export interface HomePageProps {
   discordProfile: DiscordMemberProfile;
   season: HomePageSeasonSnapshot | null;
-  /** `undefined` when the current season exists and the leaderboard is loaded via HTMX after paint. */
-  leaderboard: HomePageLeaderboard | null | undefined;
+  leaderboard: HomePageLeaderboardState;
   sortBy: HomeLeaderboardSortBy;
+  /** Shared request id from `renderToStream((rid) => …)` when any `Suspense` boundary is present. */
+  suspenseRid: number | string;
 }
 
-/** Body content for `/` (Kitajs HTML JSX → string); document shell is {@link AuthenticatedPageLayout} in the handler. */
+/** Body content for `/` (Kitajs HTML JSX → string/stream); document shell is {@link AuthenticatedPageLayout} in the handler. */
 export function HomePage(props: HomePageProps): JSX.Element {
+  const leaderboardBlock =
+    props.leaderboard.kind === "static" ? (
+      <LeaderboardTable
+        leaderboard={props.leaderboard.leaderboard}
+        sortBy={props.sortBy}
+      />
+    ) : (
+      <Suspense
+        rid={props.suspenseRid}
+        fallback={<HomeLeaderboardStreamFallback />}
+        catch={() => <HomeLeaderboardStreamErrorFallback />}
+      >
+        {props.leaderboard.load.then((leaderboard: HomePageLeaderboard) => (
+          <LeaderboardTable leaderboard={leaderboard} sortBy={props.sortBy} />
+        ))}
+      </Suspense>
+    );
+
   return (
     <div class="[ stack ] [ main-menu ]">
       <HeadingScreenElement>
@@ -61,10 +88,7 @@ export function HomePage(props: HomePageProps): JSX.Element {
         <HomePerformanceCard discordProfile={props.discordProfile} />
       </div>
 
-      <LeaderboardTable
-        leaderboard={props.leaderboard}
-        sortBy={props.sortBy}
-      />
+      {leaderboardBlock}
     </div>
   );
 }

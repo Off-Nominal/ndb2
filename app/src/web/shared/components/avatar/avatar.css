@@ -1,0 +1,27 @@
+/* Block: Discord / member avatar — image or initial fallback. Size: `--avatar-size` (set from TSX, default 20px). */
+
+.avatar {
+  --avatar-size: 20px;
+  flex-shrink: 0;
+
+  & > img {
+    display: block;
+    width: var(--avatar-size);
+    height: var(--avatar-size);
+    border-radius: var(--radius-xs);
+    object-fit: cover;
+  }
+
+  & > .avatar-fallback {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--avatar-size);
+    height: var(--avatar-size);
+    border-radius: var(--radius-xs);
+    font-size: calc(var(--avatar-size) * 0.55);
+    font-weight: var(--weight-semibold);
+    line-height: 1;
+  }
+}
