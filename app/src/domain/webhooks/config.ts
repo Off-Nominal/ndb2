@@ -122,3 +122,11 @@ eventsManager.on("season_end", (results) => {
     discordClientApiKey,
   );
 });
+
+eventsManager.on("new_snooze_check", (snooze_check) => {
+  notifySubscribers(
+    subscribers,
+    generateResponse("new_snooze_check", { snooze_check }),
+    discordClientApiKey,
+  );
+});

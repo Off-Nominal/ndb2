@@ -17,6 +17,7 @@ const WEBHOOK_EVENTS = [
   "snoozed_prediction",
   "season_start",
   "season_end",
+  "new_snooze_check",
 ] as const;
 
 // Derive the type from the array
@@ -122,6 +123,12 @@ export namespace Events {
       results: SeasonResults;
     }
   >;
+  export type NewSnoozeCheck = BasePayload<
+    "new_snooze_check",
+    {
+      snooze_check: Prediction;
+    }
+  >;
 }
 
 export type Payload =
@@ -136,6 +143,7 @@ export type Payload =
   | Events.NewVote
   | Events.PredictionEdit
   | Events.NewSnoozeVote
+  | Events.NewSnoozeCheck
   | Events.SnoozedPrediction
   | Events.SeasonStart
   | Events.SeasonEnd;

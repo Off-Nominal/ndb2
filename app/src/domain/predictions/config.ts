@@ -51,7 +51,7 @@ export const monitors: MonitorConfig[] = [
                 if (!prediction) {
                   return;
                 }
-                eventsManager.emit("triggered_snooze_check", prediction);
+                eventsManager.emit("new_snooze_check", prediction);
               })
               .then(() => undefined);
           });
