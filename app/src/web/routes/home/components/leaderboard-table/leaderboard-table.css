@@ -1,19 +1,52 @@
 /* Block: home leaderboard — table root, player cell, column sort (HTMX). */
 
-/* Center every leaderboard header cell (beats `.table-cell--align-*` on `<th>` via higher specificity). */
-.leaderboard-table-root .table thead :is(th, td) {
-  text-align: center;
+.leaderboard-table-root {
+  position: relative;
 }
 
-.leaderboard-pending {
+.leaderboard-htmx-busy {
+  /* Full-card hit target for `pointer-events`; spinner only (no `.leaderboard-loading` slab on sort). */
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  background: transparent;
+}
+
+.leaderboard-htmx-busy.htmx-request {
+  visibility: visible;
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.leaderboard-loading {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 20rem;
+  /* ~25 table body rows — matches `table.css` cell stride. */
+  min-block-size: calc(25 * (1lh + 2 * var(--space-1)));
+  border-radius: var(--radius-xs);
+  font-size: var(--text-md);
+  background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+
+  & .loader {
+    flex: 0 0 auto;
+  }
+}
+
+.leaderboard-empty {
   margin: 0;
-  padding: var(--space-3);
-  border: 1px solid var(--color-primary);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--hud-shadow-screen-element);
-}
-
-.leaderboard-pending__text {
   font-size: var(--text-md);
   color: var(--color-text-muted);
 }

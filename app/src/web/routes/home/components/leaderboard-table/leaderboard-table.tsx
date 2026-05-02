@@ -1,5 +1,6 @@
 import type { Children } from "@kitajs/html";
 import { CardScreenElement } from "@web/shared/components/card-screen-element";
+import { Loading } from "@web/shared/components/loading";
 import { Table, Th, ThSortButton } from "@web/shared/components/table";
 import { formatNumber } from "@web/shared/utils/format_number";
 import {
@@ -8,6 +9,9 @@ import {
   type HomeLeaderboardSortBy,
 } from "../../leaderboard-sort.js";
 import { formatRank, predictionOpenPipeline } from "./helpers";
+
+/** HTMX `hx-indicator`: use **`global`** so the target resolves from the document (see htmx docs for `hx-indicator`). */
+const LEADERBOARD_HTMX_BUSY = "global #leaderboard-htmx-busy";
 
 export interface HomePageLeaderboardMeta {
   page: number;
@@ -67,8 +71,6 @@ export type LeaderboardTableProps = {
   sortBy: HomeLeaderboardSortBy;
 };
 
-const EMPTY_COLSPAN = 13;
-
 /** Home leaderboard wiring for {@link Th} (HTMX targets, sort labels). */
 function LeaderboardSortTh(props: {
   class?: string;
@@ -100,6 +102,7 @@ function LeaderboardSortTh(props: {
         hx-get={homeLeaderboardFragmentUrl(props.asc)}
         hx-target="#leaderboard-root"
         hx-swap="outerHTML"
+        hx-indicator={LEADERBOARD_HTMX_BUSY}
         hx-push-url={homeLeaderboardPageUrl(props.asc)}
         aria-label={ascLabel}
         aria-pressed={props.sortBy === props.asc ? "true" : "false"}
@@ -109,6 +112,7 @@ function LeaderboardSortTh(props: {
         hx-get={homeLeaderboardFragmentUrl(props.desc)}
         hx-target="#leaderboard-root"
         hx-swap="outerHTML"
+        hx-indicator={LEADERBOARD_HTMX_BUSY}
         hx-push-url={homeLeaderboardPageUrl(props.desc)}
         aria-label={descLabel}
         aria-pressed={props.sortBy === props.desc ? "true" : "false"}
@@ -121,7 +125,44 @@ function LeaderboardRoot(props: { children: JSX.Element }): JSX.Element {
   return (
     <div id="leaderboard-root" class="[ leaderboard-table-root ]">
       {props.children}
+      <div
+        id="leaderboard-htmx-busy"
+        class="[ leaderboard-htmx-busy ]"
+        aria-hidden="true"
+      >
+        <Loading />
+      </div>
     </div>
+  );
+}
+
+function LeaderboardLoadingBody(): JSX.Element {
+  return (
+    <div
+      class="[ leaderboard-loading ]"
+      aria-busy="true"
+      aria-live="polite"
+      aria-label="Loading leaderboard"
+    >
+      <Loading />
+    </div>
+  );
+}
+
+function LeaderboardLoadingCard(): JSX.Element {
+  return (
+    <CardScreenElement heading="Leaderboard" headingElement="h2">
+      <LeaderboardLoadingBody />
+    </CardScreenElement>
+  );
+}
+
+/** Leaderboard headline + HUD card body for non-tabular empty states (no `<table>` — column count is breakpoint-dependent). */
+function LeaderboardMessageCard(props: { message: string }): JSX.Element {
+  return (
+    <CardScreenElement heading="Leaderboard" headingElement="h2">
+      <p class="[ leaderboard-empty ]">{props.message}</p>
+    </CardScreenElement>
   );
 }
 
@@ -277,7 +318,7 @@ function LeaderboardTableThead(props: {
   );
 }
 
-/** Current-season leaderboard; {@link CardScreenElement} + {@link Table}. */
+/** Current-season leaderboard; initial load + sort (`hx-indicator`) use {@link Loading}; data uses {@link Table}; empty states use card + message. */
 export function LeaderboardTable(props: LeaderboardTableProps): JSX.Element {
   /* HTMX swaps only after the full response; defer fetch so `/` isn’t blocked on DB + Discord. */
   if (props.leaderboard === undefined) {
@@ -289,9 +330,7 @@ export function LeaderboardTable(props: LeaderboardTableProps): JSX.Element {
         hx-trigger="load"
         hx-swap="outerHTML"
       >
-        <div class="[ leaderboard-pending ]" aria-busy="true" aria-live="polite">
-          <span class="[ leaderboard-pending__text ]">Loading leaderboard…</span>
-        </div>
+        <LeaderboardLoadingCard />
       </div>
     );
   }
@@ -299,15 +338,7 @@ export function LeaderboardTable(props: LeaderboardTableProps): JSX.Element {
   if (props.leaderboard == null) {
     return (
       <LeaderboardRoot>
-        <LeaderboardTableInCard ariaLabel="Leaderboard">
-          <tbody>
-            <tr>
-              <td colspan={EMPTY_COLSPAN}>
-                No current season is available; leaderboard is unavailable.
-              </td>
-            </tr>
-          </tbody>
-        </LeaderboardTableInCard>
+        <LeaderboardMessageCard message="No current season is available; leaderboard is unavailable." />
       </LeaderboardRoot>
     );
   }
@@ -315,14 +346,7 @@ export function LeaderboardTable(props: LeaderboardTableProps): JSX.Element {
   if (props.leaderboard.rows.length === 0) {
     return (
       <LeaderboardRoot>
-        <LeaderboardTableInCard ariaLabel="Current season leaderboard">
-          <LeaderboardTableThead sortBy={props.sortBy} />
-          <tbody>
-            <tr>
-              <td colspan={EMPTY_COLSPAN}>No participants in the current season yet.</td>
-            </tr>
-          </tbody>
-        </LeaderboardTableInCard>
+        <LeaderboardMessageCard message="No participants in the current season yet." />
       </LeaderboardRoot>
     );
   }

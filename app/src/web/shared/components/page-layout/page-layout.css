@@ -1,6 +1,6 @@
 /* Authenticated shell (see `AuthenticatedPageLayout`).
-   Compact (default): fixed drawer rail + checkbox; wide and up: persistent column (`min-width: 80rem`; = breakpoint.wide).
-   See `web-breakpoints` / `breakpoints.json`. */
+   Compact (default): fixed drawer rail + checkbox; wide and up: sticky rail full viewport height (`height: 100dvh`,
+   `position: sticky`, `top: 0`, overflow inside if content exceeds). See `web-breakpoints` / `breakpoints.json`. */
 
 .page-layout {
   --page-layout-nav-width: 16rem;
@@ -53,8 +53,15 @@
       background-color: transparent;
       background-image: none;
 
-      position: relative;
-      top: auto;
+      position: sticky;
+      top: 0;
+      align-self: flex-start;
+      height: 100vh;
+      height: 100dvh;
+      overflow-y: auto;
+      overscroll-behavior-y: contain;
+      -webkit-overflow-scrolling: touch;
+
       right: auto;
       bottom: auto;
       z-index: auto;
@@ -81,10 +88,10 @@
     & .page-layout-nav-toggle {
       position: absolute;
       top: var(--space-8);
-      left: calc(-1 * var(--space-8));
-      width: var(--space-8);
-      /* Explicit square: `aspect-ratio` on checkbox inputs is inconsistent (Firefox / iOS Safari). */
-      height: var(--space-8);
+      left: calc(-1 * var(--space-12));
+      width: var(--space-12);
+      /* Explicit square (~48px @ 16px root): comfortable touch target; chevron stays mask-sized inside. */
+      height: var(--space-12);
       box-sizing: border-box;
       z-index: 2;
     }
@@ -123,6 +130,8 @@
     @media (min-width: 80rem) {
       display: flex;
       flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 0;
     }
   }
 

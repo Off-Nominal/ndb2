@@ -33,6 +33,9 @@
 /* ndb2:block: shared/components/horizontal-divider/horizontal-divider.css */
 @import "../shared/components/horizontal-divider/horizontal-divider.css";
 
+/* ndb2:block: shared/components/loading/loading.css */
+@import "../shared/components/loading/loading.css";
+
 /* ndb2:block: shared/components/page-layout/nav-drawer-toggle/nav-drawer-toggle.css */
 @import "../shared/components/page-layout/nav-drawer-toggle/nav-drawer-toggle.css";
 
