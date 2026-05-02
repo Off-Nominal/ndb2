@@ -126,7 +126,7 @@ export namespace Events {
   export type NewSnoozeCheck = BasePayload<
     "new_snooze_check",
     {
-      snooze_check: Prediction;
+      prediction: Prediction;
     }
   >;
 }

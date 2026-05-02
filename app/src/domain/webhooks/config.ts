@@ -123,10 +123,10 @@ eventsManager.on("season_end", (results) => {
   );
 });
 
-eventsManager.on("new_snooze_check", (snooze_check) => {
+eventsManager.on("new_snooze_check", (prediction) => {
   notifySubscribers(
     subscribers,
-    generateResponse("new_snooze_check", { snooze_check }),
+    generateResponse("new_snooze_check", { prediction }),
     discordClientApiKey,
   );
 });
