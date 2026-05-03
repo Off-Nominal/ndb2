@@ -10,6 +10,8 @@ import {
   getDiscordGatewayClient,
   getMemberProfile,
   getMemberProfilesGuildOnly,
+  memberProfileFromDiscordUsersCache,
+  prefetchUserProfileFallback,
   resolveUserProfileFallback,
 } from "@domain/discord";
 import { Route } from "@shared/routerMap";
@@ -47,15 +49,32 @@ async function loadHomePageLeaderboardForSeasonId(
   const profileByDiscord = await getMemberProfilesGuildOnly(
     leaderboardRows.map((row) => row.user.discord_id),
   );
+  const discordClient = getDiscordGatewayClient();
+  const prefetchStartedForDiscordId = new Set<string>();
+
   return {
     meta,
     rows: leaderboardRows.map((row) => {
-      const profile = profileByDiscord.get(row.user.discord_id);
+      const discordId = row.user.discord_id;
+      let profile = profileByDiscord.get(discordId) ?? null;
+      let needsDeferredProfile = profile === null;
+
+      if (needsDeferredProfile) {
+        const fromUsersCache = memberProfileFromDiscordUsersCache(discordClient, discordId);
+        if (fromUsersCache) {
+          profile = fromUsersCache;
+          needsDeferredProfile = false;
+        } else if (!prefetchStartedForDiscordId.has(discordId)) {
+          prefetchStartedForDiscordId.add(discordId);
+          prefetchUserProfileFallback(discordClient, discordId);
+        }
+      }
+
       return {
-        discordId: row.user.discord_id,
+        discordId,
         displayName: profile?.displayName ?? "Unknown member",
         avatarUrl: profile?.avatarUrl ?? null,
-        needsDeferredProfile: profile == null,
+        needsDeferredProfile,
         predictions: row.predictions,
         bets: row.bets,
         points: row.points,
