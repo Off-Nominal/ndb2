@@ -17,6 +17,8 @@ export {
   getMemberProfile,
   getMemberProfilesGuildOnly,
   getPortalGuild,
+  memberProfileFromDiscordUsersCache,
+  prefetchUserProfileFallback,
   resolveGuildMember,
   resolveUserProfileFallback,
   type DiscordMemberProfile,

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { GuildMember } from "discord.js";
+import type { Client, GuildMember } from "discord.js";
 
 const ctx = vi.hoisted(() => {
   const fetchMember = vi.fn();
@@ -45,6 +45,7 @@ vi.mock("@config", () => ({
 import {
   getMemberProfilesGuildOnly,
   guildMemberToProfile,
+  memberProfileFromDiscordUsersCache,
   userToProfile,
 } from "./discord-member-profile.js";
 
@@ -68,6 +69,62 @@ describe("userToProfile", () => {
       displayAvatarURL: () => "https://cdn.example/x.png",
     });
     expect(profile.displayName).toBe("(unknown user)");
+  });
+});
+
+describe("memberProfileFromDiscordUsersCache", () => {
+  it("returns profile when a non-partial user is in client.users.cache", () => {
+    const snowflake = "100000000000000001";
+    const mockUser = {
+      partial: false,
+      globalName: "Cached Name",
+      username: "cached_user",
+      id: snowflake,
+      displayAvatarURL: vi.fn((options?: { size?: number }) =>
+        `https://cdn.example/u.png?s=${options?.size ?? 0}`,
+      ),
+    };
+    const client = {
+      users: {
+        cache: {
+          get: (id: string) => (id === snowflake ? mockUser : undefined),
+        },
+      },
+    } as unknown as Client;
+
+    const profile = memberProfileFromDiscordUsersCache(client, snowflake);
+
+    expect(profile?.displayName).toBe("Cached Name");
+    expect(profile?.avatarUrl).toContain("s=128");
+    expect(mockUser.displayAvatarURL).toHaveBeenCalledWith({ size: 128 });
+  });
+
+  it("returns null when id is absent from cache", () => {
+    const client = {
+      users: {
+        cache: {
+          get: (): undefined => undefined,
+        },
+      },
+    } as unknown as Client;
+    expect(memberProfileFromDiscordUsersCache(client, "188888888888888888")).toBeNull();
+  });
+
+  it("returns null when cached user is partial", () => {
+    const snowflake = "200000000000000002";
+    const client = {
+      users: {
+        cache: {
+          get: () => ({
+            partial: true,
+            username: "partial_u",
+            id: snowflake,
+          }),
+        },
+      },
+    } as unknown as Client;
+
+    expect(memberProfileFromDiscordUsersCache(client, snowflake)).toBeNull();
   });
 });
 

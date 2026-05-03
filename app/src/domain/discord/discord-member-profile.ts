@@ -54,6 +54,33 @@ export async function resolveUserProfileFallback(
   }
 }
 
+/**
+ * Starts {@link resolveUserProfileFallback} without blocking. Use when SSR still defers identity (e.g. HTMX fragment)
+ * so `users.fetch` runs in parallel with page render and the Discord.js cache may be warm when the fragment handler runs.
+ */
+export function prefetchUserProfileFallback(client: Client, discordId: string): void {
+  void resolveUserProfileFallback(client, discordId);
+}
+
+/**
+ * Builds a profile from **`client.users.cache` only** (no REST). Use after guild-only batch misses when the
+ * process has already hydrated that user elsewhere (e.g. prior HTMX identity fetch), to avoid deferred UI.
+ *
+ * Partial users are skipped (`null`) so callers still defer to {@link resolveUserProfileFallback}.
+ */
+export function memberProfileFromDiscordUsersCache(
+  client: Client,
+  discordId: string,
+): DiscordMemberProfile | null {
+  const user = client.users.cache.get(discordId);
+  if (!user || user.partial) return null;
+  const displayName = user.globalName?.trim() || user.username || user.id;
+  return userToProfile({
+    displayName,
+    displayAvatarURL: (options) => user.displayAvatarURL(options),
+  });
+}
+
 export async function getPortalGuild(client: Client, guildId: string): Promise<Guild> {
   const cached = client.guilds.cache.get(guildId);
   if (cached) {
@@ -102,7 +129,7 @@ export async function getMemberProfile(discordId: string): Promise<DiscordMember
  * Dedupes ids; repeated resolution relies on discord.js guild member caching.
  *
  * Missing members (**not in guild** in the gateway reply, or **chunk request threw**) are `null` in the map —
- * callers use placeholders and optional {@link resolveUserProfileFallback} (HTMX hydration).
+ * callers use placeholders, optional **`client.users.cache`** synthesis ({@link memberProfileFromDiscordUsersCache}), and optional {@link resolveUserProfileFallback} (HTMX hydration).
  */
 export async function getMemberProfilesGuildOnly(
   discordIds: string[],
