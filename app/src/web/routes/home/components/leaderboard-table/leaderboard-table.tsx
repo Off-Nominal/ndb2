@@ -1,5 +1,5 @@
 import type { Children } from "@kitajs/html";
-import { Avatar } from "@web/shared/components/avatar";
+import { DiscordAvatar } from "@web/shared/components/discord-avatar";
 import { CardScreenElement } from "@web/shared/components/card-screen-element";
 import { Loading } from "@web/shared/components/loading";
 import { Table, Th, ThSortButton } from "@web/shared/components/table";
@@ -155,7 +155,7 @@ function LeaderboardRoot(props: { children: JSX.Element }): JSX.Element {
 function LeaderboardLoadingBody(): JSX.Element {
   return (
     <div
-      class="[ leaderboard-loading ][ primary-fill-subtle ]"
+      class="[ leaderboard-loading ]"
       aria-busy="true"
       aria-live="polite"
       aria-label="Loading leaderboard"
@@ -361,7 +361,7 @@ export function LeaderboardTable(props: LeaderboardTableProps): JSX.Element {
             <tr>
               <td class="[ table-cell--align-start ]">
                 <span class="[ leaderboard-player ]">
-                  <Avatar url={row.avatarUrl} label={row.displayName} />
+                  <DiscordAvatar url={row.avatarUrl} discordUserId={row.discordId} />
                   <span class="[ leaderboard-player-name ]">{row.displayName}</span>
                 </span>
               </td>

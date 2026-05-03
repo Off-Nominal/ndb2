@@ -1,4 +1,8 @@
 export {
+  DISCORD_EMBED_AVATAR_PLACEHOLDER_URL,
+  discordDefaultEmbedAvatarUrl,
+} from "./discord-default-avatar-url";
+export {
   fetchGuildMember,
   type GuildMemberSummary,
 } from "./discord-gateway";

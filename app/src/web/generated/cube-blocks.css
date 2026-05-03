@@ -18,14 +18,14 @@
 /* ndb2:block: routes/login/page.css */
 @import "../routes/login/page.css";
 
-/* ndb2:block: shared/components/avatar/avatar.css */
-@import "../shared/components/avatar/avatar.css";
-
 /* ndb2:block: shared/components/button/button.css */
 @import "../shared/components/button/button.css";
 
 /* ndb2:block: shared/components/card-screen-element/card-screen-element.css */
 @import "../shared/components/card-screen-element/card-screen-element.css";
+
+/* ndb2:block: shared/components/discord-avatar/discord-avatar.css */
+@import "../shared/components/discord-avatar/discord-avatar.css";
 
 /* ndb2:block: shared/components/form-field/form-field.css */
 @import "../shared/components/form-field/form-field.css";
