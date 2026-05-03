@@ -1,8 +1,4 @@
-export {
-  HomeLeaderboardStreamErrorFallback,
-  HomeLeaderboardStreamFallback,
-  LeaderboardTable,
-} from "./leaderboard-table";
+export { LeaderboardPlayerChip, LeaderboardTable } from "./leaderboard-table";
 export type {
   HomeLeaderboardSortBy,
   HomePageLeaderboard,

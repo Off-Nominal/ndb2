@@ -1,49 +1,5 @@
 /* Block: home leaderboard — table root, player cell, column sort (HTMX). */
 
-.leaderboard-table-root {
-  position: relative;
-}
-
-.leaderboard-htmx-busy {
-  /* Full-card hit target for `pointer-events`; spinner only (no `.leaderboard-loading` slab on sort). */
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-4);
-  pointer-events: none;
-  visibility: hidden;
-  opacity: 0;
-  transition: opacity 150ms ease;
-  background: transparent;
-}
-
-.leaderboard-htmx-busy.htmx-request {
-  visibility: visible;
-  pointer-events: auto;
-  opacity: 1;
-}
-
-.leaderboard-loading {
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 0;
-  min-height: 20rem;
-  /* ~25 table body rows — matches `table.css` cell stride. */
-  min-block-size: calc(25 * (1lh + 2 * var(--space-1)));
-  border-radius: var(--radius-xs);
-  font-size: var(--text-md);
-
-  & .loader {
-    flex: 0 0 auto;
-  }
-}
-
 .leaderboard-empty {
   margin: 0;
   font-size: var(--text-md);

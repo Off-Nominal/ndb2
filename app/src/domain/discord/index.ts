@@ -15,7 +15,7 @@ export {
   guildMemberToProfile,
   userToProfile,
   getMemberProfile,
-  getMemberProfiles,
+  getMemberProfilesGuildOnly,
   getPortalGuild,
   resolveGuildMember,
   resolveUserProfileFallback,
