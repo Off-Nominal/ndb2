@@ -7,9 +7,10 @@ import resultsQueries, {
 } from "@data/queries/results";
 import { getDbClient } from "@data/db/getDbClient";
 import {
+  getDiscordGatewayClient,
   getMemberProfile,
   getMemberProfilesGuildOnly,
-  resolveUserProfileFallbackWithCache,
+  resolveUserProfileFallback,
 } from "@domain/discord";
 import { Route } from "@shared/routerMap";
 import { getWebAuth } from "../../middleware/auth/session";
@@ -175,7 +176,10 @@ export const Home: Route = (router: Router) => {
         return;
       }
 
-      const profile = await resolveUserProfileFallbackWithCache(parsed.data.discord_id);
+      const profile = await resolveUserProfileFallback(
+        getDiscordGatewayClient(),
+        parsed.data.discord_id,
+      );
       const html = await Promise.resolve(
         <LeaderboardPlayerChip
           discordId={parsed.data.discord_id}
