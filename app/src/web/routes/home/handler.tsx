@@ -1,4 +1,3 @@
-import { renderToStream } from "@kitajs/html/suspense";
 import { Router } from "express";
 import type { PoolClient } from "pg";
 import * as API from "@offnominal/ndb2-api-types/v2";
@@ -7,7 +6,11 @@ import resultsQueries, {
   RESULTS_DEFAULT_PER_PAGE,
 } from "@data/queries/results";
 import { getDbClient } from "@data/db/getDbClient";
-import { getMemberProfile, getMemberProfiles } from "@domain/discord";
+import {
+  getMemberProfile,
+  getMemberProfilesGuildOnly,
+  resolveUserProfileFallbackWithCache,
+} from "@domain/discord";
 import { Route } from "@shared/routerMap";
 import { getWebAuth } from "../../middleware/auth/session";
 import { requireWebAuth } from "../../middleware/auth/require-auth";
@@ -15,10 +18,15 @@ import { getColorScheme, getThemePreference } from "../../middleware/theme-prefe
 import { wrapWebRouteWithErrorBoundary } from "../../middleware/error-boundary";
 import { AuthenticatedPageLayout } from "../../shared/components/page-layout";
 import type { HomePageLeaderboard } from "./components/leaderboard-table";
-import { LeaderboardTable } from "./components/leaderboard-table";
+import {
+  LeaderboardPlayerChip,
+  LeaderboardTable,
+} from "./components/leaderboard-table";
 import { HomePage } from "./page";
 import {
   HOME_LEADERBOARD_HTMX_PATH,
+  HOME_LEADERBOARD_PLAYER_IDENTITY_PATH,
+  parseHomeLeaderboardPlayerIdentityQuery,
   parseHomeLeaderboardSortFromQuery,
   type HomeLeaderboardSortBy,
 } from "./leaderboard-sort.js";
@@ -35,7 +43,7 @@ async function loadHomePageLeaderboardForSeasonId(
       page: 1,
       per_page: RESULTS_DEFAULT_PER_PAGE,
     });
-  const profileByDiscord = await getMemberProfiles(
+  const profileByDiscord = await getMemberProfilesGuildOnly(
     leaderboardRows.map((row) => row.user.discord_id),
   );
   return {
@@ -46,6 +54,7 @@ async function loadHomePageLeaderboardForSeasonId(
         discordId: row.user.discord_id,
         displayName: profile?.displayName ?? "Unknown member",
         avatarUrl: profile?.avatarUrl ?? null,
+        needsDeferredProfile: profile == null,
         predictions: row.predictions,
         bets: row.bets,
         points: row.points,
@@ -86,21 +95,18 @@ export const Home: Route = (router: Router) => {
         season = await seasons.getById(dbClient)(currentSeasonId);
       }
 
-      const leaderboardState =
+      const leaderboard =
         currentSeasonId === null
-          ? ({ kind: "static" as const, leaderboard: null })
-          : {
-              kind: "stream" as const,
-              load: loadHomePageLeaderboardForSeasonId(
-                dbClient,
-                currentSeasonId,
-                sortBy,
-              ),
-            };
+          ? null
+          : await loadHomePageLeaderboardForSeasonId(
+              dbClient,
+              currentSeasonId,
+              sortBy,
+            );
 
       const discordProfile = await getMemberProfile(auth.discordId);
 
-      const stream = renderToStream((suspenseRid) => (
+      const html = await Promise.resolve(
         <AuthenticatedPageLayout
           theme={getThemePreference()}
           colorScheme={getColorScheme()}
@@ -114,24 +120,12 @@ export const Home: Route = (router: Router) => {
             discordProfile={discordProfile}
             sortBy={sortBy}
             season={season}
-            suspenseRid={suspenseRid}
-            leaderboard={leaderboardState}
+            leaderboard={leaderboard}
           />
-        </AuthenticatedPageLayout>
-      ));
+        </AuthenticatedPageLayout>,
+      );
 
-      stream.on("error", (streamError) => {
-        if (!res.headersSent) {
-          next(
-            streamError instanceof Error
-              ? streamError
-              : new Error(String(streamError)),
-          );
-        }
-      });
-
-      res.type("html");
-      stream.pipe(res);
+      res.type("html").send(html);
     },
   );
 
@@ -160,6 +154,34 @@ export const Home: Route = (router: Router) => {
 
       const html = await Promise.resolve(
         <LeaderboardTable sortBy={sortBy} leaderboard={leaderboard} />,
+      );
+      res.type("html").send(html);
+    }),
+  );
+
+  router.get(
+    HOME_LEADERBOARD_PLAYER_IDENTITY_PATH,
+    requireWebAuth,
+    wrapWebRouteWithErrorBoundary(async (req, res, next) => {
+      const auth = getWebAuth();
+      if (auth.status !== "authenticated") {
+        next(new Error("Home leaderboard player identity reached without a session"));
+        return;
+      }
+
+      const parsed = parseHomeLeaderboardPlayerIdentityQuery(req.query);
+      if (!parsed.success) {
+        res.status(400).type("text").send("Invalid discord_id query parameter");
+        return;
+      }
+
+      const profile = await resolveUserProfileFallbackWithCache(parsed.data.discord_id);
+      const html = await Promise.resolve(
+        <LeaderboardPlayerChip
+          discordId={parsed.data.discord_id}
+          displayName={profile?.displayName ?? "Unknown member"}
+          avatarUrl={profile?.avatarUrl ?? null}
+        />,
       );
       res.type("html").send(html);
     }),

@@ -163,6 +163,91 @@ async function forEachWithConcurrencyLimit<T>(
   await Promise.all(Array.from({ length: n }, () => worker()));
 }
 
+/**
+ * Resolves Discord user metadata via REST (see {@link resolveUserProfileFallback}) and merges into the
+ * Shared batch profile cache (including `null` on failure — same semantics as {@link getMemberProfiles}).
+ *
+ * Returns immediately when the cache holds a resolved profile for this id; if the cached value is
+ * `null`, fetches again so hydration can retry.
+ */
+export async function resolveUserProfileFallbackWithCache(
+  discordId: string,
+): Promise<DiscordMemberProfile | null> {
+  const hit = batchCacheGet(discordId);
+  if (hit !== undefined && hit !== null) {
+    return hit;
+  }
+  const client = getDiscordGatewayClient();
+  const profile = await resolveUserProfileFallback(client, discordId);
+  batchCacheSet(discordId, profile);
+  return profile;
+}
+
+/**
+ * Like {@link getMemberProfiles} but resolves **portal guild membership only**: bulk
+ * `guild.members.fetch({ user })` plus {@link resolveGuildMember} on batch failure/retry.
+ *
+ * Discord users **not** in the guild yield `null` in the returned map (**not** cached) so callers
+ * can defer to {@link resolveUserProfileFallback} without blocking bulk paths.
+ *
+ * Cached **positive** hits from shared {@link getMemberProfiles} batch cache are reused; cached
+ * `null` misses are ignored here so guild-only resolution retries.
+ */
+export async function getMemberProfilesGuildOnly(
+  discordIds: string[],
+): Promise<Map<string, DiscordMemberProfile | null>> {
+  const client = getDiscordGatewayClient();
+  const guildId = config.discord.webPortal.guildId;
+  const guild = await getPortalGuild(client, guildId);
+  const deduped = [...new Set(discordIds)];
+  const out = new Map<string, DiscordMemberProfile | null>();
+
+  const needsGuildResolve: string[] = [];
+  for (const id of deduped) {
+    const hit = batchCacheGet(id);
+    if (hit !== undefined && hit !== null) {
+      out.set(id, hit);
+    } else {
+      needsGuildResolve.push(id);
+    }
+  }
+
+  for (let i = 0; i < needsGuildResolve.length; i += GUILD_MEMBERS_FETCH_BY_USERS_LIMIT) {
+    const chunk = needsGuildResolve.slice(i, i + GUILD_MEMBERS_FETCH_BY_USERS_LIMIT);
+    try {
+      const collection = await guild.members.fetch({ user: chunk });
+      for (const id of chunk) {
+        const member = collection.get(id);
+        if (member) {
+          const profile = guildMemberToProfile(member);
+          batchCacheSet(id, profile);
+          out.set(id, profile);
+        } else {
+          out.set(id, null);
+        }
+      }
+    } catch {
+      await forEachWithConcurrencyLimit(chunk, PROFILE_FETCH_CONCURRENCY, async (id) => {
+        const hitPositive = batchCacheGet(id);
+        if (hitPositive !== undefined && hitPositive !== null) {
+          out.set(id, hitPositive);
+          return;
+        }
+        const member = await resolveGuildMember(guild, id);
+        if (member) {
+          const profile = guildMemberToProfile(member);
+          batchCacheSet(id, profile);
+          out.set(id, profile);
+        } else {
+          out.set(id, null);
+        }
+      });
+    }
+  }
+
+  return out;
+}
+
 export async function getMemberProfiles(
   discordIds: string[],
 ): Promise<Map<string, DiscordMemberProfile | null>> {

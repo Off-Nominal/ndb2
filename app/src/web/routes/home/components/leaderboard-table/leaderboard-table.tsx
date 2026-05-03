@@ -1,19 +1,16 @@
 import type { Children } from "@kitajs/html";
 import { DiscordAvatar } from "@web/shared/components/discord-avatar";
 import { CardScreenElement } from "@web/shared/components/card-screen-element";
-import { Loading } from "@web/shared/components/loading";
 import { Table, Th, ThSortButton } from "@web/shared/components/table";
 import { formatNumber } from "@web/shared/utils/format_number";
 import {
   homeLeaderboardFragmentUrl,
   homeLeaderboardPageUrl,
+  homeLeaderboardPlayerIdentityUrl,
   type HomeLeaderboardSortBy,
 } from "../../leaderboard-sort.js";
 import { formatRank, predictionOpenPipeline } from "./helpers";
 import { mergeClass } from "@web/shared/utils/merge_class.js";
-
-/** HTMX `hx-indicator`: use **`global`** so the target resolves from the document (see htmx docs for `hx-indicator`). */
-const LEADERBOARD_HTMX_BUSY = "global #leaderboard-htmx-busy";
 
 export interface HomePageLeaderboardMeta {
   page: number;
@@ -51,6 +48,8 @@ export interface HomePageLeaderboardRow {
   discordId: string;
   displayName: string;
   avatarUrl: string | null;
+  /** When true, guild-only batch resolution missed; identity is hydrated via HTMX fragment. */
+  needsDeferredProfile: boolean;
   predictions: HomePageLeaderboardPredictions;
   bets: HomePageLeaderboardBets;
   points: HomePageLeaderboardPoints;
@@ -70,22 +69,40 @@ export type LeaderboardTableProps = {
   sortBy: HomeLeaderboardSortBy;
 };
 
-/** Initial-stream fallback shell (matches former deferred HTMX load markup: root + loading card only). */
-export function HomeLeaderboardStreamFallback(): JSX.Element {
-  return (
-    <div id="leaderboard-root" class="[ leaderboard-table-root ]">
-      <LeaderboardLoadingCard />
-    </div>
+/**
+ * Avatar + display name chip for leaderboard rows or HTMX identity fragments (`hydrateUrl` omitted).
+ *
+ * When **`hydrateUrl`** is set, HTMX swaps this element with the resolved markup after **`revealed`**
+ * (+ throttle + **`once`**).
+ */
+export function LeaderboardPlayerChip(props: {
+  discordId: string;
+  displayName: string;
+  avatarUrl: string | null;
+  /** When set (non-empty), adds HTMX attributes to hydrate via `GET /home/leaderboard/player-identity`. */
+  hydrateUrl?: string;
+}): JSX.Element {
+  const inner = (
+    <>
+      <DiscordAvatar url={props.avatarUrl} discordUserId={props.discordId} />
+      <span class="[ leaderboard-player-name ]">{props.displayName}</span>
+    </>
   );
-}
 
-/** Full leaderboard section replacement when the streamed leaderboard promise rejects. */
-export function HomeLeaderboardStreamErrorFallback(): JSX.Element {
-  return (
-    <LeaderboardRoot>
-      <LeaderboardMessageCard message="Something went wrong loading the leaderboard." />
-    </LeaderboardRoot>
-  );
+  if (props.hydrateUrl != null && props.hydrateUrl !== "") {
+    return (
+      <span
+        class="[ leaderboard-player ]"
+        hx-get={props.hydrateUrl}
+        hx-trigger="revealed throttle:250ms once"
+        hx-swap="outerHTML"
+      >
+        {inner}
+      </span>
+    );
+  }
+
+  return <span class="[ leaderboard-player ]">{inner}</span>;
 }
 
 /** Home leaderboard wiring for {@link Th} (HTMX targets, sort labels). */
@@ -119,7 +136,6 @@ function LeaderboardSortTh(props: {
         hx-get={homeLeaderboardFragmentUrl(props.asc)}
         hx-target="#leaderboard-root"
         hx-swap="outerHTML"
-        hx-indicator={LEADERBOARD_HTMX_BUSY}
         hx-push-url={homeLeaderboardPageUrl(props.asc)}
         aria-label={ascLabel}
         aria-pressed={props.sortBy === props.asc ? "true" : "false"}
@@ -129,7 +145,6 @@ function LeaderboardSortTh(props: {
         hx-get={homeLeaderboardFragmentUrl(props.desc)}
         hx-target="#leaderboard-root"
         hx-swap="outerHTML"
-        hx-indicator={LEADERBOARD_HTMX_BUSY}
         hx-push-url={homeLeaderboardPageUrl(props.desc)}
         aria-label={descLabel}
         aria-pressed={props.sortBy === props.desc ? "true" : "false"}
@@ -142,35 +157,7 @@ function LeaderboardRoot(props: { children: JSX.Element }): JSX.Element {
   return (
     <div id="leaderboard-root" class="[ leaderboard-table-root ]">
       {props.children}
-      <div
-        id="leaderboard-htmx-busy"
-        class="[ leaderboard-htmx-busy ]"
-        aria-hidden="true"
-      >
-        <Loading />
-      </div>
     </div>
-  );
-}
-
-function LeaderboardLoadingBody(): JSX.Element {
-  return (
-    <div
-      class="[ leaderboard-loading ]"
-      aria-busy="true"
-      aria-live="polite"
-      aria-label="Loading leaderboard"
-    >
-      <Loading />
-    </div>
-  );
-}
-
-function LeaderboardLoadingCard(): JSX.Element {
-  return (
-    <CardScreenElement heading="Leaderboard" headingElement="h2">
-      <LeaderboardLoadingBody />
-    </CardScreenElement>
   );
 }
 
@@ -335,7 +322,7 @@ function LeaderboardTableThead(props: {
   );
 }
 
-/** Current-season leaderboard; sort swaps use HTMX (`hx-indicator`); data uses {@link Table}; empty states use card + message. */
+/** Current-season leaderboard; column sort uses HTMX swap on `#leaderboard-root`; empty states use card + message. */
 export function LeaderboardTable(props: LeaderboardTableProps): JSX.Element {
   if (props.leaderboard == null) {
     return (
@@ -361,10 +348,16 @@ export function LeaderboardTable(props: LeaderboardTableProps): JSX.Element {
           {props.leaderboard.rows.map((row) => (
             <tr>
               <td class="[ table-cell--align-start ]">
-                <span class="[ leaderboard-player ]">
-                  <DiscordAvatar url={row.avatarUrl} discordUserId={row.discordId} />
-                  <span class="[ leaderboard-player-name ]">{row.displayName}</span>
-                </span>
+                <LeaderboardPlayerChip
+                  discordId={row.discordId}
+                  displayName={row.displayName}
+                  avatarUrl={row.avatarUrl}
+                  hydrateUrl={
+                    row.needsDeferredProfile
+                      ? homeLeaderboardPlayerIdentityUrl(row.discordId)
+                      : undefined
+                  }
+                />
               </td>
               <td class="[ table-cell--align-end ]">{formatRank(row.points.rank)}</td>
               <td class="[ table-cell--align-end ]">{formatNumber(row.points.net)}</td>

@@ -25,7 +25,9 @@ describe("securityHeaders", () => {
     expect(csp).toContain("default-src 'self'");
     expect(csp).toContain("https://cdn.discordapp.com");
     expect(res.headers["x-frame-options"]).toBe("DENY");
-    expect(res.headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
+    expect(res.headers["referrer-policy"]).toBe(
+      "strict-origin-when-cross-origin",
+    );
   });
 
   it("does not send Strict-Transport-Security (set HSTS at the TLS terminator)", async () => {

@@ -44,6 +44,7 @@ vi.mock("@config", () => ({
 
 import {
   getMemberProfiles,
+  getMemberProfilesGuildOnly,
   guildMemberToProfile,
   userToProfile,
 } from "./discord-member-profile.js";
@@ -133,5 +134,48 @@ describe("getMemberProfiles", () => {
     const map = await getMemberProfiles(["55"]);
 
     expect(map.get("55")).toBeNull();
+  });
+});
+
+describe("getMemberProfilesGuildOnly", () => {
+  beforeEach(() => {
+    ctx.fetchMember.mockReset();
+    ctx.fetchMember.mockImplementation(
+      async ({ user }: { user: string | string[] }) => {
+        const ids = Array.isArray(user) ? user : [user];
+        const m = new Map<string, Pick<GuildMember, "displayName" | "displayAvatarURL">>();
+        for (const id of ids) {
+          m.set(id, {
+            displayName: `user-${id}`,
+            displayAvatarURL: (options?: { size?: number }) =>
+              `https://cdn.example/${id}?s=${options?.size ?? 0}`,
+          });
+        }
+        return m;
+      },
+    );
+    ctx.fetchUser.mockReset();
+    vi.mocked(ctx.guild.members.cache.get).mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("does not call users.fetch when id is absent from guild bulk collection", async () => {
+    ctx.fetchMember.mockResolvedValue(new Map() as never);
+
+    const map = await getMemberProfilesGuildOnly(["44"]);
+
+    expect(ctx.fetchUser).not.toHaveBeenCalled();
+    expect(map.get("44")).toBeNull();
+  });
+
+  it("maps guild bulk members without users.fetch", async () => {
+    const map = await getMemberProfilesGuildOnly(["9", "8"]);
+
+    expect(ctx.fetchUser).not.toHaveBeenCalled();
+    expect(map.get("9")?.displayName).toBe("user-9");
+    expect(map.get("8")?.avatarUrl).toContain("cdn.example");
   });
 });
