@@ -1,8 +1,16 @@
 /* Block: Table sort header (`Th`) — label + ▲▼ (compose HTMX / ARIA via button props). */
 
 .table-th {
+  /* Match `<th>[ table-cell--align-* ]`: `text-align` does not affect this inner flex row. */
+  &.table-cell--align-start > div {
+    justify-content: flex-start;
+  }
+
+  &.table-cell--align-end > div {
+    justify-content: flex-end;
+  }
+
   & > div {
-    /* padding-inline: var(--space-1); */
     display: flex;
     align-items: center;
     justify-content: center;

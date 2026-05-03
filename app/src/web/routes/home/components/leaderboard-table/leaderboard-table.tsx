@@ -10,6 +10,7 @@ import {
   type HomeLeaderboardSortBy,
 } from "../../leaderboard-sort.js";
 import { formatRank, predictionOpenPipeline } from "./helpers";
+import { mergeClass } from "@web/shared/utils/merge_class.js";
 
 /** HTMX `hx-indicator`: use **`global`** so the target resolves from the document (see htmx docs for `hx-indicator`). */
 const LEADERBOARD_HTMX_BUSY = "global #leaderboard-htmx-busy";
@@ -112,7 +113,7 @@ function LeaderboardSortTh(props: {
       : `Highest ${props.metricLabel} first`;
 
   return (
-    <Th label={props.label} sortGroupAriaLabel={groupLabel} class={props.class}>
+    <Th label={props.label} sortGroupAriaLabel={groupLabel} class={mergeClass("[ table-cell--align-end ]", props.class)}>
       <ThSortButton
         direction="asc"
         hx-get={homeLeaderboardFragmentUrl(props.asc)}
@@ -365,18 +366,18 @@ export function LeaderboardTable(props: LeaderboardTableProps): JSX.Element {
                   <span class="[ leaderboard-player-name ]">{row.displayName}</span>
                 </span>
               </td>
-              <td class="[ table-cell--align-center ]">{formatRank(row.points.rank)}</td>
-              <td class="[ table-cell--align-center ]">{formatNumber(row.points.net)}</td>
-              <td class="[ show-desktop-up ][ table-cell--align-center ]">{formatNumber(row.points.rewards)}</td>
-              <td class="[ show-desktop-up ][ table-cell--align-center ]">{formatNumber(row.points.penalties)}</td>
-              <td class="[ show-mobile-up ][ table-cell--align-center ]">{formatRank(row.predictions.rank)}</td>
-              <td class="[ show-mobile-up ][ table-cell--align-center ]">{formatNumber(row.predictions.successful)}</td>
-              <td class="[ show-desktop-up ][ table-cell--align-center ]">{formatNumber(row.predictions.failed)}</td>
-              <td class="[ show-desktop-up ][ table-cell--align-center ]">{formatNumber(predictionOpenPipeline(row.predictions))}</td>
-              <td class="[ show-tablet-up ][ table-cell--align-center ]">{formatRank(row.bets.rank)}</td>
-              <td class="[ show-tablet-up ][ table-cell--align-center ]">{formatNumber(row.bets.successful)}</td>
-              <td class="[ show-desktop-up ][ table-cell--align-center ]">{formatNumber(row.bets.failed)}</td>
-              <td class="[ show-desktop-up ][ table-cell--align-center ]">{formatNumber(row.bets.pending)}</td>
+              <td class="[ table-cell--align-end ]">{formatRank(row.points.rank)}</td>
+              <td class="[ table-cell--align-end ]">{formatNumber(row.points.net)}</td>
+              <td class="[ show-desktop-up ][ table-cell--align-end ]">{formatNumber(row.points.rewards)}</td>
+              <td class="[ show-desktop-up ][ table-cell--align-end ]">{formatNumber(row.points.penalties)}</td>
+              <td class="[ show-mobile-up ][ table-cell--align-end ]">{formatRank(row.predictions.rank)}</td>
+              <td class="[ show-mobile-up ][ table-cell--align-end ]">{formatNumber(row.predictions.successful)}</td>
+              <td class="[ show-desktop-up ][ table-cell--align-end ]">{formatNumber(row.predictions.failed)}</td>
+              <td class="[ show-desktop-up ][ table-cell--align-end ]">{formatNumber(predictionOpenPipeline(row.predictions))}</td>
+              <td class="[ show-tablet-up ][ table-cell--align-end ]">{formatRank(row.bets.rank)}</td>
+              <td class="[ show-tablet-up ][ table-cell--align-end ]">{formatNumber(row.bets.successful)}</td>
+              <td class="[ show-desktop-up ][ table-cell--align-end ]">{formatNumber(row.bets.failed)}</td>
+              <td class="[ show-desktop-up ][ table-cell--align-end ]">{formatNumber(row.bets.pending)}</td>
             </tr>
           ))}
         </tbody>
