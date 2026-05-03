@@ -157,7 +157,7 @@ HTMX interactions should also use data attributes where they help document behav
 
 ## Responsive breakpoints
 
-ndb2 uses **four named viewport tiers** — **mobile**, **tablet**, **desktop**, **wide** — with shared `rem` boundaries (e.g. tablet from `48rem`, desktop from `64rem`, wide from `80rem` at a 16px root). Use them in `@media` queries and comments so layout behavior stays consistent across blocks and routes. Full table, patterns, and shell/nav notes: `.cursor/skills/web-breakpoints/SKILL.md`.
+ndb2 uses **narrow (base)** through **tablet**, **desktop**, and **wide** with shared `rem` boundaries. Within handsets there is also **`breakpoint.mobile`** at **`36rem`** (~576px) before tablet at **`48rem`**. Desktop and wide start at **`64rem`** and **`80rem`** (16px root). Use the same literals in `@media` and comments so layout stays consistent across blocks and routes. Full table, patterns, and shell/nav notes: `.cursor/skills/web-breakpoints/SKILL.md`.
 
 ## Practical checklist for new UI work
 

@@ -43,5 +43,12 @@
     align-self: stretch;
     min-width: 0;
     padding: var(--space-4);
+
+    /* When card body wraps shared `Table` markup (class `table`), scroll horizontally instead of clipping. */
+    &:has(> .table) {
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
+    }
   }
 }

@@ -8,7 +8,7 @@ Token sources of truth will ultimately live as JSON and generate:
 - CSS custom properties
 - token utility classes
 
-**Viewport breakpoints:** `breakpoints.json` emits **`--breakpoint-tablet`**, **`--breakpoint-desktop`**, **`--breakpoint-wide`** on `:root`. Use those **`var(--breakpoint-*)`** in **property values** only; **`@media`** conditions must use the same **`rem`** literals as the JSON (`var()` is not valid in media queries). Tiers and patterns: `.cursor/skills/web-breakpoints/SKILL.md`.
+**Viewport breakpoints:** `breakpoints.json` emits **`--breakpoint-mobile`**, **`--breakpoint-tablet`**, **`--breakpoint-desktop`**, **`--breakpoint-wide`** on `:root`. Use those **`var(--breakpoint-*)`** in **property values** only; **`@media`** conditions must use the same **`rem`** literals as the JSON (`var()` is not valid in media queries). Tiers and patterns: `.cursor/skills/web-breakpoints/SKILL.md`.
 
 ## Design guidance (English)
 

@@ -1,0 +1,71 @@
+/* Block: Table sort header (`Th`) — label + ▲▼ (compose HTMX / ARIA via button props). */
+
+.table-th {
+  /* Match `<th>[ table-cell--align-* ]`: `text-align` does not affect this inner flex row. */
+  &.table-cell--align-start > div {
+    justify-content: flex-start;
+  }
+
+  &.table-cell--align-end > div {
+    justify-content: flex-end;
+  }
+
+  & > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+
+    & > span {
+      text-transform: uppercase;
+    }
+  }
+
+  & .table-th__controls {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+
+    & button:first-child {
+      grid-row: 1;
+    }
+
+    & button:last-child {
+      grid-row: 2;
+    }
+  }
+}
+
+.table-th-sort-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  font: inherit;
+  line-height: 1;
+  color: var(--color-text-muted);
+  opacity: 0.25;
+  cursor: pointer;
+  padding-inline: 0;
+
+  &:hover:not([aria-pressed="true"]) {
+    opacity: 0.52;
+    color: var(--color-text);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 1px;
+    opacity: 1;
+  }
+
+  &[aria-pressed="true"] {
+    opacity: 1;
+    color: var(--color-primary);
+
+    & :hover {
+      opacity: 1;
+      color: var(--color-primary);
+    }
+  }
+}

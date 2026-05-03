@@ -2,13 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { GuildMember } from "discord.js";
 
 const ctx = vi.hoisted(() => {
-  const fetchMember = vi.fn(async ({ user }: { user: string }) =>
-    Promise.resolve({
-      displayName: `user-${user}`,
-      displayAvatarURL: (options?: { size?: number }) =>
-        `https://cdn.example/${user}?s=${options?.size ?? 0}`,
-    } as Pick<GuildMember, "displayName" | "displayAvatarURL">),
-  );
+  const fetchMember = vi.fn();
 
   const guild = {
     members: {
@@ -80,12 +74,19 @@ describe("userToProfile", () => {
 describe("getMemberProfiles", () => {
   beforeEach(() => {
     ctx.fetchMember.mockReset();
-    ctx.fetchMember.mockImplementation(async ({ user }: { user: string }) =>
-      Promise.resolve({
-        displayName: `user-${user}`,
-        displayAvatarURL: (options?: { size?: number }) =>
-          `https://cdn.example/${user}?s=${options?.size ?? 0}`,
-      } as Pick<GuildMember, "displayName" | "displayAvatarURL">),
+    ctx.fetchMember.mockImplementation(
+      async ({ user }: { user: string | string[] }) => {
+        const ids = Array.isArray(user) ? user : [user];
+        const m = new Map<string, Pick<GuildMember, "displayName" | "displayAvatarURL">>();
+        for (const id of ids) {
+          m.set(id, {
+            displayName: `user-${id}`,
+            displayAvatarURL: (options?: { size?: number }) =>
+              `https://cdn.example/${id}?s=${options?.size ?? 0}`,
+          });
+        }
+        return m;
+      },
     );
     ctx.fetchUser.mockReset();
     vi.mocked(ctx.guild.members.cache.get).mockImplementation(() => undefined);
@@ -98,16 +99,15 @@ describe("getMemberProfiles", () => {
   it("dedupes discord ids so each guild member is fetched at most once", async () => {
     const map = await getMemberProfiles(["9", "9", "8", "8", "9"]);
 
-    expect(ctx.fetchMember).toHaveBeenCalledTimes(2);
-    expect(ctx.fetchMember).toHaveBeenCalledWith({ user: "9" });
-    expect(ctx.fetchMember).toHaveBeenCalledWith({ user: "8" });
+    expect(ctx.fetchMember).toHaveBeenCalledTimes(1);
+    expect(ctx.fetchMember).toHaveBeenCalledWith({ user: ["9", "8"] });
     expect(ctx.fetchUser).not.toHaveBeenCalled();
     expect(map.get("9")?.displayName).toBe("user-9");
     expect(map.get("8")?.displayName).toBe("user-8");
   });
 
   it("falls back to client.users.fetch when not in guild", async () => {
-    ctx.fetchMember.mockRejectedValue(new Error("Unknown Member"));
+    ctx.fetchMember.mockResolvedValue(new Map() as never);
     ctx.fetchUser.mockImplementation(async (id: string) => ({
       id,
       globalName: `global-${id}`,
@@ -127,7 +127,7 @@ describe("getMemberProfiles", () => {
   });
 
   it("returns null when guild member and users.fetch both fail", async () => {
-    ctx.fetchMember.mockRejectedValue(new Error("Unknown Member"));
+    ctx.fetchMember.mockResolvedValue(new Map() as never);
     ctx.fetchUser.mockRejectedValue(new Error("UserManager.fetch failed"));
 
     const map = await getMemberProfiles(["55"]);

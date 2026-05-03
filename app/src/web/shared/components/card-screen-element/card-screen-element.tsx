@@ -1,17 +1,15 @@
 import type { Children } from "@kitajs/html";
 import { createElement } from "@kitajs/html";
+import type { HeadingElement } from "@web/shared/types/heading-element.js";
 import { mergeClass } from "../../utils/merge_class.js";
 
 const BASE = "[ screen-element ] [ card-screen-element ] [ glass-primary-frost ]";
-
-/** Intrinsic heading tag used for the card title (accessibility + outline order). */
-export type CardHeadingElement = "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
 
 export type CardScreenElementProps = {
   children: Children;
   class?: string;
   heading: string;
-  headingElement: CardHeadingElement;
+  headingElement: HeadingElement;
 };
 
 /**

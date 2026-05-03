@@ -1,5 +1,10 @@
 [
   {
+    "name": "breakpoint.mobile",
+    "value": "36rem",
+    "description": "Min viewport width for the larger-phone band (576px at 16px root). Narrower viewports stack below this; tablet still starts at breakpoint.tablet."
+  },
+  {
     "name": "breakpoint.tablet",
     "value": "48rem",
     "description": "Min viewport width for tablet tier and up (768px at 16px root). Pair with web-breakpoints skill."

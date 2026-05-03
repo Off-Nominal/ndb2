@@ -70,9 +70,9 @@
 
 /**
  * Full “display glass” stack: opaque `color-bg` base + grid + soft radials. Shared by `body` and
- * mobile/tablet nav (a **second** sheet, same skin, stacked on the first). Diagonal uses an
+ * the authenticated nav **below `breakpoint.wide` (`80rem`)** (a **second** sheet, same skin, stacked on the first). Diagonal uses an
  * **opaque** tint (`color-text` on `color-bg`); do not use frosted `color-surface` here — that
- * was the translucent white/dark haze. See `page-layout.css`: wide/desktop nav is **not** a
+ * was the translucent white/dark haze. See `page-layout.css`: from **wide** up the nav column is **not** a
  * second layer (transparent, one canvas from `body` only).
  */
 .glass-background {
@@ -175,6 +175,18 @@
 }
 
 /**
+ * Translucent fill from `--color-primary` blended with transparency. Tune mix weight per appearance
+ * with `--primary-fill-subtle-mix-pct` in `globals.css` (light surfaces use a heavier wash).
+ */
+.primary-fill-subtle {
+  background: color-mix(
+    in srgb,
+    var(--color-primary) var(--primary-fill-subtle-mix-pct),
+    transparent
+  );
+}
+
+/**
  * Stretch to the containing block’s inline size. Uses `display: block` so `width: 100%` applies to
  * inline-level elements (`span`, `a`, etc.); controls that must stay `flex` / `inline-flex` should
  * use `width: 100%` in their block instead of this utility.
@@ -204,4 +216,181 @@
   align-items: baseline;
   column-gap: var(--split-pair-gap-inline, var(--space-4));
   row-gap: var(--split-pair-gap-block, var(--space-1));
+}
+
+/**
+ * Responsive visibility — tiers mirror **`breakpoints.json`**. Use **literal `rem`** widths in **`@media`** (custom properties are invalid in media queries).
+ * **`breakpoint.mobile`** **36rem**, **`breakpoint.tablet`** **48rem**, **`breakpoint.desktop`** **64rem**, **`breakpoint.wide`** **80rem**.
+ *
+ * Narrowest viewport is **below** **36rem** (no breakpoint token — base CSS only).
+ *
+ * **`show-*-up`:** **`display: none`** below that **`min-width`**, **`display: revert`** from the breakpoint up (**`show-mobile-up`** … **`show-wide-up`**).
+ *
+ * **`hide-*-up`:** default visible; **`display: none`** from that breakpoint up (**`hide-mobile-up`** … **`hide-wide-up`**).
+ *
+ * **`show-*-only` / `hide-*-only`:** a single viewport band, layered only with **`min-width`** (**`narrow-only`** below **36rem**; **`mobile-only`** from **36rem** until **`tablet`**; **`tablet-only`** until **`desktop`**; **`desktop-only`** until **`wide`**; **`wide-only`** from **80rem** up — identical span to **`show-wide-up`**).
+ */
+
+.show-mobile-up {
+  display: none;
+
+  /* = breakpoint.mobile in breakpoints.json */
+  @media (min-width: 36rem) {
+    display: revert;
+  }
+}
+
+.show-tablet-up {
+  display: none;
+
+  /* = breakpoint tablet in breakpoints.json (48rem) */
+  @media (min-width: 48rem) {
+    display: revert;
+  }
+}
+
+.show-desktop-up {
+  display: none;
+
+  /* = breakpoint desktop in breakpoints.json (64rem) */
+  @media (min-width: 64rem) {
+    display: revert;
+  }
+}
+
+.show-wide-up {
+  display: none;
+
+  /* = breakpoint wide in breakpoints.json (80rem) */
+  @media (min-width: 80rem) {
+    display: revert;
+  }
+}
+
+.hide-mobile-up {
+  /* = breakpoint.mobile in breakpoints.json */
+  @media (min-width: 36rem) {
+    display: none;
+  }
+}
+
+/* = breakpoint tablet in breakpoints.json */
+@media (min-width: 48rem) {
+  .hide-tablet-up {
+    display: none;
+  }
+}
+
+/* = breakpoint desktop in breakpoints.json */
+@media (min-width: 64rem) {
+  .hide-desktop-up {
+    display: none;
+  }
+}
+
+/* = breakpoint wide in breakpoints.json */
+@media (min-width: 80rem) {
+  .hide-wide-up {
+    display: none;
+  }
+}
+
+/* --- bands: visible / hidden only within one tier ---------------------------------- */
+
+.show-narrow-only {
+  display: revert;
+
+  @media (min-width: 36rem) {
+    display: none;
+  }
+}
+
+.show-mobile-only {
+  display: none;
+
+  /* = breakpoint.mobile in breakpoints.json */
+  @media (min-width: 36rem) {
+    display: revert;
+  }
+
+  /* = breakpoint.tablet in breakpoints.json */
+  @media (min-width: 48rem) {
+    display: none;
+  }
+}
+
+.show-tablet-only {
+  display: none;
+
+  @media (min-width: 48rem) {
+    display: revert;
+  }
+
+  @media (min-width: 64rem) {
+    display: none;
+  }
+}
+
+.show-desktop-only {
+  display: none;
+
+  @media (min-width: 64rem) {
+    display: revert;
+  }
+
+  @media (min-width: 80rem) {
+    display: none;
+  }
+}
+
+.show-wide-only {
+  display: none;
+
+  @media (min-width: 80rem) {
+    display: revert;
+  }
+}
+
+.hide-narrow-only {
+  display: none;
+
+  @media (min-width: 36rem) {
+    display: revert;
+  }
+}
+
+.hide-mobile-only {
+  @media (min-width: 36rem) {
+    display: none;
+  }
+
+  @media (min-width: 48rem) {
+    display: revert;
+  }
+}
+
+.hide-tablet-only {
+  @media (min-width: 48rem) {
+    display: none;
+  }
+
+  @media (min-width: 64rem) {
+    display: revert;
+  }
+}
+
+.hide-desktop-only {
+  @media (min-width: 64rem) {
+    display: none;
+  }
+
+  @media (min-width: 80rem) {
+    display: revert;
+  }
+}
+
+.hide-wide-only {
+  @media (min-width: 80rem) {
+    display: none;
+  }
 }

@@ -1,0 +1,36 @@
+/* Block: Table (`Table` adds bracket class `table`). Wide grids: parent should scroll (e.g. card body `:has(> .table)`). */
+
+.table {
+  --table-font-size: var(--text-md);
+  --table-cell-padding: var(--space-1);
+
+  width: max-content;
+  min-width: 100%;
+  border-spacing: 0;
+  font-size: var(--table-font-size);
+}
+
+.table :is(th, td) {
+  padding: var(--table-cell-padding);
+}
+
+.table :is(th, td).table-cell--align-start {
+  text-align: start;
+}
+
+.table :is(th, td).table-cell--align-end {
+  text-align: end;
+}
+
+.table :is(th, td).table-cell--align-center {
+  text-align: center;
+}
+
+/* Subtle stripe: tint only body rows so multi-row headers stay uniform. Uses theme mix from `globals.css`. */
+.table tbody tr:nth-child(even) {
+  background: color-mix(
+    in srgb,
+    var(--color-primary) var(--primary-fill-subtle-mix-pct),
+    transparent
+  );
+}

@@ -1,0 +1,85 @@
+/* Block: home leaderboard — table root, player cell, column sort (HTMX). */
+
+.leaderboard-table-root {
+  position: relative;
+}
+
+.leaderboard-htmx-busy {
+  /* Full-card hit target for `pointer-events`; spinner only (no `.leaderboard-loading` slab on sort). */
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  background: transparent;
+}
+
+.leaderboard-htmx-busy.htmx-request {
+  visibility: visible;
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.leaderboard-loading {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 20rem;
+  /* ~25 table body rows — matches `table.css` cell stride. */
+  min-block-size: calc(25 * (1lh + 2 * var(--space-1)));
+  border-radius: var(--radius-xs);
+  font-size: var(--text-md);
+
+  & .loader {
+    flex: 0 0 auto;
+  }
+}
+
+.leaderboard-empty {
+  margin: 0;
+  font-size: var(--text-md);
+  color: var(--color-text-muted);
+}
+
+.leaderboard-player {
+  display: inline-flex;
+  align-items: center;
+  column-gap: var(--space-2);
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Cap player column on narrow viewports; relax from breakpoint.mobile upward. */
+
+.leaderboard-table-root .table tbody td:first-child {
+  max-width: min(11rem, 46vw);
+}
+
+.leaderboard-player-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* = breakpoint.mobile in breakpoints.json */
+@media (min-width: 36rem) {
+  .leaderboard-table-root .table tbody td:first-child {
+    max-width: none;
+  }
+
+  .leaderboard-player-name {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+  }
+}

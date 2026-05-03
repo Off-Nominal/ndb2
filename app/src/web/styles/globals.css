@@ -48,6 +48,11 @@ body {
  * (light :root, dark, system + prefers dark). `neutral.*` still follow `data-color-scheme`.
  */
 :root {
+  /**
+   * Mix weight for `color-mix(primary, transparent)` washes (utility `.primary-fill-subtle`,
+   * table zebra stripes, etc.). Light UI needs more weight on pale `--color-bg`; dark UI uses a lighter wash.
+   */
+  --primary-fill-subtle-mix-pct: 22%;
   --color-surface: color-mix(in srgb, var(--neutral-0) 52%, transparent);
   --color-surface-muted: color-mix(
     in srgb,
@@ -57,6 +62,7 @@ body {
 }
 
 html[data-theme="dark"] {
+  --primary-fill-subtle-mix-pct: 10%;
   --color-surface: color-mix(in srgb, var(--neutral-800) 56%, transparent);
   --color-surface-muted: color-mix(
     in srgb,
@@ -67,6 +73,7 @@ html[data-theme="dark"] {
 
 @media (prefers-color-scheme: dark) {
   html[data-theme="system"] {
+    --primary-fill-subtle-mix-pct: 8%;
     --color-surface: color-mix(in srgb, var(--neutral-800) 56%, transparent);
     --color-surface-muted: color-mix(
       in srgb,
@@ -219,38 +226,4 @@ pre code {
   font-size: inherit;
   font-weight: var(--weight-regular);
   background: transparent;
-}
-
-/* ——— Tables (data-dense baseline) ——— */
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--text-sm);
-  line-height: var(--leading-normal);
-}
-
-caption {
-  caption-side: bottom;
-  margin-block-start: var(--space-2);
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
-  text-align: start;
-}
-
-th,
-td {
-  padding: var(--space-2) var(--space-3);
-  border-block-end: 1px solid var(--color-border);
-  vertical-align: top;
-  text-align: start;
-}
-
-th {
-  font-weight: var(--weight-semibold);
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-  background: var(--color-surface-muted);
 }
