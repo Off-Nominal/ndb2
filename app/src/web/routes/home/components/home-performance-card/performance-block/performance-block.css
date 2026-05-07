@@ -26,7 +26,6 @@
   & .performance-block__body {
     font-size: var(--text-md);
 
-    /* Even rows tinted via utility `[ stripe-even-rows ]`; padding on each metric row only. */
     & > * {
       padding-inline: var(--space-2);
     }

@@ -26,7 +26,7 @@
   text-align: center;
 }
 
-/* Subtle stripe: tint only body rows so multi-row headers stay uniform (`--stripe-even-row-background`). */
+/* Subtle stripe: tint only body rows so multi-row headers stay uniform (`--primary-fill-subtle`). */
 .table tbody tr:nth-child(even) {
-  background: var(--stripe-even-row-background);
+  background: var(--primary-fill-subtle);
 }

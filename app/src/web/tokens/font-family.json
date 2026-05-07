@@ -1,5 +1,10 @@
 [
   {
+    "name": "font.mono",
+    "value": "ui-monospace, \"Cascadia Code\", \"Source Code Pro\", Menlo, Consolas, monospace",
+    "description": "HUD / code: system UI mono first, then common dev fonts, generic fallback. Use with `code`, `pre`, and monospace readouts."
+  },
+  {
     "name": "font.sans",
     "value": "Oxanium, sans-serif",
     "description": "Base UI: Oxanium (wght 200–800) + generic sans; self-host variable TTF under /assets/ + @font-face in globals.css (CSP-safe)."

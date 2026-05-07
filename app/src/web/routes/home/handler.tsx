@@ -173,6 +173,7 @@ export const Home: Route = (router: Router) => {
                 />
                 <HomePerformanceCard
                   discordProfile={discordProfile}
+                  discordUserId={auth.discordId}
                   performance={performance}
                 />
               </div>

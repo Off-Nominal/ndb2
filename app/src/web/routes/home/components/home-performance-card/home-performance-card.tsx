@@ -1,6 +1,7 @@
 import type { DiscordMemberProfile } from "@domain/discord";
 import { CardScreenElement } from "@web/shared/components/card-screen-element";
 import { formatNumber } from "@web/shared/utils/format_number";
+import { HomePerformanceIdentityCard } from "./home-performance-identity-card";
 import { PerformanceBlock } from "./performance-block";
 import { PerformanceMetricRow } from "./performance-metric-row";
 import { HorizontalDivider } from "@web/shared/components/horizontal-divider";
@@ -39,6 +40,8 @@ export type HomePerformanceCardPerformance =
 
 export type HomePerformanceCardProps = {
   discordProfile: DiscordMemberProfile;
+  /** Guild member snowflake (identity strip + avatar fallback). */
+  discordUserId: string;
   performance: HomePerformanceCardPerformance;
 };
 
@@ -52,23 +55,14 @@ export function HomePerformanceCard(props: HomePerformanceCardProps): JSX.Elemen
       class="[ home-performance-card ]"
     >
       <div class="[ stack ]">
-        <p class="home-performance-card__identity">
-          <img
-            src={props.discordProfile.avatarUrl}
-            alt=""
-            width={36}
-            height={36}
-            loading="lazy"
-          />
-          <span>
-            Signed in as{" "}
-            <strong>{props.discordProfile.displayName}</strong>
-          </span>
-        </p>
+        <HomePerformanceIdentityCard
+          discordProfile={props.discordProfile}
+          discordUserId={props.discordUserId}
+        />
 
         {perf.state === "no-activity" ? (
           <p class={"[ center ] home-performance-card__empty"}>
-            No activity yet this season — make a prediction, bet, or vote to show up with{" "}
+            You have no activity yet this season — make a prediction, bet, or vote to show up with{" "}
             {formatNumber(perf.participantCount)} participant
             {perf.participantCount === 1 ? "" : "s"}
             .

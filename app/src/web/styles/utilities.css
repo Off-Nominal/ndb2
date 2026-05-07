@@ -147,6 +147,26 @@
 }
 
 /**
+ * Softer HUD frame for panels **nested inside** a `.screen-element` (or other primary chrome): muted
+ * primary border, gradient face, lighter shadow stack than `.screen-element`. Does not set
+ * padding — blocks supply layout and spacing.
+ */
+.screen-element-secondary {
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 32%, transparent);
+  background: linear-gradient(
+    115deg,
+    color-mix(in srgb, var(--color-primary) 8%, var(--color-bg)) 0%,
+    color-mix(in srgb, var(--primary-fill-subtle) 70%, transparent) 52%,
+    color-mix(in srgb, var(--color-bg) 88%, transparent) 100%
+  );
+  box-shadow:
+    var(--hud-shadow-rim),
+    var(--hud-shadow-inset-soft),
+    0 0 18px 0 var(--hud-glow-outer);
+}
+
+/**
  * Primary-tinted diagonal fill: brighter toward upper-left (mixed with `--color-text`), solid primary
  * mid, deeper toward lower-right (`--color-bg`). Use as `background-image` fill on ribbons, pills,
  * etc.; compose with borders / clip-path in blocks.
@@ -188,18 +208,19 @@
 
 /**
  * Translucent fill from `--color-primary` blended with transparency. Tune mix weight per appearance
- * with `--primary-fill-subtle-mix-pct` in `globals.css` (same resolved value as `--stripe-even-row-background`).
+ * with `--primary-fill-subtle-mix-pct` in `globals.css` (resolved as `--primary-fill-subtle`).
  */
 .primary-fill-subtle {
-  background: var(--stripe-even-row-background);
+  background: var(--primary-fill-subtle);
 }
 
 /**
- * Zebra stripe: tint every **even** direct child. Uses `--stripe-even-row-background` in `globals.css`
- * — same tint as `.table tbody tr:nth-child(even)`. For non-`<table>` stacks (metrics lists, cards).
+ * Zebra stripe: tint every **even** direct child. Uses `--primary-fill-subtle` (alias
+ * `--stripe-even-row-background` in `globals.css`) — same tint as `.table tbody tr:nth-child(even)`.
+ * For non-`<table>` stacks (metrics lists, cards).
  */
 .stripe-even-rows > :nth-child(even) {
-  background: var(--stripe-even-row-background);
+  background: var(--primary-fill-subtle);
 }
 
 /**
