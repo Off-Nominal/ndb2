@@ -21,7 +21,7 @@ import { wrapWebRouteWithErrorBoundary } from "../../middleware/error-boundary";
 import { AuthenticatedPageLayout } from "../../shared/components/page-layout";
 import type { HomePageLeaderboard } from "./components/leaderboard-table";
 import {
-  LeaderboardPlayerChip,
+  LeaderboardPlayerIdentityOobCells,
   LeaderboardTable,
 } from "./components/leaderboard-table";
 import {
@@ -247,7 +247,7 @@ export const Home: Route = (router: Router) => {
         parsed.data.discord_id,
       );
       const html = await Promise.resolve(
-        <LeaderboardPlayerChip
+        <LeaderboardPlayerIdentityOobCells
           discordId={parsed.data.discord_id}
           displayName={profile?.displayName ?? "Unknown member"}
           avatarUrl={profile?.avatarUrl ?? null}

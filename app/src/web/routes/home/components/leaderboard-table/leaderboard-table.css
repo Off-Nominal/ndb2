@@ -1,4 +1,4 @@
-/* Block: home leaderboard — table root, player cell, column sort (HTMX). */
+/* Block: home leaderboard — table root, player cells, column sort (HTMX). */
 
 .leaderboard-empty {
   margin: 0;
@@ -6,18 +6,50 @@
   color: var(--color-text-muted);
 }
 
-.leaderboard-player {
-  display: inline-flex;
-  align-items: center;
-  column-gap: var(--space-2);
+.leaderboard-table-th--identity {
+  /* No visible title; see visually-hidden label in markup. */
+  width: 0;
   min-width: 0;
-  max-width: 100%;
 }
 
-/* Cap player column on narrow viewports; relax from breakpoint.mobile upward. */
+/* Opaque fill for avatar column body cells / seam shadows (set per row). */
+.leaderboard-table-root .table tbody tr:nth-child(odd) {
+  --leaderboard-avatar-sticky-fill: var(--color-bg);
+}
 
-.leaderboard-table-root .table tbody td:first-child {
-  max-width: min(11rem, 46vw);
+.leaderboard-table-root .table tbody tr:nth-child(even) {
+  --leaderboard-avatar-sticky-fill: color-mix(
+    in srgb,
+    var(--color-primary) var(--primary-fill-subtle-mix-pct),
+    var(--color-bg)
+  );
+}
+
+.leaderboard-table-root .table thead .leaderboard-table-th--avatar {
+  position: sticky;
+  /* Pull 1px past the scrollport to cover fractional-pixel gaps when sticky locks. */
+  left: -1px;
+  padding-inline-start: calc(var(--table-cell-padding) + 1px);
+  z-index: 2;
+  width: 1%;
+  min-width: 0;
+  box-sizing: border-box;
+  background-color: transparent;
+}
+
+.leaderboard-table-root .table tbody .leaderboard-player-avatar-cell {
+  vertical-align: middle;
+  width: 1%;
+  position: sticky;
+  left: -1px;
+  padding-inline-start: calc(var(--table-cell-padding) + 1px);
+  z-index: 2;
+  box-sizing: border-box;
+  background-color: var(--leaderboard-avatar-sticky-fill);
+  /* Inline-end hairline: scrolling name column was visible through a subpixel seam next to this cell. */
+  box-shadow:
+    1px 0 0 0 var(--leaderboard-avatar-sticky-fill),
+    4px 0 12px -4px color-mix(in srgb, var(--color-text) 14%, transparent);
 }
 
 .leaderboard-player-name {
@@ -27,15 +59,20 @@
   white-space: nowrap;
 }
 
+/* End-aligned metrics (sort headers + body numbers): breathing room before column borders / dividers. */
+.leaderboard-table-root .table :is(th, td).table-cell--align-end {
+  padding-inline-end: calc(var(--table-cell-padding) + var(--space-1));
+}
+
+/* Cap name column on narrow viewports; wider viewports let the column grow for a single line. */
+
+.leaderboard-table-root .table tbody .leaderboard-player-name-cell {
+  max-width: min(11rem, 46vw);
+}
+
 /* = breakpoint.mobile in breakpoints.json */
 @media (min-width: 36rem) {
-  .leaderboard-table-root .table tbody td:first-child {
+  .leaderboard-table-root .table tbody .leaderboard-player-name-cell {
     max-width: none;
-  }
-
-  .leaderboard-player-name {
-    overflow: visible;
-    text-overflow: clip;
-    white-space: normal;
   }
 }

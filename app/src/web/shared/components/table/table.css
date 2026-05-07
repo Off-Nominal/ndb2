@@ -1,4 +1,4 @@
-/* Block: Table (`Table` adds bracket class `table`). Wide grids: parent should scroll (e.g. card body `:has(> .table)`). */
+/* Block: Table (`Table` adds bracket class `table`). Wide grids: parent should scroll (e.g. `.horizontal-scroll-region` or `CardScreenElement` `bodyOverflowX="auto"`). */
 
 .table {
   --table-font-size: var(--text-md);
@@ -29,4 +29,9 @@
 /* Subtle stripe: tint only body rows so multi-row headers stay uniform (`--primary-fill-subtle`). */
 .table tbody tr:nth-child(even) {
   background: var(--primary-fill-subtle);
+}
+
+/* Optional vertical rules: add `table-cell--column-divider` on any `<th>` / `<td>`. */
+.table :is(th, td).table-cell--column-divider {
+  border-inline-start: 1px solid var(--color-border);
 }
