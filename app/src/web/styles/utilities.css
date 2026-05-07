@@ -55,6 +55,19 @@
   }
 }
 
+/**
+ * Horizontal scrollport for wide inline content inside a padded or flex parent. Sets `min-width: 0` so
+ * the box can shrink below its contents (required for `overflow-x` to engage in flex/grid), enables
+ * `overflow-x: auto`, touch momentum scrolling, and horizontal overscroll containment. Use for tables,
+ * toolbars, chip rows, etc., so outer padding can stay outside the scrollbar.
+ */
+.horizontal-scroll-region {
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
 /** Single-line overflow: ellipsis. In flex layouts, pair with `min-width: 0` on the item (or a parent flex rule) so it can shrink. */
 .truncate {
   overflow: hidden;

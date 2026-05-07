@@ -68,40 +68,76 @@ export type LeaderboardTableProps = {
   sortBy: HomeLeaderboardSortBy;
 };
 
+export function leaderboardPlayerAvatarCellId(discordId: string): string {
+  return `leaderboard-player-av-${discordId}`;
+}
+
+export function leaderboardPlayerNameCellId(discordId: string): string {
+  return `leaderboard-player-nm-${discordId}`;
+}
+
 /**
- * Avatar + display name chip for leaderboard rows or HTMX identity fragments (`hydrateUrl` omitted).
- *
- * When **`hydrateUrl`** is set, HTMX swaps this element with the resolved markup after **`revealed`**
- * (+ throttle + **`once`**).
+ * HTMX out-of-band swap pair for `GET /home/leaderboard/player-identity` (matches {@link LeaderboardPlayerRowCells} ids).
  */
-export function LeaderboardPlayerChip(props: {
+export function LeaderboardPlayerIdentityOobCells(props: {
   discordId: string;
   displayName: string;
   avatarUrl: string | null;
-  /** When set (non-empty), adds HTMX attributes to hydrate via `GET /home/leaderboard/player-identity`. */
-  hydrateUrl?: string;
 }): JSX.Element {
-  const inner = (
+  return (
     <>
-      <DiscordAvatar url={props.avatarUrl} discordUserId={props.discordId} />
-      <span class="[ leaderboard-player-name ]">{props.displayName}</span>
+      <td
+        id={leaderboardPlayerAvatarCellId(props.discordId)}
+        hx-swap-oob="true"
+        class="[ table-cell--align-start ] [ leaderboard-player-avatar-cell ]"
+      >
+        <DiscordAvatar url={props.avatarUrl} discordUserId={props.discordId} />
+      </td>
+      <td
+        id={leaderboardPlayerNameCellId(props.discordId)}
+        hx-swap-oob="true"
+        class="[ table-cell--align-start ] [ leaderboard-player-name-cell ]"
+      >
+        <span class="[ leaderboard-player-name ]">{props.displayName}</span>
+      </td>
     </>
   );
+}
 
-  if (props.hydrateUrl != null && props.hydrateUrl !== "") {
+function LeaderboardPlayerRowCells(props: { row: HomePageLeaderboardRow }): JSX.Element {
+  const { row } = props;
+  const avatar = <DiscordAvatar url={row.avatarUrl} discordUserId={row.discordId} />;
+  const name = <span class="[ leaderboard-player-name ]">{row.displayName}</span>;
+
+  if (row.needsDeferredProfile) {
+    const hydrateUrl = homeLeaderboardPlayerIdentityUrl(row.discordId);
     return (
-      <span
-        class="[ leaderboard-player ]"
-        hx-get={props.hydrateUrl}
-        hx-trigger="revealed throttle:250ms once"
-        hx-swap="outerHTML"
-      >
-        {inner}
-      </span>
+      <>
+        <td
+          id={leaderboardPlayerAvatarCellId(row.discordId)}
+          class="[ table-cell--align-start ] [ leaderboard-player-avatar-cell ]"
+          hx-get={hydrateUrl}
+          hx-trigger="revealed throttle:250ms once"
+          hx-swap="none"
+        >
+          {avatar}
+        </td>
+        <td
+          id={leaderboardPlayerNameCellId(row.discordId)}
+          class="[ table-cell--align-start ] [ leaderboard-player-name-cell ]"
+        >
+          {name}
+        </td>
+      </>
     );
   }
 
-  return <span class="[ leaderboard-player ]">{inner}</span>;
+  return (
+    <>
+      <td class="[ table-cell--align-start ] [ leaderboard-player-avatar-cell ]">{avatar}</td>
+      <td class="[ table-cell--align-start ] [ leaderboard-player-name-cell ]">{name}</td>
+    </>
+  );
 }
 
 /** Home leaderboard wiring for {@link Th} (HTMX targets, sort labels). */
@@ -129,7 +165,11 @@ function LeaderboardSortTh(props: {
       : `Highest ${props.metricLabel} first`;
 
   return (
-    <Th label={props.label} sortGroupAriaLabel={groupLabel} class={mergeClass("[ table-cell--align-end ]", props.class)}>
+    <Th
+      label={props.label}
+      sortGroupAriaLabel={groupLabel}
+      class={mergeClass("[ table-cell--align-end ]", props.class)}
+    >
       <ThSortButton
         direction="asc"
         hx-get={homeLeaderboardFragmentUrl(props.asc)}
@@ -169,10 +209,10 @@ function LeaderboardMessageCard(props: { message: string }): JSX.Element {
   );
 }
 
-/** Leaderboard headline + HUD card; {@link Table} is the direct child of the card body. */
+/** Leaderboard headline + HUD card; {@link Table} uses {@link CardScreenElement} `bodyOverflowX="auto"`. */
 function LeaderboardTableInCard(props: { ariaLabel: string; children: Children }): JSX.Element {
   return (
-    <CardScreenElement heading="Leaderboard" headingElement="h2">
+    <CardScreenElement heading="Leaderboard" headingElement="h2" bodyOverflowX="auto">
       <Table aria-label={props.ariaLabel}>{props.children}</Table>
     </CardScreenElement>
   );
@@ -184,25 +224,23 @@ function LeaderboardTableThead(props: {
   return (
     <thead>
       <tr>
-        <th rowspan={2} scope="col">
-          Player
+        <th
+          rowspan={2}
+          scope="col"
+          class="[ leaderboard-table-th--identity ] [ leaderboard-table-th--avatar ]"
+        >
+          <span class="[ visually-hidden ]">Avatar</span>
         </th>
-        <th colspan={2} scope="colgroup" class="[ hide-desktop-up ]">
+        <th rowspan={2} scope="col" class="[ leaderboard-table-th--identity ]">
+          <span class="[ visually-hidden ]">Display name</span>
+        </th>
+        <th colspan={4} scope="colgroup">
           Points
         </th>
-        <th colspan={4} scope="colgroup" class="[ show-desktop-up ]">
-          Points
-        </th>
-        <th colspan={2} scope="colgroup" class="[ show-mobile-up hide-desktop-up ]">
+        <th colspan={4} scope="colgroup" class="[ table-cell--column-divider ]">
           Predictions
         </th>
-        <th colspan={4} scope="colgroup" class="[ show-desktop-up ]">
-          Predictions
-        </th>
-        <th colspan={2} scope="colgroup" class="[ show-tablet-up hide-desktop-up ]">
-          Bets
-        </th>
-        <th colspan={4} scope="colgroup" class="[ show-desktop-up ]">
+        <th colspan={4} scope="colgroup" class="[ table-cell--column-divider ]">
           Bets
         </th>
       </tr>
@@ -231,7 +269,6 @@ function LeaderboardTableThead(props: {
           sortBy={props.sortBy}
           sortMode="value"
           metricLabel="point rewards"
-          class="[ show-desktop-up ]"
         />
         <LeaderboardSortTh
           label="Loss"
@@ -240,7 +277,6 @@ function LeaderboardTableThead(props: {
           sortBy={props.sortBy}
           sortMode="value"
           metricLabel="point penalties"
-          class="[ show-desktop-up ]"
         />
         {/* Predictions */}
         <LeaderboardSortTh
@@ -250,7 +286,7 @@ function LeaderboardTableThead(props: {
           sortBy={props.sortBy}
           sortMode="rank"
           metricLabel="successful predictions"
-          class="[ show-mobile-up ]"
+          class="[ table-cell--column-divider ]"
         />
         <LeaderboardSortTh
           label="Won"
@@ -259,7 +295,6 @@ function LeaderboardTableThead(props: {
           sortBy={props.sortBy}
           sortMode="value"
           metricLabel="successful predictions"
-          class="[ show-mobile-up ]"
         />
         <LeaderboardSortTh
           label="Lost"
@@ -268,7 +303,6 @@ function LeaderboardTableThead(props: {
           sortBy={props.sortBy}
           sortMode="value"
           metricLabel="failed predictions"
-          class="[ show-desktop-up ]"
         />
         <LeaderboardSortTh
           label="Open"
@@ -277,7 +311,6 @@ function LeaderboardTableThead(props: {
           sortBy={props.sortBy}
           sortMode="value"
           metricLabel="predictions in open status"
-          class="[ show-desktop-up ]"
         />
         {/* Bets */}
         <LeaderboardSortTh
@@ -287,7 +320,7 @@ function LeaderboardTableThead(props: {
           sortBy={props.sortBy}
           sortMode="rank"
           metricLabel="successful bets"
-          class="[ show-tablet-up ]"
+          class="[ table-cell--column-divider ]"
         />
         <LeaderboardSortTh
           label="Won"
@@ -296,7 +329,6 @@ function LeaderboardTableThead(props: {
           sortBy={props.sortBy}
           sortMode="value"
           metricLabel="successful bets"
-          class="[ show-tablet-up ]"
         />
         <LeaderboardSortTh
           label="Lost"
@@ -305,7 +337,6 @@ function LeaderboardTableThead(props: {
           sortBy={props.sortBy}
           sortMode="value"
           metricLabel="failed bets"
-          class="[ show-desktop-up ]"
         />
         <LeaderboardSortTh
           label="Open"
@@ -314,7 +345,6 @@ function LeaderboardTableThead(props: {
           sortBy={props.sortBy}
           sortMode="value"
           metricLabel="pending bets"
-          class="[ show-desktop-up ]"
         />
       </tr>
     </thead>
@@ -338,30 +368,23 @@ export function LeaderboardTable(props: LeaderboardTableProps): JSX.Element {
         <tbody>
           {props.leaderboard.rows.map((row) => (
             <tr>
-              <td class="[ table-cell--align-start ]">
-                <LeaderboardPlayerChip
-                  discordId={row.discordId}
-                  displayName={row.displayName}
-                  avatarUrl={row.avatarUrl}
-                  hydrateUrl={
-                    row.needsDeferredProfile
-                      ? homeLeaderboardPlayerIdentityUrl(row.discordId)
-                      : undefined
-                  }
-                />
+              <LeaderboardPlayerRowCells row={row} />
+              <td class="[ table-cell--align-end ]">
+                {formatRank(row.points.rank)}
               </td>
-              <td class="[ table-cell--align-end ]">{formatRank(row.points.rank)}</td>
               <td class="[ table-cell--align-end ]">{formatNumber(row.points.net)}</td>
-              <td class="[ show-desktop-up ][ table-cell--align-end ]">{formatNumber(row.points.rewards)}</td>
-              <td class="[ show-desktop-up ][ table-cell--align-end ]">{formatNumber(row.points.penalties)}</td>
-              <td class="[ show-mobile-up ][ table-cell--align-end ]">{formatRank(row.predictions.rank)}</td>
-              <td class="[ show-mobile-up ][ table-cell--align-end ]">{formatNumber(row.predictions.successful)}</td>
-              <td class="[ show-desktop-up ][ table-cell--align-end ]">{formatNumber(row.predictions.failed)}</td>
-              <td class="[ show-desktop-up ][ table-cell--align-end ]">{formatNumber(predictionOpenPipeline(row.predictions))}</td>
-              <td class="[ show-tablet-up ][ table-cell--align-end ]">{formatRank(row.bets.rank)}</td>
-              <td class="[ show-tablet-up ][ table-cell--align-end ]">{formatNumber(row.bets.successful)}</td>
-              <td class="[ show-desktop-up ][ table-cell--align-end ]">{formatNumber(row.bets.failed)}</td>
-              <td class="[ show-desktop-up ][ table-cell--align-end ]">{formatNumber(row.bets.pending)}</td>
+              <td class="[ table-cell--align-end ]">{formatNumber(row.points.rewards)}</td>
+              <td class="[ table-cell--align-end ]">{formatNumber(row.points.penalties)}</td>
+              <td class="[ table-cell--align-end ] [ table-cell--column-divider ]">
+                {formatRank(row.predictions.rank)}
+              </td>
+              <td class="[ table-cell--align-end ]">{formatNumber(row.predictions.successful)}</td>
+              <td class="[ table-cell--align-end ]">{formatNumber(row.predictions.failed)}</td>
+              <td class="[ table-cell--align-end ]">{formatNumber(predictionOpenPipeline(row.predictions))}</td>
+              <td class="[ table-cell--align-end ] [ table-cell--column-divider ]">{formatRank(row.bets.rank)}</td>
+              <td class="[ table-cell--align-end ]">{formatNumber(row.bets.successful)}</td>
+              <td class="[ table-cell--align-end ]">{formatNumber(row.bets.failed)}</td>
+              <td class="[ table-cell--align-end ]">{formatNumber(row.bets.pending)}</td>
             </tr>
           ))}
         </tbody>

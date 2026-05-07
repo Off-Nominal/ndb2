@@ -47,9 +47,10 @@
   opacity: 0.25;
   cursor: pointer;
   padding-inline: 0;
+  font-size: var(--text-xl);
 
   &:hover:not([aria-pressed="true"]) {
-    opacity: 0.52;
+    opacity: 0.48;
     color: var(--color-text);
   }
 

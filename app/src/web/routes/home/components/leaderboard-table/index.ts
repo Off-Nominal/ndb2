@@ -1,4 +1,9 @@
-export { LeaderboardPlayerChip, LeaderboardTable } from "./leaderboard-table";
+export {
+  LeaderboardPlayerIdentityOobCells,
+  LeaderboardTable,
+  leaderboardPlayerAvatarCellId,
+  leaderboardPlayerNameCellId,
+} from "./leaderboard-table";
 export type {
   HomeLeaderboardSortBy,
   HomePageLeaderboard,

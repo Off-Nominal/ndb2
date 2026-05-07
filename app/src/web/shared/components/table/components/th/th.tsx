@@ -31,7 +31,7 @@ export type ThProps = {
   sortGroupAriaLabel: string;
   /** Typically two {@link ThSortButton} elements (▲ / ▼). */
   children: Children;
-  /** Extra classes on `<th>` (e.g. `.table-cell--align-*`). */
+  /** Extra classes on `<th>` (e.g. `.table-cell--align-*`, `.table-cell--column-divider`). */
   class?: string;
 };
 
