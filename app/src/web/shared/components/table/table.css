@@ -26,11 +26,7 @@
   text-align: center;
 }
 
-/* Subtle stripe: tint only body rows so multi-row headers stay uniform. Uses theme mix from `globals.css`. */
+/* Subtle stripe: tint only body rows so multi-row headers stay uniform (`--primary-fill-subtle`). */
 .table tbody tr:nth-child(even) {
-  background: color-mix(
-    in srgb,
-    var(--color-primary) var(--primary-fill-subtle-mix-pct),
-    transparent
-  );
+  background: var(--primary-fill-subtle);
 }

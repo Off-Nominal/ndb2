@@ -1,0 +1,9 @@
+.home-performance-card {
+  --horizontal-divider-margin-block: var(--space-4);
+  --stack-space: var(--space-6);
+
+  & .home-performance-card__empty {
+    --center-min-height: 8rem;
+    margin-inline: var(--space-4);
+  }
+}

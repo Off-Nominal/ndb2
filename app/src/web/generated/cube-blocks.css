@@ -3,6 +3,18 @@
  * Do not edit by hand.
  */
 
+/* ndb2:block: routes/home/components/home-performance-card/home-performance-card.css */
+@import "../routes/home/components/home-performance-card/home-performance-card.css";
+
+/* ndb2:block: routes/home/components/home-performance-card/home-performance-identity-card/home-performance-identity-card.css */
+@import "../routes/home/components/home-performance-card/home-performance-identity-card/home-performance-identity-card.css";
+
+/* ndb2:block: routes/home/components/home-performance-card/performance-block/performance-block.css */
+@import "../routes/home/components/home-performance-card/performance-block/performance-block.css";
+
+/* ndb2:block: routes/home/components/home-performance-card/performance-metric-row/performance-metric-row.css */
+@import "../routes/home/components/home-performance-card/performance-metric-row/performance-metric-row.css";
+
 /* ndb2:block: routes/home/components/leaderboard-table/leaderboard-table.css */
 @import "../routes/home/components/leaderboard-table/leaderboard-table.css";
 

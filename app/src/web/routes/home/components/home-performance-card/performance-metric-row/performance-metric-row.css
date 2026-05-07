@@ -1,0 +1,8 @@
+.performance-metric-row {
+  --split-pair-gap-inline: var(--space-2);
+
+  & span:last-child {
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--weight-semibold);
+  }
+}

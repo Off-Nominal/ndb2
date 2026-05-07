@@ -49,10 +49,17 @@ body {
  */
 :root {
   /**
-   * Mix weight for `color-mix(primary, transparent)` washes (utility `.primary-fill-subtle`,
-   * table zebra stripes, etc.). Light UI needs more weight on pale `--color-bg`; dark UI uses a lighter wash.
+   * Mix weight for `color-mix(primary, transparent)` washes (`--primary-fill-subtle`, table striping,
+   * `.stripe-even-rows`, etc.). Light UI needs more weight on pale `--color-bg`; dark UI uses a lighter wash.
    */
   --primary-fill-subtle-mix-pct: 22%;
+  --primary-fill-subtle: color-mix(
+    in srgb,
+    var(--color-primary) var(--primary-fill-subtle-mix-pct),
+    transparent
+  );
+  /* Alias: same paint as `--primary-fill-subtle`; name kept for table/zebra call sites. */
+  --stripe-even-row-background: var(--primary-fill-subtle);
   --color-surface: color-mix(in srgb, var(--neutral-0) 52%, transparent);
   --color-surface-muted: color-mix(
     in srgb,
@@ -63,6 +70,12 @@ body {
 
 html[data-theme="dark"] {
   --primary-fill-subtle-mix-pct: 10%;
+  --primary-fill-subtle: color-mix(
+    in srgb,
+    var(--color-primary) var(--primary-fill-subtle-mix-pct),
+    transparent
+  );
+  --stripe-even-row-background: var(--primary-fill-subtle);
   --color-surface: color-mix(in srgb, var(--neutral-800) 56%, transparent);
   --color-surface-muted: color-mix(
     in srgb,
@@ -74,6 +87,12 @@ html[data-theme="dark"] {
 @media (prefers-color-scheme: dark) {
   html[data-theme="system"] {
     --primary-fill-subtle-mix-pct: 8%;
+    --primary-fill-subtle: color-mix(
+      in srgb,
+      var(--color-primary) var(--primary-fill-subtle-mix-pct),
+      transparent
+    );
+    --stripe-even-row-background: var(--primary-fill-subtle);
     --color-surface: color-mix(in srgb, var(--neutral-800) 56%, transparent);
     --color-surface-muted: color-mix(
       in srgb,
@@ -146,6 +165,21 @@ small {
   color: var(--color-text-muted);
 }
 
+/* Relative to surrounding text (ordinals, footnote markers, citations). */
+sup,
+sub {
+  font-size: 0.4em;
+  line-height: 0;
+}
+
+sup {
+  vertical-align: super;
+}
+
+sub {
+  vertical-align: sub;
+}
+
 strong,
 b {
   font-weight: var(--weight-semibold);
@@ -198,10 +232,12 @@ hr {
 
 code,
 kbd {
-  font-family:
-    ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 0.925em;
   font-weight: var(--weight-medium);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--leading-snug);
+  letter-spacing: 0.04em;
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-sm);
   background: var(--color-surface-muted);
@@ -212,8 +248,7 @@ pre {
   margin-block: var(--space-4);
   padding: var(--space-4);
   overflow-x: auto;
-  font-family:
-    ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: var(--text-sm);
   line-height: var(--leading-snug);
   border-radius: var(--radius-md);

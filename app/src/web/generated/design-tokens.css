@@ -198,6 +198,8 @@
   --breakpoint-tablet: 48rem;
   /* Min viewport width for wide tier and up (1280px at 16px root). */
   --breakpoint-wide: 80rem;
+  /* HUD / code: system UI mono first, then common dev fonts, generic fallback. Use with `code`, `pre`, and monospace readouts. */
+  --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
   /* Base UI: Oxanium (wght 200–800) + generic sans; self-host variable TTF under /assets/ + @font-face in globals.css (CSP-safe). */
   --font-sans: Oxanium, sans-serif;
   --leading-normal: 1.5;
