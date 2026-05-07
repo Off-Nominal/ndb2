@@ -16,8 +16,42 @@
   overflow: hidden;
 
   & .heading-screen-element__bar {
-    /* Horizontal run of the trapezoid: height × tan(20°) so the right edge is 20° from vertical. */
-    --bar-trapezoid-run: calc(tan(20deg) * (1lh + 2 * var(--space-1)));
+    /* Slant angle from vertical; horizontal run = tan(θ) × (one text line + vertical padding). */
+    --screen-element-bar-slope: 20deg;
+    /*
+     * Bar `1lh` follows inherited body type, not the nested h1–h6 — that skewed the cut vs the card bar.
+     * Size the run from the same font × line-height tokens globals use per level.
+     */
+    --bar-interior-block-size: calc(var(--text-md) * var(--leading-snug));
+
+    &:has(h1) {
+      --bar-interior-block-size: calc(var(--text-3xl) * var(--leading-tight));
+    }
+
+    &:has(h2) {
+      --bar-interior-block-size: calc(var(--text-2xl) * var(--leading-snug));
+    }
+
+    &:has(h3) {
+      --bar-interior-block-size: calc(var(--text-xl) * var(--leading-snug));
+    }
+
+    &:has(h4) {
+      --bar-interior-block-size: calc(var(--text-lg) * var(--leading-snug));
+    }
+
+    &:has(h5) {
+      --bar-interior-block-size: calc(var(--text-md) * var(--leading-snug));
+    }
+
+    &:has(h6) {
+      --bar-interior-block-size: calc(var(--text-sm) * var(--leading-normal));
+    }
+
+    --bar-trapezoid-run: calc(
+      tan(var(--screen-element-bar-slope)) *
+        (var(--bar-interior-block-size) + 2 * var(--space-1))
+    );
 
     box-sizing: border-box;
     display: flex;
@@ -29,7 +63,8 @@
     max-width: 100%;
     min-height: min-content;
 
-    padding: var(--space-1) calc(var(--space-2) + var(--bar-trapezoid-run)) var(--space-1) var(--space-2);
+    padding: var(--space-1) calc(var(--space-2) + var(--bar-trapezoid-run))
+      var(--space-1) var(--space-2);
 
     clip-path: polygon(
       0% 0%,
@@ -41,7 +76,9 @@
     /* Fill: `.primary-specular-gradient` (utilities.css). */
   }
 
-  @supports (clip-path: polygon(round 1px, 0% 0%, 100% 0%, 100% 100%, 0% 100%)) {
+  @supports (
+    clip-path: polygon(round 1px, 0% 0%, 100% 0%, 100% 100%, 0% 100%)
+  ) {
     & .heading-screen-element__bar {
       clip-path: polygon(
         round var(--radius-sm),

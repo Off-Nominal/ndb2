@@ -10,8 +10,14 @@
   overflow: hidden;
 
   & .card-screen-element__bar {
-    /* Horizontal run of the trapezoid: height × tan(20°) so the right edge is 20° from vertical. */
-    --bar-trapezoid-run: calc(tan(20deg) * (1lh + 2 * var(--space-1)));
+    /* Slant angle from vertical; horizontal run = tan(θ) × (one text line + vertical padding). */
+    --screen-element-bar-slope: 20deg;
+    /* Title is h2 + .card-screen-element__heading → text-md; h2 keeps globals leading-snug (not bar 1lh). */
+    --bar-interior-block-size: calc(var(--text-md) * var(--leading-snug));
+    --bar-trapezoid-run: calc(
+      tan(var(--screen-element-bar-slope)) *
+        (var(--bar-interior-block-size) + 2 * var(--space-1))
+    );
 
     flex: 0 0 auto;
     width: fit-content;
