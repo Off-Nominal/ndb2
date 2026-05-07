@@ -1,0 +1,34 @@
+.performance-block {
+  --stack-space: var(--space-2);
+
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: var(--space-4);
+
+  & .performance-block__summary {
+    text-align: center;
+  }
+
+  & .performance-block__rank {
+    font-size: clamp(1.75rem, 1.5rem + 2.5vw, 2.75rem);
+    font-weight: var(--weight-bold);
+    line-height: 1.05;
+    font-variant-numeric: tabular-nums;
+  }
+
+  & .performance-block__rank-context {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+    max-inline-size: 9rem;
+  }
+
+  & .performance-block__body {
+    font-size: var(--text-md);
+
+    /* Even rows tinted via utility `[ stripe-even-rows ]`; padding on each metric row only. */
+    & > * {
+      padding-inline: var(--space-2);
+    }
+  }
+}

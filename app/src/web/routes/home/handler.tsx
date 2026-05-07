@@ -1,6 +1,5 @@
 import { Router } from "express";
 import type { PoolClient } from "pg";
-import * as API from "@offnominal/ndb2-api-types/v2";
 import seasons from "@data/queries/seasons";
 import resultsQueries, {
   RESULTS_DEFAULT_PER_PAGE,
@@ -25,6 +24,11 @@ import {
   LeaderboardPlayerChip,
   LeaderboardTable,
 } from "./components/leaderboard-table";
+import {
+  HomePerformanceCard,
+  type HomePerformanceCardPerformance,
+} from "./components/home-performance-card";
+import { SeasonCard } from "./components/season-card";
 import { HomePage } from "./page";
 import {
   HOME_LEADERBOARD_HTMX_PATH,
@@ -83,17 +87,6 @@ async function loadHomePageLeaderboardForSeasonId(
   };
 }
 
-async function loadHomePageLeaderboard(
-  dbClient: PoolClient,
-  currentSeasonId: number | null,
-  sortBy: HomeLeaderboardSortBy,
-): Promise<HomePageLeaderboard | null> {
-  if (currentSeasonId === null) {
-    return null;
-  }
-  return loadHomePageLeaderboardForSeasonId(dbClient, currentSeasonId, sortBy);
-}
-
 /** Registers `/`, `GET /home/leaderboard` (HTMX partial), and related home routes. */
 export const Home: Route = (router: Router) => {
   const homePageHandler = wrapWebRouteWithErrorBoundary(
@@ -107,22 +100,55 @@ export const Home: Route = (router: Router) => {
       const csrfHeadersJson = JSON.stringify({ "X-CSRF-Token": auth.csrfToken });
 
       const dbClient = await getDbClient(res);
-      let season: API.Entities.Seasons.SeasonDetail | null = null;
       const currentSeasonId = await seasons.getSeasonIdByIdentifier(dbClient)(
         "current",
       );
-      if (currentSeasonId !== null) {
-        season = await seasons.getById(dbClient)(currentSeasonId);
+      if (currentSeasonId === null) {
+        next(
+          new Error(
+            "Invariant violation: expected a current season; home route cannot render without one.",
+          ),
+        );
+        return;
       }
 
-      const leaderboard =
-        currentSeasonId === null
-          ? null
-          : await loadHomePageLeaderboardForSeasonId(
-              dbClient,
-              currentSeasonId,
-              sortBy,
-            );
+      const season = await seasons.getById(dbClient)(currentSeasonId);
+      if (season === null) {
+        next(
+          new Error(
+            `Invariant violation: current season id ${currentSeasonId} returned no row from getById.`,
+          ),
+        );
+        return;
+      }
+
+      const leaderboardPromise = loadHomePageLeaderboardForSeasonId(
+        dbClient,
+        currentSeasonId,
+        sortBy,
+      );
+      const userSeasonResultPromise = resultsQueries.getSeasonResultForUser(
+        dbClient,
+      )(currentSeasonId, auth.userId);
+
+      const [leaderboard, userSeasonResult] = await Promise.all([
+        leaderboardPromise,
+        userSeasonResultPromise,
+      ]);
+
+      let performance: HomePerformanceCardPerformance;
+
+      if (userSeasonResult === null) {
+        performance = {
+          state: "no-activity",
+          participantCount: leaderboard.meta.total_count,
+        };
+      } else {
+        performance = {
+          state: "ready",
+          data: userSeasonResult
+        };
+      }
 
       const discordProfile = await getMemberProfile(auth.discordId);
 
@@ -136,12 +162,23 @@ export const Home: Route = (router: Router) => {
           csrfMetaToken={auth.csrfToken}
           hxHeaders={csrfHeadersJson}
         >
-          <HomePage
-            discordProfile={discordProfile}
-            sortBy={sortBy}
-            season={season}
-            leaderboard={leaderboard}
-          />
+          <HomePage>
+            <>
+              <div class="[ home-grid ]">
+                <SeasonCard
+                  name={season.name}
+                  predictions={season.predictions}
+                  startDate={season.start}
+                  endDate={season.end}
+                />
+                <HomePerformanceCard
+                  discordProfile={discordProfile}
+                  performance={performance}
+                />
+              </div>
+              <LeaderboardTable sortBy={sortBy} leaderboard={leaderboard} />
+            </>
+          </HomePage>
         </AuthenticatedPageLayout>,
       );
 
@@ -166,7 +203,16 @@ export const Home: Route = (router: Router) => {
       const currentSeasonId = await seasons.getSeasonIdByIdentifier(dbClient)(
         "current",
       );
-      const leaderboard = await loadHomePageLeaderboard(
+      if (currentSeasonId === null) {
+        next(
+          new Error(
+            "Invariant violation: expected a current season; home leaderboard fragment cannot render without one.",
+          ),
+        );
+        return;
+      }
+
+      const leaderboard = await loadHomePageLeaderboardForSeasonId(
         dbClient,
         currentSeasonId,
         sortBy,

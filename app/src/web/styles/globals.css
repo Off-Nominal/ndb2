@@ -50,9 +50,14 @@ body {
 :root {
   /**
    * Mix weight for `color-mix(primary, transparent)` washes (utility `.primary-fill-subtle`,
-   * table zebra stripes, etc.). Light UI needs more weight on pale `--color-bg`; dark UI uses a lighter wash.
+   * `--stripe-even-row-background`, etc.). Light UI needs more weight on pale `--color-bg`; dark UI uses a lighter wash.
    */
   --primary-fill-subtle-mix-pct: 22%;
+  --stripe-even-row-background: color-mix(
+    in srgb,
+    var(--color-primary) var(--primary-fill-subtle-mix-pct),
+    transparent
+  );
   --color-surface: color-mix(in srgb, var(--neutral-0) 52%, transparent);
   --color-surface-muted: color-mix(
     in srgb,
@@ -63,6 +68,11 @@ body {
 
 html[data-theme="dark"] {
   --primary-fill-subtle-mix-pct: 10%;
+  --stripe-even-row-background: color-mix(
+    in srgb,
+    var(--color-primary) var(--primary-fill-subtle-mix-pct),
+    transparent
+  );
   --color-surface: color-mix(in srgb, var(--neutral-800) 56%, transparent);
   --color-surface-muted: color-mix(
     in srgb,
@@ -74,6 +84,11 @@ html[data-theme="dark"] {
 @media (prefers-color-scheme: dark) {
   html[data-theme="system"] {
     --primary-fill-subtle-mix-pct: 8%;
+    --stripe-even-row-background: color-mix(
+      in srgb,
+      var(--color-primary) var(--primary-fill-subtle-mix-pct),
+      transparent
+    );
     --color-surface: color-mix(in srgb, var(--neutral-800) 56%, transparent);
     --color-surface-muted: color-mix(
       in srgb,
@@ -144,6 +159,21 @@ small {
   font-size: var(--text-xs);
   line-height: var(--leading-normal);
   color: var(--color-text-muted);
+}
+
+/* Relative to surrounding text (ordinals, footnote markers, citations). */
+sup,
+sub {
+  font-size: 0.4em;
+  line-height: 0;
+}
+
+sup {
+  vertical-align: super;
+}
+
+sub {
+  vertical-align: sub;
 }
 
 strong,

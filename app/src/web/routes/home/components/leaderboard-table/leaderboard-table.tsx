@@ -64,8 +64,7 @@ export interface HomePageLeaderboard {
 export type { HomeLeaderboardSortBy } from "../../leaderboard-sort.js";
 
 export type LeaderboardTableProps = {
-  /** Leaderboard rows from the DB, or `null` when there is no current season. */
-  leaderboard: HomePageLeaderboard | null;
+  leaderboard: HomePageLeaderboard;
   sortBy: HomeLeaderboardSortBy;
 };
 
@@ -324,14 +323,6 @@ function LeaderboardTableThead(props: {
 
 /** Current-season leaderboard; column sort uses HTMX swap on `#leaderboard-root`; empty states use card + message. */
 export function LeaderboardTable(props: LeaderboardTableProps): JSX.Element {
-  if (props.leaderboard == null) {
-    return (
-      <LeaderboardRoot>
-        <LeaderboardMessageCard message="No current season is available; leaderboard is unavailable." />
-      </LeaderboardRoot>
-    );
-  }
-
   if (props.leaderboard.rows.length === 0) {
     return (
       <LeaderboardRoot>
