@@ -1,0 +1,84 @@
+/* Block: predictions browse — HUD lifecycle tiles; **`GET`** **`name="status"`** parity with search API. */
+
+/* — Root — */
+.predictions-status-lattice {
+  border: none;
+  padding: 0;
+  margin: 0;
+  min-inline-size: 0;
+
+  &:disabled label {
+    cursor: not-allowed;
+    opacity: 0.48;
+  }
+
+  & legend {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-snug);
+    margin-block-end: var(--space-2);
+    padding: 0;
+    color: var(--color-text-muted);
+  }
+
+  & ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  & li {
+    margin: 0;
+    padding: 0;
+  }
+
+  & label {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-sizing: border-box;
+    min-block-size: 2.25rem;
+    padding-block: var(--space-2);
+    padding-inline: var(--space-3);
+    border-radius: var(--radius-sm);
+    border: 1px solid color-mix(in srgb, var(--color-primary) 28%, transparent);
+    background: color-mix(in srgb, var(--color-primary) 4%, transparent);
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease,
+      color 0.15s ease,
+      background 0.15s ease;
+
+    &:hover {
+      border-color: color-mix(in srgb, var(--color-primary) 48%, transparent);
+    }
+
+    &:has(input:checked) {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      box-shadow: var(--hud-shadow-rim);
+      background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    }
+
+    &:has(input:not(:checked)) {
+      color: var(--color-text-muted);
+    }
+
+    &:has(input:not(:checked)):hover {
+      color: var(--color-text);
+    }
+  }
+
+  & .predictions-status-lattice-tile-face {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-snug);
+    text-transform: capitalize;
+    pointer-events: none;
+  }
+}

@@ -30,6 +30,9 @@
 /* ndb2:block: routes/login/page.css */
 @import "../routes/login/page.css";
 
+/* ndb2:block: routes/predictions/components/prediction-status-lattice/prediction-status-lattice.css */
+@import "../routes/predictions/components/prediction-status-lattice/prediction-status-lattice.css";
+
 /* ndb2:block: shared/components/button/button.css */
 @import "../shared/components/button/button.css";
 

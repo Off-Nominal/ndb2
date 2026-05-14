@@ -2,6 +2,7 @@ import { HeadingScreenElement } from "@web/shared/components/heading-screen-elem
 import { HudCheckbox } from "@web/shared/components/hud-checkbox";
 import { HudTextInput } from "@web/shared/components/hud-text-input";
 import { PaginationNav } from "@web/shared/components/pagination-nav";
+import { PredictionStatusLattice } from "./components/prediction-status-lattice";
 
 const PREVIEW_FIELD_ID = "predictions-hud-input-preview";
 const PREVIEW_CHECKBOX_ID = "predictions-hud-checkbox-preview";
@@ -26,6 +27,13 @@ export function PredictionsPage(): JSX.Element {
           autocomplete="off"
         />
       </div>
+      <p>Status lattice (preview — open + closed checked)</p>
+      <PredictionStatusLattice
+        controlIdPrefix="predictions-status-preview-checked"
+        selected={["open", "closed"]}
+      />
+      <p>Status lattice (preview — none selected)</p>
+      <PredictionStatusLattice controlIdPrefix="predictions-status-preview-empty" />
       <HudCheckbox
         id={PREVIEW_CHECKBOX_ID}
         name="include_non_season_applicable"
