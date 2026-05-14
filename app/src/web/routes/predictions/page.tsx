@@ -48,10 +48,10 @@ export function PredictionsPage(): JSX.Element {
         disabled={true}
         labelText="Disabled + unchecked (preview)"
       />
-      <p>Pagination (preview)</p>
-      <PaginationNav page={2} hasNextPage={true} />
+      <p>Pagination (preview — Previous disabled on first page)</p>
       <PaginationNav page={1} hasNextPage={true} />
-      <PaginationNav page={4} hasNextPage={false} />
+      <PaginationNav page={2} hasNextPage={true} />
+
     </div>
   );
 }

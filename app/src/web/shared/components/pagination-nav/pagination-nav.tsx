@@ -21,9 +21,9 @@ export type PaginationNavProps = {
   class?: string;
   /** Default **`Results pagination`**. */
   navAriaLabel?: string;
-  /** Default **`← Previous`**. */
+  /** Default **`← Previous`**, or **`No previous pages`** when there is no earlier page. */
   previousLabel?: Children;
-  /** Default **`Next →`**. */
+  /** Default **`Next →`**, or **`No more pages`** when there is no further page. */
   nextLabel?: Children;
   /** e.g. **`hx-get`**, **`hx-include`** (step 36). */
   previousButtonProps?: PaginationNavButtonPassthrough;
@@ -40,8 +40,14 @@ export function PaginationNav(props: PaginationNavProps): JSX.Element {
       ? props.navAriaLabel
       : "Results pagination";
 
-  const previousLabel = props.previousLabel ?? "← Previous";
-  const nextLabel = props.nextLabel ?? "Next →";
+  const prevDisabled = props.page <= 1;
+  const nextDisabled = !props.hasNextPage;
+
+  const previousLabel =
+    props.previousLabel ?? (prevDisabled ? "No previous pages" : "← Previous");
+
+  const nextLabel =
+    props.nextLabel ?? (nextDisabled ? "No more pages" : "Next →");
 
   const prevPt = props.previousButtonProps;
   const nextPt = props.nextButtonProps;
@@ -53,17 +59,18 @@ export function PaginationNav(props: PaginationNavProps): JSX.Element {
     typeof prevPt["aria-label"] === "string" &&
     prevPt["aria-label"].length > 0
       ? prevPt["aria-label"]
-      : "Previous page";
+      : prevDisabled
+        ? "No previous pages"
+        : "Previous page";
 
   const nextAriaLabel =
     nextPt != null &&
     typeof nextPt["aria-label"] === "string" &&
     nextPt["aria-label"].length > 0
       ? nextPt["aria-label"]
-      : "Next page";
-
-  const prevDisabled = props.page <= 1;
-  const nextDisabled = !props.hasNextPage;
+      : nextDisabled
+        ? "No more pages"
+        : "Next page";
 
   return (
     <nav class={mergeClass("[ pagination-nav ]", props.class)} aria-label={navAriaLabel}>

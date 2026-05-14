@@ -6,14 +6,13 @@
   inline-size: 100%;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
   gap: var(--space-3);
 
   /*
-   * Caps pager controls (~default **← Previous** + `.button` horizontal padding).
+   * Caps pager controls (~default **No previous pages** / arrow labels + `.button` horizontal padding).
    * Override **`--pagination-nav-pager-max-inline-size`** on **`nav.pagination-nav`** when labels change.
    */
-  --pagination-nav-pager-max-inline-size: calc(13ch + 2 * var(--space-3));
+  --pagination-nav-pager-max-inline-size: calc(20ch + 2 * var(--space-3));
 
   & .pagination-nav__pager {
     max-inline-size: var(--pagination-nav-pager-max-inline-size);
