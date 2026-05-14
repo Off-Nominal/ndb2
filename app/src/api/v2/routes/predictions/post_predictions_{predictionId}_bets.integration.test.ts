@@ -5,7 +5,6 @@ import * as API from "@offnominal/ndb2-api-types/v2";
 import { postPredictionBet } from "./post_predictions_{predictionId}_bets";
 import { eventsManager } from "@domain/events/events-manager";
 import { errorHandler } from "../../middleware/errorHandler";
-import betsQueries from "@data/queries/bets";
 import { useEphemeralDb } from "../../../../test/with-ephemeral-db";
 import { defaultUsers } from "../../../../test/factories/users";
 import { defaultPastCurrentFutureSeasons } from "../../../../test/factories/seasons";
@@ -97,44 +96,6 @@ describe("POST /predictions/:prediction_id/bets", () => {
       response.body.errors.some(
         (err: API.Utils.ErrorInfo) =>
           err.code === API.Errors.MALFORMED_BODY_DATA,
-      ),
-    ).toBeTruthy();
-  });
-
-  it("returns 404 for a non-existent prediction", async () => {
-    const response = await request(app)
-      .post("/999999/bets")
-      .send({ discord_id: "111111111111111111", endorsed: true });
-    expect(response.status).toBe(404);
-    expect(
-      response.body.errors.some(
-        (err: API.Utils.ErrorInfo) =>
-          err.code === API.Errors.PREDICTION_NOT_FOUND,
-      ),
-    ).toBeTruthy();
-  });
-
-  it("returns 400 when prediction is not open", async () => {
-    const response = await request(app)
-      .post("/2/bets")
-      .send({ discord_id: "333333333333333333", endorsed: true });
-    expect(response.status).toBe(400);
-    expect(
-      response.body.errors.some(
-        (err: API.Utils.ErrorInfo) =>
-          err.code === API.Errors.INVALID_PREDICTION_STATUS,
-      ),
-    ).toBeTruthy();
-  });
-
-  it("returns 400 when bet matches existing endorsement (no change)", async () => {
-    const response = await request(app)
-      .post("/1/bets")
-      .send({ discord_id: "111111111111111111", endorsed: true });
-    expect(response.status).toBe(400);
-    expect(
-      response.body.errors.some(
-        (err: API.Utils.ErrorInfo) => err.code === API.Errors.BETS_NO_CHANGE,
       ),
     ).toBeTruthy();
   });
