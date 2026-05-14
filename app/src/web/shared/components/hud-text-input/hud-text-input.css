@@ -1,0 +1,41 @@
+/* Block: hud-text-input — HUD terminal-line text field (scaffold; refine chrome in plan step 17). */
+
+/* — Root — */
+.hud-text-input {
+  --screen-element-secondary-padding-x: var(--space-3);
+
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+  min-height: 2.25rem;
+
+  /* Match `.ring:focus-visible` / globals focus ring — outline on wrapper because the field is nested. */
+  &:has(input:focus-visible) {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+
+  & [data-hud-text-input-prompt] {
+    flex-shrink: 0;
+    align-self: center;
+    font-variant-numeric: tabular-nums;
+    user-select: none;
+    opacity: 0.65;
+  }
+
+  & input {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    line-height: inherit;
+
+    &:focus {
+      outline: none;
+    }
+  }
+}

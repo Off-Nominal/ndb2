@@ -1,6 +1,7 @@
 import { createElement } from "@kitajs/html";
 import { describe, expect, it } from "vitest";
 import type { WebAuthAuthenticated } from "../../../middleware/auth/session";
+import { documentTitle } from "@web/shared/utils/document_title";
 import { AuthenticatedPageLayout, PageLayout } from "./page-layout";
 
 const testAuth: WebAuthAuthenticated = {
@@ -17,11 +18,11 @@ describe("PageLayout", () => {
     const html = PageLayout({
       theme: "dark",
       colorScheme: "nebula",
-      title: "Test",
+      title: documentTitle("Test"),
       children: createElement("p", null, "hello"),
     });
     expect(html).toContain('<html lang="en" data-theme="dark" data-color-scheme="nebula">');
-    expect(html).toContain("<title>Test</title>");
+    expect(html).toContain("<title>Test · NDB2</title>");
     expect(html).toContain("<main>");
     expect(html).toMatch(/<main\b[^>]*>[\s\S]*<p>hello<\/p>/);
     expect(html).not.toContain('id="app-site-nav-reveal"');
@@ -32,7 +33,7 @@ describe("PageLayout", () => {
     const html = PageLayout({
       theme: "system",
       colorScheme: "neptune",
-      title: "T",
+      title: documentTitle("T"),
       hxHeaders: '{"X-CSRF-Token":"abc"}',
       children: createElement("span", null, "x"),
     });
@@ -50,13 +51,13 @@ describe("AuthenticatedPageLayout", () => {
     const html = AuthenticatedPageLayout({
       theme: "dark",
       colorScheme: "nebula",
-      title: "Auth",
+      title: documentTitle("Auth"),
       auth: testAuth,
       discordProfile: testProfile,
       children: createElement("p", null, "hello"),
     });
     expect(html).toContain('<html lang="en" data-theme="dark" data-color-scheme="nebula">');
-    expect(html).toContain("<title>Auth</title>");
+    expect(html).toContain("<title>Auth · NDB2</title>");
     expect(html).toContain('id="app-site-nav-reveal"');
     expect(html).toContain('<main id="main">');
     expect(html).toMatch(/<main\b[^>]*\bid="main"[^>]*>[\s\S]*<p>hello<\/p>/);

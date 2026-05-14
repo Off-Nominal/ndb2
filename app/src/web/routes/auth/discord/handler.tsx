@@ -27,6 +27,7 @@ import { wrapWebRouteWithErrorBoundary } from "../../../middleware/error-boundar
 import type { ErrorPageProps } from "../../../shared/components/error-page/error-page";
 import { ErrorPage } from "../../../shared/components/error-page/error-page";
 import { PageLayout } from "../../../shared/components/page-layout";
+import { documentTitle } from "@web/shared/utils/document_title";
 import {
   DiscordPortalRequiresAllowedRoleBody,
   DiscordPortalRequiresGuildMembershipBody,
@@ -36,7 +37,11 @@ const OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 
 function renderAppErrorPage(props: ErrorPageProps) {
   return Promise.resolve(
-    <PageLayout theme={getThemePreference()} colorScheme={getColorScheme()} title={props.title}>
+    <PageLayout
+      theme={getThemePreference()}
+      colorScheme={getColorScheme()}
+      title={documentTitle(props.title)}
+    >
       <ErrorPage {...props} />
     </PageLayout>,
   );

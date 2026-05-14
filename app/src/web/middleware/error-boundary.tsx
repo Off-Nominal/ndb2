@@ -2,6 +2,7 @@ import type { ErrorRequestHandler, RequestHandler } from "express";
 import { createLogger } from "@mendahu/utilities";
 import { ErrorHtmxSnippet, ErrorPage } from "../shared/components/error-page";
 import { PageLayout } from "../shared/components/page-layout";
+import { documentTitle } from "@web/shared/utils/document_title";
 import { getColorScheme, getThemePreference } from "./theme-preference";
 
 const logger = createLogger({
@@ -42,7 +43,7 @@ export const webErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
         body: errBody,
       })
     : (
-        <PageLayout theme={theme} colorScheme={colorScheme} title={errTitle}>
+        <PageLayout theme={theme} colorScheme={colorScheme} title={documentTitle(errTitle)}>
           <ErrorPage title={errTitle} body={errBody} />
         </PageLayout>
       );

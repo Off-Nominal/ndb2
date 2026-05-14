@@ -1,6 +1,7 @@
 import type { RequestHandler } from "express";
 import { ErrorHtmxSnippet, ErrorPage } from "../shared/components/error-page";
 import { PageLayout } from "../shared/components/page-layout";
+import { documentTitle } from "@web/shared/utils/document_title";
 import { getColorScheme, getThemePreference } from "./theme-preference";
 import { wrapWebRouteWithErrorBoundary } from "./error-boundary";
 
@@ -25,7 +26,7 @@ export const webNotFoundMiddleware: RequestHandler = wrapWebRouteWithErrorBounda
       isHtmx ? (
         ErrorHtmxSnippet({ title, body })
       ) : (
-        <PageLayout theme={theme} colorScheme={colorScheme} title={title}>
+        <PageLayout theme={theme} colorScheme={colorScheme} title={documentTitle(title)}>
           <ErrorPage title={title} body={body} />
         </PageLayout>
       ),

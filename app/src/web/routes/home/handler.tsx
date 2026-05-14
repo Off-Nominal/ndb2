@@ -19,6 +19,7 @@ import { requireWebAuth } from "../../middleware/auth/require-auth";
 import { getColorScheme, getThemePreference } from "../../middleware/theme-preference";
 import { wrapWebRouteWithErrorBoundary } from "../../middleware/error-boundary";
 import { AuthenticatedPageLayout } from "../../shared/components/page-layout";
+import { documentTitle } from "@web/shared/utils/document_title";
 import type { HomePageLeaderboard } from "./components/leaderboard-table";
 import {
   LeaderboardPlayerIdentityOobCells,
@@ -156,7 +157,7 @@ export const Home: Route = (router: Router) => {
         <AuthenticatedPageLayout
           theme={getThemePreference()}
           colorScheme={getColorScheme()}
-          title="NDB2"
+          title={documentTitle()}
           auth={auth}
           discordProfile={discordProfile}
           csrfMetaToken={auth.csrfToken}
