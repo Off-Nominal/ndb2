@@ -21,8 +21,6 @@
 
   /* interaction */
   cursor: pointer;
-  -webkit-appearance: none;
-  appearance: none;
   transition:
     background 0.15s ease,
     color 0.15s ease;

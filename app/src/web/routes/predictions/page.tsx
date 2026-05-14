@@ -1,8 +1,11 @@
-import { FormField } from "@web/shared/components/form-field";
 import { HeadingScreenElement } from "@web/shared/components/heading-screen-element";
+import { HudCheckbox } from "@web/shared/components/hud-checkbox";
 import { HudTextInput } from "@web/shared/components/hud-text-input";
 
 const PREVIEW_FIELD_ID = "predictions-hud-input-preview";
+const PREVIEW_CHECKBOX_ID = "predictions-hud-checkbox-preview";
+const PREVIEW_CHECKBOX_DISABLED_ID = "predictions-hud-checkbox-disabled-preview";
+const PREVIEW_CHECKBOX_DISABLED_UNCHECKED_ID = "predictions-hud-checkbox-disabled-unchecked-preview";
 
 /** Shell for **`GET /predictions`** (browse UI lands here in later plan steps). */
 export function PredictionsPage(): JSX.Element {
@@ -12,7 +15,8 @@ export function PredictionsPage(): JSX.Element {
         <h1 class="[ canvas-knockout-text ]">Predictions</h1>
       </HeadingScreenElement>
       <p>Browse UI scaffold — filter form and results arrive in later milestones.</p>
-      <FormField label="Keyword (preview)" fieldId={PREVIEW_FIELD_ID}>
+      <div class="[ form-field ] [ stack ]">
+        <label for={PREVIEW_FIELD_ID}>Keyword (preview)</label>
         <HudTextInput
           id={PREVIEW_FIELD_ID}
           name="keyword"
@@ -20,7 +24,29 @@ export function PredictionsPage(): JSX.Element {
           maxlength={500}
           autocomplete="off"
         />
-      </FormField>
+      </div>
+      <HudCheckbox
+        id={PREVIEW_CHECKBOX_ID}
+        name="include_non_season_applicable"
+        value="1"
+        labelText="Include non-season-applicable (preview)"
+      />
+      <HudCheckbox
+        id={PREVIEW_CHECKBOX_DISABLED_ID}
+        name="preview_checkbox_disabled"
+        value="1"
+        checked={true}
+        disabled={true}
+        labelText="Disabled + checked (preview)"
+      />
+      <HudCheckbox
+        id={PREVIEW_CHECKBOX_DISABLED_UNCHECKED_ID}
+        name="preview_checkbox_disabled_unchecked"
+        value="1"
+        checked={false}
+        disabled={true}
+        labelText="Disabled + unchecked (preview)"
+      />
     </div>
   );
 }

@@ -65,7 +65,7 @@ export function Select(props: SelectProps): JSX.Element {
       <div class="[ screen-element ] [ select__surface ]" data-select-surface>
         <button
           type="button"
-          class="[ ring ] [ select__trigger ]"
+          class="[ ring ] [ appearance-none ] [ select__trigger ]"
           id={baseId}
           aria-haspopup="listbox"
           aria-expanded="false"

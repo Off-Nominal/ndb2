@@ -1,0 +1,126 @@
+/* Block: hud-checkbox — **`screen-element-secondary`** tile + **`ring-has-focus-visible`**; checkmark when checked. */
+
+/* — Optional row: tile + inline copy (`labelText` prop) — */
+.hud-checkbox-field {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+
+  &:hover .hud-checkbox:has(input:not(:disabled)) {
+    border-color: color-mix(in srgb, var(--color-primary) 52%, transparent);
+  }
+
+  &:has(input:disabled) {
+    cursor: not-allowed;
+  }
+
+  &:has(input:disabled) .hud-checkbox-inline-label {
+    opacity: 0.65;
+  }
+
+  & .hud-checkbox-inline-label {
+    font-size: var(--text-md);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-snug);
+    color: var(--color-text-muted);
+    user-select: none;
+  }
+}
+
+/* — Tile — */
+.hud-checkbox {
+  /**
+   * Resolved square edge: inherits **`--hud-checkbox-size`** from an ancestor or defaults to **2.25rem**.
+   * Checkmark **`::after`** scales from this value.
+   */
+  --hud-checkbox-tile-side: var(--hud-checkbox-size, 2.25rem);
+
+  width: var(--hud-checkbox-tile-side);
+  aspect-ratio: 1;
+  flex-shrink: 0;
+
+  --screen-element-secondary-padding-x: 0;
+  --screen-element-secondary-padding-y: 0;
+
+  position: relative;
+  box-sizing: border-box;
+  display: inline-flex;
+  border-radius: var(--radius-sm);
+
+  transition:
+    opacity 0.15s ease,
+    border-color 0.15s ease;
+
+  &:has(input:checked:not(.visually-hidden)) {
+    border-color: color-mix(in srgb, var(--color-primary) 52%, transparent);
+  }
+
+  &:has(input:not(:disabled)):hover {
+    border-color: color-mix(in srgb, var(--color-primary) 52%, transparent);
+  }
+
+  &:has(input:disabled) {
+    opacity: 0.48;
+  }
+
+  /* Checkmark scales with `--hud-checkbox-tile-side`. Omit when input uses visually-hidden (lattice label faces). */
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 0;
+    box-sizing: border-box;
+    width: calc(var(--hud-checkbox-tile-side) * 52 / 225);
+    height: calc(var(--hud-checkbox-tile-side) * 98 / 225);
+    margin-block-start: calc(var(--hud-checkbox-tile-side) * -11 / 225);
+    margin-inline-start: calc(var(--hud-checkbox-tile-side) * 4 / 225);
+    border: solid var(--color-primary);
+    border-width: 0 calc(var(--hud-checkbox-tile-side) * 25 / 225)
+      calc(var(--hud-checkbox-tile-side) * 25 / 225) 0;
+    transform: translate(-50%, -50%) rotate(45deg);
+    opacity: 0;
+    transition: opacity 0.16s ease;
+    pointer-events: none;
+    filter: drop-shadow(
+      0 0 calc(var(--hud-checkbox-tile-side) * 0.17)
+        color-mix(in srgb, var(--color-primary) 55%, transparent)
+    );
+  }
+
+  &:has(input:checked:not(.visually-hidden))::after {
+    opacity: 1;
+  }
+
+  & input[type="checkbox"] {
+    &:focus {
+      outline: none;
+    }
+  }
+
+  /* Full-tile invisible checkbox — UA chrome stays suppressed for Safari. */
+  & input[type="checkbox"]:not(.visually-hidden) {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    margin: 0;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+
+  &:has(input.visually-hidden) {
+    display: contents;
+  }
+
+  &:has(input.visually-hidden)::after {
+    content: none;
+  }
+}
