@@ -32,8 +32,6 @@ export function PredictionsPage(): JSX.Element {
         controlIdPrefix="predictions-status-preview-checked"
         selected={["open", "closed"]}
       />
-      <p>Status lattice (preview — none selected)</p>
-      <PredictionStatusLattice controlIdPrefix="predictions-status-preview-empty" />
       <HudCheckbox
         id={PREVIEW_CHECKBOX_ID}
         name="include_non_season_applicable"

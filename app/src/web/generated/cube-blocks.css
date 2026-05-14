@@ -30,9 +30,6 @@
 /* ndb2:block: routes/login/page.css */
 @import "../routes/login/page.css";
 
-/* ndb2:block: routes/predictions/components/prediction-status-lattice/prediction-status-lattice.css */
-@import "../routes/predictions/components/prediction-status-lattice/prediction-status-lattice.css";
-
 /* ndb2:block: shared/components/button/button.css */
 @import "../shared/components/button/button.css";
 
@@ -56,6 +53,9 @@
 
 /* ndb2:block: shared/components/hud-text-input/hud-text-input.css */
 @import "../shared/components/hud-text-input/hud-text-input.css";
+
+/* ndb2:block: shared/components/lattice-checkbox-group/lattice-checkbox-group.css */
+@import "../shared/components/lattice-checkbox-group/lattice-checkbox-group.css";
 
 /* ndb2:block: shared/components/loading/loading.css */
 @import "../shared/components/loading/loading.css";
