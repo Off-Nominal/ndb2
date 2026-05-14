@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { isAfter, isBefore } from "date-fns";
-import { discordIdSchema, predictionIdSchema } from "../../validations";
+import { discordIdSchema, predictionIdSchema } from "@shared/validation";
 import { Route } from "@shared/routerMap";
 import predictions from "@data/queries/predictions";
 import users from "@data/queries/users";

@@ -9,7 +9,7 @@ import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
 import {
   discordIdSchema,
   userSeasonResultsListQuerySchema,
-} from "../../validations";
+} from "@shared/validation";
 import results from "@data/queries/results";
 import { getUserByDiscordId } from "@data/queries/users/users.queries";
 

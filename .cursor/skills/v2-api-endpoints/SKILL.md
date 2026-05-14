@@ -2,7 +2,7 @@
 name: v2-api-endpoints
 description: >-
   Describes how to add Express routes under app/src/api/v2: validate middleware
-  with Zod, shared vs local schemas, server errors via the v2 errorHandler,
+  with Zod, shared @shared/validation (domain + http), server errors via the v2 errorHandler,
   responseUtils for JSON bodies, colocated supertest suites, extracting domain
   operations (DomainFailure, no HTTP in domain), and updating
   types/src/v2/endpoints for response shapes. Use when creating or changing v2
@@ -36,7 +36,9 @@ After `validate` runs, `req.params`, `req.query`, and `req.body` are the **parse
 
 ## Where to put Zod schemas
 
-- **Shared across several routes** (IDs, Discord IDs, enums, reused field shapes): add or reuse exports in `app/src/api/v2/validations/` (`index.ts`, `constants.ts`). Import from `../../validations` in route files.
+- **Shared wire validation** lives in **`app/src/shared/validation/`** — see **input-validation** skill (`domain.ts` vs `http.ts`, **`@shared/validation`** barrel). **Do not** add **`app/src/api/v2/validations/`**; import **`@shared/validation`** (or **`/domain`**, **`/http`**) directly from route modules.
+- **Domain-level Zod schemas** (IDs, Discord IDs, enums, cross-route field shapes): **`app/src/shared/validation/domain.ts`** (`@shared/validation/domain`; **`constants.ts`** for shared numeric limits).
+- **HTTP query-string preprocessing** (`req.query` arrays / empty string normalization): **`app/src/shared/validation/http.ts`** (`@shared/validation/http`). **`index.ts`** in that folder is only a barrel (`domain` + `http`) when you want one import (`@shared/validation`).
 - **Used only by one route**: keep the schema in the same route module (private `const` next to the handler), as in `post_predictions.ts` (`createPredictionBodySchema`, `predictionTextSchema`).
 
 ## Errors: client (4xx) vs server (5xx)
@@ -89,7 +91,7 @@ Add a **colocated** **`*.integration.test.ts`** next to the route module when th
 
 ## Checklist for a new endpoint
 
-1. Add Zod schemas (shared in `validations/` or local in the route file).
+1. Add Zod schemas (shared in `@shared/validation/domain`, optionally `@shared/validation/http` for query wrappers, or local in the route file).
 2. Export a `Route` that chains `validate({ params?, query?, body? })` before the handler when any of those are used.
 3. Obtain `dbClient` with `getDbClient(res)` when touching the DB; pass it into query wrappers per the v2-database-queries skill.
 4. Return **4xx** with explicit `code` + `message` via `responseUtils.writeErrors`.

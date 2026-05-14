@@ -5,7 +5,7 @@ import {
   createFutureDateSchema,
   discordIdSchema,
   predictionIdSchema,
-} from "../../validations";
+} from "@shared/validation";
 import { Route } from "@shared/routerMap";
 import predictions from "@data/queries/predictions";
 import users from "@data/queries/users";

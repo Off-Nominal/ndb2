@@ -1,6 +1,12 @@
 import { z } from "zod";
 import { Entities, Endpoints } from "@offnominal/ndb2-api-types/v2";
 import { POSTGRES_MAX_INT } from "./constants";
+import { queryParamScalar } from "./http.js";
+
+/**
+ * Domain-level Zod schemas for NDB2 (IDs, enums, cross-route field shapes).
+ * For Express `req.query` preprocessing, use `./http` (`@shared/validation/http`).
+ */
 
 const [
   snoozeVoteDay,
@@ -33,56 +39,6 @@ export const snoozeVoteValueSchema = z.coerce
     ),
   );
 
-/**
- * Normalizes raw Express `req.query` values for a single logical parameter:
- * `undefined`, `null`, and `""` become `undefined`; arrays use the first element
- * (repeated keys in the query string); other values pass through unchanged.
- */
-export function preprocessQueryStringScalar(value: unknown): unknown {
-  if (value === "" || value === undefined || value === null) {
-    return undefined;
-  }
-  return Array.isArray(value) ? value[0] : value;
-}
-
-/**
- * Wraps a Zod schema so it receives the result of {@link preprocessQueryStringScalar}.
- */
-export function queryParamScalar<Schema extends z.ZodTypeAny>(schema: Schema) {
-  return z.preprocess(preprocessQueryStringScalar, schema);
-}
-
-/**
- * Normalizes raw query values that may be repeated: `undefined` / `null` / `""`
- * become `undefined`; a single string becomes a one-element array; string arrays pass through.
- */
-export function preprocessQueryStringMulti(value: unknown): unknown {
-  if (value === "" || value === undefined || value === null) {
-    return undefined;
-  }
-  return Array.isArray(value) ? value : [value];
-}
-
-/**
- * Wraps a Zod schema so it receives the result of {@link preprocessQueryStringMulti}.
- */
-export function queryParamMulti<Schema extends z.ZodTypeAny>(schema: Schema) {
-  return z.preprocess(preprocessQueryStringMulti, schema);
-}
-
-/**
- * Optional string that trims; `undefined`, `""`, or whitespace-only after trim becomes `undefined`.
- * Use with {@link queryParamScalar} so blank query params behave as omitted.
- */
-export const optionalTrimmedStringSchema = z
-  .string()
-  .optional()
-  .transform((s) => {
-    if (s === undefined) return undefined;
-    const t = s.trim();
-    return t === "" ? undefined : t;
-  });
-
 export type BooleanStringSchemaOptions = {
   /** Property name in validation messages (`Property '…'`). */
   propName: string;
@@ -95,7 +51,7 @@ export type BooleanStringSchemaOptions = {
 
 /**
  * Creates a Zod schema for booleans from `"true"` / `"false"` strings (e.g. query params).
- * Pair with {@link queryParamScalar} for Express `req.query`, and `.optional()` on the returned schema when the param may be omitted.
+ * Pair with {@link queryParamScalar} from `@shared/validation/http` for Express `req.query`, and `.optional()` on the returned schema when the param may be omitted.
  */
 export function createBooleanStringSchema(options: BooleanStringSchemaOptions) {
   return z
@@ -146,9 +102,6 @@ export const resultsCrossScopeListQuerySchema = z.object({
     resultsPerPageCoerce.optional().default(25),
   ),
 });
-
-/** @deprecated Use {@link resultsCrossScopeListQuerySchema}. */
-export const seasonResultsLeaderboardQuerySchema = resultsCrossScopeListQuerySchema;
 
 /** GET /results/users/discord_id/:discord_id/seasons */
 export const userSeasonResultsListQuerySchema = z.object({

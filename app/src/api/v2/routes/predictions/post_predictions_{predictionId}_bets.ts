@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { discordIdSchema, predictionIdSchema } from "../../validations";
+import { discordIdSchema, predictionIdSchema } from "@shared/validation";
 import { Route } from "@shared/routerMap";
 import responseUtils from "../../utils/response";
 import * as API from "@offnominal/ndb2-api-types/v2";

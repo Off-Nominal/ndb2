@@ -10,7 +10,7 @@ import {
   discordIdSchema,
   seasonLookupParamSchema,
   seasonLookupPathToEntityIdentifier,
-} from "../../validations";
+} from "@shared/validation";
 import seasons from "@data/queries/seasons";
 import results from "@data/queries/results";
 import { getUserByDiscordId } from "@data/queries/users/users.queries";

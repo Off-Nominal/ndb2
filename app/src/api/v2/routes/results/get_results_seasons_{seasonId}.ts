@@ -10,7 +10,7 @@ import {
   seasonLookupParamSchema,
   seasonLookupPathToEntityIdentifier,
   resultsCrossScopeListQuerySchema,
-} from "../../validations";
+} from "@shared/validation";
 import seasons from "@data/queries/seasons";
 import results from "@data/queries/results";
 

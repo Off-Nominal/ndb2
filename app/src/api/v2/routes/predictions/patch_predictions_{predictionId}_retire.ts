@@ -2,7 +2,7 @@ import { config } from "@config";
 import { Router } from "express";
 import { z } from "zod";
 import { add, isAfter } from "date-fns";
-import { discordIdSchema, predictionIdSchema } from "../../validations";
+import { discordIdSchema, predictionIdSchema } from "@shared/validation";
 import { Route } from "@shared/routerMap";
 import predictions from "@data/queries/predictions";
 import responseUtils from "../../utils/response";

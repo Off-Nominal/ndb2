@@ -62,6 +62,7 @@ Work incrementally; keep **`*.integration.test.ts`** green.
 ## Related skills
 
 - **domain-kebab-case** — filenames under **`app/src/domain`**.
-- **v2-api-endpoints** — Zod, **`responseUtils`**, **`getDbClient`**, colocated route tests.
+- **v2-api-endpoints** — Zod **`validate`**, **`responseUtils`**, **`getDbClient`**, colocated route tests.
+- **input-validation** — **`@shared/validation`** (**`domain`** vs **`http`**), route-local **`z.object`** composition for shared query fields.
 - **v2-database-queries** — PgTyped wrappers the domain calls.
 - **events-manager** — **`emit`** payloads and webhook listeners.

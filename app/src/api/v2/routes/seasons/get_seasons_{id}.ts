@@ -10,7 +10,7 @@ import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
 import {
   seasonLookupParamSchema,
   seasonLookupPathToEntityIdentifier,
-} from "../../validations";
+} from "@shared/validation";
 
 export const getSeason: Route = (router: Router) => {
   router.get(

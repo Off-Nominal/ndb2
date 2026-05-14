@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { predictionIdSchema } from "../../validations";
+import { predictionIdSchema } from "@shared/validation";
 import { Route } from "@shared/routerMap";
 import responseUtils from "../../utils/response";
 import { validate } from "../../middleware/validate";

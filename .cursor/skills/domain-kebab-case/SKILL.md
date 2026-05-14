@@ -24,3 +24,5 @@ All **files** under `app/src/domain/` use **kebab-case** names, including test s
 Subfolders stay lowercase single words where they already are (`discord/`, `events/`, `monitors/`, `predictions/`, `seasons/`, `webhooks/`).
 
 For **what belongs inside** domain modules (orchestration vs HTTP), see **domain-operations**.
+
+**Naming collision:** **`@shared/validation/domain`** (wire Zod snippets in **`app/src/shared/validation/domain.ts`**) is unrelated to **`app/src/domain/`** (product domain code). Prefer **`@domain/...`** for the latter.
