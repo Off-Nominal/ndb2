@@ -5,6 +5,7 @@ import { getWebAuth } from "../../middleware/auth/session";
 import { getColorScheme, getThemePreference } from "../../middleware/theme-preference";
 import { wrapWebRouteWithErrorBoundary } from "../../middleware/error-boundary";
 import { PageLayout } from "../../shared/components/page-layout";
+import { documentTitle } from "@web/shared/utils/document_title";
 import { LoginPage } from "./page";
 
 /** Public `GET /login` with explicit control to start Discord OAuth. */
@@ -27,7 +28,7 @@ export const Login: Route = (router: Router) => {
         <PageLayout
           theme={getThemePreference()}
           colorScheme={getColorScheme()}
-          title="Sign in"
+          title={documentTitle("Sign in")}
         >
           <LoginPage
             returnTo={returnTo}

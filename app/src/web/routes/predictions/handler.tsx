@@ -6,6 +6,7 @@ import { requireWebAuth } from "../../middleware/auth/require-auth";
 import { getColorScheme, getThemePreference } from "../../middleware/theme-preference";
 import { wrapWebRouteWithErrorBoundary } from "../../middleware/error-boundary";
 import { AuthenticatedPageLayout } from "../../shared/components/page-layout";
+import { documentTitle } from "@web/shared/utils/document_title";
 import { PredictionsPage } from "./page";
 
 /** Registers **`GET /predictions`** (authenticated shell + browse scaffold). */
@@ -27,7 +28,7 @@ export const Predictions: Route = (router: Router) => {
         <AuthenticatedPageLayout
           theme={getThemePreference()}
           colorScheme={getColorScheme()}
-          title="Predictions · NDB2"
+          title={documentTitle("Predictions")}
           auth={auth}
           discordProfile={discordProfile}
           csrfMetaToken={auth.csrfToken}
