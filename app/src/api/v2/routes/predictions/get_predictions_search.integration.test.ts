@@ -135,4 +135,25 @@ describe("GET /predictions/search", () => {
     expect(response.status).toBe(200);
     expect(Array.isArray(response.body.data)).toBe(true);
   });
+
+  it("returns 400 for an invalid page_size value", async () => {
+    const response = await request(app).get(
+      "/search?status=successful&page_size=17",
+    );
+    expect(response.status).toBe(400);
+    expect(
+      response.body.errors.some(
+        (e: API.Utils.ErrorInfo) =>
+          e.code === API.Errors.MALFORMED_QUERY_PARAMS,
+      ),
+    ).toBe(true);
+  });
+
+  it("returns 200 when page_size is 25", async () => {
+    const response = await request(app).get(
+      "/search?status=successful&page_size=25",
+    );
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body.data)).toBe(true);
+  });
 });

@@ -27,15 +27,18 @@ import betsQueries from "../bets";
 import { getVotesByPredictionId } from "../votes/votes.queries";
 import { getBetsByPredictionId } from "../bets/bets.queries";
 
-/** Default page size for search; SQL `searchPredictions` only allows 10 / 25 / 50 (`page_size` bind). */
-export const PREDICTION_SEARCH_PAGE_SIZE = 10;
+/** Default when {@link PredictionSearchInput.page_size} is omitted; matches SQL `searchPredictions` fallback. */
+export const PREDICTION_SEARCH_PAGE_SIZE =
+  API.Endpoints.Predictions.GET_Search.PAGE_SIZE_VALUES[0];
 
-/** Params for {@link searchPredictions}; `page` is turned into `row_offset` here. */
+/** Params for {@link searchPredictions}; `page` + optional `page_size` → `row_offset` here. */
 export type PredictionSearchInput = Omit<
   ISearchPredictionsParams,
-  "row_offset"
+  "row_offset" | "page_size"
 > & {
   page?: number | null;
+  /** Omit for {@link PREDICTION_SEARCH_PAGE_SIZE}. */
+  page_size?: API.Endpoints.Predictions.GET_Search.PageSizeOption;
 };
 
 function mapSearchRowToDTO(
@@ -123,14 +126,15 @@ export default {
     async (
       options: PredictionSearchInput,
     ): Promise<API.Endpoints.Predictions.GET_Search.Data> => {
-      const { page, keyword, ...params } = options;
+      const { page, keyword, page_size: rawPageSize, ...params } = options;
+      const page_size = rawPageSize ?? PREDICTION_SEARCH_PAGE_SIZE;
+      const pageNum = Math.max(1, page ?? 1);
       const rows = await searchPredictions.run(
         {
           ...params,
           keyword,
-          page_size: PREDICTION_SEARCH_PAGE_SIZE,
-          row_offset:
-            Math.max(0, (page ?? 1) - 1) * PREDICTION_SEARCH_PAGE_SIZE,
+          page_size,
+          row_offset: (pageNum - 1) * page_size,
         },
         dbClient,
       );
