@@ -15,6 +15,17 @@ SELECT
   WHERE b.prediction_id = :prediction_id!
   ORDER BY date ASC;
 
+/* @name getBetsByUserId */
+SELECT
+    b.prediction_id,
+    b.endorsed,
+    b.date,
+    b.valid
+  FROM bets b
+  WHERE b.user_id = :user_id!
+  AND b.prediction_id = ANY(:prediction_ids!::int[])
+  ORDER BY b.prediction_id ASC;
+
 /* @name addBet */
 INSERT INTO bets (
     user_id,

@@ -1,5 +1,5 @@
 import { PoolClient } from "pg";
-import { addBet } from "./bets.queries";
+import { addBet, getBetsByUserId as getBetsByUserIdQuery } from "./bets.queries";
 
 export default {
   add:
@@ -12,5 +12,12 @@ export default {
     }) => {
       const [result] = await addBet.run(params, dbClient);
       return result;
+    },
+
+  /** Rows for building a `Map<prediction_id, …>` scoped to the given search result IDs (typically current page). */
+  getBetsByUserId:
+    (dbClient: PoolClient) =>
+    async (params: { user_id: string; prediction_ids: number[] }) => {
+      return getBetsByUserIdQuery.run(params, dbClient);
     },
 };
