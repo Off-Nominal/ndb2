@@ -15,6 +15,11 @@ import {
   PREDICTION_SEARCH_CREATOR_UNBETTER_DISTINCT_MESSAGE,
 } from "@domain/predictions/prediction-search-query-fields";
 
+/** Browse pager defaults (aligned with {@link predictionBrowseQuerySchema} transforms + canonical URL omissions). */
+export const PREDICTION_BROWSE_DEFAULT_PAGE = 1;
+export const PREDICTION_BROWSE_DEFAULT_PAGE_SIZE = 10;
+export const PREDICTION_BROWSE_DEFAULT_SORT_BY = "due_date-asc";
+
 /**
  * HTML **`GET /predictions`** browse query (prediction search field schemas plus `unbetter_id`).
  *
@@ -54,15 +59,15 @@ export const predictionBrowseQuerySchema = z
   })
   .transform((raw) => ({
     status: raw.status ?? [],
-    sort_by: raw.sort_by ?? "due_date-asc",
+    sort_by: raw.sort_by ?? PREDICTION_BROWSE_DEFAULT_SORT_BY,
     keyword: raw.keyword,
     creator: raw.creator,
     unbetter: raw.unbetter_id ?? raw.unbetter,
     season_id: raw.season_id,
     include_non_season_applicable:
       raw.include_non_season_applicable ?? false,
-    page: raw.page ?? 1,
-    page_size: raw.page_size ?? 10,
+    page: raw.page ?? PREDICTION_BROWSE_DEFAULT_PAGE,
+    page_size: raw.page_size ?? PREDICTION_BROWSE_DEFAULT_PAGE_SIZE,
   }))
   .refine(predictionSearchCreatorDistinctFromUnbetter, {
     message: PREDICTION_SEARCH_CREATOR_UNBETTER_DISTINCT_MESSAGE,
@@ -73,4 +78,58 @@ export type PredictionBrowseQuery = z.infer<typeof predictionBrowseQuerySchema>;
 /** Parses Express **`req.query`** (or any compatible record) for prediction browse. */
 export function parsePredictionBrowseQuery(query: unknown) {
   return predictionBrowseQuerySchema.safeParse(query);
+}
+
+/**
+ * Canonical **`GET`** query params for **`/predictions`** (HTML browse).
+ *
+ * Omits **`page`** when it equals {@link PREDICTION_BROWSE_DEFAULT_PAGE} and **`page_size`** when it equals
+ * {@link PREDICTION_BROWSE_DEFAULT_PAGE_SIZE} (plan step 13). Also omits **`sort_by`** when it equals the browse
+ * default {@link PREDICTION_BROWSE_DEFAULT_SORT_BY} so a default browse needs no `?` query prefix.
+ *
+ * Uses **`unbetter_id`** on the wire (not **`unbetter`**), matching the location-bar convention described on
+ * {@link predictionBrowseQuerySchema}.
+ */
+export function serializePredictionBrowseQuery(
+  query: PredictionBrowseQuery,
+): URLSearchParams {
+  const params = new URLSearchParams();
+
+  for (const s of query.status) {
+    params.append("status", s);
+  }
+
+  if (query.sort_by !== PREDICTION_BROWSE_DEFAULT_SORT_BY) {
+    params.set("sort_by", query.sort_by);
+  }
+
+  if (query.keyword !== undefined) {
+    params.set("keyword", query.keyword);
+  }
+
+  if (query.creator !== undefined) {
+    params.set("creator", query.creator);
+  }
+
+  if (query.unbetter !== undefined) {
+    params.set("unbetter_id", query.unbetter);
+  }
+
+  if (query.season_id !== undefined) {
+    params.set("season_id", String(query.season_id));
+  }
+
+  if (query.include_non_season_applicable) {
+    params.set("include_non_season_applicable", "true");
+  }
+
+  if (query.page !== PREDICTION_BROWSE_DEFAULT_PAGE) {
+    params.set("page", String(query.page));
+  }
+
+  if (query.page_size !== PREDICTION_BROWSE_DEFAULT_PAGE_SIZE) {
+    params.set("page_size", String(query.page_size));
+  }
+
+  return params;
 }
