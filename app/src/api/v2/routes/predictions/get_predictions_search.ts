@@ -6,101 +6,74 @@ import { getDbClient } from "@data/db/getDbClient";
 import predictions from "@data/queries/predictions";
 import { getUserByDiscordId } from "@data/queries/users/users.queries";
 import * as API from "@offnominal/ndb2-api-types/v2";
-import {
-  createBooleanStringSchema,
-  discordIdSchema,
-  queryParamMulti,
-  queryParamScalar,
-  optionalTrimmedStringSchema,
-  seasonIdSchema,
-} from "../../validations";
 import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
+import {
+  predictionSearchCreatorDistinctFromUnbetter,
+  predictionSearchQueryCreatorSchema,
+  predictionSearchQueryIncludeNonSeasonApplicableSchema,
+  predictionSearchQueryKeywordSchema,
+  predictionSearchQueryPageSchema,
+  predictionSearchQueryPageSizeSchema,
+  predictionSearchQuerySeasonIdSchema,
+  predictionSearchQuerySortBySchema,
+  predictionSearchQueryStatusSchema,
+  predictionSearchQueryUnbetterSchema,
+  PREDICTION_SEARCH_CREATOR_UNBETTER_DISTINCT_MESSAGE,
+} from "@domain/predictions/prediction-search-query-fields";
+
+const predictionSearchQueryFieldsSchema = z.object({
+  status: predictionSearchQueryStatusSchema,
+  sort_by: predictionSearchQuerySortBySchema,
+  keyword: predictionSearchQueryKeywordSchema,
+  creator: predictionSearchQueryCreatorSchema,
+  unbetter: predictionSearchQueryUnbetterSchema,
+  season_id: predictionSearchQuerySeasonIdSchema,
+  include_non_season_applicable:
+    predictionSearchQueryIncludeNonSeasonApplicableSchema,
+  page: predictionSearchQueryPageSchema,
+  page_size: predictionSearchQueryPageSizeSchema,
+});
+
+type PredictionSearchQueryFields = z.infer<
+  typeof predictionSearchQueryFieldsSchema
+>;
+
+const PREDICTION_SEARCH_REQUIRES_STANDARD_PARAM_MESSAGE =
+  "Please provide at least one standard query parameter in your search.";
+
+/** v2-only: at least one discriminating filter must be present on `GET /predictions/search`. */
+function predictionSearchRequiresStandardParam(
+  q: PredictionSearchQueryFields,
+): boolean {
+  const hasStatus = q.status !== undefined && q.status.length > 0;
+  const hasSort = q.sort_by !== undefined;
+  const hasKeyword = q.keyword !== undefined && q.keyword.length > 0;
+  const hasCreator = q.creator !== undefined;
+  const hasUnbetter = q.unbetter !== undefined;
+  const hasSeason = q.season_id !== undefined;
+  return (
+    hasStatus ||
+    hasSort ||
+    hasKeyword ||
+    hasCreator ||
+    hasUnbetter ||
+    hasSeason
+  );
+}
 
 /**
  * Zod schema for `GET /predictions/search` query string validation.
  *
- * **Wire format:** Aligns with `API.Endpoints.Predictions.GET_Search.Query` and
- * `GET_Search.toURLSearchParams()` in `@offnominal/ndb2-api-types`.
- *
- * **Preprocessing:** `queryParamScalar` / `queryParamMulti` normalize Express `req.query`
- * (`undefined`, `null`, `""`, and repeated keys as `string | string[]`) before the inner schema runs.
- *
- * | Param | Role |
- * |-------|------|
- * | `status` | Optional. One or more lifecycle values; repeat the key or pass one value. Drives SQL `statuses` filter when non-empty. |
- * | `sort_by` | Optional. Single sort key; if the key is repeated, only the **first** value is used. |
- * | `keyword` | Optional. Max 500 chars. See keyword tuning and matching rules in `app/src/data/queries/predictions/predictions.sql` (`searchPredictions` comment block). |
- * | `creator` | Optional. Predictor filter: Discord snowflake (`discordIdSchema`). Resolved to internal user id; unknown id → 404 `USER_NOT_FOUND`. |
- * | `unbetter` | Optional. Exclude predictions where this Discord user has a bet (`discordIdSchema`). Same lookup rules as `creator`. |
- * | `season_id` | Optional. Coerced to a Postgres INT (positive, in range). |
- * | `include_non_season_applicable` | Optional. `"true"` / `"false"` only; when filtering by `season_id`, controls whether non–season-applicable rows are included. |
- * | `page` | Optional. 1-based page index; defaults to 1 in the DB layer when omitted. Must be a positive integer when present. |
- * | `page_size` | Optional. **10**, **25**, or **50** only; defaults to **10** in the query layer when omitted. |
- *
- * **Cross-field rules (`.refine`):**
+ * **Cross-field rules:**
  * 1. At least one of: non-empty `status`, `sort_by`, non-empty `keyword`, `creator`, `unbetter`, or `season_id`.
  * 2. `creator` and `unbetter` cannot both be set to the **same** Discord id.
  */
-const searchQuerySchema = z
-  .object({
-    status: queryParamMulti(
-      z
-        .array(z.enum(API.Entities.Predictions.PREDICTION_LIFECYCLE_VALUES))
-        .optional(),
-    ),
-    sort_by: queryParamScalar(
-      z.enum(API.Endpoints.Predictions.GET_Search.SORT_BY_VALUES).optional(),
-    ),
-    keyword: queryParamScalar(
-      optionalTrimmedStringSchema.refine(
-        (s) => s === undefined || s.length <= 500,
-        { message: "keyword must be at most 500 characters" },
-      ),
-    ),
-    creator: queryParamScalar(discordIdSchema.optional()),
-    unbetter: queryParamScalar(discordIdSchema.optional()),
-    season_id: queryParamScalar(seasonIdSchema.optional()),
-    include_non_season_applicable: queryParamScalar(
-      createBooleanStringSchema({
-        propName: "include_non_season_applicable",
-      }).optional(),
-    ),
-    page: queryParamScalar(z.coerce.number().int().positive().optional()),
-    page_size: queryParamScalar(
-      z.coerce
-        .number()
-        .int()
-        .refine((n) => (n === 10 || n === 25 || n === 50), {
-          message: "page_size must be 10, 25, or 50",
-        })
-        .optional(),
-    ),
+const searchQuerySchema = predictionSearchQueryFieldsSchema
+  .refine(predictionSearchRequiresStandardParam, {
+    message: PREDICTION_SEARCH_REQUIRES_STANDARD_PARAM_MESSAGE,
   })
-  .refine(
-    (q) => {
-      const hasStatus = q.status !== undefined && q.status.length > 0;
-      const hasSort = q.sort_by !== undefined;
-      const hasKeyword = q.keyword !== undefined && q.keyword.length > 0;
-      const hasCreator = q.creator !== undefined;
-      const hasUnbetter = q.unbetter !== undefined;
-      const hasSeason = q.season_id !== undefined;
-      return (
-        hasStatus ||
-        hasSort ||
-        hasKeyword ||
-        hasCreator ||
-        hasUnbetter ||
-        hasSeason
-      );
-    },
-    {
-      message:
-        "Please provide at least one standard query parameter in your search.",
-    },
-  )
-  .refine((q) => !q.creator || !q.unbetter || q.creator !== q.unbetter, {
-    message:
-      'Filtering by the same "creator" and "unbetter" is not allowed. These values must be different or omitted.',
+  .refine(predictionSearchCreatorDistinctFromUnbetter, {
+    message: PREDICTION_SEARCH_CREATOR_UNBETTER_DISTINCT_MESSAGE,
   });
 
 export const getPredictionsSearch: Route = (router) => {

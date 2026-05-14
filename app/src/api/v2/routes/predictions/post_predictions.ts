@@ -12,7 +12,7 @@ import {
   createFutureDateSchema,
   discordIdSchema,
   predictionDriverSchema,
-} from "../../validations";
+} from "@shared/validation";
 
 export const createPrediction: Route = (router: Router) => {
   router.post(

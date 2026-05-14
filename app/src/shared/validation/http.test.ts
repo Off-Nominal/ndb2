@@ -2,13 +2,15 @@ import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import {
   createBooleanStringSchema,
+  seasonIdSchema,
+} from "./domain";
+import {
+  optionalTrimmedStringSchema,
   preprocessQueryStringMulti,
   preprocessQueryStringScalar,
   queryParamMulti,
   queryParamScalar,
-  optionalTrimmedStringSchema,
-  seasonIdSchema,
-} from "./index";
+} from "./http";
 
 describe("preprocessQueryStringScalar", () => {
   it("maps empty inputs to undefined", () => {

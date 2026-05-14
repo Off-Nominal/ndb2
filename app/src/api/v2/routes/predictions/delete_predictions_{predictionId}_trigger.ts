@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { predictionIdSchema } from "../../validations";
+import { predictionIdSchema } from "@shared/validation";
 import { Route } from "@shared/routerMap";
 import predictions from "@data/queries/predictions";
 import responseUtils from "../../utils/response";

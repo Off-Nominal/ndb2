@@ -6,7 +6,7 @@ import responseUtils from "../../utils/response";
 import { validate } from "../../middleware/validate";
 import { getDbClient } from "@data/db/getDbClient";
 import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
-import { discordIdSchema } from "../../validations";
+import { discordIdSchema } from "@shared/validation";
 import results from "@data/queries/results";
 import { getUserByDiscordId } from "@data/queries/users/users.queries";
 

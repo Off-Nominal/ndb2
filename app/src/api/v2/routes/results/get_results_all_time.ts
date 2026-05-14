@@ -5,7 +5,7 @@ import responseUtils from "../../utils/response";
 import { validate } from "../../middleware/validate";
 import { getDbClient } from "@data/db/getDbClient";
 import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
-import { resultsCrossScopeListQuerySchema } from "../../validations";
+import { resultsCrossScopeListQuerySchema } from "@shared/validation";
 import results from "@data/queries/results";
 
 export const getResultsAllTime: Route = (router: Router) => {

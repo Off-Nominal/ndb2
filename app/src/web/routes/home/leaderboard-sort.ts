@@ -1,8 +1,6 @@
 import { z } from "zod";
-import {
-  discordIdSchema,
-  queryParamScalar,
-} from "../../../api/v2/validations/index.js";
+import { queryParamScalar } from "@shared/validation/http";
+import { discordIdSchema } from "@shared/validation/domain";
 import { Endpoints } from "@offnominal/ndb2-api-types/v2";
 
 const homeLeaderboardSortSchema = z.object({
