@@ -1,0 +1,39 @@
+---
+description: >-
+  Domain operations — extract multi-step business logic from HTTP handlers;
+  failures use API error codes only (no HTTP); success returns metadata, not
+  full projections.
+globs:
+  - app/src/domain/**/*.ts
+  - app/src/api/v2/routes/**/*.ts
+alwaysApply: false
+---
+
+# Domain operations (ndb2)
+
+## Where code lives
+
+- Put orchestration in **`app/src/domain/<area>/`** using **kebab-case** filenames (`place-bet.ts`). Imports: **`@domain/...`**. Filenames: **domain-kebab-case** skill.
+
+## Failure shape
+
+- Use **`DomainFailure<Code>`** from **`@domain/domain-failure`**: `{ ok: false, code, message }`. **`code`** / **`message`** match **`API.Utils.ErrorInfo`** (from **`@offnominal/ndb2-api-types/v2`**).
+- Do **not** put **`httpStatus`**, headers, or envelope wrappers in domain modules.
+
+## Success shape
+
+- Return **`{ ok: true, … }`** with **operation metadata** only (e.g. **`outcome`**). Avoid reloading full entities in domain unless every caller needs the same projection—prefer letting **routes / web handlers** call **`@data/queries/...`** after success.
+
+## v2 routes
+
+- Keep **Zod** + **`validate`** on the route.
+- Call the domain function with **`PoolClient`** + parsed inputs.
+- Map **`code` → HTTP status** in the route; respond with **`responseUtils.writeErrors`** / **`writeSuccess`**.
+- **`eventsManager.emit`**, CSRF, and “fetch updated row for response” stay at the **transport** unless multiple entry points share identical side-effect ordering.
+
+## Tests
+
+- DB-heavy domain logic: **`*.integration.test.ts`** next to the domain module (Vitest integration config).
+- Route suite: validation, status mapping, and one **smoke** success path; move redundant domain assertions out of supertest.
+
+Full migration steps: **domain-operations** skill (`/.cursor/skills/domain-operations/SKILL.md`).

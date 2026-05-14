@@ -22,3 +22,5 @@ All **files** under `app/src/domain/` use **kebab-case** names, including test s
 **Symbols inside files** stay idiomatic TypeScript (`eventsManager`, `SeasonManager`, `MonitorRunner` classes, etc.); only **filenames** are kebab-case.
 
 Subfolders stay lowercase single words where they already are (`discord/`, `events/`, `monitors/`, `predictions/`, `seasons/`, `webhooks/`).
+
+For **what belongs inside** domain modules (orchestration vs HTTP), see **domain-operations**.

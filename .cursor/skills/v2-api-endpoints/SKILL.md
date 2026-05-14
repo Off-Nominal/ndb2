@@ -3,11 +3,12 @@ name: v2-api-endpoints
 description: >-
   Describes how to add Express routes under app/src/api/v2: validate middleware
   with Zod, shared vs local schemas, server errors via the v2 errorHandler,
-  responseUtils for JSON bodies, colocated supertest suites, and updating
+  responseUtils for JSON bodies, colocated supertest suites, extracting domain
+  operations (DomainFailure, no HTTP in domain), and updating
   types/src/v2/endpoints for response shapes. Use when creating or changing v2
   HTTP endpoints, route handlers, tests, validation wiring, or
   @offnominal/ndb2-api-types v2 exports; pairs with v2-database-queries for data
-  access.
+  access and domain-operations for shared business logic.
 ---
 
 # v2 API endpoints
@@ -41,6 +42,7 @@ After `validate` runs, `req.params`, `req.query`, and `req.body` are the **parse
 ## Errors: client (4xx) vs server (5xx)
 
 - **Client / domain errors** (bad state, not found, forbidden, etc.): handle **inside the route**. Pick the status code, then `res.status(...).json(responseUtils.writeErrors([{ code: API.Errors.…, message: "…" }]))`. Use codes from `@offnominal/ndb2-api-types/v2`.
+- **Shared business rules** (same logic as web HTML routes, or multi-step branching worth testing without HTTP): implement a **domain operation** under `app/src/domain/` that returns **`DomainFailure`** (`{ ok: false, code, message }`) or **`{ ok: true, … }`** with **metadata only** — **no `httpStatus`**, no `responseUtils`. The route maps **`code` → HTTP status** and calls **`writeErrors`**. See **domain-operations** skill (`.cursor/skills/domain-operations/SKILL.md`) and **`.cursor/rules/domain-operations.mdc`**.
 - **Server / unexpected errors**: do **not** hand-author 500 bodies in the happy path. Let the global **`errorHandler`** respond: it logs the error and returns a generic **500** with `API.Errors.SERVER_ERROR` via `responseUtils.writeErrors`.
 
 Signal server failures with **`throw new Error("short descriptive message for logs")`** (or `next(new Error("…"))` if not using a wrapper). The message is for operators and logs; clients still get the generic error payload from `errorHandler`.
@@ -81,7 +83,7 @@ Add a **colocated** **`*.integration.test.ts`** next to the route module when th
 
 - Use **`supertest`** (`request(app).get/post/...`) for HTTP calls.
 - Import **`@offnominal/ndb2-api-types/v2`** as **`API`** to assert **`API.Errors.*`** codes and type error entries as **`API.Utils.ErrorInfo`** where helpful.
-- Cover **validation failures** (400 + `MALFORMED_*` or field messages), **domain errors** (expected 4xx + correct `code`), and **success** shapes (`data`, important fields). For side effects (e.g. **`eventsManager.emit`**), use **Vitest** **`vi.spyOn`** like `post_predictions.integration.test.ts`.
+- Cover **validation failures** (400 + `MALFORMED_*` or field messages), **domain errors** (expected 4xx + correct `code`), and **success** shapes (`data`, important fields). For side effects (e.g. **`eventsManager.emit`**), use **Vitest** **`vi.spyOn`** like `post_predictions.integration.test.ts`. Prefer **domain-level** **`*.integration.test.ts`** for exhaustive rule branches when logic lives under **`app/src/domain/`** (see **`place-bet.integration.test.ts`**); keep the route suite to transport smoke + validation.
 
 **References**: `get_predictions_{predictionId}.integration.test.ts`, `post_predictions.integration.test.ts`, `post_predictions_{predictionId}_trigger.integration.test.ts`, `patch_predictions_{predictionId}_retire.integration.test.ts`, `delete_predictions_{predictionId}_trigger.integration.test.ts`.
 
