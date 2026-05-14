@@ -56,6 +56,44 @@
     overflow: visible;
   }
 
+  /** Searchable combobox row: padding + radii match **`button.select__trigger`**; focus ring wraps input + chevron (**`ring-has-focus-visible`**). */
+  & .select__trigger-field {
+    --screen-element-padding-x: var(--space-3);
+    --screen-element-padding-y: var(--space-2);
+
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: var(--screen-element-padding-y) var(--screen-element-padding-x);
+    border-top-left-radius: var(--select-trigger-r-tl);
+    border-top-right-radius: var(--select-trigger-r-tr);
+    border-bottom-left-radius: var(--select-trigger-r-bl);
+    border-bottom-right-radius: var(--select-trigger-r-br);
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease;
+
+    &:hover {
+      background: color-mix(in srgb, var(--color-text) 6%, var(--color-bg) 94%);
+    }
+
+    &:hover .select__trigger--searchable {
+      color: var(--color-primary);
+    }
+  }
+
+  &.select--open .select__trigger-field:hover {
+    background: transparent;
+  }
+
+  &.select--open .select__trigger-field:hover .select__trigger--searchable {
+    color: var(--color-text);
+  }
+
   /* — Trigger (no separate screen-element; chrome is on `select__surface`) — */
   & .select__trigger {
     --screen-element-padding-x: var(--space-3);
@@ -86,7 +124,7 @@
       background 0.15s ease,
       color 0.15s ease;
 
-    &:hover {
+    &:hover:not(.select__trigger--searchable) {
       /* solid hover tint (not frosted `--color-surface-muted`) */
       background: color-mix(in srgb, var(--color-text) 6%, var(--color-bg) 94%);
       color: var(--color-primary);
@@ -99,6 +137,30 @@
       width: auto;
       max-width: 100%;
     }
+  }
+
+  & .select__trigger--searchable {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    max-width: 100%;
+    display: block;
+    padding: 0;
+    margin: 0;
+    border-radius: 0;
+    background: transparent;
+    cursor: pointer;
+    text-align: start;
+    box-shadow: none;
+  }
+
+  & .select__trigger--searchable:focus,
+  & .select__trigger--searchable:focus-visible {
+    outline: none;
+  }
+
+  &.select--open .select__trigger-field .select__trigger--searchable {
+    cursor: text;
   }
 
   & .select__value {
@@ -126,6 +188,7 @@
     font-size: 0.65em;
     line-height: 1;
     opacity: 0.85;
+    pointer-events: none;
   }
 
   /* — Listbox: floats under the button (out of document flow) — */
@@ -213,7 +276,6 @@
     transition:
       background 0.12s ease,
       color 0.12s ease,
-      outline-color 0.12s ease,
       box-shadow 0.12s ease;
 
     &:hover:not([aria-selected="true"]) {
@@ -247,16 +309,15 @@
   }
 
   /**
-   * Keyboard highlight (`select.client.ts` toggles `.select__option--keyboard-active` + `data-select-option-active`).
-   * Thick outline + inset rail so focus reads clearly vs hover and vs muted committed selection.
+   * Keyboard highlight — **no full outline**: a box outline reads as a second rim against **`.select__list`**
+   * borders on the sides. Left inset rail + fill stays distinct from hover / committed selection.
    */
   & .select__option.select__option--keyboard-active {
     position: relative;
     z-index: 1;
     background: color-mix(in srgb, var(--color-primary) 44%, var(--color-bg));
     color: var(--color-text);
-    outline: 3px solid var(--color-primary);
-    outline-offset: -3px;
+    outline: none;
     box-shadow: inset 4px 0 0 0 var(--color-primary);
   }
 

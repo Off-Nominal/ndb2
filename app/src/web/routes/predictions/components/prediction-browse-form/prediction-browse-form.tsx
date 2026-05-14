@@ -149,6 +149,8 @@ export function PredictionBrowseForm(props: PredictionBrowseFormProps): JSX.Elem
             }
             options={seasonSelectOptions}
             valueLayout="multiline"
+            searchable
+            searchPlaceholder="Filter seasons…"
             aria-label="Season (All-time = every season)"
           />
         </FormField>

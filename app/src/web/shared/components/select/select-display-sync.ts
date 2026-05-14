@@ -29,19 +29,22 @@ export function syncUIFromNative(root: HTMLElement): void {
     return;
   }
 
-  const selectedOpt = native.selectedOptions[0];
-  const encoded = selectedOpt?.dataset.richLabel;
+  const plain = optionDisplayLabelForNativeSelect(native);
 
-  if (encoded != null && encoded !== "") {
-    try {
-      valueEl.innerHTML = decodeURIComponent(encoded);
-    } catch {
-      valueEl.textContent = optionDisplayLabelForNativeSelect(native);
-    }
+  if (valueEl instanceof HTMLInputElement) {
+    valueEl.value = plain;
   } else {
-    const display = optionDisplayLabelForNativeSelect(native);
-    if (display !== "") {
-      valueEl.textContent = display;
+    const selectedOpt = native.selectedOptions[0];
+    const encoded = selectedOpt?.dataset.richLabel;
+
+    if (encoded != null && encoded !== "") {
+      try {
+        valueEl.innerHTML = decodeURIComponent(encoded);
+      } catch {
+        valueEl.textContent = plain;
+      }
+    } else if (plain !== "") {
+      valueEl.textContent = plain;
     }
   }
 

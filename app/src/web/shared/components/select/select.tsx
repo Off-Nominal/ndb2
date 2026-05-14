@@ -8,7 +8,7 @@ import { mergeClass } from "../../utils/merge_class.js";
  */
 export type SelectOption = {
   value: string;
-  /** Plain label for `<option>`, screen readers, and native fallback (`optionDisplayLabelForNativeSelect`). */
+  /** Plain label for `<option>`, screen readers, native fallback (`optionDisplayLabelForNativeSelect`), and Fuse **`searchable`** keys. */
   label: string;
   /** Trusted HTML for the custom trigger + list row (e.g. inline markdown via `marked.parseInline`). */
   labelHtml?: string;
@@ -23,10 +23,14 @@ type NativeSelect = Omit<
   options: readonly SelectOption[];
   class?: string;
   id?: string;
-  /** Shorthand for the trigger button (custom UI); not applied to the hidden native `<select>`. */
+  /** Shorthand for the focusable combobox control (custom UI); not applied to the hidden native **`<select>`**. */
   "aria-label"?: string;
-  /** Closed trigger + list rows: plain **`label`** vs stacked **`labelHtml`** (trusted inline HTML). */
+  /** Closed trigger + list rows: plain **`label`** vs stacked **`labelHtml`** (ignored on searchable trigger — closed field shows plain **`label`** only). */
   valueLayout?: "truncate" | "multiline";
+  /** Fuzzy filter via Fuse.js (`select.client.ts`); trigger becomes a **`readonly`** input until the panel opens. */
+  searchable?: boolean;
+  /** Shown as the input **`placeholder`** while the panel is open (`searchable` only). */
+  searchPlaceholder?: string;
 };
 
 export type SelectProps = NativeSelect;
@@ -53,6 +57,8 @@ export function Select(props: SelectProps): JSX.Element {
     id,
     "aria-label": ariaLabel,
     valueLayout = "truncate",
+    searchable = false,
+    searchPlaceholder,
     ...selectRest
   } = props;
   const baseId = selectBaseId({ id, name: "name" in selectRest ? String(selectRest.name) : undefined, value, options });
@@ -64,11 +70,21 @@ export function Select(props: SelectProps): JSX.Element {
       ? selected.labelHtml
       : displayPlain;
 
+  const searchableAttrs = searchable
+    ? ({
+        "data-select-searchable": "true" as const,
+      } as const)
+    : ({} as const);
+
+  const placeholder =
+    searchPlaceholder != null && searchPlaceholder !== "" ? searchPlaceholder : "Search…";
+
   return (
     <div
       class={mergeClass("[ constrain-to-parent ] [ select ]", className)}
       data-select
-      {...(valueLayout === "multiline"
+      {...searchableAttrs}
+      {...(!searchable && valueLayout === "multiline"
         ? { "data-select-value-layout": "multiline" }
         : {})}
     >
@@ -97,29 +113,54 @@ export function Select(props: SelectProps): JSX.Element {
         })}
       </select>
       <div class="[ screen-element ] [ select__surface ]" data-select-surface>
-        <button
-          type="button"
-          class="[ ring ] [ appearance-none ] [ select__trigger ]"
-          id={baseId}
-          aria-haspopup="listbox"
-          aria-expanded="false"
-          aria-controls={listboxId}
-          {...(ariaLabel != null && ariaLabel !== "" ? { "aria-label": ariaLabel } : {})}
-          data-select-trigger
-        >
-          <span
-            class={mergeClass(
-              "[ select__value ]",
-              valueLayout === "truncate" ? "[ truncate ]" : "[ select__value--multiline ]",
-            )}
-            data-select-value
+        {searchable ? (
+          <div class="[ select__trigger-field ] [ ring-has-focus-visible ]" data-select-trigger-field>
+            <input
+              type="text"
+              class={mergeClass("[ appearance-none ] [ select__trigger ] [ select__trigger--searchable ]", undefined)}
+              id={baseId}
+              role="combobox"
+              aria-haspopup="listbox"
+              aria-autocomplete="list"
+              aria-expanded="false"
+              aria-controls={listboxId}
+              autocomplete="off"
+              spellcheck={false}
+              readonly
+              placeholder={placeholder}
+              data-select-trigger
+              data-select-value
+              {...(ariaLabel != null && ariaLabel !== "" ? { "aria-label": ariaLabel } : {})}
+            />
+            <span class="select__chevron" aria-hidden="true">
+              ▼
+            </span>
+          </div>
+        ) : (
+          <button
+            type="button"
+            class="[ ring ] [ appearance-none ] [ select__trigger ]"
+            id={baseId}
+            aria-haspopup="listbox"
+            aria-expanded="false"
+            aria-controls={listboxId}
+            {...(ariaLabel != null && ariaLabel !== "" ? { "aria-label": ariaLabel } : {})}
+            data-select-trigger
           >
-            {triggerBody}
-          </span>
-          <span class="select__chevron" aria-hidden="true">
-            ▼
-          </span>
-        </button>
+            <span
+              class={mergeClass(
+                "[ select__value ]",
+                valueLayout === "truncate" ? "[ truncate ]" : "[ select__value--multiline ]",
+              )}
+              data-select-value
+            >
+              {triggerBody}
+            </span>
+            <span class="select__chevron" aria-hidden="true">
+              ▼
+            </span>
+          </button>
+        )}
         <ul
           class="[ hide-scrollbar ] [ select__list ]"
           id={listboxId}
@@ -133,6 +174,7 @@ export function Select(props: SelectProps): JSX.Element {
               id={`${baseId}-opt-${opt.value.replace(/[^a-zA-Z0-9_-]/g, "-")}`}
               role="option"
               data-value={opt.value}
+              data-select-search-label={opt.label}
               {...(value === opt.value ? { "aria-selected": "true" as const } : { "aria-selected": "false" as const })}
               data-select-option
             >
