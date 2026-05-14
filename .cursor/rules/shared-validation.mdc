@@ -1,0 +1,35 @@
+---
+description: >-
+  Shared Zod validation: use app/src/shared/validation (domain.ts vs http.ts) and
+  @shared/validation imports from routes — no api/v2/validations wrapper; compose multi-field
+  query objects at handlers; web GET pages may colocate parse + serialize + tests.
+globs:
+  - app/src/shared/validation/**/*.ts
+  - app/src/api/v2/routes/**/*.ts
+  - app/src/web/routes/**/*.ts
+  - app/src/domain/predictions/prediction-search-query-fields.ts
+alwaysApply: false
+---
+
+# Shared validation (ndb2)
+
+## Imports
+
+- **`@shared/validation/http`** — Express **`req.query`** preprocessing (**`queryParamScalar`**, **`queryParamMulti`**, **`optionalTrimmedStringSchema`**).
+- **`@shared/validation/domain`** — Reusable wire primitives (Discord ID, Postgres ints, boolean query strings, shared GET query object shapes used by v2 + web).
+- **`@shared/validation`** — Barrel re-exporting **`domain` + `http`** when one import is enough.
+
+**Do not** recreate **`app/src/api/v2/validations/`**. v2 route modules import **`@shared/validation`** directly.
+
+## Product domain field schemas
+
+When JSON and HTML share the **same query fields** but **different composition / refines**, export **individual field schemas** from **`app/src/domain/<area>/`** (e.g. **`prediction-search-query-fields.ts`**) and build **`z.object({ … })`** in **each** consumer (v2 route vs web parser). Keep **transport-only** rules (e.g. REST “at least one filter”) **beside that route**.
+
+## Web browse / HTMX
+
+Colocate **`parse*Query`** + **`serialize*Query`** under **`app/src/web/routes/<feature>/`** with focused **`*.test.ts`** (parse, serialize, refinements). See **`input-validation`** and **`kitajs-html-web`** skills.
+
+## Distinction
+
+- **`app/src/domain/`** — **`DomainFailure`**, orchestration, game rules (**domain-operations**).
+- **`@shared/validation/domain`** — typed HTTP/API wire snippets only.

@@ -3,8 +3,9 @@ name: kitajs-html-web
 description: >-
   NDB2 web rendering with @kitajs/html: PascalCase Kitajs components, kebab-case
   component files in one folder per component (name/name.tsx, name.css, name.test.tsx, index.ts), feature
-  folders (page.tsx, handler.tsx, tests/), HTMX. Component props: use dot access (props.title) only; do
-  not destructure the props object at the start of a component (no const { x } = props) except the
+  folders (page.tsx, handler.tsx, tests/), HTMX. Query parsing uses @shared/validation/http + domain and
+  colocated parse/serialize helpers; see skill body. Component props: use dot access (props.title) only;
+  do not destructure the props object at the start of a component (no const { x } = props) except the
   documented rest-and-forward pattern — see Component props. Prefer narrow local props interfaces (no
   Entities.* in markup); see Props types. mergeClass, Suspense + renderToStream. Use when adding or
   changing server-rendered UI under app/src/web; not for React client apps or EJS.
@@ -23,6 +24,12 @@ description: >-
 - **`components/<name>/`** — area-local Kitajs modules: **`lucky-number/lucky-number.tsx`**, colocated **`.css`**, optional **`lucky-number.test.tsx`**, and **`index.ts`** re-exporting the public API so importers can use **`import { LuckyNumber } from "./components/lucky-number"`** (PascalCase export **`LuckyNumber`**).
 
 **Data fetching:** Perform database (and other server-side IO) work in **`handler.tsx`** only: obtain **`PoolClient`** with **`getDbClient(res)`**, call **`@data/queries/**`** or other server APIs, then pass results into **`page.tsx`** and route-local components via props. **`page.tsx`** and Kitajs presentation components should remain **pure markup from props** — do not query the database or call HTTP APIs from them.
+
+## GET query parsing & canonical URLs (Zod)
+
+- Use **`@shared/validation/http`** (**`queryParamScalar`** / **`queryParamMulti`**) plus **`@shared/validation/domain`** for primitive wire pieces (e.g. **`discordIdSchema`**).
+- Shared **logical fields** that span HTML + JSON but differ by route rules live under **`app/src/domain/<area>/`** as **per-field** schemas (example: **`prediction-search-query-fields.ts`**); compose **`z.object({ … })`** in the web handler (and add web-only keys / **`.superRefine`** there). Do **not** import from **`app/src/api/v2`** for validation.
+- Colocate **`parse*Query`** (**`safeParse`**) and **`serialize*Query`** (**`URLSearchParams`**, drop defaults for shareable cold URLs) next to the route, with **`*.test.ts`** for parse + serialize + refine errors (see **`parse-prediction-browse-query.ts`**).
 
 Cross-cutting UI → **`app/src/web/shared/components/<name>/`** (same **folder-per-component** pattern: **`button/button.tsx`**, **`page-layout/page-layout.css`**, **`index.ts`**). Small **TypeScript** helpers (no JSX) that support markup/Kita components live in **`app/src/web/shared/utils/`** — e.g. **`mergeClass`** in **`merge_class.ts`** to concatenate a block’s **`[ bracket ]`** **`class`** with optional extra groups from props (used by **`Button`**; see also **`cube-css-authoring`**). **Path alias:** import from **`@web/...`** for anything under **`app/src/web`** (e.g. **`import { Button } from "@web/shared/components/button"`**); **`@web/*` → `src/web/*`** in **`tsconfig.json`**, with Vitest mirroring in **`vitest.shared.ts`**.
 
