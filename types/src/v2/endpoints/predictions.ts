@@ -36,6 +36,11 @@ export namespace PATCH_ById_retire {
 
 // GET /predictions/search
 export namespace GET_Search {
+  /** Allowed values for `page_size` query param (must match SQL `searchPredictions`). */
+  export const PAGE_SIZE_VALUES = [10, 25, 50] as const;
+
+  export type PageSizeOption = (typeof PAGE_SIZE_VALUES)[number];
+
   export const SORT_BY_VALUES = [
     "created_date-asc",
     "created_date-desc",
@@ -70,6 +75,8 @@ export namespace GET_Search {
     include_non_season_applicable: boolean;
     /** 1-based page index (maps to `page` query param as a string on the wire). */
     page: number;
+    /** Page size for pagination (maps to `page_size` query param). Default **10** when omitted. */
+    page_size: PageSizeOption;
   };
 
   export type QueryKey = keyof SearchQueryFields;
@@ -119,6 +126,9 @@ export namespace GET_Search {
     }
     if (query.page !== undefined) {
       params.set("page", String(query.page));
+    }
+    if (query.page_size !== undefined) {
+      params.set("page_size", String(query.page_size));
     }
 
     return params;

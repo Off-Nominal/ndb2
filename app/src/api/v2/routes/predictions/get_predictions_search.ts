@@ -35,6 +35,7 @@ import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
  * | `season_id` | Optional. Coerced to a Postgres INT (positive, in range). |
  * | `include_non_season_applicable` | Optional. `"true"` / `"false"` only; when filtering by `season_id`, controls whether non–season-applicable rows are included. |
  * | `page` | Optional. 1-based page index; defaults to 1 in the DB layer when omitted. Must be a positive integer when present. |
+ * | `page_size` | Optional. **10**, **25**, or **50** only; defaults to **10** in the query layer when omitted. |
  *
  * **Cross-field rules (`.refine`):**
  * 1. At least one of: non-empty `status`, `sort_by`, non-empty `keyword`, `creator`, `unbetter`, or `season_id`.
@@ -65,6 +66,15 @@ const searchQuerySchema = z
       }).optional(),
     ),
     page: queryParamScalar(z.coerce.number().int().positive().optional()),
+    page_size: queryParamScalar(
+      z.coerce
+        .number()
+        .int()
+        .refine((n) => (n === 10 || n === 25 || n === 50), {
+          message: "page_size must be 10, 25, or 50",
+        })
+        .optional(),
+    ),
   })
   .refine(
     (q) => {
@@ -151,6 +161,7 @@ export const getPredictionsSearch: Route = (router) => {
         statuses:
           q.status !== undefined && q.status.length > 0 ? q.status : null,
         page: q.page ?? null,
+        page_size: q.page_size,
         predictor_id: q.creator ? creator_id! : null,
         non_better_id: q.unbetter ? unbetter_id! : null,
         season_id: q.season_id ?? null,
