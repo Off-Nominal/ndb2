@@ -3,6 +3,8 @@ import { PreparedQuery } from '@pgtyped/runtime';
 
 export type DateOrString = Date | string;
 
+export type numberArray = (number)[];
+
 /** 'GetBetsByPredictionId' parameters type */
 export interface IGetBetsByPredictionIdParams {
   prediction_id: number;
@@ -51,6 +53,45 @@ const getBetsByPredictionIdIR: any = {"usedParamSet":{"prediction_id":true},"par
  * ```
  */
 export const getBetsByPredictionId = new PreparedQuery<IGetBetsByPredictionIdParams,IGetBetsByPredictionIdResult>(getBetsByPredictionIdIR);
+
+
+/** 'GetBetsByUserId' parameters type */
+export interface IGetBetsByUserIdParams {
+  prediction_ids: numberArray;
+  user_id: string;
+}
+
+/** 'GetBetsByUserId' return type */
+export interface IGetBetsByUserIdResult {
+  date: Date;
+  endorsed: boolean;
+  prediction_id: number;
+  valid: boolean;
+}
+
+/** 'GetBetsByUserId' query type */
+export interface IGetBetsByUserIdQuery {
+  params: IGetBetsByUserIdParams;
+  result: IGetBetsByUserIdResult;
+}
+
+const getBetsByUserIdIR: any = {"usedParamSet":{"user_id":true,"prediction_ids":true},"params":[{"name":"user_id","required":true,"transform":{"type":"scalar"},"locs":[{"a":102,"b":110}]},{"name":"prediction_ids","required":true,"transform":{"type":"scalar"},"locs":[{"a":140,"b":155}]}],"statement":"SELECT\n    b.prediction_id,\n    b.endorsed,\n    b.date,\n    b.valid\n  FROM bets b\n  WHERE b.user_id = :user_id!\n  AND b.prediction_id = ANY(:prediction_ids!::int[])\n  ORDER BY b.prediction_id ASC"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * SELECT
+ *     b.prediction_id,
+ *     b.endorsed,
+ *     b.date,
+ *     b.valid
+ *   FROM bets b
+ *   WHERE b.user_id = :user_id!
+ *   AND b.prediction_id = ANY(:prediction_ids!::int[])
+ *   ORDER BY b.prediction_id ASC
+ * ```
+ */
+export const getBetsByUserId = new PreparedQuery<IGetBetsByUserIdParams,IGetBetsByUserIdResult>(getBetsByUserIdIR);
 
 
 /** 'AddBet' parameters type */
