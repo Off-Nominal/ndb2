@@ -8,12 +8,13 @@ import { webErrorHandler } from "../middleware/error-boundary";
 import { DiscordAuth } from "./auth/discord/handler";
 import { Home } from "./home/handler";
 import { Login } from "./login/handler";
+import { Predictions } from "./predictions/handler";
 
 export const webRouter = express.Router();
 
 webRouter.use(themePreferenceMiddleware);
 webRouter.use(webAuthMiddleware);
 webRouter.use("/demo", requireWebAuth);
-webRouter.use("/", mapRoutes([DiscordAuth, Login, Home]));
+webRouter.use("/", mapRoutes([DiscordAuth, Login, Home, Predictions]));
 webRouter.use(webNotFoundMiddleware);
 webRouter.use(webErrorHandler);

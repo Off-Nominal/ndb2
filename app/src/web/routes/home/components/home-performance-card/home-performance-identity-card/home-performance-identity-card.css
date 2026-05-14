@@ -4,8 +4,6 @@
   align-items: stretch;
   gap: var(--space-4);
 
-  padding: var(--space-2) var(--space-4);
-
   & .home-performance-identity-card__portrait {
     align-self: start;
     padding: var(--space-1);

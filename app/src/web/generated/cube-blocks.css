@@ -48,6 +48,9 @@
 /* ndb2:block: shared/components/horizontal-divider/horizontal-divider.css */
 @import "../shared/components/horizontal-divider/horizontal-divider.css";
 
+/* ndb2:block: shared/components/hud-text-input/hud-text-input.css */
+@import "../shared/components/hud-text-input/hud-text-input.css";
+
 /* ndb2:block: shared/components/loading/loading.css */
 @import "../shared/components/loading/loading.css";
 

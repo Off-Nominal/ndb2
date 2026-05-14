@@ -161,10 +161,14 @@
 
 /**
  * Softer HUD frame for panels **nested inside** a `.screen-element` (or other primary chrome): muted
- * primary border, gradient face, lighter shadow stack than `.screen-element`. Does not set
- * padding — blocks supply layout and spacing.
+ * primary border, gradient face, lighter shadow stack than `.screen-element`. Padding defaults match
+ * nested chrome; override `--screen-element-secondary-padding-x` / `-y` from block CSS when needed.
  */
 .screen-element-secondary {
+  --screen-element-secondary-padding-x: var(--space-4);
+  --screen-element-secondary-padding-y: var(--space-2);
+  padding: var(--screen-element-secondary-padding-y)
+    var(--screen-element-secondary-padding-x);
   border-radius: var(--radius-sm);
   border: 1px solid color-mix(in srgb, var(--color-primary) 32%, transparent);
   background: linear-gradient(
