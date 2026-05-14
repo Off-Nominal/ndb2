@@ -48,8 +48,14 @@
 /* ndb2:block: shared/components/horizontal-divider/horizontal-divider.css */
 @import "../shared/components/horizontal-divider/horizontal-divider.css";
 
+/* ndb2:block: shared/components/hud-checkbox/hud-checkbox.css */
+@import "../shared/components/hud-checkbox/hud-checkbox.css";
+
 /* ndb2:block: shared/components/hud-text-input/hud-text-input.css */
 @import "../shared/components/hud-text-input/hud-text-input.css";
+
+/* ndb2:block: shared/components/lattice-checkbox-group/lattice-checkbox-group.css */
+@import "../shared/components/lattice-checkbox-group/lattice-checkbox-group.css";
 
 /* ndb2:block: shared/components/loading/loading.css */
 @import "../shared/components/loading/loading.css";
@@ -59,6 +65,9 @@
 
 /* ndb2:block: shared/components/page-layout/page-layout.css */
 @import "../shared/components/page-layout/page-layout.css";
+
+/* ndb2:block: shared/components/pagination-nav/pagination-nav.css */
+@import "../shared/components/pagination-nav/pagination-nav.css";
 
 /* ndb2:block: shared/components/preferences-form/preferences-form.css */
 @import "../shared/components/preferences-form/preferences-form.css";

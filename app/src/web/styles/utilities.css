@@ -94,6 +94,22 @@
 }
 
 /**
+ * Same outline as **`.ring:focus-visible`**, applied to **this** element when **any descendant**
+ * matches **:focus-visible** (nested **`input`**, custom controls).
+ */
+.ring-has-focus-visible:has(:focus-visible) {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/** Strip native UA chrome (**`<button>`**, **`<select>`** trigger, drawn checkbox **`input`**, etc.). */
+.appearance-none {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/**
  * Full “display glass” stack: opaque `color-bg` base + grid + soft radials. Shared by `body` and
  * the authenticated nav **below `breakpoint.wide` (`80rem`)** (a **second** sheet, same skin, stacked on the first). Diagonal uses an
  * **opaque** tint (`color-text` on `color-bg`); do not use frosted `color-surface` here — that
@@ -154,7 +170,7 @@
     box-shadow 0.15s ease,
     border-color 0.15s ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     box-shadow: var(--hud-shadow-screen-element-hover);
   }
 }

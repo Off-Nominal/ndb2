@@ -1,0 +1,146 @@
+/* Block: HUD vertical checkbox list — **`screen-element-secondary`** console + bracket **`SVG`** meters. */
+
+/* — Root — */
+.lattice-checkbox-group {
+  border: none;
+  padding: 0;
+  margin: 0;
+  min-inline-size: 0;
+
+  &:disabled label {
+    cursor: not-allowed;
+    opacity: 0.48;
+  }
+
+  & legend {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-snug);
+    margin-block-end: var(--space-2);
+    padding: 0;
+    color: var(--color-text-muted);
+  }
+
+  & .lattice-checkbox-group-console {
+    --screen-element-secondary-padding-x: var(--space-3);
+    --screen-element-secondary-padding-y: var(--space-3);
+
+    position: relative;
+    overflow: hidden;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset-inline: 10%;
+      top: 50%;
+      height: 1px;
+      transform: translateY(-50%);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        color-mix(in srgb, var(--color-primary) 45%, transparent) 40%,
+        color-mix(in srgb, var(--color-primary) 60%, transparent) 50%,
+        color-mix(in srgb, var(--color-primary) 45%, transparent) 60%,
+        transparent 100%
+      );
+    }
+
+    &:hover::after,
+    &:focus-within::after {
+      opacity: 0.28;
+    }
+  }
+
+  & .lattice-checkbox-group-console ul {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  & .lattice-checkbox-group-console li {
+    margin: 0;
+    padding: 0;
+  }
+
+  & .lattice-checkbox-group-console label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding-block: var(--space-1);
+    padding-inline: var(--space-2);
+    margin-inline: calc(var(--space-2) * -1);
+    border-radius: var(--radius-sm);
+    transition:
+      color 0.15s ease,
+      background 0.15s ease;
+
+    &:hover {
+      background: color-mix(in srgb, var(--color-primary) 7%, transparent);
+    }
+
+    &:has(input:checked) {
+      color: var(--color-primary);
+    }
+
+    &:has(input:not(:checked)) {
+      color: var(--color-text-muted);
+    }
+
+    &:has(input:not(:checked)):hover {
+      color: var(--color-text);
+    }
+  }
+
+  /* Default row typography — override per use (**`optionRowClass`**, e.g. **`[ uppercase ]`**). */
+  & .lattice-checkbox-group-option {
+    display: flex;
+    align-items: center;
+    column-gap: 0.35em;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.06em;
+    pointer-events: none;
+  }
+
+  & .lattice-checkbox-group-label {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  & .lattice-checkbox-group-prefix {
+    display: flex;
+    align-items: center;
+    flex: none;
+    opacity: 0.48;
+    line-height: 0;
+  }
+
+  & label:has(input:checked) .lattice-checkbox-group-prefix {
+    opacity: 0.92;
+  }
+
+  & .lattice-checkbox-group-glyph {
+    display: block;
+  }
+
+  & .lattice-checkbox-group-check-fill {
+    opacity: 0;
+    transition: opacity 0.12s ease;
+  }
+
+  & label:has(input:checked) .lattice-checkbox-group-check-fill {
+    opacity: 1;
+  }
+}

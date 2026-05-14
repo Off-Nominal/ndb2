@@ -81,8 +81,6 @@
     background: transparent;
     /* interaction */
     cursor: pointer;
-    -webkit-appearance: none;
-    appearance: none;
     padding: var(--screen-element-padding-y) var(--screen-element-padding-x);
     transition:
       background 0.15s ease,

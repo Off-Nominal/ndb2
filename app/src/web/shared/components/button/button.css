@@ -21,17 +21,22 @@
 
   /* interaction */
   cursor: pointer;
-  -webkit-appearance: none;
-  appearance: none;
   transition:
     background 0.15s ease,
-    color 0.15s ease;
+    color 0.15s ease,
+    opacity 0.15s ease;
 
   background: var(--color-surface-muted);
 
-  &:hover {
+  &:hover:not(:disabled) {
     /* color & surface */
     color: var(--color-primary);
     /* background: transparent; */
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.48;
+    color: var(--color-text-muted);
   }
 }
