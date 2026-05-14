@@ -30,6 +30,9 @@
 /* ndb2:block: routes/login/page.css */
 @import "../routes/login/page.css";
 
+/* ndb2:block: routes/predictions/components/prediction-browse-form/prediction-browse-form.css */
+@import "../routes/predictions/components/prediction-browse-form/prediction-browse-form.css";
+
 /* ndb2:block: shared/components/button/button.css */
 @import "../shared/components/button/button.css";
 

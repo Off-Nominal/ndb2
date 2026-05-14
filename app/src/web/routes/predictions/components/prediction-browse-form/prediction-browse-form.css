@@ -1,0 +1,13 @@
+/* Block: `/predictions` GET filter shell — **`FormField`**, **`Hud*`**, **`Select`**, lattice (plan § route-local form). */
+
+.predictions-browse-form {
+  min-inline-size: 0;
+
+  & .predictions-browse-form-fields {
+    min-inline-size: 0;
+  }
+
+  & .predictions-browse-form-checkboxes {
+    padding-block-start: var(--space-1);
+  }
+}

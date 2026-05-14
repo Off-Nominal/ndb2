@@ -27,4 +27,21 @@ describe("Select", () => {
     expect(html).toContain('role="option"');
     expect(html).toContain('data-select-option');
   });
+
+  it("embeds data-rich-label when option.labelHtml is set", () => {
+    const html = Select({
+      id: "t-rich",
+      name: "season_id",
+      value: "1",
+      options: [
+        {
+          value: "1",
+          label: "Plain fallback",
+          labelHtml: '<span class="select__season-option"><span class="select__season-title">Rich</span></span>',
+        },
+      ],
+    });
+    expect(html).toContain("data-rich-label=");
+    expect(html).toContain("%3Cspan%20class%3D%22select__season-option");
+  });
 });

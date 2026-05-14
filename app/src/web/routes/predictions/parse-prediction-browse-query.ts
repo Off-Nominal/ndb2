@@ -75,6 +75,13 @@ export const predictionBrowseQuerySchema = z
 
 export type PredictionBrowseQuery = z.infer<typeof predictionBrowseQuerySchema>;
 
+/**
+ * Parsed defaults for an empty query — use when **`parsePredictionBrowseQuery`** fails so the browse UI
+ * still renders with safe **`GET`** semantics.
+ */
+export const PREDICTION_BROWSE_DEFAULT_QUERY: PredictionBrowseQuery =
+  predictionBrowseQuerySchema.parse({});
+
 /** Parses Express **`req.query`** (or any compatible record) for prediction browse. */
 export function parsePredictionBrowseQuery(query: unknown) {
   return predictionBrowseQuerySchema.safeParse(query);

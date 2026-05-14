@@ -32,6 +32,9 @@ function placeSelectInViewport(root: HTMLElement, listEl: HTMLElement, triggerEl
     return;
   }
 
+  /** Changing `max-height` resets `scrollTop` in browsers — preserve so wheel/trackpad scroll isn't undone. */
+  const preservedScrollTop = listEl.scrollTop;
+
   const { w: vw, h: vh } = getUsableViewport();
   // `getBoundingClientRect` is in client (viewport) coordinates; `vh` from visualViewport matches
   // when the URL bar/keyboard resizes the visible area.
@@ -42,7 +45,8 @@ function placeSelectInViewport(root: HTMLElement, listEl: HTMLElement, triggerEl
   listEl.style.maxHeight = "none";
   // Force reflow so scrollHeight reflects full content for measurement.
   void listEl.offsetHeight;
-  const natural = listEl.scrollHeight;
+  void listEl.getBoundingClientRect();
+  const natural = Math.max(listEl.scrollHeight, 1);
   const maxCap = readListMaxHeightPx();
   const ideal = Math.min(natural, maxCap);
 
@@ -69,7 +73,12 @@ function placeSelectInViewport(root: HTMLElement, listEl: HTMLElement, triggerEl
     maxH = Math.min(ideal, 120, maxCap);
   }
   maxH = Math.floor(maxH);
-  listEl.style.maxHeight = maxH > 0 ? `${maxH}px` : "";
+  maxH = Math.max(maxH, 1);
+  listEl.style.maxHeight = `${maxH}px`;
+
+  void listEl.offsetHeight;
+  const maxScroll = Math.max(0, listEl.scrollHeight - listEl.clientHeight);
+  listEl.scrollTop = Math.min(maxScroll, Math.max(0, preservedScrollTop));
 
   root.dataset.selectPlacement = placement;
 
@@ -129,7 +138,12 @@ function initSelect(root: HTMLElement): void {
   };
 
   function attachViewportListeners(): void {
-    window.addEventListener("scroll", onViewportChange, true);
+    /**
+     * **`capture: false`** — scroll events do not bubble, but **`capture: true`** on `window` still runs
+     * during the capture phase when **any** descendant scrolls (e.g. this list). That re‑entered
+     * **`placeSelectInViewport`** on every wheel tick and reset **`scrollTop`** via **`max-height`** churn.
+     */
+    window.addEventListener("scroll", onViewportChange);
     window.addEventListener("resize", onViewportChange);
     if (window.visualViewport != null) {
       window.visualViewport.addEventListener("resize", onViewportChange);
@@ -141,7 +155,7 @@ function initSelect(root: HTMLElement): void {
       cancelAnimationFrame(rafViewport);
       rafViewport = null;
     }
-    window.removeEventListener("scroll", onViewportChange, true);
+    window.removeEventListener("scroll", onViewportChange);
     window.removeEventListener("resize", onViewportChange);
     if (window.visualViewport != null) {
       window.visualViewport.removeEventListener("resize", onViewportChange);
@@ -154,55 +168,44 @@ function initSelect(root: HTMLElement): void {
     }
   };
 
+  /** **`Escape`** only — arrows / Enter stay on the trigger while open (**`aria-activedescendant`** on trigger). */
   const onDocKeyDown = (e: KeyboardEvent): void => {
     if (listEl.hidden) {
       return;
     }
-    const items = [...root.querySelectorAll<HTMLElement>("[data-select-option]")];
-    if (items.length === 0) {
+    if (e.key !== "Escape") {
       return;
     }
-    if (e.key === "Escape") {
-      e.preventDefault();
-      closePanel();
-      triggerEl.focus();
-      return;
-    }
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      const next =
-        activeIndex == null ? currentOptionIndex() : Math.min(activeIndex + 1, items.length - 1);
-      activeIndex = next;
-      setActiveOption(items, activeIndex);
-      return;
-    }
-    if (e.key === "ArrowUp") {
-      e.preventDefault();
-      const next = activeIndex == null ? currentOptionIndex() : Math.max(activeIndex - 1, 0);
-      activeIndex = next;
-      setActiveOption(items, activeIndex);
-      return;
-    }
-    if (e.key === "Enter" && activeIndex != null) {
-      e.preventDefault();
-      const li = items[activeIndex];
-      const v = li?.dataset.value;
-      if (v != null) {
-        commitValue(v, true);
-      }
-    }
+    e.preventDefault();
+    closePanel();
   };
 
+  /** Stable modifier — survives CSP quirks and stacks specificity vs `[aria-selected]` when highlighting keyboard row. */
+  const ACTIVE_OPTION_CLASS = "select__option--keyboard-active";
+
   function setActiveOption(items: HTMLElement[], index: number | null): void {
+    if (index == null || items[index] == null) {
+      triggerEl.removeAttribute("aria-activedescendant");
+    } else {
+      const id = items[index]!.id;
+      if (id != null && id !== "") {
+        triggerEl.setAttribute("aria-activedescendant", id);
+      } else {
+        triggerEl.removeAttribute("aria-activedescendant");
+      }
+    }
     items.forEach((li, i) => {
       if (i === index) {
         li.setAttribute("data-select-option-active", "true");
+        li.classList.add(ACTIVE_OPTION_CLASS);
         li.scrollIntoView({ block: "nearest" });
       } else {
         li.removeAttribute("data-select-option-active");
+        li.classList.remove(ACTIVE_OPTION_CLASS);
       }
     });
   }
+
 
   function currentOptionIndex(): number {
     const items = [...root.querySelectorAll<HTMLElement>("[data-select-option]")];
@@ -233,6 +236,7 @@ function initSelect(root: HTMLElement): void {
 
   function closePanel(): void {
     setOpen(false);
+    triggerEl.focus({ preventScroll: true });
   }
 
   function openPanel(): void {
@@ -245,6 +249,7 @@ function initSelect(root: HTMLElement): void {
     activeIndex = currentOptionIndex();
     const items = [...root.querySelectorAll<HTMLElement>("[data-select-option]")];
     setActiveOption(items, activeIndex);
+    /** Keep focus on the combobox trigger — **`aria-activedescendant`** points at the active **`role="option"`**. */
     requestAnimationFrame(() => {
       placeSelectInViewport(root, listEl, triggerEl);
       requestAnimationFrame(() => {
@@ -269,30 +274,128 @@ function initSelect(root: HTMLElement): void {
     if (listEl.hidden) {
       openPanel();
     } else {
-      setOpen(false);
+      closePanel();
     }
   });
 
+  function handleListboxNavigationKeys(key: string): void {
+    const items = [...root.querySelectorAll<HTMLElement>("[data-select-option]")];
+    if (items.length === 0) {
+      return;
+    }
+
+    if (key === "ArrowDown") {
+      activeIndex =
+        activeIndex == null ? currentOptionIndex() : Math.min(activeIndex + 1, items.length - 1);
+    } else if (key === "ArrowUp") {
+      activeIndex =
+        activeIndex == null ? currentOptionIndex() : Math.max(activeIndex - 1, 0);
+    } else if (key === "Home") {
+      activeIndex = 0;
+    } else if (key === "End") {
+      activeIndex = items.length - 1;
+    } else if (key === "Enter" || key === " ") {
+      const idx = activeIndex ?? currentOptionIndex();
+      const v = items[idx]?.dataset.value;
+      if (v != null) {
+        commitValue(v, true);
+      }
+      return;
+    } else {
+      return;
+    }
+
+    setActiveOption(items, activeIndex);
+  }
+
   triggerEl.addEventListener("keydown", (e: KeyboardEvent) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      if (listEl.hidden) {
-        openPanel();
-      } else {
+    if (!listEl.hidden) {
+      if (e.key === "Tab") {
         setOpen(false);
+        return;
+      }
+      if (
+        e.key === "ArrowDown" ||
+        e.key === "ArrowUp" ||
+        e.key === "Enter" ||
+        e.key === " " ||
+        e.key === "Home" ||
+        e.key === "End"
+      ) {
+        e.preventDefault();
+        handleListboxNavigationKeys(e.key);
       }
       return;
     }
-    if (e.key === "ArrowDown" && listEl.hidden) {
+
+    if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       openPanel();
       return;
     }
-    if (e.key === "Escape" && !listEl.hidden) {
+    if (e.key === "ArrowDown") {
       e.preventDefault();
-      setOpen(false);
+      openPanel();
+      return;
+    }
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      openPanel();
+      return;
     }
   });
+
+  /**
+   * Keep focus on the trigger when interacting with the scroll track / list chrome (not option rows),
+   * so keyboard navigation keeps working.
+   */
+  listEl.addEventListener("mousedown", (e: MouseEvent) => {
+    if (listEl.hidden || e.button !== 0) {
+      return;
+    }
+    if ((e.target as HTMLElement).closest("[data-select-option]") != null) {
+      return;
+    }
+    e.preventDefault();
+  });
+
+  /**
+   * Some layouts let wheel events scroll the page instead of this list. When the list has overflow,
+   * handle delta here (non-passive) so the panel scrolls reliably.
+   */
+  listEl.addEventListener(
+    "wheel",
+    (e: WheelEvent) => {
+      if (listEl.hidden) {
+        return;
+      }
+      if (listEl.scrollHeight <= listEl.clientHeight + 2) {
+        return;
+      }
+
+      let dy = e.deltaY;
+      if (e.deltaMode === WheelEvent.DOM_DELTA_LINE) {
+        dy *= 16;
+      } else if (e.deltaMode === WheelEvent.DOM_DELTA_PAGE) {
+        dy *= listEl.clientHeight;
+      }
+
+      const st = listEl.scrollTop;
+      const maxSt = listEl.scrollHeight - listEl.clientHeight;
+      const eps = 1;
+
+      if (dy > 0 && st < maxSt - eps) {
+        e.preventDefault();
+        e.stopPropagation();
+        listEl.scrollTop = Math.min(maxSt, st + dy);
+      } else if (dy < 0 && st > eps) {
+        e.preventDefault();
+        e.stopPropagation();
+        listEl.scrollTop = Math.max(0, st + dy);
+      }
+    },
+    { passive: false },
+  );
 
   for (const li of root.querySelectorAll<HTMLElement>("[data-select-option]")) {
     li.addEventListener("click", (e) => {

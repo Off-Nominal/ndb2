@@ -4,6 +4,7 @@
  */
 
 export const routeClientScripts = {
+  "predictions": ["/assets/routes/predictions/predictions.client.js"] as const,
   "shared/components/preferences-form": ["/assets/routes/shared/components/preferences-form/preferences-form.client.js"] as const,
   "shared/components/select": ["/assets/routes/shared/components/select/select.client.js"] as const,
 } as const;
