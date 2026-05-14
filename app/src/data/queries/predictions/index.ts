@@ -27,7 +27,7 @@ import betsQueries from "../bets";
 import { getVotesByPredictionId } from "../votes/votes.queries";
 import { getBetsByPredictionId } from "../bets/bets.queries";
 
-/** Must match `LIMIT` in `searchPredictions` in predictions.sql. */
+/** Default page size for search; SQL `searchPredictions` only allows 10 / 25 / 50 (`page_size` bind). */
 export const PREDICTION_SEARCH_PAGE_SIZE = 10;
 
 /** Params for {@link searchPredictions}; `page` is turned into `row_offset` here. */
@@ -128,6 +128,7 @@ export default {
         {
           ...params,
           keyword,
+          page_size: PREDICTION_SEARCH_PAGE_SIZE,
           row_offset:
             Math.max(0, (page ?? 1) - 1) * PREDICTION_SEARCH_PAGE_SIZE,
         },

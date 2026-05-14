@@ -141,10 +141,11 @@ INSERT INTO predictions (
   nullable string (first sort key only) via CASE. due_date-asc/desc use COALESCE(due_date, check_date).
 
   Query-level tuning: single-row CTE `search_defaults` (word_sim_threshold, keyword_prefix_min_len,
-  page_size). Change values there only; keep PREDICTION_SEARCH_PAGE_SIZE in predictions/index.ts
-  equal to page_size. LIMIT uses `(SELECT page_size FROM search_defaults)` because Postgres rejects
-  `LIMIT sd.page_size` (non-constant limit). plainto_tsquery('english', kw) uses kw as-is; prefix
-  stem is alnum-sanitized.
+  page_size). `page_size` is a bound parameter validated in SQL to 10, 25, or 50 (else 10). Callers
+  should still validate in application code. LIMIT uses `(SELECT page_size FROM search_defaults)`
+  because Postgres rejects `LIMIT sd.page_size` (non-constant limit).
+
+  plainto_tsquery('english', kw) uses kw as-is; prefix stem is alnum-sanitized.
 
   Keyword ranking: ORDER BY word_similarity(kw, p.text) only (no ts_rank_cd).
 */
@@ -153,7 +154,12 @@ WITH search_defaults AS (
   SELECT
     0.38::double precision AS word_sim_threshold,
     5::integer AS keyword_prefix_min_len,
-    10::integer AS page_size
+    (
+      CASE
+        WHEN :page_size::integer IN (10, 25, 50) THEN :page_size::integer
+        ELSE 10
+      END
+    ) AS page_size
 )
 SELECT
   p.id,
