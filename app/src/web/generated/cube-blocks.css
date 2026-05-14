@@ -63,6 +63,9 @@
 /* ndb2:block: shared/components/page-layout/page-layout.css */
 @import "../shared/components/page-layout/page-layout.css";
 
+/* ndb2:block: shared/components/pagination-nav/pagination-nav.css */
+@import "../shared/components/pagination-nav/pagination-nav.css";
+
 /* ndb2:block: shared/components/preferences-form/preferences-form.css */
 @import "../shared/components/preferences-form/preferences-form.css";
 

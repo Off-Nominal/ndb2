@@ -1,6 +1,7 @@
 import { HeadingScreenElement } from "@web/shared/components/heading-screen-element";
 import { HudCheckbox } from "@web/shared/components/hud-checkbox";
 import { HudTextInput } from "@web/shared/components/hud-text-input";
+import { PaginationNav } from "@web/shared/components/pagination-nav";
 
 const PREVIEW_FIELD_ID = "predictions-hud-input-preview";
 const PREVIEW_CHECKBOX_ID = "predictions-hud-checkbox-preview";
@@ -47,6 +48,10 @@ export function PredictionsPage(): JSX.Element {
         disabled={true}
         labelText="Disabled + unchecked (preview)"
       />
+      <p>Pagination (preview)</p>
+      <PaginationNav page={2} hasNextPage={true} />
+      <PaginationNav page={1} hasNextPage={true} />
+      <PaginationNav page={4} hasNextPage={false} />
     </div>
   );
 }

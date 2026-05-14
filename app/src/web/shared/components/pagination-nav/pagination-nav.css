@@ -1,0 +1,39 @@
+/* Block: pagination-nav — prev / next **`Button`**s + **Page N** (HTMX attrs via passthrough props). */
+
+/* — Root — */
+.pagination-nav {
+  display: flex;
+  inline-size: 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+
+  /*
+   * Caps pager controls (~default **← Previous** + `.button` horizontal padding).
+   * Override **`--pagination-nav-pager-max-inline-size`** on **`nav.pagination-nav`** when labels change.
+   */
+  --pagination-nav-pager-max-inline-size: calc(13ch + 2 * var(--space-3));
+
+  & .pagination-nav__pager {
+    max-inline-size: var(--pagination-nav-pager-max-inline-size);
+
+    /* Equal width up to the cap; extra row space stays outside the controls */
+    flex: 1 1 0;
+    min-inline-size: 0;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  & span[aria-live="polite"] {
+    font-size: var(--text-md);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-snug);
+    color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+    min-width: 0;
+  }
+}
