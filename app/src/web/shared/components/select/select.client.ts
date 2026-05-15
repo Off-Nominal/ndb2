@@ -1,8 +1,10 @@
+import Fuse from "fuse.js";
 import { syncUIFromNative } from "./select-display-sync.js";
 
 /**
  * Custom select: toggle listbox, sync hidden native `<select>` for forms + bubbling `change`.
  * Panel placement: flips above/below from viewport + caps `max-height` so the list stays on-screen.
+ * **`data-select-searchable`**: fuzzy filter with Fuse.js while the panel is open.
  */
 
 /** Matches `max-height: 16rem` in `select.css`. */
@@ -32,17 +34,18 @@ function placeSelectInViewport(root: HTMLElement, listEl: HTMLElement, triggerEl
     return;
   }
 
+  /** Changing `max-height` resets `scrollTop` in browsers — preserve so wheel/trackpad scroll isn't undone. */
+  const preservedScrollTop = listEl.scrollTop;
+
   const { w: vw, h: vh } = getUsableViewport();
-  // `getBoundingClientRect` is in client (viewport) coordinates; `vh` from visualViewport matches
-  // when the URL bar/keyboard resizes the visible area.
   const tr = triggerEl.getBoundingClientRect();
   const spaceBelow = vh - tr.bottom - VIEWPORT_EDGE;
   const spaceAbove = tr.top - VIEWPORT_EDGE;
 
   listEl.style.maxHeight = "none";
-  // Force reflow so scrollHeight reflects full content for measurement.
   void listEl.offsetHeight;
-  const natural = listEl.scrollHeight;
+  void listEl.getBoundingClientRect();
+  const natural = Math.max(listEl.scrollHeight, 1);
   const maxCap = readListMaxHeightPx();
   const ideal = Math.min(natural, maxCap);
 
@@ -69,11 +72,15 @@ function placeSelectInViewport(root: HTMLElement, listEl: HTMLElement, triggerEl
     maxH = Math.min(ideal, 120, maxCap);
   }
   maxH = Math.floor(maxH);
-  listEl.style.maxHeight = maxH > 0 ? `${maxH}px` : "";
+  maxH = Math.max(maxH, 1);
+  listEl.style.maxHeight = `${maxH}px`;
+
+  void listEl.offsetHeight;
+  const maxScroll = Math.max(0, listEl.scrollHeight - listEl.clientHeight);
+  listEl.scrollTop = Math.min(maxScroll, Math.max(0, preservedScrollTop));
 
   root.dataset.selectPlacement = placement;
 
-  // Horizontal: nudge the list if the surface is near the left/right edge of the visible viewport.
   void listEl.offsetHeight;
   const lr = listEl.getBoundingClientRect();
   const edgeLeft = VIEWPORT_EDGE;
@@ -109,10 +116,23 @@ function initSelect(root: HTMLElement): void {
   }
 
   const nativeSelect = native;
+  nativeSelect.addEventListener("change", () => {
+    syncUIFromNative(root);
+  });
+
   const listEl = list;
   const triggerEl = trigger;
+  const triggerField = root.querySelector<HTMLElement>("[data-select-trigger-field]");
+  /** Full trigger row (searchable) vs focusable control alone — used for panel **`getBoundingClientRect`**. */
+  const layoutAnchorEl = triggerField ?? triggerEl;
+  const searchable = root.dataset.selectSearchable === "true";
+  /** Stable DOM order for **`restoreOptionDomOrder`** after Fuse reorders matches by relevance. */
+  const originalOptionOrder = searchable
+    ? [...root.querySelectorAll<HTMLElement>("[data-select-option]")]
+    : [];
 
   let activeIndex: number | null = null;
+  let lastHighlightedValue: string | null = null;
   let rafViewport: number | null = null;
 
   const onViewportChange = (): void => {
@@ -124,12 +144,12 @@ function initSelect(root: HTMLElement): void {
     }
     rafViewport = requestAnimationFrame(() => {
       rafViewport = null;
-      placeSelectInViewport(root, listEl, triggerEl);
+      placeSelectInViewport(root, listEl, layoutAnchorEl);
     });
   };
 
   function attachViewportListeners(): void {
-    window.addEventListener("scroll", onViewportChange, true);
+    window.addEventListener("scroll", onViewportChange);
     window.addEventListener("resize", onViewportChange);
     if (window.visualViewport != null) {
       window.visualViewport.addEventListener("resize", onViewportChange);
@@ -141,7 +161,7 @@ function initSelect(root: HTMLElement): void {
       cancelAnimationFrame(rafViewport);
       rafViewport = null;
     }
-    window.removeEventListener("scroll", onViewportChange, true);
+    window.removeEventListener("scroll", onViewportChange);
     window.removeEventListener("resize", onViewportChange);
     if (window.visualViewport != null) {
       window.visualViewport.removeEventListener("resize", onViewportChange);
@@ -158,56 +178,111 @@ function initSelect(root: HTMLElement): void {
     if (listEl.hidden) {
       return;
     }
-    const items = [...root.querySelectorAll<HTMLElement>("[data-select-option]")];
-    if (items.length === 0) {
+    if (e.key !== "Escape") {
       return;
     }
-    if (e.key === "Escape") {
-      e.preventDefault();
-      closePanel();
-      triggerEl.focus();
-      return;
-    }
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      const next =
-        activeIndex == null ? currentOptionIndex() : Math.min(activeIndex + 1, items.length - 1);
-      activeIndex = next;
-      setActiveOption(items, activeIndex);
-      return;
-    }
-    if (e.key === "ArrowUp") {
-      e.preventDefault();
-      const next = activeIndex == null ? currentOptionIndex() : Math.max(activeIndex - 1, 0);
-      activeIndex = next;
-      setActiveOption(items, activeIndex);
-      return;
-    }
-    if (e.key === "Enter" && activeIndex != null) {
-      e.preventDefault();
-      const li = items[activeIndex];
-      const v = li?.dataset.value;
-      if (v != null) {
-        commitValue(v, true);
-      }
-    }
+    e.preventDefault();
+    closePanel();
   };
 
-  function setActiveOption(items: HTMLElement[], index: number | null): void {
-    items.forEach((li, i) => {
-      if (i === index) {
-        li.setAttribute("data-select-option-active", "true");
-        li.scrollIntoView({ block: "nearest" });
-      } else {
-        li.removeAttribute("data-select-option-active");
-      }
-    });
+  const ACTIVE_OPTION_CLASS = "select__option--keyboard-active";
+
+  function optionElementsForNav(): HTMLElement[] {
+    return [...root.querySelectorAll<HTMLElement>("[data-select-option]")].filter((li) => !li.hidden);
   }
 
-  function currentOptionIndex(): number {
-    const items = [...root.querySelectorAll<HTMLElement>("[data-select-option]")];
-    const i = items.findIndex((li) => (li.dataset.value ?? "") === nativeSelect.value);
+  function pickInitialActiveIndex(items: HTMLElement[]): number {
+    const v = nativeSelect.value;
+    const i = items.findIndex((li) => (li.dataset.value ?? "") === v);
     return i >= 0 ? i : 0;
+  }
+
+  function restoreOptionDomOrder(): void {
+    if (!searchable || originalOptionOrder.length === 0) {
+      return;
+    }
+    for (const li of originalOptionOrder) {
+      listEl.appendChild(li);
+    }
+  }
+
+  function clearSearchFilter(): void {
+    if (!searchable) {
+      return;
+    }
+    restoreOptionDomOrder();
+    for (const li of root.querySelectorAll<HTMLElement>("[data-select-option]")) {
+      li.hidden = false;
+    }
+  }
+
+  function applySearchFilter(raw: string): void {
+    if (!searchable) {
+      return;
+    }
+    const q = raw.trim();
+    const all = [...root.querySelectorAll<HTMLElement>("[data-select-option]")];
+
+    if (q === "") {
+      restoreOptionDomOrder();
+      all.forEach((li) => {
+        li.hidden = false;
+      });
+    } else {
+      type FuseRow = { label: string; el: HTMLElement };
+      const corpus: FuseRow[] = all.map((el) => ({
+        label: el.dataset.selectSearchLabel ?? el.textContent?.trim() ?? "",
+        el,
+      }));
+      const fuse = new Fuse(corpus, {
+        keys: ["label"],
+        threshold: 0.38,
+        ignoreLocation: true,
+        minMatchCharLength: 1,
+        shouldSort: true,
+      });
+      const matchedInRelevanceOrder = fuse.search(q).map((r) => r.item.el);
+      const matchedSet = new Set(matchedInRelevanceOrder);
+
+      for (const li of matchedInRelevanceOrder) {
+        listEl.appendChild(li);
+        li.hidden = false;
+      }
+      for (const li of originalOptionOrder) {
+        if (!matchedSet.has(li)) {
+          listEl.appendChild(li);
+          li.hidden = true;
+        }
+      }
+    }
+    requestAnimationFrame(() => placeSelectInViewport(root, listEl, layoutAnchorEl));
+  }
+
+  function setActiveOption(items: HTMLElement[], index: number | null): void {
+    const all = [...root.querySelectorAll<HTMLElement>("[data-select-option]")];
+    for (const li of all) {
+      li.removeAttribute("data-select-option-active");
+      li.classList.remove(ACTIVE_OPTION_CLASS);
+    }
+
+    if (index == null || items.length === 0 || items[index] == null) {
+      triggerEl.removeAttribute("aria-activedescendant");
+      lastHighlightedValue = null;
+      return;
+    }
+
+    const activeLi = items[index]!;
+    const id = activeLi.id;
+    if (id != null && id !== "") {
+      triggerEl.setAttribute("aria-activedescendant", id);
+    } else {
+      triggerEl.removeAttribute("aria-activedescendant");
+    }
+
+    activeLi.setAttribute("data-select-option-active", "true");
+    activeLi.classList.add(ACTIVE_OPTION_CLASS);
+    activeLi.scrollIntoView({ block: "nearest" });
+    lastHighlightedValue = activeLi.dataset.value ?? null;
   }
 
   function detachGlobalListeners(): void {
@@ -220,6 +295,12 @@ function initSelect(root: HTMLElement): void {
       clearSelectPlacement(listEl, root);
       detachGlobalListeners();
       detachViewportListeners();
+      if (searchable) {
+        clearSearchFilter();
+        if (triggerEl instanceof HTMLInputElement) {
+          triggerEl.readOnly = true;
+        }
+      }
     }
     listEl.hidden = !open;
     triggerEl.setAttribute("aria-expanded", open ? "true" : "false");
@@ -233,6 +314,8 @@ function initSelect(root: HTMLElement): void {
 
   function closePanel(): void {
     setOpen(false);
+    syncUIFromNative(root);
+    triggerEl.focus({ preventScroll: true });
   }
 
   function openPanel(): void {
@@ -242,13 +325,18 @@ function initSelect(root: HTMLElement): void {
     listEl.hidden = false;
     triggerEl.setAttribute("aria-expanded", "true");
     root.classList.add("select--open");
-    activeIndex = currentOptionIndex();
-    const items = [...root.querySelectorAll<HTMLElement>("[data-select-option]")];
+    clearSearchFilter();
+    if (searchable && triggerEl instanceof HTMLInputElement) {
+      triggerEl.readOnly = false;
+      triggerEl.value = "";
+    }
+    const items = optionElementsForNav();
+    activeIndex = items.length === 0 ? null : pickInitialActiveIndex(items);
     setActiveOption(items, activeIndex);
     requestAnimationFrame(() => {
-      placeSelectInViewport(root, listEl, triggerEl);
+      placeSelectInViewport(root, listEl, layoutAnchorEl);
       requestAnimationFrame(() => {
-        placeSelectInViewport(root, listEl, triggerEl);
+        placeSelectInViewport(root, listEl, layoutAnchorEl);
       });
     });
   }
@@ -268,31 +356,161 @@ function initSelect(root: HTMLElement): void {
   triggerEl.addEventListener("click", () => {
     if (listEl.hidden) {
       openPanel();
-    } else {
-      setOpen(false);
+    } else if (!searchable) {
+      closePanel();
     }
   });
 
-  triggerEl.addEventListener("keydown", (e: KeyboardEvent) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
+  /**
+   * Chevron uses **`pointer-events: none`** — hits fall through to **`select__trigger-field`**.
+   * Focus stays on the combobox **`input`**; ring wraps the row via **`ring-has-focus-visible`**.
+   */
+  if (searchable && triggerField != null) {
+    triggerField.addEventListener("click", (e: MouseEvent) => {
+      const t = e.target;
+      if (t instanceof Node && triggerEl.contains(t)) {
+        return;
+      }
+      triggerEl.focus({ preventScroll: true });
       if (listEl.hidden) {
         openPanel();
-      } else {
+      }
+    });
+  }
+
+  function handleListboxNavigationKeys(key: string): void {
+    const items = optionElementsForNav();
+    if (items.length === 0) {
+      return;
+    }
+
+    if (key === "ArrowDown") {
+      activeIndex =
+        activeIndex == null ? pickInitialActiveIndex(items) : Math.min(activeIndex + 1, items.length - 1);
+    } else if (key === "ArrowUp") {
+      activeIndex =
+        activeIndex == null ? pickInitialActiveIndex(items) : Math.max(activeIndex - 1, 0);
+    } else if (key === "Home") {
+      activeIndex = 0;
+    } else if (key === "End") {
+      activeIndex = items.length - 1;
+    } else if (key === "Enter" || (!searchable && key === " ")) {
+      const idx = activeIndex ?? pickInitialActiveIndex(items);
+      const v = items[idx]?.dataset.value;
+      if (v != null) {
+        commitValue(v, true);
+      }
+      return;
+    } else {
+      return;
+    }
+
+    setActiveOption(items, activeIndex);
+  }
+
+  triggerEl.addEventListener("keydown", (e: KeyboardEvent) => {
+    if (!listEl.hidden) {
+      if (e.key === "Tab") {
         setOpen(false);
+        syncUIFromNative(root);
+        return;
+      }
+      const navigates =
+        e.key === "ArrowDown" ||
+        e.key === "ArrowUp" ||
+        e.key === "Enter" ||
+        e.key === "Home" ||
+        e.key === "End" ||
+        (!searchable && e.key === " ");
+      if (navigates) {
+        e.preventDefault();
+        handleListboxNavigationKeys(e.key);
       }
       return;
     }
-    if (e.key === "ArrowDown" && listEl.hidden) {
+
+    if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       openPanel();
       return;
     }
-    if (e.key === "Escape" && !listEl.hidden) {
+    if (e.key === "ArrowDown") {
       e.preventDefault();
-      setOpen(false);
+      openPanel();
+      return;
+    }
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      openPanel();
+      return;
     }
   });
+
+  if (searchable && triggerEl instanceof HTMLInputElement) {
+    triggerEl.addEventListener("input", () => {
+      if (listEl.hidden) {
+        return;
+      }
+      const keep = lastHighlightedValue;
+      applySearchFilter(triggerEl.value);
+      const visible = optionElementsForNav();
+      if (visible.length === 0) {
+        activeIndex = null;
+        setActiveOption([], null);
+        return;
+      }
+      let idx = keep != null ? visible.findIndex((li) => (li.dataset.value ?? "") === keep) : -1;
+      if (idx < 0) {
+        idx = pickInitialActiveIndex(visible);
+      }
+      activeIndex = idx;
+      setActiveOption(visible, activeIndex);
+    });
+  }
+
+  listEl.addEventListener("mousedown", (e: MouseEvent) => {
+    if (listEl.hidden || e.button !== 0) {
+      return;
+    }
+    if ((e.target as HTMLElement).closest("[data-select-option]") != null) {
+      return;
+    }
+    e.preventDefault();
+  });
+
+  listEl.addEventListener(
+    "wheel",
+    (e: WheelEvent) => {
+      if (listEl.hidden) {
+        return;
+      }
+      if (listEl.scrollHeight <= listEl.clientHeight + 2) {
+        return;
+      }
+
+      let dy = e.deltaY;
+      if (e.deltaMode === WheelEvent.DOM_DELTA_LINE) {
+        dy *= 16;
+      } else if (e.deltaMode === WheelEvent.DOM_DELTA_PAGE) {
+        dy *= listEl.clientHeight;
+      }
+
+      const st = listEl.scrollTop;
+      const maxSt = listEl.scrollHeight - listEl.clientHeight;
+      const eps = 1;
+
+      if (dy > 0 && st < maxSt - eps) {
+        e.preventDefault();
+        e.stopPropagation();
+        listEl.scrollTop = Math.min(maxSt, st + dy);
+      } else if (dy < 0 && st > eps) {
+        e.preventDefault();
+        e.stopPropagation();
+        listEl.scrollTop = Math.max(0, st + dy);
+      }
+    },
+    { passive: false },
+  );
 
   for (const li of root.querySelectorAll<HTMLElement>("[data-select-option]")) {
     li.addEventListener("click", (e) => {

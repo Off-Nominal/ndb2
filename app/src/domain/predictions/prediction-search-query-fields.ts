@@ -19,7 +19,7 @@ import {
  *
  * Call sites compose their own {@link z.object}; see `get_predictions_search.ts` and `parse-prediction-browse-query.ts`.
  *
- * **Product-level rules** (creator ≠ unbetter, browse defaults, `unbetter_id` alias, and
+ * **Product-level rules** (predictor ≠ unbetter, browse defaults, `unbetter_id` alias, and
  * v2-only “at least one filter”) are composed **outside** this module.
  */
 
@@ -40,7 +40,8 @@ export const predictionSearchQueryKeywordSchema = queryParamScalar(
   ),
 );
 
-export const predictionSearchQueryCreatorSchema = queryParamScalar(
+/** Optional predictor Discord snowflake — wire query key **`creator`** (v2 **`GET /predictions/search`** + HTML browse). */
+export const predictionSearchQueryPredictorSchema = queryParamScalar(
   discordIdSchema.optional(),
 );
 
@@ -73,12 +74,13 @@ export const predictionSearchQueryPageSizeSchema = queryParamScalar(
     .optional(),
 );
 
-export const PREDICTION_SEARCH_CREATOR_UNBETTER_DISTINCT_MESSAGE =
-  'Filtering by the same "creator" and "unbetter" is not allowed. These values must be different or omitted.';
+export const PREDICTION_SEARCH_PREDICTOR_UNBETTER_DISTINCT_MESSAGE =
+  'Filtering by the same "predictor" and "unbetter" is not allowed. These values must be different or omitted.';
 
-/** Shared by v2 search and HTML browse after `unbetter` is resolved (including `unbetter_id` → `unbetter`). */
-export function predictionSearchCreatorDistinctFromUnbetter<
-  Q extends { creator?: string | undefined; unbetter?: string | undefined },
->(q: Q): boolean {
-  return !q.creator || !q.unbetter || q.creator !== q.unbetter;
+/** Shared by v2 search (wire **`creator`**) and HTML browse (**`predictor`**) after `unbetter` is resolved (including `unbetter_id` → `unbetter`). */
+export function predictionSearchPredictorDistinctFromUnbetter(q: {
+  predictor?: string | undefined;
+  unbetter?: string | undefined;
+}): boolean {
+  return !q.predictor || !q.unbetter || q.predictor !== q.unbetter;
 }

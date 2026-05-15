@@ -12,6 +12,10 @@ export {
   getDiscordGatewayClient,
 } from "./discord-js-client";
 export {
+  listPortalGuildCachedMemberProfiles,
+  type PortalGuildCachedMemberProfile,
+} from "./list-portal-guild-cached-member-profiles";
+export {
   guildMemberToProfile,
   userToProfile,
   getMemberProfile,

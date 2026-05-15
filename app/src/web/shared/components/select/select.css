@@ -56,6 +56,44 @@
     overflow: visible;
   }
 
+  /** Searchable combobox row: padding + radii match **`button.select__trigger`**; focus ring wraps input + chevron (**`ring-has-focus-visible`**). */
+  & .select__trigger-field {
+    --screen-element-padding-x: var(--space-3);
+    --screen-element-padding-y: var(--space-2);
+
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: var(--screen-element-padding-y) var(--screen-element-padding-x);
+    border-top-left-radius: var(--select-trigger-r-tl);
+    border-top-right-radius: var(--select-trigger-r-tr);
+    border-bottom-left-radius: var(--select-trigger-r-bl);
+    border-bottom-right-radius: var(--select-trigger-r-br);
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease;
+
+    &:hover {
+      background: color-mix(in srgb, var(--color-text) 6%, var(--color-bg) 94%);
+    }
+
+    &:hover .select__trigger--searchable {
+      color: var(--color-primary);
+    }
+  }
+
+  &.select--open .select__trigger-field:hover {
+    background: transparent;
+  }
+
+  &.select--open .select__trigger-field:hover .select__trigger--searchable {
+    color: var(--color-text);
+  }
+
   /* — Trigger (no separate screen-element; chrome is on `select__surface`) — */
   & .select__trigger {
     --screen-element-padding-x: var(--space-3);
@@ -86,7 +124,7 @@
       background 0.15s ease,
       color 0.15s ease;
 
-    &:hover {
+    &:hover:not(.select__trigger--searchable) {
       /* solid hover tint (not frosted `--color-surface-muted`) */
       background: color-mix(in srgb, var(--color-text) 6%, var(--color-bg) 94%);
       color: var(--color-primary);
@@ -101,11 +139,46 @@
     }
   }
 
+  & .select__trigger--searchable {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    max-width: 100%;
+    display: block;
+    padding: 0;
+    margin: 0;
+    border-radius: 0;
+    background: transparent;
+    cursor: pointer;
+    text-align: start;
+    box-shadow: none;
+  }
+
+  & .select__trigger--searchable:focus,
+  & .select__trigger--searchable:focus-visible {
+    outline: none;
+  }
+
+  &.select--open .select__trigger-field .select__trigger--searchable {
+    cursor: text;
+  }
+
   & .select__value {
     flex: 1 1 0;
     min-width: 0;
     width: auto;
     max-width: 100%;
+  }
+
+  & .select__value.select__value--multiline {
+    overflow: visible;
+    text-overflow: unset;
+    white-space: normal;
+    line-height: var(--leading-snug);
+  }
+
+  &[data-select-value-layout="multiline"] .select__trigger {
+    align-items: flex-start;
   }
 
   & .select__chevron {
@@ -115,6 +188,7 @@
     font-size: 0.65em;
     line-height: 1;
     opacity: 0.85;
+    pointer-events: none;
   }
 
   /* — Listbox: floats under the button (out of document flow) — */
@@ -136,6 +210,9 @@
     padding: 0;
     list-style: none;
     overflow-y: auto;
+    overscroll-behavior-y: contain;
+    min-height: 0;
+    -webkit-overflow-scrolling: touch;
 
     box-sizing: border-box;
     border: 1px solid var(--color-primary);
@@ -148,6 +225,15 @@
     box-shadow: var(--select-list-shadow);
     color: var(--color-text);
     background: var(--color-bg);
+
+    /**
+     * The `<ul>` is not focused — the trigger owns **`aria-activedescendant`**. Kill stray UA rings if the
+     * scrollport ever receives focus (**`tabindex`** omitted).
+     */
+    &:focus,
+    &:focus-visible {
+      outline: none;
+    }
 
     &[hidden] {
       display: none !important;
@@ -189,14 +275,15 @@
     cursor: pointer;
     transition:
       background 0.12s ease,
-      color 0.12s ease;
+      color 0.12s ease,
+      box-shadow 0.12s ease;
 
     &:hover:not([aria-selected="true"]) {
       background: color-mix(in srgb, var(--color-primary) 26%, var(--color-bg));
       color: var(--color-text);
     }
 
-    /* Selected row: stronger tint + body text for max contrast vs mid accent hues. */
+    /* Closed panel / no keyboard row: committed selection matches trigger context. */
     &[aria-selected="true"] {
       background: color-mix(in srgb, var(--color-primary) 38%, var(--color-bg));
       color: var(--color-text);
@@ -208,17 +295,126 @@
     }
   }
 
-  & .select__option[data-select-option-active="true"] {
-    background: color-mix(in srgb, var(--color-primary) 38%, var(--color-bg));
+  /**
+   * Panel open: distinguish **committed value** (still `aria-selected`) from **keyboard highlight**
+   * (`data-select-option-active`). Previously both used the same fill, so arrows looked like they did nothing.
+   */
+  &.select--open .select__option[aria-selected="true"]:not(.select__option--keyboard-active) {
+    background: color-mix(in srgb, var(--color-primary) 16%, var(--color-bg));
     color: var(--color-text);
-    /* Top/bottom only: full inset outline sat flush with the list border and read as double-wide sides. */
-    outline: none;
-    box-shadow:
-      inset 0 1px 0 0 var(--color-primary),
-      inset 0 -1px 0 0 var(--color-primary);
   }
 
-  & .select__option[data-select-option-active="true"]:hover {
-    background: color-mix(in srgb, var(--color-primary) 46%, var(--color-bg));
+  &.select--open .select__option[aria-selected="true"]:not(.select__option--keyboard-active):hover {
+    background: color-mix(in srgb, var(--color-primary) 24%, var(--color-bg));
+  }
+
+  /**
+   * Keyboard highlight — **no outline / inset rail**: those stack awkwardly against **`.select__list`**
+   * chrome; fill + z-index keep the row readable vs hover and muted committed selection.
+   */
+  & .select__option.select__option--keyboard-active {
+    position: relative;
+    z-index: 1;
+    background: color-mix(in srgb, var(--color-primary) 44%, var(--color-bg));
+    color: var(--color-text);
+    outline: none;
+    box-shadow: none;
+  }
+
+  & .select__option.select__option--keyboard-active:hover {
+    background: color-mix(in srgb, var(--color-primary) 50%, var(--color-bg));
+  }
+
+  &.select--open .select__option[aria-selected="true"].select__option--keyboard-active {
+    background: color-mix(in srgb, var(--color-primary) 52%, var(--color-bg));
+  }
+
+  /* Optional stacked rows (`SelectOption.labelHtml`, e.g. season picker) */
+  & .select__season-option {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+    text-align: start;
+    min-inline-size: 0;
+    max-width: 100%;
+  }
+
+  & .select__season-option-markers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+  }
+
+  & .select__season-badge {
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    line-height: var(--leading-snug);
+  }
+
+  & .select__season-badge--muted {
+    color: var(--color-text-muted);
+  }
+
+  & .select__season-title {
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-snug);
+    max-width: 100%;
+  }
+
+  & .select__season-title :where(strong, b) {
+    font-weight: var(--weight-semibold);
+  }
+
+  & .select__season-dates {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--color-text-muted);
+    letter-spacing: 0.04em;
+    line-height: var(--leading-snug);
+  }
+
+  /* Guild member rows (`SelectOption.labelHtml`, predictions creator filter) */
+  & .select__member-option {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-2);
+    text-align: start;
+    min-inline-size: 0;
+    max-width: 100%;
+  }
+
+  & .select__member-option-avatar {
+    flex-shrink: 0;
+    inline-size: 1.75rem;
+    block-size: 1.75rem;
+    border-radius: var(--radius-full);
+    object-fit: cover;
+    background: color-mix(in srgb, var(--color-text-muted) 18%, transparent);
+  }
+
+  & .select__member-option-name {
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-snug);
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+
+  & .select__member-option-hint {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    letter-spacing: 0.04em;
+    line-height: var(--leading-snug);
+  }
+
+  & .select__member-option--fallback {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
   }
 }

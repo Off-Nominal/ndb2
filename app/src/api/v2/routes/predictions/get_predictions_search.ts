@@ -8,8 +8,8 @@ import { getUserByDiscordId } from "@data/queries/users/users.queries";
 import * as API from "@offnominal/ndb2-api-types/v2";
 import { wrapRouteWithErrorBoundary } from "../../middleware/errorHandler";
 import {
-  predictionSearchCreatorDistinctFromUnbetter,
-  predictionSearchQueryCreatorSchema,
+  predictionSearchPredictorDistinctFromUnbetter,
+  predictionSearchQueryPredictorSchema,
   predictionSearchQueryIncludeNonSeasonApplicableSchema,
   predictionSearchQueryKeywordSchema,
   predictionSearchQueryPageSchema,
@@ -18,14 +18,14 @@ import {
   predictionSearchQuerySortBySchema,
   predictionSearchQueryStatusSchema,
   predictionSearchQueryUnbetterSchema,
-  PREDICTION_SEARCH_CREATOR_UNBETTER_DISTINCT_MESSAGE,
+  PREDICTION_SEARCH_PREDICTOR_UNBETTER_DISTINCT_MESSAGE,
 } from "@domain/predictions/prediction-search-query-fields";
 
 const predictionSearchQueryFieldsSchema = z.object({
   status: predictionSearchQueryStatusSchema,
   sort_by: predictionSearchQuerySortBySchema,
   keyword: predictionSearchQueryKeywordSchema,
-  creator: predictionSearchQueryCreatorSchema,
+  creator: predictionSearchQueryPredictorSchema,
   unbetter: predictionSearchQueryUnbetterSchema,
   season_id: predictionSearchQuerySeasonIdSchema,
   include_non_season_applicable:
@@ -65,16 +65,23 @@ function predictionSearchRequiresStandardParam(
  * Zod schema for `GET /predictions/search` query string validation.
  *
  * **Cross-field rules:**
- * 1. At least one of: non-empty `status`, `sort_by`, non-empty `keyword`, `creator`, `unbetter`, or `season_id`.
- * 2. `creator` and `unbetter` cannot both be set to the **same** Discord id.
+ * 1. At least one of: non-empty `status`, `sort_by`, non-empty `keyword`, `creator` (predictor), `unbetter`, or `season_id`.
+ * 2. Wire **`creator`** (predictor filter) and **`unbetter`** cannot both be set to the **same** Discord id.
  */
 const searchQuerySchema = predictionSearchQueryFieldsSchema
   .refine(predictionSearchRequiresStandardParam, {
     message: PREDICTION_SEARCH_REQUIRES_STANDARD_PARAM_MESSAGE,
   })
-  .refine(predictionSearchCreatorDistinctFromUnbetter, {
-    message: PREDICTION_SEARCH_CREATOR_UNBETTER_DISTINCT_MESSAGE,
-  });
+  .refine(
+    (q) =>
+      predictionSearchPredictorDistinctFromUnbetter({
+        predictor: q.creator,
+        unbetter: q.unbetter,
+      }),
+    {
+      message: PREDICTION_SEARCH_PREDICTOR_UNBETTER_DISTINCT_MESSAGE,
+    },
+  );
 
 export const getPredictionsSearch: Route = (router) => {
   router.get(
