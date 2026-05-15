@@ -116,6 +116,10 @@ function initSelect(root: HTMLElement): void {
   }
 
   const nativeSelect = native;
+  nativeSelect.addEventListener("change", () => {
+    syncUIFromNative(root);
+  });
+
   const listEl = list;
   const triggerEl = trigger;
   const triggerField = root.querySelector<HTMLElement>("[data-select-trigger-field]");

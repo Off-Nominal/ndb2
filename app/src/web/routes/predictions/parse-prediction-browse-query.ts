@@ -2,8 +2,8 @@ import { z } from "zod";
 import { queryParamScalar } from "@shared/validation/http";
 import { discordIdSchema } from "@shared/validation/domain";
 import {
-  predictionSearchCreatorDistinctFromUnbetter,
-  predictionSearchQueryCreatorSchema,
+  predictionSearchPredictorDistinctFromUnbetter,
+  predictionSearchQueryPredictorSchema,
   predictionSearchQueryIncludeNonSeasonApplicableSchema,
   predictionSearchQueryKeywordSchema,
   predictionSearchQueryPageSchema,
@@ -12,7 +12,7 @@ import {
   predictionSearchQuerySortBySchema,
   predictionSearchQueryStatusSchema,
   predictionSearchQueryUnbetterSchema,
-  PREDICTION_SEARCH_CREATOR_UNBETTER_DISTINCT_MESSAGE,
+  PREDICTION_SEARCH_PREDICTOR_UNBETTER_DISTINCT_MESSAGE,
 } from "@domain/predictions/prediction-search-query-fields";
 
 /** Browse pager defaults (aligned with {@link predictionBrowseQuerySchema} transforms + canonical URL omissions). */
@@ -28,13 +28,15 @@ export const PREDICTION_BROWSE_DEFAULT_SORT_BY = "due_date-asc";
  *
  * **Defaults** (`sort_by`, `page`, `page_size`, empty `status` ⇒ no filter) apply after validation —
  * unlike v2 **`GET /predictions/search`**, an empty query string is valid.
+ *
+ * Wire **`creator`** maps to **`predictor`** on the parsed object (v2 search parity).
  */
 export const predictionBrowseQuerySchema = z
   .object({
     status: predictionSearchQueryStatusSchema,
     sort_by: predictionSearchQuerySortBySchema,
     keyword: predictionSearchQueryKeywordSchema,
-    creator: predictionSearchQueryCreatorSchema,
+    creator: predictionSearchQueryPredictorSchema,
     unbetter: predictionSearchQueryUnbetterSchema,
     season_id: predictionSearchQuerySeasonIdSchema,
     include_non_season_applicable:
@@ -61,7 +63,7 @@ export const predictionBrowseQuerySchema = z
     status: raw.status ?? [],
     sort_by: raw.sort_by ?? PREDICTION_BROWSE_DEFAULT_SORT_BY,
     keyword: raw.keyword,
-    creator: raw.creator,
+    predictor: raw.creator,
     unbetter: raw.unbetter_id ?? raw.unbetter,
     season_id: raw.season_id,
     include_non_season_applicable:
@@ -69,8 +71,8 @@ export const predictionBrowseQuerySchema = z
     page: raw.page ?? PREDICTION_BROWSE_DEFAULT_PAGE,
     page_size: raw.page_size ?? PREDICTION_BROWSE_DEFAULT_PAGE_SIZE,
   }))
-  .refine(predictionSearchCreatorDistinctFromUnbetter, {
-    message: PREDICTION_SEARCH_CREATOR_UNBETTER_DISTINCT_MESSAGE,
+  .refine(predictionSearchPredictorDistinctFromUnbetter, {
+    message: PREDICTION_SEARCH_PREDICTOR_UNBETTER_DISTINCT_MESSAGE,
   });
 
 export type PredictionBrowseQuery = z.infer<typeof predictionBrowseQuerySchema>;
@@ -96,6 +98,8 @@ export function parsePredictionBrowseQuery(query: unknown) {
  *
  * Uses **`unbetter_id`** on the wire (not **`unbetter`**), matching the location-bar convention described on
  * {@link predictionBrowseQuerySchema}.
+ *
+ * **`predictor`** serializes as query param **`creator`** (v2 search parity).
  */
 export function serializePredictionBrowseQuery(
   query: PredictionBrowseQuery,
@@ -114,8 +118,8 @@ export function serializePredictionBrowseQuery(
     params.set("keyword", query.keyword);
   }
 
-  if (query.creator !== undefined) {
-    params.set("creator", query.creator);
+  if (query.predictor !== undefined) {
+    params.set("creator", query.predictor);
   }
 
   if (query.unbetter !== undefined) {

@@ -9,8 +9,7 @@ import type { PredictionBrowseQuery } from "../../parse-prediction-browse-query"
 import { PredictionStatusLattice } from "../prediction-status-lattice";
 
 const KEYWORD_FIELD_ID = "predictions-keyword";
-const CREATOR_FIELD_ID = "predictions-creator";
-const UNBETTER_FIELD_ID = "predictions-unbetter-id";
+const PREDICTOR_FIELD_ID = "predictions-predictor";
 const EXCLUDE_MY_BETS_CHECKBOX_ID = "predictions-exclude-my-bets";
 const INCLUDE_NON_SEASON_CHECKBOX_ID = "predictions-include-non-season-applicable";
 const SORT_FIELD_ID = "predictions-sort-by";
@@ -18,10 +17,27 @@ const SEASON_FIELD_ID = "predictions-season-id";
 const PAGE_SIZE_FIELD_ID = "predictions-page-size";
 const PAGE_HIDDEN_ID = "predictions-page-hidden";
 
+const SORT_LABELS = {
+  "created_date-asc": "Created Date, Oldest First",
+  "created_date-desc": "Created Date, Newest First",
+  "due_date-asc": "Due Date, Soonest First",
+  "due_date-desc": "Due Date, Latest First",
+  "check_date-asc": "Check Date, Soonest First",
+  "check_date-desc": "Check Date, Latest First",
+  "retired_date-asc": "Retired Date, Oldest First",
+  "retired_date-desc": "Retired Date, Newest First",
+  "triggered_date-asc": "Triggered Date, Oldest First",
+  "triggered_date-desc": "Triggered Date, Newest First",
+  "closed_date-asc": "Closed Date, Oldest First",
+  "closed_date-desc": "Closed Date, Newest First",
+  "judged_date-asc": "Judged Date, Oldest First",
+  "judged_date-desc": "Judged Date, Newest First",
+} as const satisfies Record<API.Endpoints.Predictions.GET_Search.SortByOption, string>;
+
 const SORT_OPTIONS: readonly SelectOption[] =
   API.Endpoints.Predictions.GET_Search.SORT_BY_VALUES.map((value) => ({
     value,
-    label: value.replace(/_/g, " ").replace("-", " · "),
+    label: SORT_LABELS[value],
   }));
 
 const PAGE_SIZE_OPTIONS: readonly SelectOption[] =
@@ -42,6 +58,7 @@ export type PredictionBrowseFormProps = {
    * (see handler **`seasons.getAll`** **`ORDER BY end DESC`**).
    */
   seasonOptions: readonly SelectOption[];
+  predictorOptions: readonly SelectOption[];
   class?: string;
 };
 
@@ -53,9 +70,6 @@ export function PredictionBrowseForm(props: PredictionBrowseFormProps): JSX.Elem
   const excludeMineChecked =
     props.browseQuery.unbetter !== undefined &&
     props.browseQuery.unbetter === props.viewerDiscordId;
-
-  const unbetterTextValue =
-    excludeMineChecked ? "" : (props.browseQuery.unbetter ?? "");
 
   const seasonSelectOptions: readonly SelectOption[] = props.seasonOptions.some(
     (o) => o.value === "",
@@ -72,6 +86,7 @@ export function PredictionBrowseForm(props: PredictionBrowseFormProps): JSX.Elem
       hx-get="/predictions/list"
       hx-target="#predictions-results"
       hx-swap="innerHTML"
+      data-viewer-discord-id={props.viewerDiscordId}
     >
       <div class="predictions-browse-form-fields [ stack ]">
         <FormField label="Keyword" fieldId={KEYWORD_FIELD_ID}>
@@ -85,30 +100,28 @@ export function PredictionBrowseForm(props: PredictionBrowseFormProps): JSX.Elem
           />
         </FormField>
 
-        <FormField label="Creator (Discord ID)" fieldId={CREATOR_FIELD_ID}>
-          <HudTextInput
-            id={CREATOR_FIELD_ID}
-            name="creator"
-            value={props.browseQuery.creator ?? ""}
-            placeholder="Discord snowflake…"
-            maxlength={32}
-            autocomplete="off"
-          />
-        </FormField>
-
-        <FormField
-          label="Exclude bets by user (Discord ID)"
-          fieldId={UNBETTER_FIELD_ID}
-        >
-          <HudTextInput
-            id={UNBETTER_FIELD_ID}
-            {...(excludeMineChecked ? {} : { name: "unbetter_id" })}
-            value={unbetterTextValue}
-            placeholder="Discord snowflake…"
-            maxlength={32}
-            autocomplete="off"
-            disabled={excludeMineChecked}
-          />
+        <FormField label="Predictor" fieldId={PREDICTOR_FIELD_ID}>
+          <div class="predictions-browse-form-predictor">
+            <div class="predictions-browse-form-predictor-select">
+              <Select
+                id={PREDICTOR_FIELD_ID}
+                name="creator"
+                value={props.browseQuery.predictor ?? ""}
+                options={props.predictorOptions}
+                searchable
+                searchPlaceholder="Search members…"
+                aria-label="Predictor (Any predictor = no filter)"
+              />
+            </div>
+            <Button
+              type="button"
+              class="predictions-browse-form-predictor-me"
+              data-predictions-predictor-me=""
+              aria-label="Set predictor filter to yourself"
+            >
+              Me
+            </Button>
+          </div>
         </FormField>
 
         <div class="predictions-browse-form-checkboxes [ stack ]">

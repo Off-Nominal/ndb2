@@ -7,6 +7,7 @@ export type PredictionsPageProps = {
   browseQuery: PredictionBrowseQuery;
   viewerDiscordId: string;
   seasonOptions: readonly SelectOption[];
+  predictorOptions: readonly SelectOption[];
 };
 
 /** Authenticated **`GET /predictions`** — filter form + HTMX results target (fragment in plan step 33). */
@@ -21,6 +22,7 @@ export function PredictionsPage(props: PredictionsPageProps): JSX.Element {
         browseQuery={props.browseQuery}
         viewerDiscordId={props.viewerDiscordId}
         seasonOptions={props.seasonOptions}
+        predictorOptions={props.predictorOptions}
       />
 
       <section id="predictions-results" aria-live="polite" />

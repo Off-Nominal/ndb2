@@ -60,7 +60,7 @@ describe("GET /predictions/search", () => {
     ).toBe(true);
   });
 
-  it("returns 400 when creator and unbetter are the same", async () => {
+  it("returns 400 when predictor (wire creator) and unbetter are the same", async () => {
     const response = await request(app).get(
       "/search?creator=111111111111111111&unbetter=111111111111111111",
     );
@@ -108,7 +108,7 @@ describe("GET /predictions/search", () => {
     ).toBe(true);
   });
 
-  it("returns 404 when creator Discord user does not exist", async () => {
+  it("returns 404 when predictor Discord user does not exist", async () => {
     const response = await request(app).get(
       "/search?creator=987654321098765432",
     );

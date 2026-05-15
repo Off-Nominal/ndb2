@@ -10,4 +10,25 @@
   & .predictions-browse-form-checkboxes {
     padding-block-start: var(--space-1);
   }
+
+  & .predictions-browse-form-predictor {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    min-inline-size: 0;
+  }
+
+  & .predictions-browse-form-predictor-select {
+    flex: 1 1 12rem;
+    min-inline-size: 0;
+  }
+
+  /**
+   * **`Me`** uses default **`.button`** / **`.screen-element`** padding (**`--space-2` × `--space-3`**),
+   * matching **`.select__trigger-field`** so the row heights align with the predictor combobox.
+   */
+  & .predictions-browse-form-predictor-me {
+    flex-shrink: 0;
+  }
 }

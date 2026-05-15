@@ -309,8 +309,8 @@
   }
 
   /**
-   * Keyboard highlight — **no full outline**: a box outline reads as a second rim against **`.select__list`**
-   * borders on the sides. Left inset rail + fill stays distinct from hover / committed selection.
+   * Keyboard highlight — **no outline / inset rail**: those stack awkwardly against **`.select__list`**
+   * chrome; fill + z-index keep the row readable vs hover and muted committed selection.
    */
   & .select__option.select__option--keyboard-active {
     position: relative;
@@ -318,7 +318,7 @@
     background: color-mix(in srgb, var(--color-primary) 44%, var(--color-bg));
     color: var(--color-text);
     outline: none;
-    box-shadow: inset 4px 0 0 0 var(--color-primary);
+    box-shadow: none;
   }
 
   & .select__option.select__option--keyboard-active:hover {
@@ -375,5 +375,46 @@
     color: var(--color-text-muted);
     letter-spacing: 0.04em;
     line-height: var(--leading-snug);
+  }
+
+  /* Guild member rows (`SelectOption.labelHtml`, predictions creator filter) */
+  & .select__member-option {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-2);
+    text-align: start;
+    min-inline-size: 0;
+    max-width: 100%;
+  }
+
+  & .select__member-option-avatar {
+    flex-shrink: 0;
+    inline-size: 1.75rem;
+    block-size: 1.75rem;
+    border-radius: var(--radius-full);
+    object-fit: cover;
+    background: color-mix(in srgb, var(--color-text-muted) 18%, transparent);
+  }
+
+  & .select__member-option-name {
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-snug);
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+
+  & .select__member-option-hint {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    letter-spacing: 0.04em;
+    line-height: var(--leading-snug);
+  }
+
+  & .select__member-option--fallback {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
   }
 }
