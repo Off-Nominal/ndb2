@@ -3,6 +3,9 @@
  * Do not edit by hand.
  */
 
+/* ndb2:block: routes/admin/components/season-end-webhook-form/season-end-webhook-form.css */
+@import "../routes/admin/components/season-end-webhook-form/season-end-webhook-form.css";
+
 /* ndb2:block: routes/home/components/home-performance-card/home-performance-card.css */
 @import "../routes/home/components/home-performance-card/home-performance-card.css";
 
