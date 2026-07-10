@@ -1,6 +1,8 @@
 export {
   DISCORD_EMBED_AVATAR_PLACEHOLDER_URL,
   discordDefaultEmbedAvatarUrl,
+  resolveDiscordAvatarUrl,
+  type DiscordAvatarUrlInput,
 } from "./discord-default-avatar-url";
 export {
   fetchGuildMember,
@@ -14,12 +16,17 @@ export {
   connectDiscordGatewayInBackground,
   stopDiscordGatewayClient,
   getDiscordGatewayClient,
+  getDiscordGatewayClientIfReady,
+  getDiscordGatewayStatus,
   isDiscordGatewayReady,
+  type DiscordGatewayStatus,
 } from "./discord-js-client";
 export {
   guildMemberToProfile,
   userToProfile,
+  fallbackMemberProfile,
   getMemberProfile,
+  tryGetMemberProfile,
   getMemberProfilesGuildOnly,
   getPortalGuild,
   memberProfileFromDiscordUsersCache,

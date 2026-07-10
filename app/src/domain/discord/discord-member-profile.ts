@@ -1,12 +1,27 @@
 import type { Client, Guild, GuildMember } from "discord.js";
 import { config } from "@config";
+import {
+  discordDefaultEmbedAvatarUrl,
+  resolveDiscordAvatarUrl,
+} from "./discord-default-avatar-url.js";
 import { forEachGuildMemberFetchChunk } from "./guild-members-chunk-fetch.js";
-import { getDiscordGatewayClient } from "./discord-js-client";
+import {
+  getDiscordGatewayClient,
+  isDiscordGatewayReady,
+} from "./discord-js-client";
 
 export type DiscordMemberProfile = {
   displayName: string;
   avatarUrl: string;
 };
+
+/** Placeholder profile when the gateway client is unavailable or lookup fails. */
+export function fallbackMemberProfile(discordId: string): DiscordMemberProfile {
+  return {
+    displayName: discordId,
+    avatarUrl: resolveDiscordAvatarUrl(discordId),
+  };
+}
 
 /** Narrow shape for tests and mapping without importing full GuildMember behavior. */
 export type GuildMemberProfileSource = {
@@ -125,6 +140,23 @@ export async function getMemberProfile(discordId: string): Promise<DiscordMember
 }
 
 /**
+ * Like {@link getMemberProfile} but returns {@link fallbackMemberProfile} when the gateway
+ * is not ready or the lookup throws.
+ */
+export async function tryGetMemberProfile(
+  discordId: string,
+): Promise<DiscordMemberProfile> {
+  if (!isDiscordGatewayReady()) {
+    return fallbackMemberProfile(discordId);
+  }
+  try {
+    return await getMemberProfile(discordId);
+  } catch {
+    return fallbackMemberProfile(discordId);
+  }
+}
+
+/**
  * Resolves **portal guild membership only** for many Discord ids via chunked `guild.members.fetch({ user })`.
  * Dedupes ids; repeated resolution relies on discord.js guild member caching.
  *
@@ -134,11 +166,19 @@ export async function getMemberProfile(discordId: string): Promise<DiscordMember
 export async function getMemberProfilesGuildOnly(
   discordIds: string[],
 ): Promise<Map<string, DiscordMemberProfile | null>> {
+  const deduped = [...new Set(discordIds)];
+  const out = new Map<string, DiscordMemberProfile | null>();
+
+  if (!isDiscordGatewayReady()) {
+    for (const id of deduped) {
+      out.set(id, null);
+    }
+    return out;
+  }
+
   const client = getDiscordGatewayClient();
   const guildId = config.discord.webPortal.guildId;
   const guild = await getPortalGuild(client, guildId);
-  const deduped = [...new Set(discordIds)];
-  const out = new Map<string, DiscordMemberProfile | null>();
 
   await forEachGuildMemberFetchChunk(guild, deduped, {
     onChunkSucceeded: async (chunk, collection) => {

@@ -1,7 +1,7 @@
 import path from "node:path";
 import express, { type Express } from "express";
 import pool from "@data/db";
-import { isDiscordGatewayReady } from "@domain/discord";
+import { getDiscordGatewayStatus, isDiscordGatewayReady } from "@domain/discord";
 import { isDev } from "@shared/utils";
 import { logStartup, logStartupError } from "@shared/startup-log";
 import { mountJsonApi } from "../api/mountJsonApi";
@@ -58,6 +58,7 @@ export async function createApp(): Promise<Express> {
       return res.status(200).json({
         status: "healthy",
         discord: isDiscordGatewayReady() ? "connected" : "connecting",
+        discordStatus: getDiscordGatewayStatus(),
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);

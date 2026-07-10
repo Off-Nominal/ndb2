@@ -96,4 +96,18 @@ describe("AuthenticatedPageLayout", () => {
     });
     expect(html).not.toContain('href="/admin"');
   });
+
+  it("shows discord gateway banner when status is not connected", () => {
+    const html = AuthenticatedPageLayout({
+      theme: "dark",
+      colorScheme: "nebula",
+      title: documentTitle("Auth"),
+      auth: testAuth,
+      discordProfile: testProfile,
+      discordGatewayStatus: "connecting",
+      children: createElement("p", null, "hello"),
+    });
+    expect(html).toContain("discord-gateway-banner");
+    expect(html).toContain("Connecting to Discord");
+  });
 });
