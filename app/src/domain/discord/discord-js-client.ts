@@ -288,3 +288,14 @@ export function __resetDiscordGatewayClientForTests(): void {
   setGatewayStatus("disconnected");
   stopConnectLoop = false;
 }
+
+/** Test-only injection of gateway client / loop state. */
+export function __setDiscordGatewayClientForTests(
+  mock: { isReady(): boolean } | null,
+): void {
+  client = mock as Client;
+}
+
+export function __setConnectLoopRunningForTests(value: boolean): void {
+  connectLoopRunning = value;
+}

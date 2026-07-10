@@ -1,9 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   __resetDiscordGatewayClientForTests,
+  __setConnectLoopRunningForTests,
+  __setDiscordGatewayClientForTests,
   applyDiscordGatewayRetryJitter,
   baseDiscordGatewayRetryDelayMs,
+  getDiscordGatewayClient,
+  getDiscordGatewayClientIfReady,
   getDiscordGatewayStatus,
+  isDiscordGatewayReady,
   isLikelyPermanentDiscordAuthError,
 } from "./discord-js-client";
 
@@ -49,5 +54,66 @@ describe("getDiscordGatewayStatus", () => {
 
   it("starts disconnected before any connect attempt", () => {
     expect(getDiscordGatewayStatus()).toBe("disconnected");
+  });
+
+  it("returns connected when the client is ready", () => {
+    __setDiscordGatewayClientForTests({ isReady: () => true });
+    expect(getDiscordGatewayStatus()).toBe("connected");
+  });
+
+  it("returns connecting while the background loop is running", () => {
+    __setConnectLoopRunningForTests(true);
+    expect(getDiscordGatewayStatus()).toBe("connecting");
+  });
+
+  it("prefers connected over connecting when the client is ready", () => {
+    __setDiscordGatewayClientForTests({ isReady: () => true });
+    __setConnectLoopRunningForTests(true);
+    expect(getDiscordGatewayStatus()).toBe("connected");
+  });
+});
+
+describe("isDiscordGatewayReady", () => {
+  afterEach(() => {
+    __resetDiscordGatewayClientForTests();
+  });
+
+  it("is false when disconnected", () => {
+    expect(isDiscordGatewayReady()).toBe(false);
+  });
+
+  it("is true only when status is connected", () => {
+    __setDiscordGatewayClientForTests({ isReady: () => true });
+    expect(isDiscordGatewayReady()).toBe(true);
+  });
+});
+
+describe("getDiscordGatewayClient accessors", () => {
+  afterEach(() => {
+    __resetDiscordGatewayClientForTests();
+  });
+
+  it("getDiscordGatewayClient throws when not started", () => {
+    expect(() => getDiscordGatewayClient()).toThrow(
+      "Discord gateway client not started",
+    );
+  });
+
+  it("getDiscordGatewayClient returns the live client", () => {
+    const mock = { isReady: () => true };
+    __setDiscordGatewayClientForTests(mock);
+    expect(getDiscordGatewayClient()).toBe(mock);
+  });
+
+  it("getDiscordGatewayClientIfReady returns null when absent or not ready", () => {
+    expect(getDiscordGatewayClientIfReady()).toBeNull();
+    __setDiscordGatewayClientForTests({ isReady: () => false });
+    expect(getDiscordGatewayClientIfReady()).toBeNull();
+  });
+
+  it("getDiscordGatewayClientIfReady returns the client when ready", () => {
+    const mock = { isReady: () => true };
+    __setDiscordGatewayClientForTests(mock);
+    expect(getDiscordGatewayClientIfReady()).toBe(mock);
   });
 });
