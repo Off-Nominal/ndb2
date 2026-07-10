@@ -1,14 +1,9 @@
 import {
-  discordDefaultEmbedAvatarUrl,
-  DISCORD_EMBED_AVATAR_PLACEHOLDER_URL,
+  resolveDiscordAvatarUrl,
+  type DiscordAvatarUrlInput,
 } from "@domain/discord";
 
-export type DiscordAvatarUrl = string | null | undefined | false;
-
-/** True when {@link DiscordAvatar} should prefer a custom CDN / remote `<img>` `src`. */
-function isDiscordAvatarImgUrl(url: DiscordAvatarUrl): url is string {
-  return typeof url === "string" && url.trim().length > 0;
-}
+export type DiscordAvatarUrl = DiscordAvatarUrlInput;
 
 export interface DiscordAvatarProps {
   /** Edge length in CSS pixels. Default `20`. */
@@ -22,17 +17,13 @@ export interface DiscordAvatarProps {
 }
 
 /**
- * Square Discord user avatar `<img>`: custom `url` when set, otherwise `embed/avatars` `(id >> 22) % 6`
- * (placeholder `embed/avatars/0.png` only if the id string does not parse).
+ * Square Discord user avatar `<img>`: custom `url` when set, otherwise the default embed PNG
+ * for {@link DiscordAvatarProps.discordUserId} (see {@link resolveDiscordAvatarUrl}).
  */
 export function DiscordAvatar(props: DiscordAvatarProps): JSX.Element {
   const size = props.size ?? 20;
   const frameStyle = `--discord-avatar-size:${size}px`;
-
-  const customUrl = isDiscordAvatarImgUrl(props.url) ? props.url.trim() : null;
-  const imgSrc =
-    customUrl ??
-    (discordDefaultEmbedAvatarUrl(props.discordUserId) ?? DISCORD_EMBED_AVATAR_PLACEHOLDER_URL);
+  const imgSrc = resolveDiscordAvatarUrl(props.discordUserId, props.url);
 
   return (
     <span class="[ discord-avatar ]" style={frameStyle}>

@@ -2,6 +2,7 @@ import type { WebAuthAuthenticated } from "../../../middleware/auth/session";
 import type { ColorScheme, ThemePreference } from "../../../middleware/theme-preference";
 import type { DiscordMemberProfile } from "@domain/discord";
 import { Button } from "../button";
+import { DiscordAvatar } from "../discord-avatar";
 import { PreferencesForm } from "../preferences-form";
 
 const SITE_NAV_TITLE = "Nostradambot2";
@@ -55,14 +56,11 @@ export function NavigationMenu(props: NavigationMenuProps): JSX.Element {
 
       <div class="[ stack ]">
         <div class="[ split-pair ]">
-
-          <img
-
-            src={props.discordProfile.avatarUrl}
+          <DiscordAvatar
+            discordUserId={props.auth.discordId}
+            url={props.discordProfile.avatarUrl}
+            size={40}
             alt=""
-            width={40}
-            height={40}
-            loading="lazy"
           />
           <span>{props.discordProfile.displayName}</span>
         </div>

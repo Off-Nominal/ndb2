@@ -6,15 +6,16 @@ import resultsQueries, {
 } from "@data/queries/results";
 import { getDbClient } from "@data/db/getDbClient";
 import {
-  getDiscordGatewayClient,
-  getMemberProfile,
+  fallbackMemberProfile,
+  getDiscordGatewayClientIfReady,
+  getDiscordGatewayStatus,
   getMemberProfilesGuildOnly,
   memberProfileFromDiscordUsersCache,
   prefetchUserProfileFallback,
   resolveUserProfileFallback,
 } from "@domain/discord";
 import { Route } from "@shared/routerMap";
-import { resolveWebAdminAccess } from "../../auth/web-admin-access";
+import { resolveAuthenticatedShell } from "../../auth/resolve-authenticated-shell";
 import { getWebAuth } from "../../middleware/auth/session";
 import { requireWebAuth } from "../../middleware/auth/require-auth";
 import { getColorScheme, getThemePreference } from "../../middleware/theme-preference";
@@ -55,7 +56,7 @@ async function loadHomePageLeaderboardForSeasonId(
   const profileByDiscord = await getMemberProfilesGuildOnly(
     leaderboardRows.map((row) => row.user.discord_id),
   );
-  const discordClient = getDiscordGatewayClient();
+  const discordClient = getDiscordGatewayClientIfReady();
   const prefetchStartedForDiscordId = new Set<string>();
 
   return {
@@ -65,7 +66,7 @@ async function loadHomePageLeaderboardForSeasonId(
       let profile = profileByDiscord.get(discordId) ?? null;
       let needsDeferredProfile = profile === null;
 
-      if (needsDeferredProfile) {
+      if (needsDeferredProfile && discordClient) {
         const fromUsersCache = memberProfileFromDiscordUsersCache(discordClient, discordId);
         if (fromUsersCache) {
           profile = fromUsersCache;
@@ -74,11 +75,13 @@ async function loadHomePageLeaderboardForSeasonId(
           prefetchStartedForDiscordId.add(discordId);
           prefetchUserProfileFallback(discordClient, discordId);
         }
+      } else if (needsDeferredProfile && !discordClient) {
+        needsDeferredProfile = false;
       }
 
       return {
         discordId,
-        displayName: profile?.displayName ?? "Unknown member",
+        displayName: profile?.displayName ?? discordId,
         avatarUrl: profile?.avatarUrl ?? null,
         needsDeferredProfile,
         predictions: row.predictions,
@@ -152,10 +155,7 @@ export const Home: Route = (router: Router) => {
         };
       }
 
-      const [discordProfile, showAdminNav] = await Promise.all([
-        getMemberProfile(auth.discordId),
-        resolveWebAdminAccess(auth.discordId),
-      ]);
+      const { discordProfile, showAdminNav } = await resolveAuthenticatedShell(auth);
 
       const html = await Promise.resolve(
         <AuthenticatedPageLayout
@@ -165,6 +165,7 @@ export const Home: Route = (router: Router) => {
           auth={auth}
           discordProfile={discordProfile}
           showAdminNav={showAdminNav}
+          discordGatewayStatus={getDiscordGatewayStatus()}
           csrfMetaToken={auth.csrfToken}
           hxHeaders={csrfHeadersJson}
         >
@@ -248,14 +249,14 @@ export const Home: Route = (router: Router) => {
         return;
       }
 
-      const profile = await resolveUserProfileFallback(
-        getDiscordGatewayClient(),
-        parsed.data.discord_id,
-      );
+      const discordClient = getDiscordGatewayClientIfReady();
+      const profile = discordClient
+        ? await resolveUserProfileFallback(discordClient, parsed.data.discord_id)
+        : fallbackMemberProfile(parsed.data.discord_id);
       const html = await Promise.resolve(
         <LeaderboardPlayerIdentityOobCells
           discordId={parsed.data.discord_id}
-          displayName={profile?.displayName ?? "Unknown member"}
+          displayName={profile?.displayName ?? parsed.data.discord_id}
           avatarUrl={profile?.avatarUrl ?? null}
         />,
       );

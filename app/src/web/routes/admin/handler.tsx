@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { getMemberProfile } from "@domain/discord";
+import { getDiscordGatewayStatus } from "@domain/discord";
 import { Route } from "@shared/routerMap";
-import { resolveWebAdminAccess } from "../../auth/web-admin-access";
+import { resolveAuthenticatedShell } from "../../auth/resolve-authenticated-shell";
 import { getWebAuth } from "../../middleware/auth/session";
 import { requireWebAuth } from "../../middleware/auth/require-auth";
 import { requireWebAdmin } from "../../middleware/auth/require-web-admin";
@@ -24,10 +24,7 @@ export const Admin: Route = (router: Router) => {
         return;
       }
 
-      const [discordProfile, showAdminNav] = await Promise.all([
-        getMemberProfile(auth.discordId),
-        resolveWebAdminAccess(auth.discordId),
-      ]);
+      const { discordProfile, showAdminNav } = await resolveAuthenticatedShell(auth);
       const csrfHeadersJson = JSON.stringify({ "X-CSRF-Token": auth.csrfToken });
 
       const html = await Promise.resolve(
@@ -38,6 +35,7 @@ export const Admin: Route = (router: Router) => {
           auth={auth}
           discordProfile={discordProfile}
           showAdminNav={showAdminNav}
+          discordGatewayStatus={getDiscordGatewayStatus()}
           csrfMetaToken={auth.csrfToken}
           hxHeaders={csrfHeadersJson}
         >

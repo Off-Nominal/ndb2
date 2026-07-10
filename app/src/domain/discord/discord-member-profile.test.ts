@@ -3,6 +3,7 @@ import type { Client, GuildMember } from "discord.js";
 
 const ctx = vi.hoisted(() => {
   const fetchMember = vi.fn();
+  const isGatewayReady = vi.fn(() => true);
 
   const guild = {
     members: {
@@ -27,11 +28,12 @@ const ctx = vi.hoisted(() => {
     },
   }));
 
-  return { fetchMember, fetchUser, guild, getClient };
+  return { fetchMember, fetchUser, guild, getClient, isGatewayReady };
 });
 
 vi.mock("./discord-js-client.js", () => ({
   getDiscordGatewayClient: () => ctx.getClient(),
+  isDiscordGatewayReady: () => ctx.isGatewayReady(),
 }));
 
 vi.mock("@config", () => ({
@@ -43,9 +45,11 @@ vi.mock("@config", () => ({
 }));
 
 import {
+  fallbackMemberProfile,
   getMemberProfilesGuildOnly,
   guildMemberToProfile,
   memberProfileFromDiscordUsersCache,
+  tryGetMemberProfile,
   userToProfile,
 } from "./discord-member-profile.js";
 
@@ -128,8 +132,69 @@ describe("memberProfileFromDiscordUsersCache", () => {
   });
 });
 
+describe("fallbackMemberProfile", () => {
+  it("uses snowflake as display name and default embed avatar", () => {
+    const id = "100000000000000001";
+    const profile = fallbackMemberProfile(id);
+    expect(profile.displayName).toBe(id);
+    expect(profile.avatarUrl).toContain("embed/avatars/");
+  });
+});
+
+describe("tryGetMemberProfile", () => {
+  beforeEach(() => {
+    ctx.isGatewayReady.mockReturnValue(true);
+    ctx.fetchMember.mockReset();
+    ctx.fetchMember.mockImplementation(
+      async ({ user }: { user: string | string[] }) => {
+        const ids = Array.isArray(user) ? user : [user];
+        const m = new Map<string, Pick<GuildMember, "displayName" | "displayAvatarURL">>();
+        for (const id of ids) {
+          m.set(id, {
+            displayName: `user-${id}`,
+            displayAvatarURL: () => `https://cdn.example/${id}.png`,
+          });
+        }
+        return m;
+      },
+    );
+  });
+
+  it("returns fallback when gateway is not ready", async () => {
+    ctx.isGatewayReady.mockReturnValueOnce(false);
+
+    const profile = await tryGetMemberProfile("100000000000000001");
+    expect(profile.displayName).toBe("100000000000000001");
+  });
+
+  it("returns guild profile when gateway is ready", async () => {
+    ctx.fetchMember.mockImplementation(async ({ user }: { user: string | string[] }) => {
+      const id = Array.isArray(user) ? user[0]! : user;
+      return {
+        displayName: `user-${id}`,
+        displayAvatarURL: () => `https://cdn.example/${id}.png`,
+      };
+    });
+
+    const profile = await tryGetMemberProfile("9");
+    expect(profile.displayName).toBe("user-9");
+    expect(profile.avatarUrl).toBe("https://cdn.example/9.png");
+  });
+
+  it("returns fallback when gateway lookup throws", async () => {
+    const id = "100000000000000001";
+    ctx.fetchMember.mockRejectedValue(new Error("Discord down"));
+
+    const profile = await tryGetMemberProfile(id);
+
+    expect(profile.displayName).toBe(id);
+    expect(profile.avatarUrl).toContain("embed/avatars/");
+  });
+});
+
 describe("getMemberProfilesGuildOnly", () => {
   beforeEach(() => {
+    ctx.isGatewayReady.mockReturnValue(true);
     ctx.fetchMember.mockReset();
     ctx.fetchMember.mockImplementation(
       async ({ user }: { user: string | string[] }) => {
@@ -151,6 +216,16 @@ describe("getMemberProfilesGuildOnly", () => {
 
   afterEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("returns null entries when gateway is not ready", async () => {
+    ctx.isGatewayReady.mockReturnValueOnce(false);
+
+    const map = await getMemberProfilesGuildOnly(["9", "8"]);
+
+    expect(ctx.fetchMember).not.toHaveBeenCalled();
+    expect(map.get("9")).toBeNull();
+    expect(map.get("8")).toBeNull();
   });
 
   it("dedupes discord ids so each guild member is fetched at most once", async () => {
