@@ -8,8 +8,10 @@ export {
 } from "./discord-gateway";
 export {
   startDiscordGatewayClient,
+  connectDiscordGatewayInBackground,
   stopDiscordGatewayClient,
   getDiscordGatewayClient,
+  isDiscordGatewayReady,
 } from "./discord-js-client";
 export {
   guildMemberToProfile,

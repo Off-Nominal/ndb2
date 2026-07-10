@@ -2,7 +2,7 @@ import type { Server } from "node:http";
 import { config } from "@config";
 import { createLogger } from "@mendahu/utilities";
 import {
-  startDiscordGatewayClient,
+  connectDiscordGatewayInBackground,
   stopDiscordGatewayClient,
 } from "@domain/discord";
 import PredictionMonitor from "@domain/predictions/prediction-monitor";
@@ -39,13 +39,7 @@ function logFatal(label: string, err: unknown): void {
   logger.error(label, { detail: String(err) });
 }
 
-async function startBackgroundServices() {
-  const portal = config.discord.webPortal;
-  await startDiscordGatewayClient({
-    token: portal.botToken,
-    guildId: portal.guildId,
-  });
-
+function startBackgroundServices() {
   const monitor = new PredictionMonitor(monitors);
   monitor.initiate();
 
@@ -53,6 +47,12 @@ async function startBackgroundServices() {
 
   const seasonMonitor = new SeasonMonitor(seasonMonitors);
   seasonMonitor.initiate();
+
+  const portal = config.discord.webPortal;
+  connectDiscordGatewayInBackground({
+    token: portal.botToken,
+    guildId: portal.guildId,
+  });
 }
 
 async function shutdown(signal: string): Promise<void> {
@@ -108,8 +108,8 @@ async function main(): Promise<void> {
 
   try {
     await waitForDatabase();
-    logStartup("Database ready; starting Discord and monitors");
-    await startBackgroundServices();
+    logStartup("Database ready; starting monitors and Discord gateway");
+    startBackgroundServices();
     markReady();
     logStartup("Ready");
     logger.log("Application ready");
