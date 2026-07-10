@@ -12,6 +12,8 @@ export type NavigationMenuProps = {
   colorScheme: ColorScheme;
   /** Guild display name + avatar from discord.js cache. */
   discordProfile: DiscordMemberProfile;
+  /** When true, show the Admin nav link (hosts/mods only). */
+  showAdminNav?: boolean;
   /** Suffix for control `id`s when two menus exist (e.g. `-desktop`). */
   preferencesControlIdSuffix?: string;
 };
@@ -44,6 +46,11 @@ export function NavigationMenu(props: NavigationMenuProps): JSX.Element {
         <li>
           <Button class="[ full-width ]" href="/profile">Profile</Button>
         </li>
+        {props.showAdminNav ? (
+          <li>
+            <Button class="[ full-width ]" href="/admin">Admin</Button>
+          </li>
+        ) : null}
       </ul>
 
       <div class="[ stack ]">

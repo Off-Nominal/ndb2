@@ -31,6 +31,11 @@ process.env.DISCORD_BOT_TOKEN =
 process.env.OFFNOMDISCORD_GUILD_ID =
   process.env.OFFNOMDISCORD_GUILD_ID ?? "123456789012345678";
 
+process.env.ROLE_ID_HOST =
+  process.env.ROLE_ID_HOST ?? "111111111111111111";
+process.env.ROLE_ID_MODS =
+  process.env.ROLE_ID_MODS ?? "222222222222222222";
+
 if (!Object.keys(process.env).some((k) => k.startsWith("ROLE_ID_") && process.env[k]?.trim())) {
   process.env.ROLE_ID_TEST = "987654321098765432";
 }

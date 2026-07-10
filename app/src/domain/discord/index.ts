@@ -7,6 +7,9 @@ export {
   type GuildMemberSummary,
 } from "./discord-gateway";
 export {
+  memberHasAnyRole,
+} from "./member-has-any-role";
+export {
   startDiscordGatewayClient,
   connectDiscordGatewayInBackground,
   stopDiscordGatewayClient,

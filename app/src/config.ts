@@ -15,6 +15,20 @@ export function collectWebPortalRoleIdsFromEnv(
   return ids;
 }
 
+/** Host and mod role snowflakes for web admin access (`ROLE_ID_HOST`, `ROLE_ID_MODS`). */
+export function collectWebAdminRoleIdsFromEnv(
+  env: NodeJS.ProcessEnv,
+): string[] {
+  const ids: string[] = [];
+  for (const key of ["ROLE_ID_HOST", "ROLE_ID_MODS"] as const) {
+    const value = env[key]?.trim();
+    if (value) {
+      ids.push(value);
+    }
+  }
+  return ids;
+}
+
 const nonEmptyTrimmed = z
   .string()
   .transform((s) => s.trim())
@@ -73,6 +87,9 @@ const rawConfigSchema = z.object({
   webPortalAllowedRoleIds: z
     .array(z.string().min(1))
     .min(1, "Set at least one ROLE_ID_* with an allowed Discord role id"),
+  webAdminRoleIds: z
+    .array(z.string().min(1))
+    .min(1, "Set ROLE_ID_HOST and/or ROLE_ID_MODS"),
   webDiscordAuthzRecheckHours: webDiscordAuthzRecheckHoursSchema,
 });
 
@@ -95,6 +112,7 @@ const RAW_FIELD_TO_ENV_NAME: Record<string, string> = {
   offnomDiscordGuildId: "OFFNOMDISCORD_GUILD_ID",
   webPortalAllowedRoleIds:
     "ROLE_ID_* (at least one, e.g. ROLE_ID_HOST=…)",
+  webAdminRoleIds: "ROLE_ID_HOST and/or ROLE_ID_MODS",
   webDiscordAuthzRecheckHours: "WEB_DISCORD_AUTHZ_RECHECK_HOURS",
 };
 
@@ -240,6 +258,7 @@ const appConfigSchema = rawConfigSchema.transform((raw) => ({
       botToken: raw.discordBotToken,
       guildId: raw.offnomDiscordGuildId,
       allowedRoleIds: raw.webPortalAllowedRoleIds,
+      adminRoleIds: raw.webAdminRoleIds,
     },
     authzRecheckMs: raw.webDiscordAuthzRecheckHours * 60 * 60 * 1000,
   },
@@ -263,6 +282,7 @@ function buildRawFromProcessEnv(): unknown {
     discordBotToken: process.env.DISCORD_BOT_TOKEN,
     offnomDiscordGuildId: process.env.OFFNOMDISCORD_GUILD_ID,
     webPortalAllowedRoleIds: collectWebPortalRoleIdsFromEnv(process.env),
+    webAdminRoleIds: collectWebAdminRoleIdsFromEnv(process.env),
     webDiscordAuthzRecheckHours: process.env.WEB_DISCORD_AUTHZ_RECHECK_HOURS,
   };
 }

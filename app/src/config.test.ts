@@ -1,6 +1,7 @@
 import { z, ZodError } from "zod";
 import { describe, expect, it } from "vitest";
 import {
+  collectWebAdminRoleIdsFromEnv,
   collectWebPortalRoleIdsFromEnv,
   formatConfigError,
   resolveTrustProxy,
@@ -14,6 +15,24 @@ describe("collectWebPortalRoleIdsFromEnv", () => {
       OTHER: "x",
     } as NodeJS.ProcessEnv;
     expect(collectWebPortalRoleIdsFromEnv(env)).toEqual(["111", "222"]);
+  });
+});
+
+describe("collectWebAdminRoleIdsFromEnv", () => {
+  it("collects only ROLE_ID_HOST and ROLE_ID_MODS", () => {
+    const env = {
+      ROLE_ID_HOST: "111",
+      ROLE_ID_MODS: "222",
+      ROLE_ID_TEST: "333",
+    } as NodeJS.ProcessEnv;
+    expect(collectWebAdminRoleIdsFromEnv(env)).toEqual(["111", "222"]);
+  });
+
+  it("returns a single id when only one admin role is set", () => {
+    const env = {
+      ROLE_ID_HOST: "111",
+    } as NodeJS.ProcessEnv;
+    expect(collectWebAdminRoleIdsFromEnv(env)).toEqual(["111"]);
   });
 });
 

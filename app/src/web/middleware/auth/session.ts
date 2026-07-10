@@ -4,7 +4,7 @@ import type { RequestHandler } from "express";
 import type { PoolClient } from "pg";
 import { getDbClient } from "@data/db/getDbClient";
 import webSessionsQueries from "@data/queries/web_sessions";
-import { fetchGuildMember } from "@domain/discord";
+import { fetchGuildMember, memberHasAnyRole } from "@domain/discord";
 import {
   buildSessionClearCookieHeader,
   parseSessionCookie,
@@ -68,9 +68,7 @@ async function recheckDiscordAuthzIfStale(
       await webSessionsQueries.revoke(dbClient)(row.id);
       return { outcome: "revoked" };
     }
-    const allowed = portal.allowedRoleIds.some((id) =>
-      member.roles.includes(id),
-    );
+    const allowed = memberHasAnyRole(member.roles, portal.allowedRoleIds);
     if (!allowed) {
       await webSessionsQueries.revoke(dbClient)(row.id);
       return { outcome: "revoked" };

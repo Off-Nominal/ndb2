@@ -26,6 +26,8 @@ export type AuthenticatedPageLayoutProps = PageLayoutProps & {
   auth: WebAuthAuthenticated;
   /** Resolved from discord.js guild member cache for nav display. */
   discordProfile: DiscordMemberProfile;
+  /** When true, show the Admin nav link (hosts/mods only). */
+  showAdminNav?: boolean;
 };
 
 function DocumentFrame(props: PageLayoutProps): JSX.Element {
@@ -101,15 +103,17 @@ export function AuthenticatedPageLayout(props: AuthenticatedPageLayoutProps): JS
                   discordProfile={props.discordProfile}
                   theme={props.theme}
                   colorScheme={props.colorScheme}
+                  showAdminNav={props.showAdminNav}
                 />
               </div>
             </div>
             <div class="[ page-layout-nav-desktop ]">
               <NavigationMenu
-                auth={props.auth}
-                discordProfile={props.discordProfile}
-                theme={props.theme}
-                colorScheme={props.colorScheme}
+                  auth={props.auth}
+                  discordProfile={props.discordProfile}
+                  theme={props.theme}
+                  colorScheme={props.colorScheme}
+                  showAdminNav={props.showAdminNav}
                 preferencesControlIdSuffix="-desktop"
               />
             </div>

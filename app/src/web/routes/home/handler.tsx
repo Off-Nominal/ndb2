@@ -14,6 +14,7 @@ import {
   resolveUserProfileFallback,
 } from "@domain/discord";
 import { Route } from "@shared/routerMap";
+import { resolveWebAdminAccess } from "../../auth/web-admin-access";
 import { getWebAuth } from "../../middleware/auth/session";
 import { requireWebAuth } from "../../middleware/auth/require-auth";
 import { getColorScheme, getThemePreference } from "../../middleware/theme-preference";
@@ -151,7 +152,10 @@ export const Home: Route = (router: Router) => {
         };
       }
 
-      const discordProfile = await getMemberProfile(auth.discordId);
+      const [discordProfile, showAdminNav] = await Promise.all([
+        getMemberProfile(auth.discordId),
+        resolveWebAdminAccess(auth.discordId),
+      ]);
 
       const html = await Promise.resolve(
         <AuthenticatedPageLayout
@@ -160,6 +164,7 @@ export const Home: Route = (router: Router) => {
           title={documentTitle()}
           auth={auth}
           discordProfile={discordProfile}
+          showAdminNav={showAdminNav}
           csrfMetaToken={auth.csrfToken}
           hxHeaders={csrfHeadersJson}
         >
