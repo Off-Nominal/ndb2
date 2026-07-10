@@ -8,7 +8,7 @@ import {
   serializePredictionBrowseQuery,
   type PredictionBrowseQuery,
 } from "./parse-prediction-browse-query";
-import { PREDICTION_SEARCH_CREATOR_UNBETTER_DISTINCT_MESSAGE } from "@domain/predictions/prediction-search-query-fields";
+import { PREDICTION_SEARCH_PREDICTOR_UNBETTER_DISTINCT_MESSAGE } from "@domain/predictions/prediction-search-query-fields";
 
 const DID_A = "111111111111111111";
 const DID_B = "222222222222222222";
@@ -31,7 +31,7 @@ describe("parsePredictionBrowseQuery", () => {
       status: [],
       sort_by: PREDICTION_BROWSE_DEFAULT_SORT_BY,
       keyword: undefined,
-      creator: undefined,
+      predictor: undefined,
       unbetter: undefined,
       season_id: undefined,
       include_non_season_applicable: false,
@@ -54,7 +54,7 @@ describe("parsePredictionBrowseQuery", () => {
         status: [],
         sort_by: "created_date-desc",
         keyword: "mars landing",
-        creator: undefined,
+        predictor: undefined,
         unbetter: undefined,
         season_id: undefined,
         include_non_season_applicable: false,
@@ -69,7 +69,7 @@ describe("parsePredictionBrowseQuery", () => {
         status: [],
         sort_by: PREDICTION_BROWSE_DEFAULT_SORT_BY,
         keyword: undefined,
-        creator: undefined,
+        predictor: undefined,
         unbetter: undefined,
         season_id: undefined,
         include_non_season_applicable: false,
@@ -84,7 +84,7 @@ describe("parsePredictionBrowseQuery", () => {
         status: ["open", "closed"],
         sort_by: PREDICTION_BROWSE_DEFAULT_SORT_BY,
         keyword: undefined,
-        creator: undefined,
+        predictor: undefined,
         unbetter: undefined,
         season_id: undefined,
         include_non_season_applicable: false,
@@ -102,7 +102,7 @@ describe("parsePredictionBrowseQuery", () => {
         status: [],
         sort_by: PREDICTION_BROWSE_DEFAULT_SORT_BY,
         keyword: undefined,
-        creator: undefined,
+        predictor: undefined,
         unbetter: undefined,
         season_id: 12,
         include_non_season_applicable: true,
@@ -111,13 +111,13 @@ describe("parsePredictionBrowseQuery", () => {
       },
     ],
     [
-      "creator + unbetter_id (location bar)",
+      "predictor + unbetter_id (location bar; wire creator)",
       { creator: DID_A, unbetter_id: DID_B },
       {
         status: [],
         sort_by: PREDICTION_BROWSE_DEFAULT_SORT_BY,
         keyword: undefined,
-        creator: DID_A,
+        predictor: DID_A,
         unbetter: DID_B,
         season_id: undefined,
         include_non_season_applicable: false,
@@ -132,7 +132,7 @@ describe("parsePredictionBrowseQuery", () => {
         status: [],
         sort_by: PREDICTION_BROWSE_DEFAULT_SORT_BY,
         keyword: undefined,
-        creator: undefined,
+        predictor: undefined,
         unbetter: DID_B,
         season_id: undefined,
         include_non_season_applicable: false,
@@ -164,7 +164,7 @@ describe("parsePredictionBrowseQuery", () => {
     ).toBe(true);
   });
 
-  it("rejects when creator matches unbetter after merge", () => {
+  it("rejects when predictor matches unbetter after merge", () => {
     const r = parsePredictionBrowseQuery({
       creator: DID_A,
       unbetter_id: DID_A,
@@ -172,7 +172,7 @@ describe("parsePredictionBrowseQuery", () => {
     expect(r.success).toBe(false);
     if (r.success) return;
     expect(
-      r.error.issues.some((i) => i.message === PREDICTION_SEARCH_CREATOR_UNBETTER_DISTINCT_MESSAGE),
+      r.error.issues.some((i) => i.message === PREDICTION_SEARCH_PREDICTOR_UNBETTER_DISTINCT_MESSAGE),
     ).toBe(true);
   });
 
@@ -190,7 +190,7 @@ describe("parsePredictionBrowseQuery", () => {
     ).toBe(false);
   });
 
-  it("rejects short discord snowflake for creator", () => {
+  it("rejects short discord snowflake for predictor (wire creator)", () => {
     expect(parsePredictionBrowseQuery({ creator: "12" }).success).toBe(false);
   });
 });
@@ -237,7 +237,7 @@ describe("serializePredictionBrowseQuery", () => {
       status: ["open", "checking"],
       sort_by: PREDICTION_BROWSE_DEFAULT_SORT_BY,
       keyword: undefined,
-      creator: undefined,
+      predictor: undefined,
       unbetter: undefined,
       season_id: undefined,
       include_non_season_applicable: false,
@@ -284,7 +284,7 @@ describe("parse + serialize round-trip (shareable URLs)", () => {
       },
     ],
     [
-      "creator vs unbetter_id",
+      "predictor vs unbetter_id (wire creator)",
       { creator: DID_A, unbetter_id: DID_B },
     ],
     [

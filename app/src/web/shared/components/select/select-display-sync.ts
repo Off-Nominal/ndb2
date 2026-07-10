@@ -24,14 +24,30 @@ export function optionDisplayLabelForNativeSelect(native: HTMLSelectElement): st
 
 export function syncUIFromNative(root: HTMLElement): void {
   const native = root.querySelector<HTMLSelectElement>("[data-select-native]");
-  const valueEl = root.querySelector("[data-select-value]");
+  const valueEl = root.querySelector<HTMLElement>("[data-select-value]");
   if (native == null || valueEl == null) {
     return;
   }
-  const display = optionDisplayLabelForNativeSelect(native);
-  if (display !== "") {
-    valueEl.textContent = display;
+
+  const plain = optionDisplayLabelForNativeSelect(native);
+
+  if (valueEl instanceof HTMLInputElement) {
+    valueEl.value = plain;
+  } else {
+    const selectedOpt = native.selectedOptions[0];
+    const encoded = selectedOpt?.dataset.richLabel;
+
+    if (encoded != null && encoded !== "") {
+      try {
+        valueEl.innerHTML = decodeURIComponent(encoded);
+      } catch {
+        valueEl.textContent = plain;
+      }
+    } else if (plain !== "") {
+      valueEl.textContent = plain;
+    }
   }
+
   const options = root.querySelectorAll<HTMLElement>("[data-select-option]");
   for (let i = 0; i < options.length; i++) {
     const li = options[i]!;
