@@ -1,19 +1,14 @@
 import { Router } from "express";
-<<<<<<< HEAD
 import { getDbClient } from "@data/db/getDbClient";
 import seasons from "@data/queries/seasons";
 import {
   getDiscordGatewayClient,
-  getMemberProfile,
   listPortalGuildCachedMemberProfiles,
   resolveUserProfileFallback,
   type PortalGuildCachedMemberProfile,
 } from "@domain/discord";
-=======
 import { getDiscordGatewayStatus } from "@domain/discord";
->>>>>>> main
 import { Route } from "@shared/routerMap";
-import { resolveAuthenticatedShell } from "../../auth/resolve-authenticated-shell";
 import { getWebAuth } from "../../middleware/auth/session";
 import { requireWebAuth } from "../../middleware/auth/require-auth";
 import { getColorScheme, getThemePreference } from "../../middleware/theme-preference";
@@ -28,6 +23,7 @@ import {
   PREDICTION_BROWSE_DEFAULT_QUERY,
 } from "./parse-prediction-browse-query";
 import { PredictionsPage } from "./page";
+import { resolveAuthenticatedShell } from "@web/auth/resolve-authenticated-shell";
 
 /** Registers **`GET /predictions`** (authenticated shell + browse scaffold). */
 export const Predictions: Route = (router: Router) => {
@@ -41,16 +37,12 @@ export const Predictions: Route = (router: Router) => {
         return;
       }
 
-<<<<<<< HEAD
       const browseParsed = parsePredictionBrowseQuery(req.query);
       const browseQuery = browseParsed.success
         ? browseParsed.data
         : PREDICTION_BROWSE_DEFAULT_QUERY;
 
-      const discordProfile = await getMemberProfile(auth.discordId);
-=======
       const { discordProfile, showAdminNav } = await resolveAuthenticatedShell(auth);
->>>>>>> main
       const csrfHeadersJson = JSON.stringify({ "X-CSRF-Token": auth.csrfToken });
 
       const dbClient = await getDbClient(res);
