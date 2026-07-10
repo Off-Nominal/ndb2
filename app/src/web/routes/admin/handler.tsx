@@ -4,21 +4,23 @@ import { Route } from "@shared/routerMap";
 import { resolveWebAdminAccess } from "../../auth/web-admin-access";
 import { getWebAuth } from "../../middleware/auth/session";
 import { requireWebAuth } from "../../middleware/auth/require-auth";
+import { requireWebAdmin } from "../../middleware/auth/require-web-admin";
 import { getColorScheme, getThemePreference } from "../../middleware/theme-preference";
 import { wrapWebRouteWithErrorBoundary } from "../../middleware/error-boundary";
 import { AuthenticatedPageLayout } from "../../shared/components/page-layout";
 import { documentTitle } from "@web/shared/utils/document_title";
-import { PredictionsPage } from "./page";
+import { AdminPage } from "./page";
 
-/** Registers **`GET /predictions`** (authenticated shell + browse scaffold). */
-export const Predictions: Route = (router: Router) => {
+/** Registers **`GET /admin`** (host/mod-only placeholder). */
+export const Admin: Route = (router: Router) => {
   router.get(
-    "/predictions",
+    "/admin",
     requireWebAuth,
+    requireWebAdmin,
     wrapWebRouteWithErrorBoundary(async (_req, res, next) => {
       const auth = getWebAuth();
       if (auth.status !== "authenticated") {
-        next(new Error("Predictions route reached without a session"));
+        next(new Error("Admin route reached without a session"));
         return;
       }
 
@@ -32,14 +34,14 @@ export const Predictions: Route = (router: Router) => {
         <AuthenticatedPageLayout
           theme={getThemePreference()}
           colorScheme={getColorScheme()}
-          title={documentTitle("Predictions")}
+          title={documentTitle("Admin")}
           auth={auth}
           discordProfile={discordProfile}
           showAdminNav={showAdminNav}
           csrfMetaToken={auth.csrfToken}
           hxHeaders={csrfHeadersJson}
         >
-          <PredictionsPage />
+          <AdminPage />
         </AuthenticatedPageLayout>,
       );
 
