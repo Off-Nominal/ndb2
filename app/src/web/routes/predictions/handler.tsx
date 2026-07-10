@@ -1,4 +1,5 @@
 import { Router } from "express";
+<<<<<<< HEAD
 import { getDbClient } from "@data/db/getDbClient";
 import seasons from "@data/queries/seasons";
 import {
@@ -8,7 +9,11 @@ import {
   resolveUserProfileFallback,
   type PortalGuildCachedMemberProfile,
 } from "@domain/discord";
+=======
+import { getDiscordGatewayStatus } from "@domain/discord";
+>>>>>>> main
 import { Route } from "@shared/routerMap";
+import { resolveAuthenticatedShell } from "../../auth/resolve-authenticated-shell";
 import { getWebAuth } from "../../middleware/auth/session";
 import { requireWebAuth } from "../../middleware/auth/require-auth";
 import { getColorScheme, getThemePreference } from "../../middleware/theme-preference";
@@ -36,12 +41,16 @@ export const Predictions: Route = (router: Router) => {
         return;
       }
 
+<<<<<<< HEAD
       const browseParsed = parsePredictionBrowseQuery(req.query);
       const browseQuery = browseParsed.success
         ? browseParsed.data
         : PREDICTION_BROWSE_DEFAULT_QUERY;
 
       const discordProfile = await getMemberProfile(auth.discordId);
+=======
+      const { discordProfile, showAdminNav } = await resolveAuthenticatedShell(auth);
+>>>>>>> main
       const csrfHeadersJson = JSON.stringify({ "X-CSRF-Token": auth.csrfToken });
 
       const dbClient = await getDbClient(res);
@@ -81,6 +90,8 @@ export const Predictions: Route = (router: Router) => {
           title={documentTitle("Predictions")}
           auth={auth}
           discordProfile={discordProfile}
+          showAdminNav={showAdminNav}
+          discordGatewayStatus={getDiscordGatewayStatus()}
           csrfMetaToken={auth.csrfToken}
           hxHeaders={csrfHeadersJson}
           clientScripts={clientScriptsForRouteDir("predictions")}

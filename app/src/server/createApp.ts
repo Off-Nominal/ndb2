@@ -1,8 +1,12 @@
 import path from "node:path";
 import express, { type Express } from "express";
+import pool from "@data/db";
+import { getDiscordGatewayStatus, isDiscordGatewayReady } from "@domain/discord";
 import { isDev } from "@shared/utils";
+import { logStartup, logStartupError } from "@shared/startup-log";
 import { mountJsonApi } from "../api/mountJsonApi";
 import { mountWeb } from "../web/mountWeb";
+import { getReadiness } from "./readiness";
 import { configureTrustProxy, installSecurityHeaders } from "./securityHeaders";
 
 /** Package root (`ndb2/app`). Requires dev/prod commands to run with cwd = this package (pnpm scripts do). */
@@ -35,8 +39,39 @@ export async function createApp(): Promise<Express> {
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
 
-  app.get("/health", (req, res) => {
-    return res.status(200).json({ status: "healthy" });
+  app.get("/health", async (req, res) => {
+    const readiness = getReadiness();
+
+    if (!readiness.ready) {
+      if (readiness.error) {
+        return res.status(503).json({
+          status: "unhealthy",
+          phase: "startup",
+          error: readiness.error,
+        });
+      }
+      return res.status(200).json({ status: "starting" });
+    }
+
+    try {
+      await pool.query("SELECT 1");
+      return res.status(200).json({
+        status: "healthy",
+        discord: isDiscordGatewayReady() ? "connected" : "connecting",
+        discordStatus: getDiscordGatewayStatus(),
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      const code =
+        err instanceof Error && "code" in err && typeof err.code === "string"
+          ? err.code
+          : undefined;
+      return res.status(503).json({
+        status: "unhealthy",
+        phase: "runtime",
+        database: { message, code },
+      });
+    }
   });
 
   mountWeb(app);

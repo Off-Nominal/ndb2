@@ -1,8 +1,9 @@
 import type { WebAuthAuthenticated } from "../../../middleware/auth/session";
 import type { ColorScheme, ThemePreference } from "../../../middleware/theme-preference";
-import type { DiscordMemberProfile } from "@domain/discord";
+import type { DiscordGatewayStatus, DiscordMemberProfile } from "@domain/discord";
 import type { HtmlHeadProps } from "../html-head";
 import { HtmlHead } from "../html-head";
+import { DiscordGatewayBanner } from "../discord-gateway-banner";
 import { NavDrawerToggle } from "./nav-drawer-toggle";
 import { NavigationMenu } from "../site-nav";
 
@@ -26,6 +27,10 @@ export type AuthenticatedPageLayoutProps = PageLayoutProps & {
   auth: WebAuthAuthenticated;
   /** Resolved from discord.js guild member cache for nav display. */
   discordProfile: DiscordMemberProfile;
+  /** When true, show the Admin nav link (hosts/mods only). */
+  showAdminNav?: boolean;
+  /** Gateway connection state for the status banner; defaults to connected. */
+  discordGatewayStatus?: DiscordGatewayStatus;
 };
 
 function DocumentFrame(props: PageLayoutProps): JSX.Element {
@@ -76,6 +81,8 @@ export function PageLayout(props: PageLayoutProps): JSX.Element {
  * (and scrim, tab, HTMX `hx-headers` on `body` when provided).
  */
 export function AuthenticatedPageLayout(props: AuthenticatedPageLayoutProps): JSX.Element {
+  const discordGatewayStatus = props.discordGatewayStatus ?? "connected";
+
   return (
     <DocumentFrame
       theme={props.theme}
@@ -88,7 +95,10 @@ export function AuthenticatedPageLayout(props: AuthenticatedPageLayoutProps): JS
       <div>
         <div class="[ page-layout ]">
           <main id="main">
-            <div class="[ center-inline ]">{props.children}</div>
+            <div class="[ center-inline ]">
+              <DiscordGatewayBanner status={discordGatewayStatus} />
+              {props.children}
+            </div>
           </main>
           <aside class="[ page-layout-nav ] [ glass-background ]">
             <div class="[ page-layout-nav-mobile ]">
@@ -101,15 +111,17 @@ export function AuthenticatedPageLayout(props: AuthenticatedPageLayoutProps): JS
                   discordProfile={props.discordProfile}
                   theme={props.theme}
                   colorScheme={props.colorScheme}
+                  showAdminNav={props.showAdminNav}
                 />
               </div>
             </div>
             <div class="[ page-layout-nav-desktop ]">
               <NavigationMenu
-                auth={props.auth}
-                discordProfile={props.discordProfile}
-                theme={props.theme}
-                colorScheme={props.colorScheme}
+                  auth={props.auth}
+                  discordProfile={props.discordProfile}
+                  theme={props.theme}
+                  colorScheme={props.colorScheme}
+                  showAdminNav={props.showAdminNav}
                 preferencesControlIdSuffix="-desktop"
               />
             </div>

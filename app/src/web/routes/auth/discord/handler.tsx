@@ -7,7 +7,7 @@ import usersQueries from "@data/queries/users";
 import webSessionsQueries from "@data/queries/web_sessions";
 import { Route } from "@shared/routerMap";
 import { safeReturnTo } from "../../../auth/safeReturnTo";
-import { fetchGuildMember, type GuildMemberSummary } from "@domain/discord";
+import { fetchGuildMember, memberHasAnyRole, type GuildMemberSummary } from "@domain/discord";
 import {
   buildDiscordAuthorizeUrl,
   discordPkceCodeChallengeS256,
@@ -22,30 +22,14 @@ import {
   buildSessionPersistCookieHeader,
   newCsrfToken,
 } from "../../../middleware/auth/session-cookie-utils";
-import { getColorScheme, getThemePreference } from "../../../middleware/theme-preference";
 import { wrapWebRouteWithErrorBoundary } from "../../../middleware/error-boundary";
-import type { ErrorPageProps } from "../../../shared/components/error-page/error-page";
-import { ErrorPage } from "../../../shared/components/error-page/error-page";
-import { PageLayout } from "../../../shared/components/page-layout";
-import { documentTitle } from "@web/shared/utils/document_title";
+import { renderAccessDeniedPage } from "@web/shared/components/access-denied-page";
 import {
   DiscordPortalRequiresAllowedRoleBody,
   DiscordPortalRequiresGuildMembershipBody,
 } from "./discord-oauth-error-partials";
 
 const OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
-
-function renderAppErrorPage(props: ErrorPageProps) {
-  return Promise.resolve(
-    <PageLayout
-      theme={getThemePreference()}
-      colorScheme={getColorScheme()}
-      title={documentTitle(props.title)}
-    >
-      <ErrorPage {...props} />
-    </PageLayout>,
-  );
-}
 
 /** Discord OAuth start, callback, error page, and logout. */
 export const DiscordAuth: Route = (router: Router) => {
@@ -94,7 +78,7 @@ export const DiscordAuth: Route = (router: Router) => {
       const oauthErr =
         typeof req.query.error === "string" ? req.query.error : undefined;
       if (oauthErr) {
-        const html = await renderAppErrorPage({
+        const html = await renderAccessDeniedPage({
           title: "Sign in cancelled",
           body:
             oauthErr === "access_denied"
@@ -110,7 +94,7 @@ export const DiscordAuth: Route = (router: Router) => {
       const state =
         typeof req.query.state === "string" ? req.query.state : undefined;
       if (!code || !state) {
-        const html = await renderAppErrorPage({
+        const html = await renderAccessDeniedPage({
           title: "Sign in failed",
           body: "Missing authorization code or state from Discord.",
         });
@@ -122,7 +106,7 @@ export const DiscordAuth: Route = (router: Router) => {
       const loginState =
         await oauthLoginStatesQueries.takeOauthLoginState(dbClient)(state);
       if (!loginState) {
-        const html = await renderAppErrorPage({
+        const html = await renderAccessDeniedPage({
           title: "Sign in failed",
           body: "Invalid or expired sign-in state. Please try again.",
         });
@@ -142,7 +126,7 @@ export const DiscordAuth: Route = (router: Router) => {
           codeVerifier: loginState.code_verifier,
         }));
       } catch {
-        const html = await renderAppErrorPage({
+        const html = await renderAccessDeniedPage({
           title: "Sign in failed",
           body: "Could not complete sign-in with Discord. Please try again.",
         });
@@ -154,7 +138,7 @@ export const DiscordAuth: Route = (router: Router) => {
       try {
         discordUser = await fetchDiscordCurrentUser(accessToken);
       } catch {
-        const html = await renderAppErrorPage({
+        const html = await renderAccessDeniedPage({
           title: "Sign in failed",
           body: "Could not load your Discord profile. Please try again.",
         });
@@ -170,7 +154,7 @@ export const DiscordAuth: Route = (router: Router) => {
           discordUser.id,
         );
       } catch {
-        const html = await renderAppErrorPage({
+        const html = await renderAccessDeniedPage({
           title: "Sign in failed",
           body: "Could not verify your Discord server membership. Please try again.",
         });
@@ -179,7 +163,7 @@ export const DiscordAuth: Route = (router: Router) => {
       }
 
       if (!member) {
-        const html = await renderAppErrorPage({
+        const html = await renderAccessDeniedPage({
           title: "Access denied",
           body: DiscordPortalRequiresGuildMembershipBody(),
         });
@@ -187,11 +171,9 @@ export const DiscordAuth: Route = (router: Router) => {
         return;
       }
 
-      const allowed = portalAuthz.allowedRoleIds.some((id) =>
-        member.roles.includes(id),
-      );
+      const allowed = memberHasAnyRole(member.roles, portalAuthz.allowedRoleIds);
       if (!allowed) {
-        const html = await renderAppErrorPage({
+        const html = await renderAccessDeniedPage({
           title: "Access denied",
           body: DiscordPortalRequiresAllowedRoleBody(),
         });

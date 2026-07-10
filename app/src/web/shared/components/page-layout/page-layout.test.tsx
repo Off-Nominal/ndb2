@@ -69,4 +69,45 @@ describe("AuthenticatedPageLayout", () => {
     expect(html).toContain("data-preferences-form");
     expect(html).toContain("Nav User");
   });
+
+  it("renders Admin nav link when showAdminNav is true", () => {
+    const html = AuthenticatedPageLayout({
+      theme: "dark",
+      colorScheme: "nebula",
+      title: documentTitle("Auth"),
+      auth: testAuth,
+      discordProfile: testProfile,
+      showAdminNav: true,
+      children: createElement("p", null, "hello"),
+    });
+    expect(html).toContain('href="/admin"');
+    expect(html).toContain(">Admin</");
+  });
+
+  it("omits Admin nav link when showAdminNav is false", () => {
+    const html = AuthenticatedPageLayout({
+      theme: "dark",
+      colorScheme: "nebula",
+      title: documentTitle("Auth"),
+      auth: testAuth,
+      discordProfile: testProfile,
+      showAdminNav: false,
+      children: createElement("p", null, "hello"),
+    });
+    expect(html).not.toContain('href="/admin"');
+  });
+
+  it("shows discord gateway banner when status is not connected", () => {
+    const html = AuthenticatedPageLayout({
+      theme: "dark",
+      colorScheme: "nebula",
+      title: documentTitle("Auth"),
+      auth: testAuth,
+      discordProfile: testProfile,
+      discordGatewayStatus: "connecting",
+      children: createElement("p", null, "hello"),
+    });
+    expect(html).toContain("discord-gateway-banner");
+    expect(html).toContain("Connecting to Discord");
+  });
 });

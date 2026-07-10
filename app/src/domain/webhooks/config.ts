@@ -1,5 +1,6 @@
 import { config } from "@config";
 import { eventsManager } from "@domain/events/events-manager";
+import { notifySeasonEndWebhook } from "./notify-season-end-webhook";
 import { generateResponse, notifySubscribers } from "./utilities";
 
 const base = config.webhooks.missionControlBaseUrl;
@@ -115,13 +116,7 @@ eventsManager.on("season_start", (season) => {
   );
 });
 
-eventsManager.on("season_end", (results) => {
-  notifySubscribers(
-    subscribers,
-    generateResponse("season_end", { results }),
-    discordClientApiKey,
-  );
-});
+eventsManager.on("season_end", notifySeasonEndWebhook);
 
 eventsManager.on("new_snooze_check", (prediction) => {
   notifySubscribers(

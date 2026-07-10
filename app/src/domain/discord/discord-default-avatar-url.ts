@@ -9,6 +9,24 @@
 export const DISCORD_EMBED_AVATAR_PLACEHOLDER_URL =
   "https://cdn.discordapp.com/embed/avatars/0.png" as const;
 
+export type DiscordAvatarUrlInput = string | null | undefined | false;
+
+/**
+ * Resolves the `<img src>` for a Discord user avatar: custom CDN URL when present,
+ * otherwise the default embed avatar for the snowflake (or {@link DISCORD_EMBED_AVATAR_PLACEHOLDER_URL}).
+ */
+export function resolveDiscordAvatarUrl(
+  discordUserId: string,
+  customUrl?: DiscordAvatarUrlInput,
+): string {
+  if (typeof customUrl === "string" && customUrl.trim().length > 0) {
+    return customUrl.trim();
+  }
+  return (
+    discordDefaultEmbedAvatarUrl(discordUserId) ?? DISCORD_EMBED_AVATAR_PLACEHOLDER_URL
+  );
+}
+
 /**
  * Returns PNG URL on `cdn.discordapp.com`, or `null` if `discordUserId` is not a usable numeric snowflake string.
  */

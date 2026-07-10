@@ -2,6 +2,7 @@ import type { WebAuthAuthenticated } from "../../../middleware/auth/session";
 import type { ColorScheme, ThemePreference } from "../../../middleware/theme-preference";
 import type { DiscordMemberProfile } from "@domain/discord";
 import { Button } from "../button";
+import { DiscordAvatar } from "../discord-avatar";
 import { PreferencesForm } from "../preferences-form";
 
 const SITE_NAV_TITLE = "Nostradambot2";
@@ -12,6 +13,8 @@ export type NavigationMenuProps = {
   colorScheme: ColorScheme;
   /** Guild display name + avatar from discord.js cache. */
   discordProfile: DiscordMemberProfile;
+  /** When true, show the Admin nav link (hosts/mods only). */
+  showAdminNav?: boolean;
   /** Suffix for control `id`s when two menus exist (e.g. `-desktop`). */
   preferencesControlIdSuffix?: string;
 };
@@ -44,18 +47,20 @@ export function NavigationMenu(props: NavigationMenuProps): JSX.Element {
         <li>
           <Button class="[ full-width ]" href="/profile">Profile</Button>
         </li>
+        {props.showAdminNav ? (
+          <li>
+            <Button class="[ full-width ]" href="/admin">Admin</Button>
+          </li>
+        ) : null}
       </ul>
 
       <div class="[ stack ]">
         <div class="[ split-pair ]">
-
-          <img
-
-            src={props.discordProfile.avatarUrl}
+          <DiscordAvatar
+            discordUserId={props.auth.discordId}
+            url={props.discordProfile.avatarUrl}
+            size={40}
             alt=""
-            width={40}
-            height={40}
-            loading="lazy"
           />
           <span>{props.discordProfile.displayName}</span>
         </div>

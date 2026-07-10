@@ -3,6 +3,9 @@
  * Do not edit by hand.
  */
 
+/* ndb2:block: routes/admin/components/season-end-webhook-form/season-end-webhook-form.css */
+@import "../routes/admin/components/season-end-webhook-form/season-end-webhook-form.css";
+
 /* ndb2:block: routes/home/components/home-performance-card/home-performance-card.css */
 @import "../routes/home/components/home-performance-card/home-performance-card.css";
 
@@ -41,6 +44,9 @@
 
 /* ndb2:block: shared/components/discord-avatar/discord-avatar.css */
 @import "../shared/components/discord-avatar/discord-avatar.css";
+
+/* ndb2:block: shared/components/discord-gateway-banner/discord-gateway-banner.css */
+@import "../shared/components/discord-gateway-banner/discord-gateway-banner.css";
 
 /* ndb2:block: shared/components/form-field/form-field.css */
 @import "../shared/components/form-field/form-field.css";

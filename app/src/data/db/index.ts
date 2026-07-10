@@ -1,5 +1,12 @@
 import { config } from "@config";
+import { createLogger } from "@mendahu/utilities";
+import { logStartupError } from "@shared/startup-log";
 import pg from "pg";
+
+const logger = createLogger({
+  namespace: "NDB2/DB",
+  env: ["dev", "development", "production"],
+});
 
 let pool: pg.Pool | null = null;
 
@@ -15,10 +22,20 @@ const poolProxyTarget = {} as pg.Pool;
 function createPool(): pg.Pool {
   /** Prefer live `process.env` so integration tests can swap `DATABASE_URL` after {@link resetPoolForTests}. */
   const url = process.env.DATABASE_URL ?? config.database.url;
-  return new pg.Pool({
+  const newPool = new pg.Pool({
     connectionString: url,
     max: config.database.poolMax,
   });
+
+  // Idle clients can be terminated by Postgres (restart, admin, pooler). Without
+  // this handler Node treats the pool 'error' event as fatal and exits the process.
+  newPool.on("error", (err: Error & { code?: string }) => {
+    const detail = { message: err.message, code: err.code };
+    logger.error("Idle Postgres client error (connection dropped; pool replaces on next use)", detail);
+    logStartupError("Idle Postgres client error (connection dropped)", err);
+  });
+
+  return newPool;
 }
 
 /** Lazily created so integration tests can set DATABASE_URL before first use. */
@@ -63,14 +80,19 @@ export default new Proxy(poolProxyTarget, {
   },
 }) as pg.Pool;
 
-/**
- * Closes the pool and clears the singleton so the next access uses the current
- * DATABASE_URL (used by ephemeral database tests).
- */
-export async function resetPoolForTests(): Promise<void> {
+/** Closes the pool and clears the singleton. */
+export async function closePool(): Promise<void> {
   if (pool) {
     await pool.end();
     pool = null;
   }
   boundMethodCache.clear();
+}
+
+/**
+ * Closes the pool and clears the singleton so the next access uses the current
+ * DATABASE_URL (used by ephemeral database tests).
+ */
+export async function resetPoolForTests(): Promise<void> {
+  await closePool();
 }
