@@ -1,7 +1,11 @@
 import { createLogger } from "@mendahu/utilities";
+import { logStartup, logStartupError } from "@shared/startup-log";
 import pool from "./index";
 
-const logger = createLogger({ namespace: "NDB2/DB", env: ["dev", "production"] });
+const logger = createLogger({
+  namespace: "NDB2/DB",
+  env: ["dev", "development", "production"],
+});
 
 export type WaitForDatabaseOptions = {
   maxAttempts?: number;
@@ -41,18 +45,22 @@ export async function waitForDatabase(
       client.release();
       if (attempt > 1) {
         logger.log(`Database connection verified on attempt ${attempt}/${maxAttempts}`);
+        logStartup(`Database connection verified on attempt ${attempt}/${maxAttempts}`);
       }
       return;
     } catch (err) {
       const detail = formatConnectionError(err);
 
       if (attempt === maxAttempts) {
-        throw new Error(
-          `Database unavailable after ${maxAttempts} attempts (last error: ${detail})`,
-        );
+        const message = `Database unavailable after ${maxAttempts} attempts (last error: ${detail})`;
+        logStartupError("Database connection failed", new Error(message));
+        throw new Error(message);
       }
 
       logger.error(
+        `Database connection failed (attempt ${attempt}/${maxAttempts}): ${detail}. Retrying in ${delayMs}ms…`,
+      );
+      logStartup(
         `Database connection failed (attempt ${attempt}/${maxAttempts}): ${detail}. Retrying in ${delayMs}ms…`,
       );
       await sleep(delayMs);

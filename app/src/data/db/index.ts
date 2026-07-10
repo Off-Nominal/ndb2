@@ -1,8 +1,12 @@
 import { config } from "@config";
 import { createLogger } from "@mendahu/utilities";
+import { logStartupError } from "@shared/startup-log";
 import pg from "pg";
 
-const logger = createLogger({ namespace: "NDB2/DB", env: ["dev", "production"] });
+const logger = createLogger({
+  namespace: "NDB2/DB",
+  env: ["dev", "development", "production"],
+});
 
 let pool: pg.Pool | null = null;
 
@@ -26,10 +30,9 @@ function createPool(): pg.Pool {
   // Idle clients can be terminated by Postgres (restart, admin, pooler). Without
   // this handler Node treats the pool 'error' event as fatal and exits the process.
   newPool.on("error", (err: Error & { code?: string }) => {
-    logger.error("Idle Postgres client error (connection dropped; pool replaces on next use)", {
-      message: err.message,
-      code: err.code,
-    });
+    const detail = { message: err.message, code: err.code };
+    logger.error("Idle Postgres client error (connection dropped; pool replaces on next use)", detail);
+    logStartupError("Idle Postgres client error (connection dropped)", err);
   });
 
   return newPool;
