@@ -1,5 +1,6 @@
 import path from "node:path";
 import express, { type Express } from "express";
+import pool from "@data/db";
 import { isDev } from "@shared/utils";
 import { mountJsonApi } from "../api/mountJsonApi";
 import { mountWeb } from "../web/mountWeb";
@@ -35,8 +36,21 @@ export async function createApp(): Promise<Express> {
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
 
-  app.get("/health", (req, res) => {
-    return res.status(200).json({ status: "healthy" });
+  app.get("/health", async (req, res) => {
+    try {
+      await pool.query("SELECT 1");
+      return res.status(200).json({ status: "healthy" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      const code =
+        err instanceof Error && "code" in err && typeof err.code === "string"
+          ? err.code
+          : undefined;
+      return res.status(503).json({
+        status: "unhealthy",
+        database: { message, code },
+      });
+    }
   });
 
   mountWeb(app);

@@ -1,3 +1,4 @@
+import type { Server } from "node:http";
 import { config } from "@config";
 import { createLogger } from "@mendahu/utilities";
 import {
@@ -9,7 +10,8 @@ import { monitors } from "@domain/predictions/config";
 import SeasonMonitor from "@domain/seasons/season-monitor";
 import { monitors as seasonMonitors } from "@domain/seasons/config";
 import { seasonsManager } from "@domain/seasons/season-manager";
-import pool from "@data/db";
+import { closePool } from "@data/db";
+import { waitForDatabase } from "@data/db/wait-for-database";
 import { isDev } from "@shared/utils";
 import { createApp } from "./server/createApp";
 
@@ -17,20 +19,19 @@ const PORT = config.port;
 
 const logger = createLogger({ namespace: "NDB2", env: ["dev", "production"] });
 
-// DB Connection Test
-pool
-  .connect()
-  .then((client) => {
-    client.release();
-  })
-  .catch((err) => {
-    if (isDev()) {
-      logger.error("Failed to connect to database. Ensure Docker is running.");
-      process.exit(1);
-    }
-    logger.error("Failed to connect to database: ", err);
-    process.exit(1);
-  });
+let httpServer: Server | undefined;
+let shuttingDown = false;
+
+function logFatal(label: string, err: unknown): void {
+  if (err instanceof Error) {
+    logger.error(label, {
+      message: err.message,
+      stack: err.stack,
+    });
+    return;
+  }
+  logger.error(label, { detail: String(err) });
+}
 
 async function bootstrap() {
   const app = await createApp();
@@ -40,7 +41,7 @@ async function bootstrap() {
     guildId: portal.guildId,
   });
 
-  app.listen(PORT, () => {
+  httpServer = app.listen(PORT, () => {
     logger.log(`Application listening on port: ${PORT}`);
   });
 
@@ -51,15 +52,65 @@ async function bootstrap() {
 
   const seasonMonitor = new SeasonMonitor(seasonMonitors);
   seasonMonitor.initiate();
-
-  const shutdownDiscord = () => {
-    void stopDiscordGatewayClient();
-  };
-  process.once("SIGINT", shutdownDiscord);
-  process.once("SIGTERM", shutdownDiscord);
 }
 
-bootstrap().catch((err) => {
-  logger.error(`Bootstrap failed: ${err instanceof Error ? err.message : String(err)}`);
-  process.exit(1);
-});
+async function shutdown(signal: string): Promise<void> {
+  if (shuttingDown) {
+    return;
+  }
+  shuttingDown = true;
+
+  logger.log(`Received ${signal}; shutting down…`);
+
+  await stopDiscordGatewayClient();
+
+  if (httpServer) {
+    await new Promise<void>((resolve, reject) => {
+      httpServer!.close((err) => (err ? reject(err) : resolve()));
+    });
+  }
+
+  await closePool();
+  logger.log("Shutdown complete");
+  process.exit(0);
+}
+
+function registerShutdownHandlers(): void {
+  const onSignal = (signal: string) => {
+    void shutdown(signal).catch((err) => {
+      logFatal(`Shutdown failed after ${signal}`, err);
+      process.exit(1);
+    });
+  };
+
+  process.once("SIGINT", () => onSignal("SIGINT"));
+  process.once("SIGTERM", () => onSignal("SIGTERM"));
+}
+
+async function main(): Promise<void> {
+  registerShutdownHandlers();
+
+  try {
+    await waitForDatabase();
+  } catch (err) {
+    if (isDev()) {
+      logFatal(
+        "Failed to connect to database after retries. Ensure Docker is running and DATABASE_URL is set.",
+        err,
+      );
+    } else {
+      logFatal("Failed to connect to database after retries", err);
+    }
+    process.exit(1);
+  }
+
+  try {
+    await bootstrap();
+  } catch (err) {
+    logFatal("Bootstrap failed", err);
+    await closePool();
+    process.exit(1);
+  }
+}
+
+void main();
