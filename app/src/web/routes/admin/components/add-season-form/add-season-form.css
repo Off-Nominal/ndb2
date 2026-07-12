@@ -1,0 +1,30 @@
+.add-season-form {
+  & .add-season-form__latest {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 0.9em;
+    line-height: var(--leading-normal);
+
+    & .add-season-form__latest-label {
+      margin-inline-end: var(--space-2);
+      font-weight: var(--weight-medium);
+      color: var(--color-text);
+    }
+
+    & code {
+      font-family: var(--font-mono);
+      font-size: 0.95em;
+      word-break: break-word;
+    }
+  }
+
+  .htmx-indicator {
+    opacity: 0;
+    transition: opacity 150ms ease;
+  }
+
+  .htmx-request .htmx-indicator,
+  .htmx-request.htmx-indicator {
+    opacity: 1;
+  }
+}

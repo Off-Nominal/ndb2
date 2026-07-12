@@ -9,6 +9,40 @@ SELECT
 FROM seasons
 ORDER BY "end" DESC;
 
+/* @name getLatestSeasonForCreate */
+SELECT
+  id,
+  name,
+  start,
+  "end",
+  payout_formula,
+  wager_cap,
+  closed
+FROM seasons
+ORDER BY "end" DESC
+LIMIT 1;
+
+/* @name addSeason */
+INSERT INTO seasons (
+  name,
+  start,
+  "end",
+  payout_formula
+)
+VALUES (
+  :name!,
+  :start!,
+  :end!,
+  :payout_formula!
+)
+RETURNING
+  id,
+  name,
+  start,
+  "end",
+  wager_cap,
+  closed;
+
 /* @name getSeasonById */
 SELECT
   s.id,
