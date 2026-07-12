@@ -24,7 +24,6 @@ export function SeasonEndWebhookForm(props: SeasonEndWebhookFormProps): JSX.Elem
 
   return (
     <section class="[ stack ] [ season-end-webhook-form ]">
-      <h2>Re-send season end webhook</h2>
       <p>
         Re-post the season_end webhook payload to Mission Control for a past
         closed season. This does not close the season or emit the internal event

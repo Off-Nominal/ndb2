@@ -1,7 +1,9 @@
 import { isBefore } from "date-fns";
 import {
+  addSeason,
   closeSeasonById,
   getAllSeasons,
+  getLatestSeasonForCreate,
   getSeasonById,
   getSeasonResultsById,
   IGetSeasonByIdResult,
@@ -58,6 +60,53 @@ const seasonsQueries = {
 
     return seasons;
   },
+  getLatestForCreate: (dbClient: PoolClient) => async () => {
+    const [row] = await getLatestSeasonForCreate.run(undefined, dbClient);
+    if (!row) {
+      return null;
+    }
+
+    return {
+      id: row.id,
+      name: row.name,
+      start: row.start.toISOString(),
+      end: row.end.toISOString(),
+      payout_formula: row.payout_formula,
+      wager_cap: row.wager_cap,
+      closed: row.closed,
+    };
+  },
+  add:
+    (dbClient: PoolClient) =>
+    async (input: {
+      name: string;
+      start: Date;
+      end: Date;
+      payout_formula: string;
+    }) => {
+      const [row] = await addSeason.run(
+        {
+          name: input.name,
+          start: input.start,
+          end: input.end,
+          payout_formula: input.payout_formula,
+        },
+        dbClient,
+      );
+
+      if (!row) {
+        throw new Error("Season insert returned no row");
+      }
+
+      return {
+        id: row.id,
+        name: row.name,
+        start: row.start.toISOString(),
+        end: row.end.toISOString(),
+        wager_cap: row.wager_cap,
+        closed: row.closed,
+      };
+    },
   getById: (dbClient: PoolClient) => async (id: number) => {
     const result = await getSeasonById.run({ id }, dbClient);
     const season = result[0];

@@ -1,6 +1,8 @@
 /** Types generated for queries found in "src/data/queries/seasons/seasons.sql" */
 import { PreparedQuery } from '@pgtyped/runtime';
 
+export type DateOrString = Date | string;
+
 /** 'GetAllSeasons' parameters type */
 export type IGetAllSeasonsParams = void;
 
@@ -37,6 +39,100 @@ const getAllSeasonsIR: any = {"usedParamSet":{},"params":[],"statement":"SELECT\
  * ```
  */
 export const getAllSeasons = new PreparedQuery<IGetAllSeasonsParams,IGetAllSeasonsResult>(getAllSeasonsIR);
+
+
+/** 'GetLatestSeasonForCreate' parameters type */
+export type IGetLatestSeasonForCreateParams = void;
+
+/** 'GetLatestSeasonForCreate' return type */
+export interface IGetLatestSeasonForCreateResult {
+  closed: boolean;
+  end: Date;
+  id: number;
+  name: string;
+  payout_formula: string;
+  start: Date;
+  wager_cap: number;
+}
+
+/** 'GetLatestSeasonForCreate' query type */
+export interface IGetLatestSeasonForCreateQuery {
+  params: IGetLatestSeasonForCreateParams;
+  result: IGetLatestSeasonForCreateResult;
+}
+
+const getLatestSeasonForCreateIR: any = {"usedParamSet":{},"params":[],"statement":"SELECT\n  id,\n  name,\n  start,\n  \"end\",\n  payout_formula,\n  wager_cap,\n  closed\nFROM seasons\nORDER BY \"end\" DESC\nLIMIT 1"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * SELECT
+ *   id,
+ *   name,
+ *   start,
+ *   "end",
+ *   payout_formula,
+ *   wager_cap,
+ *   closed
+ * FROM seasons
+ * ORDER BY "end" DESC
+ * LIMIT 1
+ * ```
+ */
+export const getLatestSeasonForCreate = new PreparedQuery<IGetLatestSeasonForCreateParams,IGetLatestSeasonForCreateResult>(getLatestSeasonForCreateIR);
+
+
+/** 'AddSeason' parameters type */
+export interface IAddSeasonParams {
+  end: DateOrString;
+  name: string;
+  payout_formula: string;
+  start: DateOrString;
+}
+
+/** 'AddSeason' return type */
+export interface IAddSeasonResult {
+  closed: boolean;
+  end: Date;
+  id: number;
+  name: string;
+  start: Date;
+  wager_cap: number;
+}
+
+/** 'AddSeason' query type */
+export interface IAddSeasonQuery {
+  params: IAddSeasonParams;
+  result: IAddSeasonResult;
+}
+
+const addSeasonIR: any = {"usedParamSet":{"name":true,"start":true,"end":true,"payout_formula":true},"params":[{"name":"name","required":true,"transform":{"type":"scalar"},"locs":[{"a":78,"b":83}]},{"name":"start","required":true,"transform":{"type":"scalar"},"locs":[{"a":88,"b":94}]},{"name":"end","required":true,"transform":{"type":"scalar"},"locs":[{"a":99,"b":103}]},{"name":"payout_formula","required":true,"transform":{"type":"scalar"},"locs":[{"a":108,"b":123}]}],"statement":"INSERT INTO seasons (\n  name,\n  start,\n  \"end\",\n  payout_formula\n)\nVALUES (\n  :name!,\n  :start!,\n  :end!,\n  :payout_formula!\n)\nRETURNING\n  id,\n  name,\n  start,\n  \"end\",\n  wager_cap,\n  closed"};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * INSERT INTO seasons (
+ *   name,
+ *   start,
+ *   "end",
+ *   payout_formula
+ * )
+ * VALUES (
+ *   :name!,
+ *   :start!,
+ *   :end!,
+ *   :payout_formula!
+ * )
+ * RETURNING
+ *   id,
+ *   name,
+ *   start,
+ *   "end",
+ *   wager_cap,
+ *   closed
+ * ```
+ */
+export const addSeason = new PreparedQuery<IAddSeasonParams,IAddSeasonResult>(addSeasonIR);
 
 
 /** 'GetSeasonById' parameters type */

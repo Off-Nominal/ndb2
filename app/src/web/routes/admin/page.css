@@ -1,0 +1,22 @@
+/* Block: admin-page — admin tools shell. */
+
+/* — Root — */
+.admin-page {
+  & .admin-page__tools {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    align-items: stretch;
+
+    /* tablet+ — cards sit side by side */
+    @media (min-width: 48rem) {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+
+    & > * {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+  }
+}
