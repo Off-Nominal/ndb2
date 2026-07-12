@@ -9,6 +9,8 @@ export type HudDateInputProps = Omit<
   /** `"date"` → date-only; `"datetime"` → date + minute precision. */
   mode: HudDateInputMode;
   class?: string;
+  /** Accessible name for the open-calendar trigger. */
+  "aria-label"?: string;
   /** Pairs with hint / error copy (`FormField` validation). */
   "aria-describedby"?: string;
   "aria-invalid"?: boolean | "true" | "false";
@@ -22,11 +24,11 @@ function displayLabel(mode: HudDateInputMode, value: string | undefined): string
 }
 
 function baseId(props: {
-  id?: string;
+  id?: string | number;
   name?: string | number | boolean;
 }): string {
-  if (props.id != null && props.id !== "") {
-    return props.id;
+  if (props.id != null && String(props.id) !== "") {
+    return String(props.id);
   }
   if (props.name != null && String(props.name) !== "") {
     return `hud-date-${String(props.name)}`;
