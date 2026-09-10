@@ -37,6 +37,6 @@
     "@types/node": "^22.15.3",
     "dotenv-cli": "^8.0.0",
     "typescript": "^5.8.3",
-    "vitest": "^4.0.8"
+    "vitest": "^4.1.11"
   }
 }
