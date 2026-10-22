@@ -1,0 +1,4 @@
+# The official Node 26 linux binaries (fetched by pnpm via use-node-version in .npmrc)
+# dynamically link libatomic.so.1, which the Nixpacks Ubuntu base image doesn't ship.
+[phases.setup]
+aptPkgs = ["...", "libatomic1"]
