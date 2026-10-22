@@ -64,9 +64,6 @@
     "vitest": "^4.0.8",
     "wireit": "^0.14.12"
   },
-  "engines": {
-    "node": "26.x"
-  },
   "wireit": {
     "vendor-htmx": {
       "command": "mkdir -p ./dist/web/public && cp ./node_modules/htmx.org/dist/htmx.min.js ./dist/web/public/htmx.min.js",

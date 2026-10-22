@@ -1,4 +1,10 @@
-# The official Node 26 linux binaries (fetched by pnpm via use-node-version in .npmrc)
-# dynamically link libatomic.so.1, which the Nixpacks Ubuntu base image doesn't ship.
+# Nixpacks' own Node only bootstraps corepack/pnpm (Nixpacks supports 18/22/24 only).
+# The app runs on the Node pinned in package.json devEngines.runtime, which pnpm downloads
+# and verifies against the checksum in pnpm-lock.yaml.
+[variables]
+NIXPACKS_NODE_VERSION = "24"
+
+# The official Node 26+ linux binaries dynamically link libatomic.so.1,
+# which the Nixpacks Ubuntu base image doesn't ship.
 [phases.setup]
 aptPkgs = ["...", "libatomic1"]
