@@ -34,9 +34,12 @@
     "pg": "^8.15.6"
   },
   "devDependencies": {
-    "@types/node": "^22.15.3",
+    "@types/node": "^26.6.5",
     "dotenv-cli": "^8.0.0",
     "typescript": "^5.8.3",
     "vitest": "^4.0.8"
+  },
+  "engines": {
+    "node": "26.x"
   }
 }
