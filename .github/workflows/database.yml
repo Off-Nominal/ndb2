@@ -5,17 +5,26 @@ on:
       - main
     paths:
       - "db/migrations/**"
+permissions:
+  contents: read
+env:
+  DBMATE_VERSION: v2.37.0
+  # SHA-256 of dbmate-linux-amd64 for DBMATE_VERSION. Update together with the version.
+  DBMATE_SHA256: f855e99a0f0a81322014bf686b1cb820d2b4d8074e4eadafd64b851b80ecb15a
 jobs:
   migrate:
     name: "Migrate Database"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Install dependencies
         run: |
-          sudo curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64
-          sudo chmod +x /usr/local/bin/dbmate
+          curl -fsSL -o "$RUNNER_TEMP/dbmate" "https://github.com/amacneil/dbmate/releases/download/${DBMATE_VERSION}/dbmate-linux-amd64"
+          echo "${DBMATE_SHA256}  $RUNNER_TEMP/dbmate" | sha256sum -c -
+          sudo install -m 0755 "$RUNNER_TEMP/dbmate" /usr/local/bin/dbmate
           /usr/local/bin/dbmate --help
       - name: Run migrations
         working-directory: ./db
