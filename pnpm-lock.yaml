@@ -1029,10 +1029,6 @@ packages:
     resolution: {integrity: sha512-Vh3dmFbc4wZeox7M9I/0L9GfFd83Su4+yCck/OF9Gi/P/dAHn0RT7X4K9R7gMNMhDck3DvhR6QXsnQdjjgwNvQ==}
     engines: {node: 20 || >=22}
 
-  brace-expansion@5.0.7:
-    resolution: {integrity: sha512-7oFy703dxfY3/NLxC1fh2SUCQ0H9rmAY+5EpDVfXjUTTs+HEwR2nYaqLv+GWcTsumwxPfiz6CzCNkwXwBUwqCA==}
-    engines: {node: 18 || 20 || >=22}
-
   braces@3.0.3:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
     engines: {node: '>=8'}
@@ -2925,10 +2921,6 @@ snapshots:
     dependencies:
       balanced-match: 4.0.4
 
-  brace-expansion@5.0.7:
-    dependencies:
-      balanced-match: 4.0.4
-
   braces@3.0.3:
     dependencies:
       fill-range: 7.1.1
@@ -4009,7 +4001,7 @@ snapshots:
 
   wireit@0.14.13:
     dependencies:
-      brace-expansion: 5.0.7
+      brace-expansion: 5.0.13
       chokidar: 3.6.0
       fast-glob: 3.3.3
       jsonc-parser: 3.3.1
